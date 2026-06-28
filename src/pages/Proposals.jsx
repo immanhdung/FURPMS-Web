@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -19,15 +19,11 @@ import {
 } from "../components/ui/table";
 import {
   Search,
-  Filter,
   PlusCircle,
-  MoreVertical,
   Eye,
   Users,
   Calendar,
   DollarSign,
-  ChevronLeft,
-  ChevronRight,
   FileText,
   Clock,
   CheckCircle2,
@@ -37,6 +33,12 @@ import {
   Loader2,
 } from "lucide-react";
 import { api } from "../api/axios";
+import { StatusBadge } from "../components/shared/StatusBadge";
+import { InfoBlock } from "../components/shared/InfoBlock";
+import { EmptyState } from "../components/shared/EmptyState";
+import { LoadingState } from "../components/shared/LoadingState";
+import { FilterPills } from "../components/shared/FilterPills";
+import { Pagination } from "../components/shared/Pagination";
 
 // ────────────────────────────────────────────────────────────────────────
 // Status mapping — color + label
@@ -52,15 +54,269 @@ const STATUS_MAP = {
   IN_PROGRESS:        { label: "Đang thực hiện", color: "bg-emerald-100 text-emerald-700", icon: Loader2 },
 };
 
-const StatusBadge = ({ status }) => {
-  const info = STATUS_MAP[status] || { label: status, color: "bg-gray-100 text-gray-700", icon: FileText };
-  const Icon = info.icon;
+const STATUS_OPTIONS = [
+  { key: "ALL", label: "Tất cả" },
+  { key: "DRAFT", label: "Bản nháp" },
+  { key: "SUBMITTED", label: "Đã nộp" },
+  { key: "UNDER_REVIEW", label: "Đang xét duyệt" },
+  { key: "REVISION_REQUESTED", label: "Yêu cầu chỉnh sửa" },
+  { key: "APPROVED", label: "Đã duyệt" },
+  { key: "REJECTED", label: "Từ chối" },
+  { key: "WITHDRAWN", label: "Đã rút" },
+  { key: "IN_PROGRESS", label: "Đang thực hiện" },
+];
+
+// ────────────────────────────────────────────────────────────────────────
+// Helpers
+// ────────────────────────────────────────────────────────────────────────
+const formatCurrency = (amount) => new Intl.NumberFormat("vi-VN").format(amount) + " ₫";
+const formatDate = (iso) => iso ? new Date(iso).toLocaleDateString("vi-VN") : "—";
+
+// ────────────────────────────────────────────────────────────────────────
+// Sub-components
+// ────────────────────────────────────────────────────────────────────────
+
+function ProposalFilters({ searchQuery, setSearchQuery, statusFilter, setStatusFilter, onSearch }) {
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full ${info.color}`}>
-      <Icon size={12} /> {info.label}
-    </span>
+    <Card className="p-4 border-border shadow-sm">
+      <div className="flex flex-col md:flex-row gap-4">
+        {/* Search */}
+        <form onSubmit={onSearch} className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+          <Input
+            name="search"
+            autoComplete="off"
+            placeholder="Tìm kiếm theo tên đề tài, chủ nhiệm…"
+            aria-label="Tìm kiếm đề tài"
+            className="pl-10 bg-background border-border"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </form>
+
+        {/* Status filter */}
+        <FilterPills
+          options={STATUS_OPTIONS}
+          value={statusFilter}
+          onChange={setStatusFilter}
+        />
+      </div>
+    </Card>
   );
-};
+}
+
+function ProposalTableRow({ proposal, onOpen }) {
+  return (
+    <TableRow
+      className="hover:bg-surface-variant/30 transition-colors cursor-pointer"
+      onClick={() => onOpen(proposal)}
+      tabIndex={0}
+      role="button"
+      aria-label={`Xem chi tiết: ${proposal.titleVI}`}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(proposal); } }}
+    >
+      <TableCell>
+        <p className="font-semibold text-foreground line-clamp-1">{proposal.titleVI}</p>
+        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{proposal.titleEN}</p>
+      </TableCell>
+      <TableCell>
+        <p className="text-sm font-medium text-foreground">{proposal.piName}</p>
+        <p className="text-xs text-muted-foreground">{proposal.hostingUnit}</p>
+      </TableCell>
+      <TableCell>
+        <StatusBadge status={proposal.status} statusMap={STATUS_MAP} />
+      </TableCell>
+      <TableCell className="font-medium text-foreground whitespace-nowrap" style={{ fontVariantNumeric: "tabular-nums" }}>
+        {formatCurrency(proposal.totalBudget)}
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-2 min-w-[120px]">
+          <div className="flex-1 bg-surface-variant rounded-full h-2" aria-hidden="true">
+            <div className="bg-primary h-2 rounded-full transition-transform" style={{ width: `${proposal.progress}%` }} />
+          </div>
+          <span className="text-xs font-semibold text-muted-foreground w-8 text-right" style={{ fontVariantNumeric: "tabular-nums" }}>{proposal.progress}%</span>
+        </div>
+      </TableCell>
+      <TableCell className="text-right">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-muted-foreground"
+          onClick={(e) => { e.stopPropagation(); onOpen(proposal); }}
+          aria-label={`Xem chi tiết ${proposal.titleVI}`}
+        >
+          <Eye className="h-4 w-4" aria-hidden="true" />
+        </Button>
+      </TableCell>
+    </TableRow>
+  );
+}
+
+function ProposalOverviewTab({ proposal }) {
+  return (
+    <div className="space-y-4 text-sm">
+      <InfoBlock label="Tên tiếng Anh" value={proposal.titleEN} />
+      <InfoBlock label="Chủ nhiệm" value={`${proposal.piName} (${proposal.piEmail})`} />
+      <InfoBlock label="Đơn vị chủ trì" value={proposal.hostingUnit} />
+      <InfoBlock label="Thời gian" value={`${proposal.durationMonths} tháng`} />
+      <InfoBlock label="Phương thức tài trợ" value={proposal.fundingMethod} />
+      {proposal.abstractVI && <InfoBlock label="Tóm tắt" value={proposal.abstractVI} />}
+      {proposal.researchObjectives && <InfoBlock label="Mục tiêu nghiên cứu" value={proposal.researchObjectives} />}
+      {proposal.noveltyOriginality && <InfoBlock label="Tính mới / Sáng tạo" value={proposal.noveltyOriginality} />}
+    </div>
+  );
+}
+
+function ProposalTeamTab({ proposal }) {
+  if (!proposal.teamMembers?.length) {
+    return <EmptyState title="Chưa có thông tin nhóm nghiên cứu" />;
+  }
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Họ tên</TableHead>
+          <TableHead>Vai trò</TableHead>
+          <TableHead>Đơn vị</TableHead>
+          <TableHead>Tháng làm việc</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {proposal.teamMembers.map((m) => (
+          <TableRow key={m.id}>
+            <TableCell>
+              <span className="font-medium">{m.fullName}</span>
+              {m.isPi && <Badge variant="outline" className="ml-2 text-primary border-primary text-[10px]">PI</Badge>}
+              {m.isSecretary && <Badge variant="outline" className="ml-1 text-[10px]">Thư ký</Badge>}
+            </TableCell>
+            <TableCell className="text-sm">{m.roleType}</TableCell>
+            <TableCell className="text-sm">{m.unitName}</TableCell>
+            <TableCell className="text-sm" style={{ fontVariantNumeric: "tabular-nums" }}>{m.workMonths}</TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+}
+
+function ProposalBudgetTab({ proposal }) {
+  if (!proposal.budgetSummary) {
+    return <EmptyState title="Chưa có thông tin ngân sách" />;
+  }
+  return (
+    <div className="space-y-4">
+      <div className="text-lg font-bold text-foreground" style={{ fontVariantNumeric: "tabular-nums" }}>
+        Tổng: {formatCurrency(proposal.budgetSummary.totalAmount)}
+      </div>
+      <div className="space-y-3">
+        {proposal.budgetSummary.items.map((item, idx) => (
+          <div key={idx} className="flex items-center gap-4">
+            <span className="text-sm text-foreground flex-1 min-w-0 truncate">{item.categoryName}</span>
+            <span className="text-sm font-medium text-foreground w-36 text-right" style={{ fontVariantNumeric: "tabular-nums" }}>{formatCurrency(item.amount)}</span>
+            <div className="w-32" aria-hidden="true">
+              <div className="bg-surface-variant rounded-full h-2">
+                <div className="bg-tertiary h-2 rounded-full" style={{ width: `${item.percentage}%` }} />
+              </div>
+            </div>
+            <span className="text-xs text-muted-foreground w-12 text-right" style={{ fontVariantNumeric: "tabular-nums" }}>{item.percentage}%</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ProposalRoundsTab({ proposal }) {
+  if (!proposal.rounds?.length) {
+    return <EmptyState title="Chưa có vòng xét duyệt" />;
+  }
+  return (
+    <div className="space-y-3">
+      {proposal.rounds.map((r) => (
+        <div key={r.id} className="flex items-center gap-4 p-3 rounded-lg border border-border bg-surface-container-low">
+          <div className="w-10 h-10 rounded-full bg-tertiary/10 text-tertiary flex items-center justify-center font-bold text-sm" aria-hidden="true">
+            V{r.roundNumber}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-medium text-foreground text-sm">Vòng {r.roundNumber} — {r.dimension}</p>
+            <p className="text-xs text-muted-foreground">{r.closedAt ? `Kết thúc: ${formatDate(r.closedAt)}` : "Đang mở"}</p>
+          </div>
+          <StatusBadge status={r.status} statusMap={STATUS_MAP} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ProposalDetailDialog({ open, onOpenChange, proposal, loading }) {
+  const [activeTab, setActiveTab] = useState("overview");
+
+  // Reset tab when opening new proposal
+  React.useEffect(() => {
+    if (open) setActiveTab("overview");
+  }, [open]);
+
+  const TABS = [
+    { key: "overview", label: "Tổng quan" },
+    { key: "team", label: "Nhóm nghiên cứu" },
+    { key: "budget", label: "Ngân sách" },
+    { key: "rounds", label: "Vòng xét duyệt" },
+  ];
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-bold text-foreground pr-8" style={{ textWrap: "balance" }}>
+            {proposal?.titleVI || "Chi tiết đề xuất"}
+          </DialogTitle>
+        </DialogHeader>
+
+        {loading ? (
+          <LoadingState message="Đang tải chi tiết…" />
+        ) : proposal ? (
+          <div className="flex flex-col gap-6 mt-2">
+            {/* Status + Quick Info */}
+            <div className="flex flex-wrap items-center gap-4">
+              <StatusBadge status={proposal.status} statusMap={STATUS_MAP} />
+              <span className="text-xs text-muted-foreground flex items-center gap-1"><Calendar size={12} aria-hidden="true" /> {formatDate(proposal.plannedStartDate)} — {formatDate(proposal.plannedEndDate)}</span>
+              <span className="text-xs text-muted-foreground flex items-center gap-1" style={{ fontVariantNumeric: "tabular-nums" }}><DollarSign size={12} aria-hidden="true" /> {formatCurrency(proposal.totalBudget)}</span>
+              <span className="text-xs text-muted-foreground flex items-center gap-1"><Users size={12} aria-hidden="true" /> {proposal.teamMemberCount || proposal.teamMembers?.length || 0} thành viên</span>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex gap-1 border-b border-border" role="tablist" aria-label="Chi tiết đề xuất">
+              {TABS.map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  role="tab"
+                  aria-selected={activeTab === tab.key}
+                  aria-controls={`panel-${tab.key}`}
+                  className={`px-4 py-2.5 text-sm font-medium transition-colors rounded-t-md -mb-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                    activeTab === tab.key
+                      ? "border-b-2 border-primary text-primary bg-background"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Tab Content */}
+            <div className="min-h-[200px]" role="tabpanel" id={`panel-${activeTab}`}>
+              {activeTab === "overview" && <ProposalOverviewTab proposal={proposal} />}
+              {activeTab === "team" && <ProposalTeamTab proposal={proposal} />}
+              {activeTab === "budget" && <ProposalBudgetTab proposal={proposal} />}
+              {activeTab === "rounds" && <ProposalRoundsTab proposal={proposal} />}
+            </div>
+          </div>
+        ) : null}
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 // ────────────────────────────────────────────────────────────────────────
 // Main Page
@@ -74,7 +330,6 @@ export default function ProposalsPage() {
   const [selectedProposal, setSelectedProposal] = useState(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
-  const [activeDetailTab, setActiveDetailTab] = useState("overview");
 
   // ── Fetch proposals ──────────────────────────────────────────────────
   const fetchProposals = async (page = 1) => {
@@ -110,7 +365,6 @@ export default function ProposalsPage() {
   const openDetail = async (proposal) => {
     setDetailOpen(true);
     setDetailLoading(true);
-    setActiveDetailTab("overview");
     try {
       const res = await api.get(`/proposals/${proposal.id}`);
       if (res.data.success) {
@@ -124,59 +378,28 @@ export default function ProposalsPage() {
     }
   };
 
-  // ── Helpers ──────────────────────────────────────────────────────────
-  const formatCurrency = (amount) => new Intl.NumberFormat("vi-VN").format(amount) + " ₫";
-  const formatDate = (iso) => iso ? new Date(iso).toLocaleDateString("vi-VN") : "—";
-
-  const statusOptions = ["ALL", "DRAFT", "SUBMITTED", "UNDER_REVIEW", "REVISION_REQUESTED", "APPROVED", "REJECTED", "WITHDRAWN", "IN_PROGRESS"];
-
   // ────────────────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col gap-6 animate-in fade-in duration-500">
+    <div className="flex flex-col gap-6 animate-in fade-in duration-500 motion-reduce:animate-none">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Quản lý Đề xuất Nghiên cứu</h1>
+          <h1 className="text-2xl font-bold text-foreground" style={{ textWrap: "balance" }}>Quản lý Đề xuất Nghiên cứu</h1>
           <p className="text-sm text-muted-foreground mt-1">Xem, lọc và quản lý tất cả đề xuất của bạn.</p>
         </div>
         <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
-          <PlusCircle className="mr-2 h-4 w-4" /> Tạo Đề xuất mới
+          <PlusCircle className="mr-2 h-4 w-4" aria-hidden="true" /> Tạo Đề xuất mới
         </Button>
       </div>
 
       {/* Filters */}
-      <Card className="p-4 border-border shadow-sm">
-        <div className="flex flex-col md:flex-row gap-4">
-          {/* Search */}
-          <form onSubmit={handleSearch} className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Tìm kiếm theo tên đề tài, chủ nhiệm..."
-              className="pl-10 bg-background border-border"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </form>
-
-          {/* Status filter */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <Filter className="h-4 w-4 text-muted-foreground" />
-            {statusOptions.map((s) => (
-              <button
-                key={s}
-                onClick={() => setStatusFilter(s)}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                  statusFilter === s
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "bg-surface-container text-muted-foreground hover:bg-surface-container-high"
-                }`}
-              >
-                {s === "ALL" ? "Tất cả" : (STATUS_MAP[s]?.label || s)}
-              </button>
-            ))}
-          </div>
-        </div>
-      </Card>
+      <ProposalFilters
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        onSearch={handleSearch}
+      />
 
       {/* Table */}
       <Card className="border-border shadow-sm overflow-hidden">
@@ -195,50 +418,19 @@ export default function ProposalsPage() {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-12">
-                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                      <Loader2 className="h-6 w-6 animate-spin" />
-                      <span>Đang tải...</span>
-                    </div>
+                  <TableCell colSpan={6}>
+                    <LoadingState message="Đang tải…" />
                   </TableCell>
                 </TableRow>
               ) : proposals.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
-                    Không tìm thấy đề xuất nào phù hợp.
+                  <TableCell colSpan={6}>
+                    <EmptyState title="Không tìm thấy đề xuất nào phù hợp" />
                   </TableCell>
                 </TableRow>
               ) : (
                 proposals.map((p) => (
-                  <TableRow key={p.id} className="hover:bg-surface-variant/30 transition-colors cursor-pointer" onClick={() => openDetail(p)}>
-                    <TableCell>
-                      <p className="font-semibold text-foreground line-clamp-1">{p.titleVI}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{p.titleEN}</p>
-                    </TableCell>
-                    <TableCell>
-                      <p className="text-sm font-medium text-foreground">{p.piName}</p>
-                      <p className="text-xs text-muted-foreground">{p.hostingUnit}</p>
-                    </TableCell>
-                    <TableCell>
-                      <StatusBadge status={p.status} />
-                    </TableCell>
-                    <TableCell className="font-medium text-foreground whitespace-nowrap">
-                      {formatCurrency(p.totalBudget)}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2 min-w-[120px]">
-                        <div className="flex-1 bg-surface-variant rounded-full h-2">
-                          <div className="bg-primary h-2 rounded-full transition-all" style={{ width: `${p.progress}%` }} />
-                        </div>
-                        <span className="text-xs font-semibold text-muted-foreground w-8 text-right">{p.progress}%</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" className="text-muted-foreground" onClick={(e) => { e.stopPropagation(); openDetail(p); }}>
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
+                  <ProposalTableRow key={p.id} proposal={p} onOpen={openDetail} />
                 ))
               )}
             </TableBody>
@@ -246,182 +438,16 @@ export default function ProposalsPage() {
         </div>
 
         {/* Pagination */}
-        {pagination.totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-3 border-t border-border bg-surface/50">
-            <span className="text-sm text-muted-foreground">
-              Hiển thị {(pagination.page - 1) * pagination.limit + 1}–{Math.min(pagination.page * pagination.limit, pagination.total)} / {pagination.total} kết quả
-            </span>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" disabled={pagination.page <= 1} onClick={() => fetchProposals(pagination.page - 1)}>
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="sm" disabled={pagination.page >= pagination.totalPages} onClick={() => fetchProposals(pagination.page + 1)}>
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        )}
+        <Pagination pagination={pagination} onPageChange={fetchProposals} />
       </Card>
 
-      {/* ── Detail Dialog ────────────────────────────────────────────── */}
-      <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-foreground pr-8">
-              {selectedProposal?.titleVI || "Chi tiết đề xuất"}
-            </DialogTitle>
-          </DialogHeader>
-
-          {detailLoading ? (
-            <div className="flex items-center justify-center py-16">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          ) : selectedProposal ? (
-            <div className="flex flex-col gap-6 mt-2">
-              {/* Status + Quick Info */}
-              <div className="flex flex-wrap items-center gap-4">
-                <StatusBadge status={selectedProposal.status} />
-                <span className="text-xs text-muted-foreground flex items-center gap-1"><Calendar size={12} /> {formatDate(selectedProposal.plannedStartDate)} — {formatDate(selectedProposal.plannedEndDate)}</span>
-                <span className="text-xs text-muted-foreground flex items-center gap-1"><DollarSign size={12} /> {formatCurrency(selectedProposal.totalBudget)}</span>
-                <span className="text-xs text-muted-foreground flex items-center gap-1"><Users size={12} /> {selectedProposal.teamMemberCount || selectedProposal.teamMembers?.length || 0} thành viên</span>
-              </div>
-
-              {/* Tabs */}
-              <div className="flex gap-1 border-b border-border">
-                {[
-                  { key: "overview", label: "Tổng quan" },
-                  { key: "team", label: "Nhóm nghiên cứu" },
-                  { key: "budget", label: "Ngân sách" },
-                  { key: "rounds", label: "Vòng xét duyệt" },
-                ].map((tab) => (
-                  <button
-                    key={tab.key}
-                    onClick={() => setActiveDetailTab(tab.key)}
-                    className={`px-4 py-2.5 text-sm font-medium transition-colors rounded-t-md -mb-px ${
-                      activeDetailTab === tab.key
-                        ? "border-b-2 border-primary text-primary bg-background"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Tab Content */}
-              <div className="min-h-[200px]">
-                {activeDetailTab === "overview" && (
-                  <div className="space-y-4 text-sm">
-                    <InfoBlock label="Tên tiếng Anh" value={selectedProposal.titleEN} />
-                    <InfoBlock label="Chủ nhiệm" value={`${selectedProposal.piName} (${selectedProposal.piEmail})`} />
-                    <InfoBlock label="Đơn vị chủ trì" value={selectedProposal.hostingUnit} />
-                    <InfoBlock label="Thời gian" value={`${selectedProposal.durationMonths} tháng`} />
-                    <InfoBlock label="Phương thức tài trợ" value={selectedProposal.fundingMethod} />
-                    {selectedProposal.abstractVI && <InfoBlock label="Tóm tắt" value={selectedProposal.abstractVI} />}
-                    {selectedProposal.researchObjectives && <InfoBlock label="Mục tiêu nghiên cứu" value={selectedProposal.researchObjectives} />}
-                    {selectedProposal.noveltyOriginality && <InfoBlock label="Tính mới / Sáng tạo" value={selectedProposal.noveltyOriginality} />}
-                  </div>
-                )}
-
-                {activeDetailTab === "team" && (
-                  <div>
-                    {selectedProposal.teamMembers?.length > 0 ? (
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Họ tên</TableHead>
-                            <TableHead>Vai trò</TableHead>
-                            <TableHead>Đơn vị</TableHead>
-                            <TableHead>Tháng làm việc</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {selectedProposal.teamMembers.map((m) => (
-                            <TableRow key={m.id}>
-                              <TableCell>
-                                <span className="font-medium">{m.fullName}</span>
-                                {m.isPi && <Badge variant="outline" className="ml-2 text-primary border-primary text-[10px]">PI</Badge>}
-                                {m.isSecretary && <Badge variant="outline" className="ml-1 text-[10px]">Thư ký</Badge>}
-                              </TableCell>
-                              <TableCell className="text-sm">{m.roleType}</TableCell>
-                              <TableCell className="text-sm">{m.unitName}</TableCell>
-                              <TableCell className="text-sm">{m.workMonths}</TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    ) : (
-                      <p className="text-center text-muted-foreground py-8">Chưa có thông tin nhóm nghiên cứu.</p>
-                    )}
-                  </div>
-                )}
-
-                {activeDetailTab === "budget" && (
-                  <div>
-                    {selectedProposal.budgetSummary ? (
-                      <div className="space-y-4">
-                        <div className="text-lg font-bold text-foreground">
-                          Tổng: {formatCurrency(selectedProposal.budgetSummary.totalAmount)}
-                        </div>
-                        <div className="space-y-3">
-                          {selectedProposal.budgetSummary.items.map((item, idx) => (
-                            <div key={idx} className="flex items-center gap-4">
-                              <span className="text-sm text-foreground flex-1">{item.categoryName}</span>
-                              <span className="text-sm font-medium text-foreground w-36 text-right">{formatCurrency(item.amount)}</span>
-                              <div className="w-32">
-                                <div className="bg-surface-variant rounded-full h-2">
-                                  <div className="bg-tertiary h-2 rounded-full" style={{ width: `${item.percentage}%` }} />
-                                </div>
-                              </div>
-                              <span className="text-xs text-muted-foreground w-12 text-right">{item.percentage}%</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-center text-muted-foreground py-8">Chưa có thông tin ngân sách.</p>
-                    )}
-                  </div>
-                )}
-
-                {activeDetailTab === "rounds" && (
-                  <div>
-                    {selectedProposal.rounds?.length > 0 ? (
-                      <div className="space-y-3">
-                        {selectedProposal.rounds.map((r) => (
-                          <div key={r.id} className="flex items-center gap-4 p-3 rounded-lg border border-border bg-surface-container-low">
-                            <div className="w-10 h-10 rounded-full bg-tertiary/10 text-tertiary flex items-center justify-center font-bold text-sm">
-                              V{r.roundNumber}
-                            </div>
-                            <div className="flex-1">
-                              <p className="font-medium text-foreground text-sm">Vòng {r.roundNumber} — {r.dimension}</p>
-                              <p className="text-xs text-muted-foreground">{r.closedAt ? `Kết thúc: ${formatDate(r.closedAt)}` : "Đang mở"}</p>
-                            </div>
-                            <StatusBadge status={r.status} />
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-center text-muted-foreground py-8">Chưa có vòng xét duyệt.</p>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : null}
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
-
-// ── Small helper component ─────────────────────────────────────────────
-function InfoBlock({ label, value }) {
-  if (!value) return null;
-  return (
-    <div>
-      <dt className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">{label}</dt>
-      <dd className="text-foreground whitespace-pre-line">{value}</dd>
+      {/* Detail Dialog */}
+      <ProposalDetailDialog
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        proposal={selectedProposal}
+        loading={detailLoading}
+      />
     </div>
   );
 }
