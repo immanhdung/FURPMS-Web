@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { FileText, Play, Filter, ArrowUpDown, MoreVertical } from "lucide-react";
@@ -34,7 +35,7 @@ export default function DashboardPage() {
   }, []);
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
+    return new Intl.NumberFormat('vi-VN').format(amount) + ' ₫';
   };
 
   const getStatusBadge = (status) => {

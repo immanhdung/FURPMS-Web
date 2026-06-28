@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { Key, VpnKey, LogIn as LoginIcon } from "lucide-react";
+import { Key, KeyRound, LogIn as LoginIcon } from "lucide-react";
 import { api } from "../api/axios";
 import { useAuthStore } from "../store/authStore";
 import { useNavigate } from "react-router-dom";
@@ -135,7 +135,7 @@ export default function LoginPage() {
               variant="outline"
               className="w-full mt-2 border-primary text-primary hover:bg-primary/10 hover:text-primary py-6 rounded-lg text-lg flex items-center gap-3 transition-all"
             >
-              {isLoading ? "Authenticating..." : <><VpnKey className="w-5 h-5" /> Authenticate</>}
+              {isLoading ? "Authenticating..." : <><KeyRound className="w-5 h-5" /> Authenticate</>}
             </Button>
           </form>
         </div>
