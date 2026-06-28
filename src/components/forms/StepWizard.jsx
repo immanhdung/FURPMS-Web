@@ -7,7 +7,7 @@ import { Button } from "../ui/button";
 
 const WizardContext = createContext(null);
 
-function useWizard() {
+export function useWizard() {
   const context = useContext(WizardContext);
   if (!context) {
     throw new Error("Wizard components must be rendered within a <StepWizard>");
