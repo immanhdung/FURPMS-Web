@@ -1,5 +1,6 @@
 import MockAdapter from "axios-mock-adapter";
 import { mockProposalsList, mockProposalDetail } from "./proposalData";
+import { setupProposalWizardMocks } from "./proposalWizardMocks";
 import { mockCouncilsList } from "./councilData";
 import { mockContractsList } from "./contractData";
 
@@ -7,6 +8,9 @@ export const setupMocks = (api) => {
   const mock = new MockAdapter(api, { delayResponse: 500 });
 
   console.log("🔧 FURPMS Mock API Enabled");
+
+  // Call feature-specific mock setups
+  setupProposalWizardMocks(mock);
 
   // ─── Auth ───────────────────────────────────────────────────────────
   mock.onPost("/auth/login").reply((config) => {
