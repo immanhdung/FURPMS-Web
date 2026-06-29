@@ -89,3 +89,103 @@ export const mockCouncilsList = [
     },
   },
 ];
+
+export const mockReviewRounds = [
+  {
+    id: 1,
+    proposalId: "a1b2c3d4-0003",
+    roundNumber: 1,
+    dimension: "SCIENCE",
+    roundType: "REVIEW",
+    status: "PASSED",
+    rubricTemplateId: 1,
+    sequence: 1,
+    prerequisiteRoundId: null,
+    result: "APPROVED"
+  },
+  {
+    id: 2,
+    proposalId: "a1b2c3d4-0001",
+    roundNumber: 2,
+    dimension: "FINANCE",
+    roundType: "REVIEW",
+    status: "OPEN",
+    rubricTemplateId: 2,
+    sequence: 2,
+    prerequisiteRoundId: 1,
+    result: null
+  },
+  {
+    id: 3,
+    proposalId: "a1b2c3d4-0002",
+    roundNumber: 1,
+    dimension: "SCIENCE",
+    roundType: "REVIEW",
+    status: "PENDING",
+    rubricTemplateId: 1,
+    sequence: 1,
+    prerequisiteRoundId: null,
+    result: null
+  }
+];
+
+export const mockRubricTemplate = {
+  id: 1,
+  name: "Phiếu đánh giá Đề cương Nghiên cứu Khoa học",
+  dimension: "SCIENCE",
+  maxTotalScore: 100,
+  criteria: [
+    { id: 11, code: "C1", name: "Tính mới và sáng tạo (Innovation)", max_score: 25 },
+    { id: 12, code: "C2", name: "Phương pháp nghiên cứu (Methodology)", max_score: 30 },
+    { id: 13, code: "C3", name: "Tính khả thi (Feasibility)", max_score: 20 },
+    { id: 14, code: "C4", name: "Tính ứng dụng & Tác động (Impact)", max_score: 25 },
+  ]
+};
+
+export const mockScores = [
+  {
+    id: "score-001",
+    councilId: "council-003",
+    reviewerId: "uuid-123", // Assuming PI or some logged-in user is reviewer for demo
+    templateId: 1,
+    totalScore: 88,
+    generalComments: "Đề tài có tính ứng dụng rất cao, phương pháp rõ ràng.",
+    otherRecommendations: "Cần chú ý thêm về dữ liệu đầu vào.",
+    scoreDetails: [
+      { criterionId: 11, givenScore: 22, comments: "Ý tưởng tốt" },
+      { criterionId: 12, givenScore: 28, comments: "Phương pháp chuẩn xác" },
+      { criterionId: 13, givenScore: 18, comments: "Có khả năng thực hiện" },
+      { criterionId: 14, givenScore: 20, comments: "Tác động xã hội khá" }
+    ],
+    submittedAt: "2025-10-18T09:15:00Z"
+  },
+  {
+    id: "score-002",
+    councilId: "council-003",
+    reviewerId: "m9",
+    templateId: 1,
+    totalScore: 82,
+    generalComments: "Tốt, cần làm rõ ngân sách.",
+    otherRecommendations: null,
+    scoreDetails: [
+      { criterionId: 11, givenScore: 20, comments: "" },
+      { criterionId: 12, givenScore: 25, comments: "" },
+      { criterionId: 13, givenScore: 17, comments: "" },
+      { criterionId: 14, givenScore: 20, comments: "" }
+    ],
+    submittedAt: "2025-10-18T09:10:00Z"
+  }
+];
+
+export const mockDecisions = [
+  {
+    id: "dec-001",
+    councilId: "council-003",
+    result: "APPROVED",
+    councilComments: "Đề cương đạt yêu cầu, điểm trung bình 85/100. Hội đồng nhất trí phê duyệt.",
+    recommendations: "Cần tối ưu thêm phần mềm mô phỏng.",
+    chairUserId: "m8",
+    secretaryUserId: "m12",
+    finalizedAt: "2025-10-18T10:00:00Z"
+  }
+];

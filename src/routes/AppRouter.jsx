@@ -15,6 +15,7 @@ const ContractsPage = lazy(() => import("../pages/Contracts"));
 // Auth flow pages
 const SSOCallbackPage = lazy(() => import("../pages/auth/SSOCallback"));
 const ProfileSettingsPage = lazy(() => import("../pages/auth/ProfileSettings"));
+const ExpertAuthPage = lazy(() => import("../pages/auth/ExpertAuth"));
 
 // Proposal sub-pages
 const ProposalWizardPage = lazy(() => import("../pages/proposals/ProposalWizard"));
@@ -71,6 +72,7 @@ export default function AppRouter() {
           {/* ─── Public Routes ──────────────────────────────── */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/auth/callback" element={<SSOCallbackPage />} />
+          <Route path="/expert-login" element={<ExpertAuthPage />} />
 
           {/* ─── Protected Routes (wrapped by AppLayout with auth guard) ── */}
           <Route element={<AppLayout />}>

@@ -1,7 +1,13 @@
 import MockAdapter from "axios-mock-adapter";
 import { mockProposalsList, mockProposalDetail } from "./proposalData";
 import { setupProposalWizardMocks } from "./proposalWizardMocks";
-import { mockCouncilsList } from "./councilData";
+import { 
+  mockCouncilsList, 
+  mockReviewRounds, 
+  mockRubricTemplate, 
+  mockScores, 
+  mockDecisions 
+} from "./councilData";
 import { mockContractsList } from "./contractData";
 import { mockUsersList, mockUserProfile, MOCK_UNITS } from "./userMocks";
 import {
@@ -307,6 +313,75 @@ export const setupMocks = (api) => {
   mockLookups("/product-categories", mockProductCategories);
   mockLookups("/rubric-criteria", mockRubricCriteria);
   mockLookups("/amendment-categories", mockAmendmentCategories);
+
+  // ─── Council Review & Scoring (Sprint 5) ───────────────────────────
+  // Rounds
+  mock.onGet(/\/proposals\/[^/]+\/rounds/).reply((config) => {
+    const proposalId = config.url.split("/")[2];
+    const rounds = mockReviewRounds.filter(r => r.proposalId === proposalId);
+    return [200, { success: true, data: rounds }];
+  });
+  mock.onPost(/\/proposals\/[^/]+\/rounds/).reply(201, { success: true, message: "Round created" });
+  mock.onPost(/\/rounds\/[^/]+\/open/).reply((config) => {
+    const roundId = Number(config.url.split("/")[2]);
+    const round = mockReviewRounds.find(r => r.id === roundId);
+    if (round?.prerequisiteRoundId) {
+      const prereq = mockReviewRounds.find(r => r.id === round.prerequisiteRoundId);
+      if (prereq && prereq.status !== "PASSED") {
+        return [409, { success: false, message: "Prerequisite round not passed" }];
+      }
+    }
+    return [200, { success: true, message: "Round opened" }];
+  });
+  mock.onPost(/\/rounds\/[^/]+\/close/).reply(200, { success: true, message: "Round closed" });
+
+  // Councils
+  mock.onGet("/councils/my-memberships").reply(200, { success: true, data: mockCouncilsList });
+  mock.onGet(/\/councils\/[^/]+$/).reply((config) => {
+    const id = config.url.split("/").pop();
+    const council = mockCouncilsList.find(c => c.id === id);
+    if (!council) return [404, { success: false }];
+    return [200, { success: true, data: council }];
+  });
+  mock.onPost("/councils").reply(201, { success: true, message: "Council created" });
+  mock.onPatch(/\/councils\/[^/]+\/status/).reply(200, { success: true, message: "Status updated" });
+  
+  // Council Members
+  mock.onGet(/\/councils\/[^/]+\/members/).reply((config) => {
+    const id = config.url.split("/")[2];
+    const council = mockCouncilsList.find(c => c.id === id);
+    return [200, { success: true, data: council?.members || [] }];
+  });
+  mock.onPost(/\/councils\/[^/]+\/members\/invite-by-email/).reply(200, { success: true, message: "Invited by email" });
+  mock.onPost(/\/councils\/[^/]+\/members/).reply(200, { success: true, message: "Member added" });
+  mock.onPatch(/\/council-members\/[^/]+\/respond/).reply(200, { success: true, message: "Responded" });
+  mock.onDelete(/\/council-members\/[^/]+$/).reply(200, { success: true, message: "Member removed" });
+
+  // Scoring
+  mock.onGet("/review-scoring/rubrics").reply(200, { success: true, data: [mockRubricTemplate] });
+  mock.onGet(/\/review-scoring\/rubrics\/[^/]+$/).reply(200, { success: true, data: mockRubricTemplate });
+  
+  mock.onGet(/\/review-scoring\/councils\/[^/]+\/scores\/my/).reply((config) => {
+    const councilId = config.url.split("/")[3];
+    // hardcoded logic for mock user 'uuid-123'
+    const score = mockScores.find(s => s.councilId === councilId && s.reviewerId === "uuid-123");
+    return [200, { success: true, data: score || null }];
+  });
+  
+  mock.onGet(/\/review-scoring\/councils\/[^/]+\/scores/).reply((config) => {
+    const councilId = config.url.split("/")[3];
+    const scores = mockScores.filter(s => s.councilId === councilId);
+    return [200, { success: true, data: scores }];
+  });
+  
+  mock.onPost(/\/review-scoring\/councils\/[^/]+\/scores/).reply(201, { success: true, message: "Score submitted" });
+  
+  mock.onPost(/\/review-scoring\/councils\/[^/]+\/decision/).reply(200, { success: true, message: "Decision finalized" });
+  mock.onGet(/\/review-scoring\/councils\/[^/]+\/decision/).reply((config) => {
+    const councilId = config.url.split("/")[3];
+    const decision = mockDecisions.find(d => d.councilId === councilId);
+    return [200, { success: true, data: decision || null }];
+  });
 
   return mock;
 };
