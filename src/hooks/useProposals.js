@@ -86,6 +86,21 @@ export function useSubmitProposal() {
   });
 }
 
+/** Withdraw a submitted proposal back to draft */
+export function useWithdrawProposal() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id) => {
+      const { data } = await api.patch(`/proposals/${id}/withdraw`);
+      return data.data;
+    },
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: proposalKeys.detail(id) });
+      queryClient.invalidateQueries({ queryKey: proposalKeys.lists() });
+    },
+  });
+}
+
 // ─── Mutations: Team (Step 2) ────────────────────────────────────────
 
 export function useManageTeamMembers() {

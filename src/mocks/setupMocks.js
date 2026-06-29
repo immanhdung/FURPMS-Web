@@ -144,5 +144,18 @@ export const setupMocks = (api) => {
     return [200, { success: true, data: contract }];
   });
 
+  // ─── Notifications / Recent Activity ────────────────────────────────
+  mock.onGet("/notifications").reply(200, {
+    success: true,
+    data: [
+      { id: "n1", type: "PROPOSAL_SUBMITTED", title: "Đề xuất đã được nộp", message: "Đề xuất 'Ứng dụng AI trong y tế' đã được nộp thành công.", createdAt: new Date(Date.now() - 2 * 3600_000).toISOString(), isRead: false },
+      { id: "n2", type: "REVIEW_ASSIGNED", title: "Được phân công đánh giá", message: "Bạn được phân công đánh giá đề xuất 'Blockchain cho chuỗi cung ứng'.", createdAt: new Date(Date.now() - 5 * 3600_000).toISOString(), isRead: false },
+      { id: "n3", type: "CYCLE_OPENED", title: "Chu kỳ mới đã mở", message: "Chu kỳ tài trợ 2026-B đã mở nhận hồ sơ.", createdAt: new Date(Date.now() - 24 * 3600_000).toISOString(), isRead: true },
+      { id: "n4", type: "PROPOSAL_APPROVED", title: "Đề xuất được duyệt", message: "Đề xuất 'Năng lượng tái tạo' đã được Hội đồng phê duyệt.", createdAt: new Date(Date.now() - 48 * 3600_000).toISOString(), isRead: true },
+      { id: "n5", type: "DEADLINE_REMINDER", title: "Nhắc nhở hạn chót", message: "Hạn nộp báo cáo tiến độ còn 3 ngày.", createdAt: new Date(Date.now() - 72 * 3600_000).toISOString(), isRead: true },
+    ],
+    pagination: { page: 1, limit: 5, total: 5, totalPages: 1 }
+  });
+
   return mock;
 };

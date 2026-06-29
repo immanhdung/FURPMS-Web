@@ -18,6 +18,7 @@ const ProfileSettingsPage = lazy(() => import("../pages/auth/ProfileSettings"));
 
 // Proposal sub-pages
 const ProposalWizardPage = lazy(() => import("../pages/proposals/ProposalWizard"));
+const ProposalDetailPage = lazy(() => import("../pages/proposals/ProposalDetail"));
 
 // User management pages (Admin)
 const UserManagementPage = lazy(() => import("../pages/users/UserManagement"));
@@ -79,6 +80,7 @@ export default function AppRouter() {
             {/* ── Proposals ─────────────────────────────────── */}
             <Route path="/proposals" element={<ProposalsPage />} />
             <Route path="/proposals/new" element={<ProposalWizardPage />} />
+            <Route path="/proposals/:id" element={<ProposalDetailPage />} />
             <Route path="/proposals/:id/edit" element={<ProposalWizardPage />} />
 
             {/* ── Councils / Reviews ────────────────────────── */}
