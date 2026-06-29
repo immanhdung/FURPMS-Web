@@ -10,6 +10,7 @@ export default function LoginPage() {
   const [token, setToken] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [selectedEmail, setSelectedEmail] = useState("admin@fpt.edu.vn");
   
   const setAuthToken = useAuthStore((state) => state.setToken);
   const setUser = useAuthStore((state) => state.setUser);
@@ -42,7 +43,7 @@ export default function LoginPage() {
     setError(null);
     try {
       // Typically redirects to an SSO provider, for mock purposes we'll simulate a login directly
-      const res = await api.post("/auth/login", { email: "user@fpt.edu.vn" });
+      const res = await api.post("/auth/login", { email: selectedEmail });
       if (res.data.success) {
         setAuthToken(res.data.data.token);
         setUser(res.data.data.user);
@@ -91,6 +92,25 @@ export default function LoginPage() {
           )}
 
           <div className="flex flex-col gap-6">
+            {/* Dev Mode Mock Accounts Selector */}
+            <div className="flex flex-col gap-2 p-4 bg-primary/5 border border-primary/20 rounded-lg">
+              <label htmlFor="mock-account" className="text-xs font-semibold text-primary uppercase flex items-center justify-between">
+                <span>[Dev Mode] Quick Select</span>
+                <span className="text-[10px] bg-primary text-primary-foreground px-1.5 py-0.5 rounded">Mock</span>
+              </label>
+              <select
+                id="mock-account"
+                value={selectedEmail}
+                onChange={(e) => setSelectedEmail(e.target.value)}
+                className="w-full p-2.5 mt-1 border border-border bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary shadow-sm"
+              >
+                <option value="admin@fpt.edu.vn">Admin - Trần Minh Quân</option>
+                <option value="staff.nguyen@fpt.edu.vn">Staff - Nguyễn Thị Hồng</option>
+                <option value="an.nguyen@fe.edu.vn">PI & Faculty - Dr. Nguyễn Văn An</option>
+                <option value="expert.yamada@kyoto-u.ac.jp">Reviewer - Prof. Yamada Takeshi</option>
+              </select>
+            </div>
+
             <Button
               onClick={handleSSOLogin}
               disabled={isLoading}

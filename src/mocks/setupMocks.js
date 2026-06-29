@@ -3,6 +3,7 @@ import { mockProposalsList, mockProposalDetail } from "./proposalData";
 import { setupProposalWizardMocks } from "./proposalWizardMocks";
 import { mockCouncilsList } from "./councilData";
 import { mockContractsList } from "./contractData";
+import { mockUsersList, mockUserProfile, MOCK_UNITS } from "./userMocks";
 
 export const setupMocks = (api) => {
   const mock = new MockAdapter(api, { delayResponse: 500 });
@@ -18,6 +19,18 @@ export const setupMocks = (api) => {
     if (data.email === "error@fpt.edu.vn") {
       return [401, { success: false, message: "Invalid credentials.", errorCode: "UNAUTHORIZED", data: null, errors: [], pagination: null }];
     }
+
+    const user = mockUsersList.find(u => u.email === data.email);
+
+    if (user) {
+      return [200, {
+        success: true, message: "Login successful.", errorCode: null,
+        data: { token: `mock-jwt-token-${user.id}`, user },
+        errors: null, pagination: null
+      }];
+    }
+
+    // Default fallback
     return [200, {
       success: true, message: "Login successful.", errorCode: null,
       data: { token: "mock-jwt-token-12345", user: { id: "uuid-123", email: data.email, fullName: "Dr. Nguyễn Văn An", roles: ["PI", "Faculty"] } },
@@ -155,6 +168,80 @@ export const setupMocks = (api) => {
       { id: "n5", type: "DEADLINE_REMINDER", title: "Nhắc nhở hạn chót", message: "Hạn nộp báo cáo tiến độ còn 3 ngày.", createdAt: new Date(Date.now() - 72 * 3600_000).toISOString(), isRead: true },
     ],
     pagination: { page: 1, limit: 5, total: 5, totalPages: 1 }
+  });
+  // ─── Users CRUD ────────────────────────────────────────────────────
+  mock.onGet("/users").reply((config) => {
+    const params = new URLSearchParams(config.params);
+    let filtered = [...mockUsersList];
+
+    const role = params.get("role");
+    if (role && role !== "ALL") {
+      filtered = filtered.filter(u => u.roles.includes(role));
+    }
+
+    const unitId = params.get("unitId");
+    if (unitId) {
+      filtered = filtered.filter(u => u.unitId === Number(unitId));
+    }
+
+    const search = params.get("search");
+    if (search) {
+      const q = search.toLowerCase();
+      filtered = filtered.filter(u =>
+        u.fullName.toLowerCase().includes(q) ||
+        u.email.toLowerCase().includes(q)
+      );
+    }
+
+    const page = Number(params.get("page")) || 1;
+    const limit = Number(params.get("limit")) || 20;
+    const total = filtered.length;
+    const totalPages = Math.ceil(total / limit);
+    const start = (page - 1) * limit;
+    const paged = filtered.slice(start, start + limit);
+
+    return [200, {
+      success: true,
+      data: paged,
+      pagination: { page, limit, total, totalPages }
+    }];
+  });
+
+  mock.onGet(/\/users\/[^/]+\/profile$/).reply((config) => {
+    const id = config.url.split("/").slice(-2, -1)[0];
+    if (id === mockUserProfile.userId) {
+      return [200, { success: true, data: mockUserProfile }];
+    }
+    // Return generic empty profile for others
+    return [200, { success: true, data: { userId: id, fullName: "", education: [], workHistory: [], publications: [], projects: [] } }];
+  });
+
+  mock.onPut(/\/users\/[^/]+\/profile$/).reply(200, {
+    success: true, message: "Profile updated.", data: mockUserProfile
+  });
+
+  mock.onGet(/\/users\/[^/]+$/).reply((config) => {
+    const id = config.url.split("/").pop();
+    const user = mockUsersList.find(u => u.id === id);
+    if (!user) return [404, { success: false, message: "User not found.", data: null }];
+    return [200, { success: true, data: user }];
+  });
+
+  mock.onPost("/users").reply(201, {
+    success: true, message: "User created.", data: { id: "u-new-" + Date.now() }
+  });
+
+  mock.onPut(/\/users\/[^/]+$/).reply(200, {
+    success: true, message: "User updated.", data: null
+  });
+
+  mock.onDelete(/\/users\/[^/]+$/).reply(200, {
+    success: true, message: "User deactivated (soft delete).", data: null
+  });
+
+  // ─── Organizational Units (lookup) ─────────────────────────────────
+  mock.onGet("/organizational-units").reply(200, {
+    success: true, data: MOCK_UNITS
   });
 
   return mock;
