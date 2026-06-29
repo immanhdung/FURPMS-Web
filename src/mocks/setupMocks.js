@@ -4,6 +4,16 @@ import { setupProposalWizardMocks } from "./proposalWizardMocks";
 import { mockCouncilsList } from "./councilData";
 import { mockContractsList } from "./contractData";
 import { mockUsersList, mockUserProfile, MOCK_UNITS } from "./userMocks";
+import {
+  mockCyclesList,
+  mockTracks,
+  mockBudgetCategories,
+  mockFinancialConfigs,
+  mockPersonnelRoles,
+  mockProductCategories,
+  mockRubricCriteria,
+  mockAmendmentCategories,
+} from "./settingsMocks";
 
 export const setupMocks = (api) => {
   const mock = new MockAdapter(api, { delayResponse: 500 });
@@ -243,6 +253,60 @@ export const setupMocks = (api) => {
   mock.onGet("/organizational-units").reply(200, {
     success: true, data: MOCK_UNITS
   });
+
+  // ─── Cycles & Tracks ───────────────────────────────────────────────
+  mock.onGet("/cycles").reply((config) => {
+    const params = new URLSearchParams(config.params);
+    let filtered = [...mockCyclesList];
+
+    const status = params.get("status");
+    if (status && status !== "ALL") filtered = filtered.filter(c => c.status === status);
+
+    const year = params.get("year");
+    if (year && year !== "ALL") filtered = filtered.filter(c => c.year === Number(year));
+
+    return [200, { success: true, data: filtered, pagination: { page: 1, limit: 10, total: filtered.length, totalPages: 1 } }];
+  });
+
+  mock.onGet(/\/cycles\/\d+$/).reply((config) => {
+    const id = Number(config.url.split("/").pop());
+    const cycle = mockCyclesList.find(c => c.id === id);
+    if (!cycle) return [404, { success: false, message: "Cycle not found." }];
+    return [200, { success: true, data: cycle }];
+  });
+
+  mock.onPost("/cycles").reply(201, { success: true, data: { id: Date.now() }, message: "Tạo đợt tài trợ thành công." });
+  mock.onPut(/\/cycles\/\d+$/).reply(200, { success: true, message: "Cập nhật đợt tài trợ thành công." });
+
+  // Cycle State Transitions
+  mock.onPost(/\/cycles\/\d+\/open/).reply(200, { success: true, message: "Đã mở nhận hồ sơ." });
+  mock.onPost(/\/cycles\/\d+\/start-review/).reply(200, { success: true, message: "Đã chuyển sang giai đoạn xét duyệt." });
+  mock.onPost(/\/cycles\/\d+\/close/).reply(200, { success: true, message: "Đã đóng đợt tài trợ." });
+  mock.onPost(/\/cycles\/\d+\/archive/).reply(200, { success: true, message: "Đã lưu trữ đợt tài trợ." });
+
+  mock.onGet("/cycles/tracks").reply(200, { success: true, data: mockTracks });
+
+  // ─── Lookups ───────────────────────────────────────────────────────
+  const mockLookups = (endpoint, dataArray) => {
+    mock.onGet(endpoint).reply(200, { success: true, data: dataArray });
+    mock.onPost(endpoint).reply(201, { success: true, message: "Thêm mới thành công." });
+    mock.onPut(new RegExp(`^${endpoint}/\\d+$`)).reply(200, { success: true, message: "Cập nhật thành công." });
+    mock.onPatch(new RegExp(`^${endpoint}/\\d+/deactivate$`)).reply((config) => {
+      // Simulate 409 Conflict for specific items to test error handling
+      const id = Number(config.url.split("/")[2]);
+      if (id === 1) { // Hardcode ID 1 to always fail for testing 409
+        return [409, { success: false, message: "Conflict: Dữ liệu đang được sử dụng trong hệ thống." }];
+      }
+      return [200, { success: true, message: "Cập nhật trạng thái thành công." }];
+    });
+  };
+
+  mockLookups("/budget-expense-categories", mockBudgetCategories);
+  mockLookups("/financial-configs", mockFinancialConfigs);
+  mockLookups("/personnel-role-types", mockPersonnelRoles);
+  mockLookups("/product-categories", mockProductCategories);
+  mockLookups("/rubric-criteria", mockRubricCriteria);
+  mockLookups("/amendment-categories", mockAmendmentCategories);
 
   return mock;
 };

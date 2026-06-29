@@ -5,6 +5,7 @@ import { Key, KeyRound, LogIn as LoginIcon, Loader2 } from "lucide-react";
 import { api } from "../api/axios";
 import { useAuthStore } from "../store/authStore";
 import { useNavigate } from "react-router-dom";
+import fptBg from "../assets/fpt.jpg";
 
 export default function LoginPage() {
   const [token, setToken] = useState("");
@@ -62,19 +63,29 @@ export default function LoginPage() {
   return (
     <div className="flex flex-col md:flex-row w-full min-h-screen bg-background text-foreground font-sans antialiased">
       {/* Left Pane - Branding */}
-      <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-6 sm:p-10 relative z-10 text-center md:text-left bg-gradient-to-br from-tertiary-container/30 to-primary-container/20 overflow-hidden">
+      <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-6 sm:p-10 relative z-10 text-center md:text-left overflow-hidden">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: `url(${fptBg})` }}
+          aria-hidden="true"
+        />
+        {/* Premium Dark Glassmorphism Overlay */}
+        <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-[2px]" aria-hidden="true" />
+        
         <div className="max-w-md w-full relative z-20 flex flex-col gap-6">
-          <h1 className="text-4xl sm:text-5xl font-bold text-primary tracking-tight" style={{ textWrap: "balance" }}>FURPMS</h1>
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-secondary-foreground" style={{ textWrap: "balance" }}>
+          <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tight drop-shadow-md" style={{ textWrap: "balance" }}>FURPMS</h1>
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-slate-200 drop-shadow" style={{ textWrap: "balance" }}>
             FPT University Research Project Management System
           </h2>
-          <p className="text-base sm:text-lg text-muted-foreground mt-4 sm:mt-6 border-l-4 border-primary pl-4">
+          <p className="text-base sm:text-lg text-slate-300 mt-4 sm:mt-6 border-l-4 border-primary-container pl-4">
             Empowering academic excellence and research innovation.
           </p>
         </div>
-        {/* Decorative elements */}
-        <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none z-0 motion-reduce:hidden" aria-hidden="true" />
-        <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-tertiary/10 rounded-full blur-3xl pointer-events-none z-0 motion-reduce:hidden" aria-hidden="true" />
+        
+        {/* Decorative elements (adapted for dark background) */}
+        <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-primary-container/20 rounded-full blur-3xl pointer-events-none z-0 motion-reduce:hidden mix-blend-screen" aria-hidden="true" />
+        <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-tertiary-container/20 rounded-full blur-3xl pointer-events-none z-0 motion-reduce:hidden mix-blend-screen" aria-hidden="true" />
       </div>
 
       {/* Right Pane - Login Container */}
