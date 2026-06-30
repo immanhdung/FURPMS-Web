@@ -31,6 +31,7 @@ import {
 } from "../../hooks/useCouncils";
 import { LoadingState } from "../../components/shared/LoadingState";
 import { StatusBadge } from "../../components/shared/StatusBadge";
+import { DecisionPanel } from "./components/DecisionPanel";
 
 // ────────────────────────────────────────────────────────────────────────
 // Constants
@@ -118,7 +119,7 @@ export default function CouncilSetup() {
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-12">
       {/* Header & Breadcrumb */}
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 sticky top-0 z-30 bg-surface/95 backdrop-blur-md -mx-4 sm:-mx-6 px-4 sm:px-6 py-4 border-b border-border mb-6 shadow-sm">
         <Button variant="ghost" size="sm" className="w-fit -ml-3 text-muted-foreground" onClick={() => navigate("/meetings")}>
           <ArrowLeft size={16} className="mr-2" /> Quay lại danh sách Hội đồng
         </Button>
@@ -312,10 +313,15 @@ export default function CouncilSetup() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Panel 4: Decision & Scores (Moved here for better layout balance) */}
+          {(council.status === "IN_MEETING" || council.status === "DECIDED") && (
+            <DecisionPanel councilId={councilId} />
+          )}
         </div>
 
         {/* Right Column (Info) */}
-        <div className="space-y-6">
+        <div className="space-y-6 lg:sticky lg:top-24 h-fit">
           {/* Panel 2: Council Info */}
           <Card className="border-border shadow-sm">
             <CardHeader className="pb-3 border-b border-border bg-surface/30">
@@ -361,6 +367,7 @@ export default function CouncilSetup() {
               )}
             </CardContent>
           </Card>
+
         </div>
       </div>
 

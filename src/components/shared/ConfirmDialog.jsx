@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 import { AlertTriangle, X } from "lucide-react";
 
 /**
@@ -16,7 +17,8 @@ import { AlertTriangle, X } from "lucide-react";
  * @param {string} [confirmLabel="Xác nhận"] - Confirm button text
  * @param {string} [cancelLabel="Hủy"] - Cancel button text
  * @param {"danger" | "warning"} [variant="danger"] - Visual style
- * @param {boolean} [isLoading=false] - Show loading state on confirm button
+ * @param {boolean} [requireInput=false] - Whether to require typing a specific string to confirm
+ * @param {string} [expectedInput="XAC NHAN"] - The string that must be typed
  */
 export function ConfirmDialog({
   open,
@@ -28,14 +30,18 @@ export function ConfirmDialog({
   cancelLabel = "Hủy",
   variant = "danger",
   isLoading = false,
+  requireInput = false,
+  expectedInput = "XAC NHAN"
 }) {
   const dialogRef = useRef(null);
+  const [inputValue, setInputValue] = React.useState("");
 
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
 
     if (open && !dialog.open) {
+      setInputValue("");
       dialog.showModal();
     } else if (!open && dialog.open) {
       dialog.close();
@@ -99,6 +105,20 @@ export function ConfirmDialog({
             </div>
           </div>
 
+          {requireInput && (
+            <div className="mt-4 px-4">
+              <label className="text-sm font-medium text-foreground block mb-2 text-center">
+                Vui lòng gõ <span className="font-bold font-mono text-destructive bg-destructive/10 px-1.5 py-0.5 rounded">{expectedInput}</span> để xác nhận
+              </label>
+              <Input 
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                placeholder={expectedInput}
+                className="text-center font-mono uppercase"
+              />
+            </div>
+          )}
+
           {/* Actions */}
           <div className="flex gap-3 mt-6">
             <Button
@@ -116,7 +136,7 @@ export function ConfirmDialog({
                   : "bg-amber-600 hover:bg-amber-700 text-white"
               }`}
               onClick={onConfirm}
-              disabled={isLoading}
+              disabled={isLoading || (requireInput && inputValue !== expectedInput)}
             >
               {isLoading ? (
                 <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />

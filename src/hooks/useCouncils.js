@@ -14,6 +14,7 @@ export const councilKeys = {
   scores: (id) => [...councilKeys.all, "scores", id],
   myScore: (id) => [...councilKeys.all, "myScore", id],
   decision: (id) => [...councilKeys.all, "decision", id],
+  meeting: (id) => [...councilKeys.all, "meeting", id],
 };
 
 // ─── Review Rounds ──────────────────────────────────────────────────
@@ -207,6 +208,53 @@ export function useRemoveCouncilMember(councilId) {
       toast.success("Đã xóa thành viên khỏi hội đồng");
     },
     onError: () => toast.error("Lỗi khi xóa thành viên"),
+  });
+}
+
+// ─── Decisions ────────────────────────────────────────────────────────
+
+export function useMakeDecision(councilId) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload) => {
+      const { data } = await api.post(`/councils/${councilId}/decisions`, payload);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: councilKeys.detail(councilId) });
+      queryClient.invalidateQueries({ queryKey: councilKeys.all });
+      toast.success("Đã chốt quyết định thành công!");
+    },
+    onError: () => toast.error("Có lỗi xảy ra khi chốt quyết định"),
+  });
+}
+
+// ─── Meetings ─────────────────────────────────────────────────────────
+
+export function useMeeting(councilId) {
+  return useQuery({
+    queryKey: councilKeys.meeting(councilId),
+    queryFn: async () => {
+      const { data } = await api.get(`/councils/${councilId}/meeting`);
+      return data.data; // might be null if not scheduled
+    },
+    enabled: !!councilId,
+  });
+}
+
+export function useScheduleMeeting(councilId) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload) => {
+      const { data } = await api.post(`/councils/${councilId}/meeting`, payload);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: councilKeys.meeting(councilId) });
+      queryClient.invalidateQueries({ queryKey: councilKeys.detail(councilId) });
+      toast.success("Đã lên lịch họp thành công!");
+    },
+    onError: () => toast.error("Có lỗi xảy ra khi lên lịch họp"),
   });
 }
 

@@ -364,10 +364,51 @@ export const setupMocks = (api) => {
   mock.onGet(/\/review-scoring\/councils\/[^/]+\/scores\/my/).reply((config) => {
     const councilId = config.url.split("/")[3];
     // hardcoded logic for mock user 'uuid-123'
-    const score = mockScores.find(s => s.councilId === councilId && s.reviewerId === "uuid-123");
-    return [200, { success: true, data: score || null }];
+    const userScore = mockScores.find(s => s.councilId === councilId && s.reviewerId === "uuid-123");
+    return [200, { success: true, data: userScore || null }];
   });
-  
+
+  // ─── Meetings ────────────────────────────────────────────────────────
+  mock.onGet(/\/councils\/[^/]+\/meeting/).reply((config) => {
+    const councilId = config.url.split("/")[2];
+    const meeting = data.mockMeetings.find(m => m.councilId === councilId);
+    return [200, { success: true, data: meeting || null }];
+  });
+
+  mock.onPost(/\/councils\/[^/]+\/meeting/).reply((config) => {
+    const councilId = config.url.split("/")[2];
+    const body = JSON.parse(config.data);
+    
+    // Simulate updating council status to IN_MEETING when meeting is scheduled
+    const councilIndex = data.mockCouncilsList.findIndex(c => c.id === councilId);
+    if (councilIndex !== -1 && data.mockCouncilsList[councilIndex].status === "READY") {
+      data.mockCouncilsList[councilIndex].status = "IN_MEETING";
+    }
+
+    const newMeeting = {
+      id: `meeting-${Date.now()}`,
+      councilId,
+      ...body,
+      status: "SCHEDULED"
+    };
+    
+    data.mockMeetings.push(newMeeting);
+    return [200, { success: true, data: newMeeting }];
+  });
+
+  // Decisions
+  mock.onPost(/\/councils\/[^/]+\/decisions/).reply((config) => {
+    const councilId = config.url.split("/")[2];
+    const body = JSON.parse(config.data);
+    
+    const councilIndex = data.mockCouncilsList.findIndex(c => c.id === councilId);
+    if (councilIndex !== -1) {
+      data.mockCouncilsList[councilIndex].status = "DECIDED";
+    }
+
+    return [200, { success: true, data: { id: `decision-${Date.now()}`, councilId, ...body } }];
+  });
+
   mock.onGet(/\/review-scoring\/councils\/[^/]+\/scores/).reply((config) => {
     const councilId = config.url.split("/")[3];
     const scores = mockScores.filter(s => s.councilId === councilId);
