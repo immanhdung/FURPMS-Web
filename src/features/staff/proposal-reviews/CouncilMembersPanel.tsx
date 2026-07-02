@@ -79,6 +79,7 @@ export function CouncilMembersPanel({ councilId, trackId }: CouncilMembersPanelP
                       variant="ghost"
                       size="icon-sm"
                       title="Mark accepted"
+                      aria-label="Mark accepted"
                       onClick={() => respondMutation.mutate({ memberId: member.id, payload: { accept: true } })}
                     >
                       <CheckCircle2 className="text-success" />
@@ -87,13 +88,14 @@ export function CouncilMembersPanel({ councilId, trackId }: CouncilMembersPanelP
                       variant="ghost"
                       size="icon-sm"
                       title="Mark declined"
+                      aria-label="Mark declined"
                       onClick={() => respondMutation.mutate({ memberId: member.id, payload: { accept: false } })}
                     >
                       <XCircle className="text-danger" />
                     </Button>
                   </>
                 )}
-                <Button variant="ghost" size="icon-sm" title="Remove member" onClick={() => setRemovingMember(member)}>
+                <Button variant="ghost" size="icon-sm" title="Remove member" aria-label="Remove member" onClick={() => setRemovingMember(member)}>
                   <UserX />
                 </Button>
               </div>

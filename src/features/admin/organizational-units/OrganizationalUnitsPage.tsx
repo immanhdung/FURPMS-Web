@@ -18,14 +18,18 @@ export function OrganizationalUnitsPage() {
 
   const parentNames = useMemo(() => Object.fromEntries((data ?? []).map((u) => [u.id, u.name])), [data]);
 
-  const columns = getOrgUnitColumns({
-    parentNames,
-    onView: (unit) => setViewingUnit(unit),
-    onEdit: (unit) => {
-      setEditingUnit(unit);
-      setFormOpen(true);
-    },
-  });
+  const columns = useMemo(
+    () =>
+      getOrgUnitColumns({
+        parentNames,
+        onView: (unit) => setViewingUnit(unit),
+        onEdit: (unit) => {
+          setEditingUnit(unit);
+          setFormOpen(true);
+        },
+      }),
+    [parentNames]
+  );
 
   return (
     <div className="space-y-4">

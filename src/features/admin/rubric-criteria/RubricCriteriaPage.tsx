@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/tables/DataTable";
@@ -17,13 +17,17 @@ export function RubricCriteriaPage() {
   const [editingCriterion, setEditingCriterion] = useState<RubricCriterion | null>(null);
   const [deletingCriterion, setDeletingCriterion] = useState<RubricCriterion | null>(null);
 
-  const columns = getRubricCriterionColumns({
-    onEdit: (criterion) => {
-      setEditingCriterion(criterion);
-      setFormOpen(true);
-    },
-    onDelete: (criterion) => setDeletingCriterion(criterion),
-  });
+  const columns = useMemo(
+    () =>
+      getRubricCriterionColumns({
+        onEdit: (criterion) => {
+          setEditingCriterion(criterion);
+          setFormOpen(true);
+        },
+        onDelete: (criterion) => setDeletingCriterion(criterion),
+      }),
+    []
+  );
 
   return (
     <div className="space-y-4">

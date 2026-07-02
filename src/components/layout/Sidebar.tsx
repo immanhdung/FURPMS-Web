@@ -13,7 +13,7 @@ import type { NavItem } from "@/types/nav";
 function Brand({ collapsed }: { collapsed: boolean }) {
   return (
     <div className="flex h-14 shrink-0 items-center gap-2 border-b border-sidebar-border px-4">
-      <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground" style={{ backgroundColor: "#2563EB" }}>
+      <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
         <GraduationCap className="size-4.5" />
       </div>
       {!collapsed && (

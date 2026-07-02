@@ -21,11 +21,15 @@ export function ResearchOrdersPage() {
   const cycleNames = useMemo(() => Object.fromEntries((cycles ?? []).map((c) => [c.id, c.name])), [cycles]);
   const unitNames = useMemo(() => Object.fromEntries((units ?? []).map((u) => [u.id, u.name])), [units]);
 
-  const columns = getResearchOrderColumns({
-    cycleNames,
-    unitNames,
-    onView: (order) => setDetailOrderId(order.id),
-  });
+  const columns = useMemo(
+    () =>
+      getResearchOrderColumns({
+        cycleNames,
+        unitNames,
+        onView: (order) => setDetailOrderId(order.id),
+      }),
+    [cycleNames, unitNames]
+  );
 
   return (
     <div className="space-y-4">

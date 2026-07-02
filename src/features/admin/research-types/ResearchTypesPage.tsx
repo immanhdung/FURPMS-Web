@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/tables/DataTable";
@@ -17,13 +17,17 @@ export function ResearchTypesPage() {
   const [editingType, setEditingType] = useState<ResearchType | null>(null);
   const [deletingType, setDeletingType] = useState<ResearchType | null>(null);
 
-  const columns = getResearchTypeColumns({
-    onEdit: (rt) => {
-      setEditingType(rt);
-      setFormOpen(true);
-    },
-    onDelete: (rt) => setDeletingType(rt),
-  });
+  const columns = useMemo(
+    () =>
+      getResearchTypeColumns({
+        onEdit: (rt) => {
+          setEditingType(rt);
+          setFormOpen(true);
+        },
+        onDelete: (rt) => setDeletingType(rt),
+      }),
+    []
+  );
 
   return (
     <div className="space-y-4">

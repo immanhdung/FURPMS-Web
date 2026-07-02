@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { CHART_AXIS_STYLE, CHART_COLORS, CHART_PALETTE, CHART_TOOLTIP_STYLE } from "@/components/charts/chart-theme";
 
@@ -9,7 +10,7 @@ interface BarChartCardProps<T> {
   colorful?: boolean;
 }
 
-export function BarChartCardBody<T extends object>({
+function BarChartCardBodyImpl<T extends object>({
   data,
   categoryKey,
   valueKey,
@@ -54,3 +55,5 @@ export function BarChartCardBody<T extends object>({
     </ResponsiveContainer>
   );
 }
+
+export const BarChartCardBody = memo(BarChartCardBodyImpl) as typeof BarChartCardBodyImpl;

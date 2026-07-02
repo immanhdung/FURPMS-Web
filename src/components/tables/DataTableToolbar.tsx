@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import type { Table } from "@tanstack/react-table";
 import { Download, SlidersHorizontal, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -11,6 +12,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { exportRowsToCsv } from "@/utils/exportCsv";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
@@ -23,8 +25,12 @@ export function DataTableToolbar<TData>({
   searchPlaceholder = "Search...",
   exportFileName = "export",
 }: DataTableToolbarProps<TData>) {
-  const globalFilter = (table.getState().globalFilter as string) ?? "";
-  const isFiltered = globalFilter.length > 0;
+  const [searchInput, setSearchInput] = useState((table.getState().globalFilter as string) ?? "");
+  const debouncedSearch = useDebouncedValue(searchInput, 250);
+
+  useEffect(() => {
+    table.setGlobalFilter(debouncedSearch);
+  }, [debouncedSearch, table]);
 
   const handleExport = () => {
     const rows = table.getFilteredRowModel().rows.map((row) => row.original as Record<string, unknown>);
@@ -36,12 +42,12 @@ export function DataTableToolbar<TData>({
       <div className="flex flex-1 items-center gap-2">
         <Input
           placeholder={searchPlaceholder}
-          value={globalFilter}
-          onChange={(e) => table.setGlobalFilter(e.target.value)}
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
           className="h-8 max-w-xs"
         />
-        {isFiltered && (
-          <Button variant="ghost" size="icon-sm" onClick={() => table.setGlobalFilter("")}>
+        {searchInput.length > 0 && (
+          <Button variant="ghost" size="icon-sm" aria-label="Clear search" onClick={() => setSearchInput("")}>
             <X />
           </Button>
         )}

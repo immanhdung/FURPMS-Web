@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { CHART_AXIS_STYLE, CHART_PALETTE, CHART_TOOLTIP_STYLE } from "@/components/charts/chart-theme";
 import type { ChartSeries } from "@/components/charts/AreaChartCard";
@@ -8,7 +9,7 @@ interface LineChartCardProps<T> {
   series: ChartSeries<T>[];
 }
 
-export function LineChartCardBody<T extends object>({ data, xKey, series }: LineChartCardProps<T>) {
+function LineChartCardBodyImpl<T extends object>({ data, xKey, series }: LineChartCardProps<T>) {
   return (
     <ResponsiveContainer width="100%" height="100%">
       <LineChart data={data} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
@@ -34,3 +35,5 @@ export function LineChartCardBody<T extends object>({ data, xKey, series }: Line
     </ResponsiveContainer>
   );
 }
+
+export const LineChartCardBody = memo(LineChartCardBodyImpl) as typeof LineChartCardBodyImpl;

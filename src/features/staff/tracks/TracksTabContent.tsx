@@ -3,7 +3,7 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/tables/DataTable";
 import { ErrorState } from "@/components/shared/ErrorState";
-import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { ToggleActiveDialog } from "@/components/shared/ToggleActiveDialog";
 import { useDeactivateTrackMutation, useTracksQuery } from "@/hooks/useTracks";
 import { useUsersQuery } from "@/hooks/useUsers";
 import { getTrackColumns } from "@/features/staff/tracks/columns";
@@ -23,15 +23,19 @@ export function TracksTabContent() {
 
   const ownerNames = useMemo(() => Object.fromEntries((users ?? []).map((u) => [u.id, u.fullName])), [users]);
 
-  const columns = getTrackColumns({
-    ownerNames,
-    onEdit: (track) => {
-      setEditingTrack(track);
-      setFormOpen(true);
-    },
-    onAssignOwner: (track) => setAssigningTrack(track),
-    onDeactivate: (track) => setDeactivatingTrack(track),
-  });
+  const columns = useMemo(
+    () =>
+      getTrackColumns({
+        ownerNames,
+        onEdit: (track) => {
+          setEditingTrack(track);
+          setFormOpen(true);
+        },
+        onAssignOwner: (track) => setAssigningTrack(track),
+        onDeactivate: (track) => setDeactivatingTrack(track),
+      }),
+    [ownerNames]
+  );
 
   return (
     <div className="space-y-4">
@@ -67,13 +71,12 @@ export function TracksTabContent() {
       <TrackFormSheet open={formOpen} onOpenChange={setFormOpen} track={editingTrack} />
       <AssignTrackOwnerDialog open={Boolean(assigningTrack)} onOpenChange={(open) => !open && setAssigningTrack(null)} track={assigningTrack} />
 
-      <ConfirmDialog
+      <ToggleActiveDialog
         open={Boolean(deactivatingTrack)}
         onOpenChange={(open) => !open && setDeactivatingTrack(null)}
-        title="Deactivate research field"
-        description={`Are you sure you want to deactivate "${deactivatingTrack?.name}"?`}
-        variant="destructive"
-        confirmLabel="Deactivate"
+        isActive
+        entityName="research field"
+        itemLabel={deactivatingTrack?.name ?? ""}
         isLoading={deactivateMutation.isPending}
         onConfirm={() =>
           deactivatingTrack &&

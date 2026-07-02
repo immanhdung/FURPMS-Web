@@ -29,16 +29,20 @@ export function CyclesPage() {
     [researchTypes]
   );
 
-  const columns = getCycleColumns({
-    researchTypeNames,
-    onView: (cycle) => setDetailCycleId(cycle.id),
-    onEdit: (cycle) => {
-      setEditingCycle(cycle);
-      setFormOpen(true);
-    },
-    onOpen: (cycle) => openMutation.mutate(cycle.id),
-    onClose: (cycle) => setClosingCycle(cycle),
-  });
+  const columns = useMemo(
+    () =>
+      getCycleColumns({
+        researchTypeNames,
+        onView: (cycle) => setDetailCycleId(cycle.id),
+        onEdit: (cycle) => {
+          setEditingCycle(cycle);
+          setFormOpen(true);
+        },
+        onOpen: (cycle) => openMutation.mutate(cycle.id),
+        onClose: (cycle) => setClosingCycle(cycle),
+      }),
+    [researchTypeNames, openMutation]
+  );
 
   return (
     <div className="space-y-4">

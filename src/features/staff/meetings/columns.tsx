@@ -44,16 +44,16 @@ export function getMeetingColumns({ onStart, onEnd }: GetMeetingColumnsOptions):
       cell: ({ row }) => (
         <div className="flex justify-end gap-1">
           {row.original.meetingLink && (
-            <Button variant="ghost" size="icon-sm" asChild title="Join">
+            <Button variant="ghost" size="icon-sm" asChild title="Join" aria-label="Join meeting">
               <a href={row.original.meetingLink} target="_blank" rel="noreferrer">
                 <ExternalLink />
               </a>
             </Button>
           )}
-          <Button variant="ghost" size="icon-sm" title="Start" onClick={() => onStart(row.original)}>
+          <Button variant="ghost" size="icon-sm" title="Start" aria-label="Start meeting" onClick={() => onStart(row.original)}>
             <Play />
           </Button>
-          <Button variant="ghost" size="icon-sm" title="End" onClick={() => onEnd(row.original)}>
+          <Button variant="ghost" size="icon-sm" title="End" aria-label="End meeting" onClick={() => onEnd(row.original)}>
             <Square />
           </Button>
         </div>

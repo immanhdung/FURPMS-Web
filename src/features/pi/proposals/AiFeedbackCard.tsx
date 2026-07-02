@@ -46,7 +46,7 @@ export function AiFeedbackCard({ proposalId }: { proposalId: string }) {
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.15, delay: index * 0.05 }}
-                className="rounded-lg bg-primary/[0.04] p-2.5"
+                className="rounded-lg bg-primary/4 p-2.5"
               >
                 <Badge variant="secondary" className="mb-1">
                   {item.category}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/tables/DataTable";
@@ -17,10 +17,14 @@ export function UsersPage() {
   const [editUser, setEditUser] = useState<AdminUser | null>(null);
   const [detailUserId, setDetailUserId] = useState<string | null>(null);
 
-  const columns = getUserColumns({
-    onView: (user) => setDetailUserId(user.id),
-    onEdit: (user) => setEditUser(user),
-  });
+  const columns = useMemo(
+    () =>
+      getUserColumns({
+        onView: (user) => setDetailUserId(user.id),
+        onEdit: (user) => setEditUser(user),
+      }),
+    []
+  );
 
   return (
     <div className="space-y-4">

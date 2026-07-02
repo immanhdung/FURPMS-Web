@@ -26,14 +26,18 @@ export function MyProposalsPage() {
   const cycleNames = useMemo(() => Object.fromEntries((cycles ?? []).map((c) => [c.id, c.name])), [cycles]);
   const trackNames = useMemo(() => Object.fromEntries((tracks ?? []).map((t) => [t.id.toString(), t.name])), [tracks]);
 
-  const columns = getMyProposalColumns({
-    cycleNames,
-    trackNames,
-    onView: (proposal) => navigate(`${ROUTES.MY_PROPOSALS}/${proposal.id}`),
-    onEdit: (proposal) => navigate(`${ROUTES.SUBMIT_PROPOSAL}/${proposal.id}`),
-    onSubmit: (proposal) => setSubmittingId(proposal.id),
-    onWithdraw: (proposal) => setWithdrawingProposal(proposal),
-  });
+  const columns = useMemo(
+    () =>
+      getMyProposalColumns({
+        cycleNames,
+        trackNames,
+        onView: (proposal) => navigate(`${ROUTES.MY_PROPOSALS}/${proposal.id}`),
+        onEdit: (proposal) => navigate(`${ROUTES.SUBMIT_PROPOSAL}/${proposal.id}`),
+        onSubmit: (proposal) => setSubmittingId(proposal.id),
+        onWithdraw: (proposal) => setWithdrawingProposal(proposal),
+      }),
+    [cycleNames, trackNames, navigate]
+  );
 
   return (
     <div className="space-y-4">

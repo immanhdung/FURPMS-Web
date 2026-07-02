@@ -23,6 +23,7 @@ export function DataTablePagination<TData>({ table }: DataTablePaginationProps<T
         <Button
           variant="outline"
           size="icon-sm"
+          aria-label="Go to first page"
           onClick={() => table.setPageIndex(0)}
           disabled={!table.getCanPreviousPage()}
         >
@@ -31,6 +32,7 @@ export function DataTablePagination<TData>({ table }: DataTablePaginationProps<T
         <Button
           variant="outline"
           size="icon-sm"
+          aria-label="Go to previous page"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
@@ -39,12 +41,19 @@ export function DataTablePagination<TData>({ table }: DataTablePaginationProps<T
         <span className="px-2 text-sm text-muted-foreground">
           Page {table.getPageCount() === 0 ? 0 : pageIndex + 1} of {table.getPageCount()}
         </span>
-        <Button variant="outline" size="icon-sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+        <Button
+          variant="outline"
+          size="icon-sm"
+          aria-label="Go to next page"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+        >
           <ChevronRight />
         </Button>
         <Button
           variant="outline"
           size="icon-sm"
+          aria-label="Go to last page"
           onClick={() => table.setPageIndex(table.getPageCount() - 1)}
           disabled={!table.getCanNextPage()}
         >

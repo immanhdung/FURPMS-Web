@@ -44,6 +44,7 @@ export function ReviewerLiveQueueCard() {
                   <Button
                     variant="ghost"
                     size="icon-sm"
+                    aria-label="Decline invitation"
                     onClick={() =>
                       respondMutation.mutate({ memberId: membership.memberId, payload: { accept: false } })
                     }
@@ -53,6 +54,7 @@ export function ReviewerLiveQueueCard() {
                   <Button
                     variant="ghost"
                     size="icon-sm"
+                    aria-label="Accept invitation"
                     onClick={() =>
                       respondMutation.mutate({ memberId: membership.memberId, payload: { accept: true } })
                     }

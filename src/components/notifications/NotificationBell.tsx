@@ -97,7 +97,7 @@ export function NotificationBell() {
                   onClick={() => !notification.read && markAsRead.mutate(notification.id)}
                   className={cn(
                     "cursor-pointer px-4 py-3 transition-colors hover:bg-muted/60",
-                    !notification.read && "bg-primary/[0.03]"
+                    !notification.read && "bg-primary/3"
                   )}
                 >
                   <div className="flex items-start gap-2">

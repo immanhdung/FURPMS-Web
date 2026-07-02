@@ -1,3 +1,4 @@
+import { memo } from "react";
 import {
   Area,
   AreaChart,
@@ -22,7 +23,7 @@ interface AreaChartCardProps<T> {
   series: ChartSeries<T>[];
 }
 
-export function AreaChartCardBody<T extends object>({ data, xKey, series }: AreaChartCardProps<T>) {
+function AreaChartCardBodyImpl<T extends object>({ data, xKey, series }: AreaChartCardProps<T>) {
   return (
     <ResponsiveContainer width="100%" height="100%">
       <AreaChart data={data} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
@@ -62,3 +63,5 @@ export function AreaChartCardBody<T extends object>({ data, xKey, series }: Area
     </ResponsiveContainer>
   );
 }
+
+export const AreaChartCardBody = memo(AreaChartCardBodyImpl) as typeof AreaChartCardBodyImpl;

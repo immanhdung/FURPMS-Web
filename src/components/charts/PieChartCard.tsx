@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { CHART_PALETTE, CHART_TOOLTIP_STYLE } from "@/components/charts/chart-theme";
 
@@ -7,7 +8,7 @@ interface PieChartCardProps<T> {
   valueKey: keyof T & string;
 }
 
-export function PieChartCardBody<T extends object>({ data, nameKey, valueKey }: PieChartCardProps<T>) {
+function PieChartCardBodyImpl<T extends object>({ data, nameKey, valueKey }: PieChartCardProps<T>) {
   return (
     <ResponsiveContainer width="100%" height="100%">
       <PieChart>
@@ -30,3 +31,5 @@ export function PieChartCardBody<T extends object>({ data, nameKey, valueKey }: 
     </ResponsiveContainer>
   );
 }
+
+export const PieChartCardBody = memo(PieChartCardBodyImpl) as typeof PieChartCardBodyImpl;

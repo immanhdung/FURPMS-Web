@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/tables/DataTable";
 import { ErrorState } from "@/components/shared/ErrorState";
-import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { ToggleActiveDialog } from "@/components/shared/ToggleActiveDialog";
 import { useFinancialConfigsQuery, useUpdateFinancialConfigMutation } from "@/hooks/useFinancialConfigs";
 import { getFinancialConfigColumns } from "@/features/admin/financial-configs/columns";
 import { FinancialConfigFormSheet } from "@/features/admin/financial-configs/FinancialConfigFormSheet";
@@ -17,13 +17,17 @@ export function FinancialConfigsPage() {
   const [editingConfig, setEditingConfig] = useState<FinancialConfig | null>(null);
   const [togglingConfig, setTogglingConfig] = useState<FinancialConfig | null>(null);
 
-  const columns = getFinancialConfigColumns({
-    onEdit: (config) => {
-      setEditingConfig(config);
-      setFormOpen(true);
-    },
-    onToggleActive: (config) => setTogglingConfig(config),
-  });
+  const columns = useMemo(
+    () =>
+      getFinancialConfigColumns({
+        onEdit: (config) => {
+          setEditingConfig(config);
+          setFormOpen(true);
+        },
+        onToggleActive: (config) => setTogglingConfig(config),
+      }),
+    []
+  );
 
   return (
     <div className="space-y-4">
@@ -59,13 +63,12 @@ export function FinancialConfigsPage() {
 
       <FinancialConfigFormSheet open={formOpen} onOpenChange={setFormOpen} config={editingConfig} />
 
-      <ConfirmDialog
+      <ToggleActiveDialog
         open={Boolean(togglingConfig)}
         onOpenChange={(open) => !open && setTogglingConfig(null)}
-        title={togglingConfig?.isActive ? "Deactivate configuration" : "Activate configuration"}
-        description={`Are you sure you want to ${togglingConfig?.isActive ? "deactivate" : "activate"} "${togglingConfig?.code}"?`}
-        variant={togglingConfig?.isActive ? "destructive" : "default"}
-        confirmLabel={togglingConfig?.isActive ? "Deactivate" : "Activate"}
+        isActive={Boolean(togglingConfig?.isActive)}
+        entityName="configuration"
+        itemLabel={togglingConfig?.code ?? ""}
         isLoading={updateMutation.isPending}
         onConfirm={() =>
           togglingConfig &&

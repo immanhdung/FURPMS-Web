@@ -77,7 +77,7 @@ export function FileDropzone({
           <p className="text-xs text-muted-foreground">{formatBytes(file.size)}</p>
         </div>
         {!disabled && (
-          <Button type="button" variant="ghost" size="icon-sm" onClick={onRemove}>
+          <Button type="button" variant="ghost" size="icon-sm" aria-label="Remove file" onClick={onRemove}>
             <X />
           </Button>
         )}
@@ -100,7 +100,7 @@ export function FileDropzone({
         onDrop={handleDrop}
         className={cn(
           "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-6 py-10 text-center transition-colors",
-          isDragging ? "border-primary bg-primary/[0.04]" : "border-border hover:border-primary/40",
+          isDragging ? "border-primary bg-primary/4" : "border-border hover:border-primary/40",
           disabled && "cursor-not-allowed opacity-50"
         )}
       >

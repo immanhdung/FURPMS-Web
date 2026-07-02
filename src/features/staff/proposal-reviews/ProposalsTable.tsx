@@ -25,7 +25,7 @@ export function ProposalsTable({ params, onOpen, emptyTitle, emptyDescription }:
     [tracks]
   );
 
-  const columns = getProposalColumns({ cycleNames, trackNames, onOpen });
+  const columns = useMemo(() => getProposalColumns({ cycleNames, trackNames, onOpen }), [cycleNames, trackNames, onOpen]);
 
   if (isError) {
     return <ErrorState onRetry={() => refetch()} isRetrying={isRefetching} />;

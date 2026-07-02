@@ -16,7 +16,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur-sm">
       <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
-        <Button variant="ghost" size="icon-sm" className="md:hidden" onClick={() => setMobileNavOpen(true)}>
+        <Button variant="ghost" size="icon-sm" className="md:hidden" aria-label="Open navigation menu" onClick={() => setMobileNavOpen(true)}>
           <Menu />
         </Button>
         <SheetContent side="left" className="w-64 p-0">
@@ -40,7 +40,7 @@ export function Header() {
           Search
           <kbd className="ml-2 rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium">⌘K</kbd>
         </Button>
-        <Button variant="ghost" size="icon-sm" className="sm:hidden" onClick={() => setCommandPaletteOpen(true)}>
+        <Button variant="ghost" size="icon-sm" className="sm:hidden" aria-label="Open search" onClick={() => setCommandPaletteOpen(true)}>
           <Search />
         </Button>
 

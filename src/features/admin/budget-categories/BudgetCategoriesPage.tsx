@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/tables/DataTable";
 import { ErrorState } from "@/components/shared/ErrorState";
-import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { ToggleActiveDialog } from "@/components/shared/ToggleActiveDialog";
 import { useBudgetCategoriesQuery, useUpdateBudgetCategoryMutation } from "@/hooks/useBudgetCategories";
 import { getBudgetCategoryColumns } from "@/features/admin/budget-categories/columns";
 import { BudgetCategoryFormSheet } from "@/features/admin/budget-categories/BudgetCategoryFormSheet";
@@ -17,13 +17,17 @@ export function BudgetCategoriesPage() {
   const [editingCategory, setEditingCategory] = useState<BudgetCategory | null>(null);
   const [togglingCategory, setTogglingCategory] = useState<BudgetCategory | null>(null);
 
-  const columns = getBudgetCategoryColumns({
-    onEdit: (category) => {
-      setEditingCategory(category);
-      setFormOpen(true);
-    },
-    onToggleActive: (category) => setTogglingCategory(category),
-  });
+  const columns = useMemo(
+    () =>
+      getBudgetCategoryColumns({
+        onEdit: (category) => {
+          setEditingCategory(category);
+          setFormOpen(true);
+        },
+        onToggleActive: (category) => setTogglingCategory(category),
+      }),
+    []
+  );
 
   return (
     <div className="space-y-4">
@@ -59,13 +63,12 @@ export function BudgetCategoriesPage() {
 
       <BudgetCategoryFormSheet open={formOpen} onOpenChange={setFormOpen} category={editingCategory} />
 
-      <ConfirmDialog
+      <ToggleActiveDialog
         open={Boolean(togglingCategory)}
         onOpenChange={(open) => !open && setTogglingCategory(null)}
-        title={togglingCategory?.isActive ? "Deactivate category" : "Activate category"}
-        description={`Are you sure you want to ${togglingCategory?.isActive ? "deactivate" : "activate"} "${togglingCategory?.name}"?`}
-        variant={togglingCategory?.isActive ? "destructive" : "default"}
-        confirmLabel={togglingCategory?.isActive ? "Deactivate" : "Activate"}
+        isActive={Boolean(togglingCategory?.isActive)}
+        entityName="category"
+        itemLabel={togglingCategory?.name ?? ""}
         isLoading={updateMutation.isPending}
         onConfirm={() =>
           togglingCategory &&

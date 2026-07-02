@@ -86,7 +86,7 @@ export function PiDashboardPage() {
             ) : (
               <ul className="space-y-3">
                 {data?.aiSuggestions.map((suggestion, index) => (
-                  <li key={index} className="rounded-lg bg-primary/[0.04] p-2.5 text-xs text-foreground">
+                  <li key={index} className="rounded-lg bg-primary/4 p-2.5 text-xs text-foreground">
                     {suggestion}
                   </li>
                 ))}

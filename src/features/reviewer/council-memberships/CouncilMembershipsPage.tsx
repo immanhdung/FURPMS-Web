@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { DataTable } from "@/components/tables/DataTable";
 import { ErrorState } from "@/components/shared/ErrorState";
@@ -9,7 +10,10 @@ export function CouncilMembershipsPage() {
   const navigate = useNavigate();
   const { data, isLoading, isError, refetch, isRefetching } = useMyMembershipsQuery();
 
-  const columns = getMembershipColumns((membership) => navigate(`${ROUTES.ASSIGNED_REVIEWS}/${membership.councilId}`));
+  const columns = useMemo(
+    () => getMembershipColumns((membership) => navigate(`${ROUTES.ASSIGNED_REVIEWS}/${membership.councilId}`)),
+    [navigate]
+  );
 
   return (
     <div className="space-y-4">

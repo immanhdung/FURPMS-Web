@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { CalendarClock } from "lucide-react";
 import { DataTable } from "@/components/tables/DataTable";
@@ -11,10 +12,14 @@ export function MeetingsPage() {
   const startMutation = useStartMeetingMutation();
   const endMutation = useEndMeetingMutation();
 
-  const columns = getMeetingColumns({
-    onStart: (meeting) => startMutation.mutate(meeting.id),
-    onEnd: (meeting) => endMutation.mutate(meeting.id),
-  });
+  const columns = useMemo(
+    () =>
+      getMeetingColumns({
+        onStart: (meeting) => startMutation.mutate(meeting.id),
+        onEnd: (meeting) => endMutation.mutate(meeting.id),
+      }),
+    [startMutation, endMutation]
+  );
 
   return (
     <div className="space-y-4">

@@ -53,7 +53,7 @@ export function Step4TeamMembers({ form }: { form: UseFormReturn<ProposalWizardV
                 <CardContent className="space-y-3 p-4">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium text-foreground">Member {index + 1}</p>
-                    <Button type="button" variant="ghost" size="icon-sm" onClick={() => remove(index)}>
+                    <Button type="button" variant="ghost" size="icon-sm" aria-label={`Remove member ${index + 1}`} onClick={() => remove(index)}>
                       <Trash2 />
                     </Button>
                   </div>
