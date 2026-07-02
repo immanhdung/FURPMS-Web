@@ -8,6 +8,7 @@ export const queryKeys = {
     all: () => ["proposals"] as const,
     list: (params?: Record<string, unknown>) => ["proposals", "list", params] as const,
     detail: (id: string) => ["proposals", "detail", id] as const,
+    mine: () => ["proposals", "mine"] as const,
   },
   cycles: {
     all: () => ["cycles"] as const,
