@@ -43,6 +43,9 @@ export const queryKeys = {
   },
   analytics: {
     dashboard: (role: string) => ["analytics", "dashboard", role] as const,
+    overview: () => ["analytics", "overview"] as const,
+    byTrack: (cycleId?: number) => ["analytics", "by-track", cycleId] as const,
+    funnel: (cycleId?: number) => ["analytics", "funnel", cycleId] as const,
   },
   researchTypes: {
     all: () => ["research-types"] as const,

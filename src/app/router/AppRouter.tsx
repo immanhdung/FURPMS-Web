@@ -31,6 +31,8 @@ import { AssignedReviewsPage } from "@/features/reviewer/assigned-reviews/Assign
 import { ScoringPage } from "@/features/reviewer/scoring/ScoringPage";
 import { CouncilMembershipsPage } from "@/features/reviewer/council-memberships/CouncilMembershipsPage";
 import { ProposalReviewWorkspace as ReviewerProposalReviewWorkspace } from "@/features/reviewer/proposal-review/ProposalReviewWorkspace";
+import { AnalyticsPage } from "@/features/analytics/AnalyticsPage";
+import { SemanticSearchPage } from "@/features/pi/ai-search/SemanticSearchPage";
 import { useBootstrapAuth } from "@/hooks/useAuth";
 import { ROUTES } from "@/constants/routes";
 import { APP_ROUTE_GROUPS } from "@/app/router/routes";
@@ -59,6 +61,8 @@ const FEATURE_PAGES: Partial<Record<string, ComponentType>> = {
   [ROUTES.ASSIGNED_REVIEWS]: AssignedReviewsPage,
   [ROUTES.SCORING]: ScoringPage,
   [ROUTES.COUNCIL_MEMBERSHIPS]: CouncilMembershipsPage,
+  [ROUTES.ANALYTICS]: AnalyticsPage,
+  [ROUTES.AI_SEARCH]: SemanticSearchPage,
 };
 
 const proposalReviewsRoles = NAV_ITEMS.find((item) => item.path === ROUTES.PROPOSAL_REVIEWS)?.roles ?? [];

@@ -98,6 +98,7 @@ export function ProposalReviewWorkspace() {
         open={Boolean(selectedRound)}
         onOpenChange={(open) => !open && setSelectedRoundId(null)}
         proposalId={proposalId}
+        trackId={proposal?.trackId}
         round={selectedRound}
       />
 

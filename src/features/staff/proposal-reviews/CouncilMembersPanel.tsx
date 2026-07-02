@@ -15,7 +15,12 @@ import { AddCouncilMemberDialog } from "@/features/staff/proposal-reviews/AddCou
 import { formatDateTime } from "@/utils/format";
 import type { CouncilMember } from "@/types/council-member";
 
-export function CouncilMembersPanel({ councilId }: { councilId: string }) {
+interface CouncilMembersPanelProps {
+  councilId: string;
+  trackId?: string | null;
+}
+
+export function CouncilMembersPanel({ councilId, trackId }: CouncilMembersPanelProps) {
   const { data: members, isLoading } = useCouncilMembersQuery(councilId);
   const sendInvitationsMutation = useSendInvitationsMutation(councilId);
   const respondMutation = useRespondMembershipMutation(councilId);
@@ -97,7 +102,7 @@ export function CouncilMembersPanel({ councilId }: { councilId: string }) {
         </ul>
       )}
 
-      <AddCouncilMemberDialog open={addOpen} onOpenChange={setAddOpen} councilId={councilId} />
+      <AddCouncilMemberDialog open={addOpen} onOpenChange={setAddOpen} councilId={councilId} trackId={trackId} />
 
       <ConfirmDialog
         open={Boolean(removingMember)}

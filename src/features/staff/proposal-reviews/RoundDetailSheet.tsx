@@ -18,10 +18,11 @@ interface RoundDetailSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   proposalId: string;
+  trackId?: string | null;
   round: ReviewRound | null;
 }
 
-export function RoundDetailSheet({ open, onOpenChange, proposalId, round }: RoundDetailSheetProps) {
+export function RoundDetailSheet({ open, onOpenChange, proposalId, trackId, round }: RoundDetailSheetProps) {
   const openMutation = useOpenRoundMutation(proposalId);
   const [createCouncilOpen, setCreateCouncilOpen] = useState(false);
   const [closeRoundOpen, setCloseRoundOpen] = useState(false);
@@ -74,7 +75,7 @@ export function RoundDetailSheet({ open, onOpenChange, proposalId, round }: Roun
                   <TabsTrigger value="meetings">Meetings</TabsTrigger>
                 </TabsList>
                 <TabsContent value="members">
-                  <CouncilMembersPanel councilId={round.councilId} />
+                  <CouncilMembersPanel councilId={round.councilId} trackId={trackId} />
                 </TabsContent>
                 <TabsContent value="meetings">
                   <MeetingsPanel councilId={round.councilId} />
