@@ -1,8 +1,9 @@
 export const ROUTES = {
+  HOME: "/",
   LOGIN: "/login",
   UNAUTHORIZED: "/unauthorized",
 
-  DASHBOARD: "/",
+  DASHBOARD: "/dashboard",
 
   RESEARCH_CYCLES: "/research-cycles",
   RESEARCH_TYPES: "/research-types",

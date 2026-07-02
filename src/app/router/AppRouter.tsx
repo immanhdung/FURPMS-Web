@@ -14,6 +14,7 @@ import { PublicOnlyRoute } from "@/app/router/PublicOnlyRoute";
 import { RoleGuard } from "@/app/router/RoleGuard";
 import { NAV_ITEMS } from "@/constants/nav";
 
+const HomePage = lazy(() => import("@/features/home/HomePage").then((m) => ({ default: m.HomePage })));
 const LoginPage = lazy(() => import("@/features/auth/pages/LoginPage").then((m) => ({ default: m.LoginPage })));
 const ChangePasswordPage = lazy(() =>
   import("@/features/auth/pages/ChangePasswordPage").then((m) => ({ default: m.ChangePasswordPage }))
@@ -132,6 +133,7 @@ export function AppRouter() {
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route element={<PublicOnlyRoute />}>
+            <Route path={ROUTES.HOME} element={<HomePage />} />
             <Route element={<AuthLayout />}>
               <Route path={ROUTES.LOGIN} element={<LoginPage />} />
             </Route>
@@ -141,7 +143,7 @@ export function AppRouter() {
 
           <Route element={<ProtectedRoute />}>
             <Route element={<AppLayout />}>
-              <Route index element={<DashboardPage />} />
+              <Route path={ROUTES.DASHBOARD.slice(1)} element={<DashboardPage />} />
               <Route path={ROUTES.PROFILE.slice(1)} element={<ProfilePage />} />
               <Route path={ROUTES.CHANGE_PASSWORD.slice(1)} element={<ChangePasswordPage />} />
 

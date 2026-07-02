@@ -7,6 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuthStore } from "@/store/auth.store";
 import { useUiStore } from "@/store/ui.store";
 import { getNavItemsForRoles } from "@/constants/nav";
+import { ROUTES } from "@/constants/routes";
 import { cn } from "@/lib/utils";
 import type { NavItem } from "@/types/nav";
 
@@ -30,7 +31,7 @@ function NavLinkItem({ item, collapsed }: { item: NavItem; collapsed: boolean })
   const link = (
     <NavLink
       to={item.path}
-      end={item.path === "/"}
+      end={item.path === ROUTES.DASHBOARD}
       className={({ isActive }) =>
         cn(
           "group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
