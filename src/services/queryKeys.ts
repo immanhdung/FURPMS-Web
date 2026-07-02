@@ -6,7 +6,7 @@ export const queryKeys = {
   },
   proposals: {
     all: () => ["proposals"] as const,
-    list: (params?: PaginationParams) => ["proposals", "list", params] as const,
+    list: (params?: Record<string, unknown>) => ["proposals", "list", params] as const,
     detail: (id: string) => ["proposals", "detail", id] as const,
   },
   cycles: {
@@ -19,15 +19,22 @@ export const queryKeys = {
     list: (params?: PaginationParams) => ["users", "list", params] as const,
     detail: (id: string) => ["users", "detail", id] as const,
   },
-  councils: {
-    all: () => ["councils"] as const,
-    list: (params?: PaginationParams) => ["councils", "list", params] as const,
-    detail: (id: string) => ["councils", "detail", id] as const,
+  reviewRounds: {
+    all: () => ["review-rounds"] as const,
+    list: (proposalId: string) => ["review-rounds", "list", proposalId] as const,
+  },
+  councilMembers: {
+    all: () => ["council-members"] as const,
+    list: (councilId: string) => ["council-members", "list", councilId] as const,
   },
   meetings: {
     all: () => ["meetings"] as const,
-    list: (params?: PaginationParams) => ["meetings", "list", params] as const,
-    detail: (id: string) => ["meetings", "detail", id] as const,
+    list: () => ["meetings", "list"] as const,
+    byCouncil: (councilId: string) => ["meetings", "council", councilId] as const,
+  },
+  tracks: {
+    all: () => ["tracks"] as const,
+    list: () => ["tracks", "list"] as const,
   },
   notifications: {
     all: () => ["notifications"] as const,

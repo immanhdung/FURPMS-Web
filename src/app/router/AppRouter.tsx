@@ -18,12 +18,18 @@ import { BudgetCategoriesPage } from "@/features/admin/budget-categories/BudgetC
 import { FinancialConfigsPage } from "@/features/admin/financial-configs/FinancialConfigsPage";
 import { OrganizationalUnitsPage } from "@/features/admin/organizational-units/OrganizationalUnitsPage";
 import { RubricCriteriaPage } from "@/features/admin/rubric-criteria/RubricCriteriaPage";
+import { ProposalReviewsPage } from "@/features/staff/proposal-reviews/ProposalReviewsPage";
+import { ProposalReviewWorkspace } from "@/features/staff/proposal-reviews/ProposalReviewWorkspace";
+import { CouncilsPage } from "@/features/staff/councils/CouncilsPage";
+import { AssignmentsPage } from "@/features/staff/assignments/AssignmentsPage";
+import { MeetingsPage } from "@/features/staff/meetings/MeetingsPage";
 import { useBootstrapAuth } from "@/hooks/useAuth";
 import { ROUTES } from "@/constants/routes";
 import { APP_ROUTE_GROUPS } from "@/app/router/routes";
 import { ProtectedRoute } from "@/app/router/ProtectedRoute";
 import { PublicOnlyRoute } from "@/app/router/PublicOnlyRoute";
 import { RoleGuard } from "@/app/router/RoleGuard";
+import { NAV_ITEMS } from "@/constants/nav";
 
 const FEATURE_PAGES: Partial<Record<string, ComponentType>> = {
   [ROUTES.NOTIFICATIONS]: NotificationsPage,
@@ -35,7 +41,13 @@ const FEATURE_PAGES: Partial<Record<string, ComponentType>> = {
   [ROUTES.FINANCIAL_CONFIG]: FinancialConfigsPage,
   [ROUTES.ORGANIZATIONAL_UNITS]: OrganizationalUnitsPage,
   [ROUTES.RUBRIC_CRITERIA]: RubricCriteriaPage,
+  [ROUTES.PROPOSAL_REVIEWS]: ProposalReviewsPage,
+  [ROUTES.COUNCILS]: CouncilsPage,
+  [ROUTES.ASSIGNMENTS]: AssignmentsPage,
+  [ROUTES.MEETINGS]: MeetingsPage,
 };
+
+const proposalReviewsRoles = NAV_ITEMS.find((item) => item.path === ROUTES.PROPOSAL_REVIEWS)?.roles ?? [];
 
 function FeaturePage({ path }: { path: string }) {
   const Page = FEATURE_PAGES[path];
@@ -67,6 +79,10 @@ export function AppRouter() {
                 <Route path={group.path.slice(1)} element={<FeaturePage path={group.path} />} />
               </Route>
             ))}
+
+            <Route element={<RoleGuard allowedRoles={proposalReviewsRoles} />}>
+              <Route path={`${ROUTES.PROPOSAL_REVIEWS.slice(1)}/:proposalId`} element={<ProposalReviewWorkspace />} />
+            </Route>
           </Route>
         </Route>
 
