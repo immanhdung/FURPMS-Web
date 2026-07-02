@@ -26,6 +26,11 @@ import { MeetingsPage } from "@/features/staff/meetings/MeetingsPage";
 import { MyProposalsPage } from "@/features/pi/proposals/MyProposalsPage";
 import { ProposalDetailPage } from "@/features/pi/proposals/ProposalDetailPage";
 import { ProposalWizardPage } from "@/features/pi/proposals/wizard/ProposalWizardPage";
+import { InvitationsPage } from "@/features/reviewer/invitations/InvitationsPage";
+import { AssignedReviewsPage } from "@/features/reviewer/assigned-reviews/AssignedReviewsPage";
+import { ScoringPage } from "@/features/reviewer/scoring/ScoringPage";
+import { CouncilMembershipsPage } from "@/features/reviewer/council-memberships/CouncilMembershipsPage";
+import { ProposalReviewWorkspace as ReviewerProposalReviewWorkspace } from "@/features/reviewer/proposal-review/ProposalReviewWorkspace";
 import { useBootstrapAuth } from "@/hooks/useAuth";
 import { ROUTES } from "@/constants/routes";
 import { APP_ROUTE_GROUPS } from "@/app/router/routes";
@@ -50,10 +55,15 @@ const FEATURE_PAGES: Partial<Record<string, ComponentType>> = {
   [ROUTES.MEETINGS]: MeetingsPage,
   [ROUTES.MY_PROPOSALS]: MyProposalsPage,
   [ROUTES.SUBMIT_PROPOSAL]: ProposalWizardPage,
+  [ROUTES.INVITATIONS]: InvitationsPage,
+  [ROUTES.ASSIGNED_REVIEWS]: AssignedReviewsPage,
+  [ROUTES.SCORING]: ScoringPage,
+  [ROUTES.COUNCIL_MEMBERSHIPS]: CouncilMembershipsPage,
 };
 
 const proposalReviewsRoles = NAV_ITEMS.find((item) => item.path === ROUTES.PROPOSAL_REVIEWS)?.roles ?? [];
 const myProposalsRoles = NAV_ITEMS.find((item) => item.path === ROUTES.MY_PROPOSALS)?.roles ?? [];
+const assignedReviewsRoles = NAV_ITEMS.find((item) => item.path === ROUTES.ASSIGNED_REVIEWS)?.roles ?? [];
 
 function FeaturePage({ path }: { path: string }) {
   const Page = FEATURE_PAGES[path];
@@ -93,6 +103,10 @@ export function AppRouter() {
             <Route element={<RoleGuard allowedRoles={myProposalsRoles} />}>
               <Route path={`${ROUTES.MY_PROPOSALS.slice(1)}/:proposalId`} element={<ProposalDetailPage />} />
               <Route path={`${ROUTES.SUBMIT_PROPOSAL.slice(1)}/:proposalId`} element={<ProposalWizardPage />} />
+            </Route>
+
+            <Route element={<RoleGuard allowedRoles={assignedReviewsRoles} />}>
+              <Route path={`${ROUTES.ASSIGNED_REVIEWS.slice(1)}/:councilId`} element={<ReviewerProposalReviewWorkspace />} />
             </Route>
           </Route>
         </Route>

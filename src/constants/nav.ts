@@ -22,6 +22,7 @@ import {
   Mail,
   ClipboardCheck,
   Star,
+  Contact,
 } from "lucide-react";
 import { ROLES } from "@/constants/roles";
 import type { Role } from "@/constants/roles";
@@ -62,6 +63,7 @@ export const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", path: ROUTES.DASHBOARD, icon: LayoutDashboard, roles: [ROLES.REVIEW_COMMITTEE] },
   { label: "Invitations", path: ROUTES.INVITATIONS, icon: Mail, roles: [ROLES.REVIEW_COMMITTEE] },
   { label: "Assigned Reviews", path: ROUTES.ASSIGNED_REVIEWS, icon: ClipboardCheck, roles: [ROLES.REVIEW_COMMITTEE] },
+  { label: "Council Memberships", path: ROUTES.COUNCIL_MEMBERSHIPS, icon: Contact, roles: [ROLES.REVIEW_COMMITTEE] },
   { label: "Scoring", path: ROUTES.SCORING, icon: Star, roles: [ROLES.REVIEW_COMMITTEE] },
 ];
 

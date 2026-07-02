@@ -7,6 +7,7 @@ import { ActivityFeed } from "@/components/shared/ActivityFeed";
 import { RecentNotificationsCard } from "@/components/notifications/RecentNotificationsCard";
 import { QuickActions, type QuickAction } from "@/components/shared/QuickActions";
 import { ErrorState } from "@/components/shared/ErrorState";
+import { ReviewerLiveQueueCard } from "@/features/dashboard/reviewer/ReviewerLiveQueueCard";
 import { useReviewerDashboardQuery } from "@/hooks/useDashboard";
 import { ROUTES } from "@/constants/routes";
 
@@ -71,7 +72,8 @@ export function ReviewerDashboardPage() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
+        <ReviewerLiveQueueCard />
         <ActivityFeed items={data?.activity ?? []} isLoading={isLoading} />
         <RecentNotificationsCard />
         <QuickActions actions={QUICK_ACTIONS} />

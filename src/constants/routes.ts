@@ -32,6 +32,7 @@ export const ROUTES = {
   INVITATIONS: "/invitations",
   ASSIGNED_REVIEWS: "/assigned-reviews",
   SCORING: "/scoring",
+  COUNCIL_MEMBERSHIPS: "/council-memberships",
 } as const;
 
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];

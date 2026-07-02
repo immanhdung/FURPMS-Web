@@ -69,4 +69,23 @@ export const queryKeys = {
     all: () => ["rubric-criteria"] as const,
     list: (roundType?: string) => ["rubric-criteria", "list", roundType] as const,
   },
+  memberships: {
+    mine: () => ["memberships", "mine"] as const,
+  },
+  rubricTemplates: {
+    all: () => ["rubric-templates"] as const,
+    list: () => ["rubric-templates", "list"] as const,
+  },
+  scores: {
+    my: (councilId: string) => ["scores", "my", councilId] as const,
+  },
+  feedback: {
+    list: (councilId: string) => ["feedback", "list", councilId] as const,
+  },
+  acceptance: {
+    detail: (councilId: string) => ["acceptance", "detail", councilId] as const,
+  },
+  decision: {
+    detail: (councilId: string) => ["decision", "detail", councilId] as const,
+  },
 } as const;
