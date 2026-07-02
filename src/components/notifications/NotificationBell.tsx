@@ -41,8 +41,7 @@ export function NotificationBell() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 exit={{ scale: 0 }}
-                className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full text-[10px] font-medium text-white"
-                style={{ backgroundColor: "#EF4444" }}
+                className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-danger text-[10px] font-medium text-danger-foreground"
               >
                 {unreadCount > 9 ? "9+" : unreadCount}
               </motion.span>

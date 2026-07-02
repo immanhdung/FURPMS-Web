@@ -1,3 +1,4 @@
+import type { ComponentType } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { AuthLayout } from "@/components/layout/AuthLayout";
@@ -9,6 +10,14 @@ import { ChangePasswordPage } from "@/features/auth/pages/ChangePasswordPage";
 import { ProfilePage } from "@/features/auth/pages/ProfilePage";
 import { DashboardPage } from "@/features/dashboard/pages/DashboardPage";
 import { NotificationsPage } from "@/features/notification/pages/NotificationsPage";
+import { UsersPage } from "@/features/admin/users/UsersPage";
+import { CyclesPage } from "@/features/admin/cycles/CyclesPage";
+import { ResearchTypesPage } from "@/features/admin/research-types/ResearchTypesPage";
+import { ResearchOrdersPage } from "@/features/admin/research-orders/ResearchOrdersPage";
+import { BudgetCategoriesPage } from "@/features/admin/budget-categories/BudgetCategoriesPage";
+import { FinancialConfigsPage } from "@/features/admin/financial-configs/FinancialConfigsPage";
+import { OrganizationalUnitsPage } from "@/features/admin/organizational-units/OrganizationalUnitsPage";
+import { RubricCriteriaPage } from "@/features/admin/rubric-criteria/RubricCriteriaPage";
 import { useBootstrapAuth } from "@/hooks/useAuth";
 import { ROUTES } from "@/constants/routes";
 import { APP_ROUTE_GROUPS } from "@/app/router/routes";
@@ -16,9 +25,21 @@ import { ProtectedRoute } from "@/app/router/ProtectedRoute";
 import { PublicOnlyRoute } from "@/app/router/PublicOnlyRoute";
 import { RoleGuard } from "@/app/router/RoleGuard";
 
+const FEATURE_PAGES: Partial<Record<string, ComponentType>> = {
+  [ROUTES.NOTIFICATIONS]: NotificationsPage,
+  [ROUTES.USERS]: UsersPage,
+  [ROUTES.RESEARCH_CYCLES]: CyclesPage,
+  [ROUTES.RESEARCH_TYPES]: ResearchTypesPage,
+  [ROUTES.RESEARCH_ORDERS]: ResearchOrdersPage,
+  [ROUTES.BUDGET_CATEGORIES]: BudgetCategoriesPage,
+  [ROUTES.FINANCIAL_CONFIG]: FinancialConfigsPage,
+  [ROUTES.ORGANIZATIONAL_UNITS]: OrganizationalUnitsPage,
+  [ROUTES.RUBRIC_CRITERIA]: RubricCriteriaPage,
+};
+
 function FeaturePage({ path }: { path: string }) {
-  if (path === ROUTES.NOTIFICATIONS) return <NotificationsPage />;
-  return <ComingSoonPage />;
+  const Page = FEATURE_PAGES[path];
+  return Page ? <Page /> : <ComingSoonPage />;
 }
 
 export function AppRouter() {

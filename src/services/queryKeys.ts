@@ -36,4 +36,29 @@ export const queryKeys = {
   analytics: {
     dashboard: (role: string) => ["analytics", "dashboard", role] as const,
   },
+  researchTypes: {
+    all: () => ["research-types"] as const,
+    list: () => ["research-types", "list"] as const,
+  },
+  researchOrders: {
+    all: () => ["research-orders"] as const,
+    list: (params?: PaginationParams) => ["research-orders", "list", params] as const,
+    detail: (id: number) => ["research-orders", "detail", id] as const,
+  },
+  budgetCategories: {
+    all: () => ["budget-categories"] as const,
+    list: () => ["budget-categories", "list"] as const,
+  },
+  financialConfigs: {
+    all: () => ["financial-configs"] as const,
+    list: () => ["financial-configs", "list"] as const,
+  },
+  organizationalUnits: {
+    all: () => ["organizational-units"] as const,
+    list: () => ["organizational-units", "list"] as const,
+  },
+  rubricCriteria: {
+    all: () => ["rubric-criteria"] as const,
+    list: (roundType?: string) => ["rubric-criteria", "list", roundType] as const,
+  },
 } as const;

@@ -29,6 +29,16 @@ export const REVIEW_ROUND_TYPE = {
 } as const;
 export type ReviewRoundType = (typeof REVIEW_ROUND_TYPE)[keyof typeof REVIEW_ROUND_TYPE];
 
+/**
+ * The backend's SaveCriterionRequest takes `roundType` as an integer enum ordinal with no
+ * documented lookup. Best-effort mapping based on declaration order — verify once confirmed.
+ */
+export const ROUND_TYPE_ID_MAP: Record<ReviewRoundType, number> = {
+  [REVIEW_ROUND_TYPE.SCREENING]: 0,
+  [REVIEW_ROUND_TYPE.REVIEW]: 1,
+  [REVIEW_ROUND_TYPE.ACCEPTANCE]: 2,
+};
+
 export const REVIEW_DECISION = {
   APPROVED: "APPROVED",
   REJECTED: "REJECTED",
