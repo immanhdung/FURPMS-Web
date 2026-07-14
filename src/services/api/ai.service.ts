@@ -23,7 +23,12 @@ export const aiService = {
 
   summarizeProposal: (proposalId: string) =>
     axiosClient
-      .post<ApiResponse<SummaryResult>>(`/ai/proposals/${proposalId}/summarize`)
+      .post<ApiResponse<SummaryResult>>(`/proposals/${proposalId}/generate-summary`)
+      .then((res) => res.data.data),
+
+  getProposalSummary: (proposalId: string) =>
+    axiosClient
+      .get<ApiResponse<SummaryResult>>(`/proposals/${proposalId}/summary`)
       .then((res) => res.data.data),
 
   semanticSearch: (query: string) =>
