@@ -69,7 +69,13 @@ export const ROUND_TYPE_ID_MAP: Record<ReviewRoundType, number> = {
  * "REVIEW"). RubricCriterion's roundType is a real backend enum, serialized on read as its C#
  * member name — confirmed live as "ProposalReview" for what this app calls REVIEW. The
  * Acceptance/Final name below ("Acceptance") is inferred by naming symmetry with the
- * "AcceptanceEvaluations" API area and hasn't been confirmed live yet.
+ * "AcceptanceEvaluations" API area and hasn't been confirmed live yet (a live test returned
+ * "ProgressCheck" for one guessed ordinal, so treat "Acceptance" as unverified).
+ *
+ * Only used for *display* (mapping a criterion's roundType to a friendly label) — the
+ * GET /rubric-criteria?roundType= query filter's expected value is unconfirmed and returned zero
+ * results for a value that should have matched, so callers fetch unfiltered and match client-side
+ * with `rubricRoundTypeToAppType` instead of relying on that filter.
  */
 export const RUBRIC_ROUND_TYPE_NAME: Record<ReviewRoundType, string> = {
   [REVIEW_ROUND_TYPE.REVIEW]: "ProposalReview",
@@ -81,14 +87,6 @@ export function rubricRoundTypeToAppType(name?: string | null): ReviewRoundType 
     ([, value]) => value === name
   );
   return entry?.[0];
-}
-
-/** Converts this app's loose ReviewRound.roundType ("REVIEW"/"ACCEPTANCE") into the RubricCriterion enum name. */
-export function toRubricRoundTypeName(appRoundType?: string | null): string | undefined {
-  const normalized = appRoundType?.toUpperCase();
-  if (normalized === REVIEW_ROUND_TYPE.REVIEW) return RUBRIC_ROUND_TYPE_NAME[REVIEW_ROUND_TYPE.REVIEW];
-  if (normalized === REVIEW_ROUND_TYPE.ACCEPTANCE) return RUBRIC_ROUND_TYPE_NAME[REVIEW_ROUND_TYPE.ACCEPTANCE];
-  return undefined;
 }
 
 export const REVIEW_DECISION = {

@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { useRubricCriteriaQuery } from "@/hooks/useRubricCriteria";
 import { useMyScoreQuery, useRubricTemplatesQuery, useSubmitScoreMutation } from "@/hooks/useReviewScoring";
-import { toRubricRoundTypeName } from "@/constants/statuses";
+import { rubricRoundTypeToAppType } from "@/constants/statuses";
 import type { ScoreDetailPayload } from "@/types/review-scoring";
 
 interface RubricScoringFormProps {
@@ -18,14 +18,27 @@ interface RubricScoringFormProps {
 }
 
 export function RubricScoringForm({ councilId, roundType }: RubricScoringFormProps) {
-  const { data: criteria, isLoading: isCriteriaLoading } = useRubricCriteriaQuery(toRubricRoundTypeName(roundType));
+  /**
+   * Fetching unfiltered and matching client-side because the GET /rubric-criteria?roundType=
+   * query filter's expected value is unconfirmed (a round created as "REVIEW" produced zero
+   * results even for admin-created, active "Review"-labeled criteria) — the label mapping used
+   * to display the round type in the admin list is proven correct, so we reuse it here instead.
+   */
+  const { data: criteria, isLoading: isCriteriaLoading } = useRubricCriteriaQuery();
   const { data: templates } = useRubricTemplatesQuery();
   const { data: existingScore, isLoading: isScoreLoading } = useMyScoreQuery(councilId);
   const submitMutation = useSubmitScoreMutation(councilId);
 
   const matchingTemplate = templates?.find((t) => t.roundType === roundType) ?? templates?.[0];
 
-  const activeCriteria = useMemo(() => (criteria ?? []).filter((c) => c.isActive), [criteria]);
+  const normalizedRoundType = roundType?.toUpperCase();
+  const activeCriteria = useMemo(
+    () =>
+      (criteria ?? []).filter(
+        (c) => c.isActive && rubricRoundTypeToAppType(c.roundType) === normalizedRoundType
+      ),
+    [criteria, normalizedRoundType]
+  );
 
   const [scores, setScores] = useState<Record<number, { givenScore: number; comments: string }>>({});
   const [generalComments, setGeneralComments] = useState("");
