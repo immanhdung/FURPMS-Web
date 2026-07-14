@@ -2,14 +2,12 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { DataTableColumnHeader } from "@/components/tables/DataTableColumnHeader";
 import { DataTableRowActions } from "@/components/tables/DataTableRowActions";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { ROUND_TYPE_ID_MAP, ROUND_TYPE_LABELS, type ReviewRoundType } from "@/constants/statuses";
+import { ROUND_TYPE_LABELS, rubricRoundTypeToAppType } from "@/constants/statuses";
 import type { RubricCriterion } from "@/types/rubric-criterion";
 
-function roundTypeLabel(id: number) {
-  const type = Object.entries(ROUND_TYPE_ID_MAP).find(([, value]) => value === id)?.[0] as
-    | ReviewRoundType
-    | undefined;
-  return type && ROUND_TYPE_LABELS[type];
+function roundTypeLabel(roundType: string) {
+  const type = rubricRoundTypeToAppType(roundType);
+  return type ? ROUND_TYPE_LABELS[type] : roundType;
 }
 
 interface GetRubricCriterionColumnsOptions {
@@ -24,7 +22,7 @@ export function getRubricCriterionColumns({
   return [
     {
       id: "roundType",
-      accessorFn: (row) => roundTypeLabel(row.roundType) ?? row.roundType,
+      accessorFn: (row) => roundTypeLabel(row.roundType),
       header: ({ column }) => <DataTableColumnHeader column={column} title="Round Type" />,
     },
     {

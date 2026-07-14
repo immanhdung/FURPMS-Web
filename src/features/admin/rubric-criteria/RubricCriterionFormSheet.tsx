@@ -13,15 +13,14 @@ import {
   rubricCriterionSchema,
   type RubricCriterionFormValues,
 } from "@/features/admin/rubric-criteria/rubric-criterion.schema";
-import { REVIEW_ROUND_TYPE, ROUND_TYPE_ID_MAP, ROUND_TYPE_LABELS, type ReviewRoundType } from "@/constants/statuses";
+import {
+  REVIEW_ROUND_TYPE,
+  ROUND_TYPE_ID_MAP,
+  ROUND_TYPE_LABELS,
+  rubricRoundTypeToAppType,
+  type ReviewRoundType,
+} from "@/constants/statuses";
 import type { RubricCriterion } from "@/types/rubric-criterion";
-
-function roundTypeLabel(id: number): ReviewRoundType {
-  return (
-    (Object.entries(ROUND_TYPE_ID_MAP).find(([, value]) => value === id)?.[0] as ReviewRoundType) ??
-    REVIEW_ROUND_TYPE.REVIEW
-  );
-}
 
 interface RubricCriterionFormSheetProps {
   open: boolean;
@@ -51,7 +50,7 @@ export function RubricCriterionFormSheet({ open, onOpenChange, criterion }: Rubr
       reset(
         criterion
           ? {
-              roundType: roundTypeLabel(criterion.roundType),
+              roundType: rubricRoundTypeToAppType(criterion.roundType) ?? REVIEW_ROUND_TYPE.REVIEW,
               orderIndex: criterion.orderIndex,
               name: criterion.name,
               maxScore: criterion.maxScore,

@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { useRubricCriteriaQuery } from "@/hooks/useRubricCriteria";
 import { useMyScoreQuery, useRubricTemplatesQuery, useSubmitScoreMutation } from "@/hooks/useReviewScoring";
+import { toRubricRoundTypeName } from "@/constants/statuses";
 import type { ScoreDetailPayload } from "@/types/review-scoring";
 
 interface RubricScoringFormProps {
@@ -17,7 +18,7 @@ interface RubricScoringFormProps {
 }
 
 export function RubricScoringForm({ councilId, roundType }: RubricScoringFormProps) {
-  const { data: criteria, isLoading: isCriteriaLoading } = useRubricCriteriaQuery(roundType);
+  const { data: criteria, isLoading: isCriteriaLoading } = useRubricCriteriaQuery(toRubricRoundTypeName(roundType));
   const { data: templates } = useRubricTemplatesQuery();
   const { data: existingScore, isLoading: isScoreLoading } = useMyScoreQuery(councilId);
   const submitMutation = useSubmitScoreMutation(councilId);
