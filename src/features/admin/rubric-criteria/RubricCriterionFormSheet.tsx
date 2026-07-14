@@ -13,13 +13,13 @@ import {
   rubricCriterionSchema,
   type RubricCriterionFormValues,
 } from "@/features/admin/rubric-criteria/rubric-criterion.schema";
-import { REVIEW_ROUND_TYPE, ROUND_TYPE_ID_MAP, type ReviewRoundType } from "@/constants/statuses";
+import { REVIEW_ROUND_TYPE, ROUND_TYPE_ID_MAP, ROUND_TYPE_LABELS, type ReviewRoundType } from "@/constants/statuses";
 import type { RubricCriterion } from "@/types/rubric-criterion";
 
 function roundTypeLabel(id: number): ReviewRoundType {
   return (
     (Object.entries(ROUND_TYPE_ID_MAP).find(([, value]) => value === id)?.[0] as ReviewRoundType) ??
-    REVIEW_ROUND_TYPE.SCREENING
+    REVIEW_ROUND_TYPE.REVIEW
   );
 }
 
@@ -43,7 +43,7 @@ export function RubricCriterionFormSheet({ open, onOpenChange, criterion }: Rubr
     formState: { errors },
   } = useForm<RubricCriterionFormValues>({
     resolver: zodResolver(rubricCriterionSchema),
-    defaultValues: { roundType: REVIEW_ROUND_TYPE.SCREENING, orderIndex: 0, name: "", maxScore: 10, isActive: true },
+    defaultValues: { roundType: REVIEW_ROUND_TYPE.REVIEW, orderIndex: 0, name: "", maxScore: 10, isActive: true },
   });
 
   useEffect(() => {
@@ -57,7 +57,7 @@ export function RubricCriterionFormSheet({ open, onOpenChange, criterion }: Rubr
               maxScore: criterion.maxScore,
               isActive: criterion.isActive,
             }
-          : { roundType: REVIEW_ROUND_TYPE.SCREENING, orderIndex: 0, name: "", maxScore: 10, isActive: true }
+          : { roundType: REVIEW_ROUND_TYPE.REVIEW, orderIndex: 0, name: "", maxScore: 10, isActive: true }
       );
     }
   }, [open, criterion, reset]);
@@ -98,7 +98,7 @@ export function RubricCriterionFormSheet({ open, onOpenChange, criterion }: Rubr
               <SelectContent>
                 {Object.values(REVIEW_ROUND_TYPE).map((type) => (
                   <SelectItem key={type} value={type}>
-                    {type}
+                    {ROUND_TYPE_LABELS[type]}
                   </SelectItem>
                 ))}
               </SelectContent>

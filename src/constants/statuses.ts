@@ -33,12 +33,17 @@ export function isAcceptedInvitation(status?: string | null): boolean {
   return normalized === INVITATION_STATUS.ACCEPTED || normalized === "CONFIRMED";
 }
 
+/** Only Review and Final (acceptance) rounds are used in this project — Screening was removed project-wide. */
 export const REVIEW_ROUND_TYPE = {
-  SCREENING: "SCREENING",
   REVIEW: "REVIEW",
   ACCEPTANCE: "ACCEPTANCE",
 } as const;
 export type ReviewRoundType = (typeof REVIEW_ROUND_TYPE)[keyof typeof REVIEW_ROUND_TYPE];
+
+export const ROUND_TYPE_LABELS: Record<ReviewRoundType, string> = {
+  [REVIEW_ROUND_TYPE.REVIEW]: "Review",
+  [REVIEW_ROUND_TYPE.ACCEPTANCE]: "Final",
+};
 
 /** The backend rejects any other value here — confirmed via the "Dimension must be SCIENCE or FINANCE" validation error. */
 export const ROUND_DIMENSION = {
@@ -50,9 +55,10 @@ export type RoundDimension = (typeof ROUND_DIMENSION)[keyof typeof ROUND_DIMENSI
 /**
  * The backend's SaveCriterionRequest takes `roundType` as an integer enum ordinal with no
  * documented lookup. Best-effort mapping based on declaration order — verify once confirmed.
+ * Ordinals for Review/Acceptance are kept as originally mapped (1/2) even though Screening (0)
+ * is no longer offered in the UI, since the backend's underlying enum may still reserve it.
  */
 export const ROUND_TYPE_ID_MAP: Record<ReviewRoundType, number> = {
-  [REVIEW_ROUND_TYPE.SCREENING]: 0,
   [REVIEW_ROUND_TYPE.REVIEW]: 1,
   [REVIEW_ROUND_TYPE.ACCEPTANCE]: 2,
 };

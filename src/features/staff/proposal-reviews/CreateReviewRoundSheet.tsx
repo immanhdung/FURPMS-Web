@@ -4,17 +4,10 @@ import { z } from "zod";
 import { FormSheet } from "@/components/shared/FormSheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCreateReviewRoundMutation } from "@/hooks/useReviewRounds";
-import { REVIEW_ROUND_TYPE, ROUND_DIMENSION } from "@/constants/statuses";
+import { REVIEW_ROUND_TYPE, ROUND_DIMENSION, ROUND_TYPE_LABELS } from "@/constants/statuses";
 import type { ReviewRound } from "@/types/review-round";
 
 const NONE_VALUE = "none";
-
-/** Staff only creates Review and Final (acceptance) rounds — Screening isn't offered here. */
-const CREATABLE_ROUND_TYPES = [REVIEW_ROUND_TYPE.REVIEW, REVIEW_ROUND_TYPE.ACCEPTANCE];
-const ROUND_TYPE_LABELS: Record<string, string> = {
-  [REVIEW_ROUND_TYPE.REVIEW]: "Review",
-  [REVIEW_ROUND_TYPE.ACCEPTANCE]: "Final",
-};
 
 const schema = z.object({
   dimension: z.enum([ROUND_DIMENSION.SCIENCE, ROUND_DIMENSION.FINANCE], {
@@ -92,7 +85,7 @@ export function CreateReviewRoundSheet({
                 <SelectValue placeholder="Select round type" />
               </SelectTrigger>
               <SelectContent>
-                {CREATABLE_ROUND_TYPES.map((type) => (
+                {Object.values(REVIEW_ROUND_TYPE).map((type) => (
                   <SelectItem key={type} value={type}>
                     {ROUND_TYPE_LABELS[type]}
                   </SelectItem>
