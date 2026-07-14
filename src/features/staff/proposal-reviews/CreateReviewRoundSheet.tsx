@@ -2,16 +2,24 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { FormSheet } from "@/components/shared/FormSheet";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCreateReviewRoundMutation } from "@/hooks/useReviewRounds";
-import { REVIEW_ROUND_TYPE } from "@/constants/statuses";
+import { REVIEW_ROUND_TYPE, ROUND_DIMENSION } from "@/constants/statuses";
 import type { ReviewRound } from "@/types/review-round";
 
 const NONE_VALUE = "none";
 
+/** Staff only creates Review and Final (acceptance) rounds — Screening isn't offered here. */
+const CREATABLE_ROUND_TYPES = [REVIEW_ROUND_TYPE.REVIEW, REVIEW_ROUND_TYPE.ACCEPTANCE];
+const ROUND_TYPE_LABELS: Record<string, string> = {
+  [REVIEW_ROUND_TYPE.REVIEW]: "Review",
+  [REVIEW_ROUND_TYPE.ACCEPTANCE]: "Final",
+};
+
 const schema = z.object({
-  dimension: z.string().optional(),
+  dimension: z.enum([ROUND_DIMENSION.SCIENCE, ROUND_DIMENSION.FINANCE], {
+    message: "Select a dimension",
+  }),
   roundType: z.string().min(1, "Select a round type"),
   prerequisiteRoundId: z.string().optional(),
 });
@@ -23,33 +31,40 @@ interface CreateReviewRoundSheetProps {
   onOpenChange: (open: boolean) => void;
   proposalId: string;
   existingRounds: ReviewRound[];
+  onCreated?: (round: ReviewRound) => void;
 }
 
-export function CreateReviewRoundSheet({ open, onOpenChange, proposalId, existingRounds }: CreateReviewRoundSheetProps) {
+export function CreateReviewRoundSheet({
+  open,
+  onOpenChange,
+  proposalId,
+  existingRounds,
+  onCreated,
+}: CreateReviewRoundSheetProps) {
   const createMutation = useCreateReviewRoundMutation(proposalId);
 
   const {
-    register,
     handleSubmit,
     control,
     reset,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { dimension: "", roundType: REVIEW_ROUND_TYPE.SCREENING, prerequisiteRoundId: undefined },
+    defaultValues: { dimension: undefined, roundType: REVIEW_ROUND_TYPE.REVIEW, prerequisiteRoundId: undefined },
   });
 
   const onSubmit = (values: FormValues) => {
     createMutation.mutate(
       {
-        dimension: values.dimension || undefined,
+        dimension: values.dimension,
         roundType: values.roundType,
         prerequisiteRoundId: values.prerequisiteRoundId,
       },
       {
-        onSuccess: () => {
+        onSuccess: (round) => {
           reset();
           onOpenChange(false);
+          onCreated?.(round);
         },
       }
     );
@@ -77,9 +92,9 @@ export function CreateReviewRoundSheet({ open, onOpenChange, proposalId, existin
                 <SelectValue placeholder="Select round type" />
               </SelectTrigger>
               <SelectContent>
-                {Object.values(REVIEW_ROUND_TYPE).map((type) => (
+                {CREATABLE_ROUND_TYPES.map((type) => (
                   <SelectItem key={type} value={type}>
-                    {type}
+                    {ROUND_TYPE_LABELS[type]}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -90,10 +105,26 @@ export function CreateReviewRoundSheet({ open, onOpenChange, proposalId, existin
       </div>
 
       <div>
-        <label htmlFor="round-dimension" className="mb-1.5 block text-sm font-medium text-foreground">
-          Dimension
-        </label>
-        <Input id="round-dimension" placeholder="e.g. Scientific, Financial" {...register("dimension")} />
+        <label className="mb-1.5 block text-sm font-medium text-foreground">Dimension</label>
+        <Controller
+          control={control}
+          name="dimension"
+          render={({ field }) => (
+            <Select value={field.value} onValueChange={field.onChange}>
+              <SelectTrigger aria-invalid={Boolean(errors.dimension)}>
+                <SelectValue placeholder="Select dimension" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.values(ROUND_DIMENSION).map((dimension) => (
+                  <SelectItem key={dimension} value={dimension}>
+                    {dimension}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
+        {errors.dimension && <p className="mt-1 text-xs text-destructive">{errors.dimension.message}</p>}
       </div>
 
       {existingRounds.length > 0 && (

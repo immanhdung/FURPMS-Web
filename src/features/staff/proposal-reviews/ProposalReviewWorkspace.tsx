@@ -107,6 +107,7 @@ export function ProposalReviewWorkspace() {
         onOpenChange={setCreateRoundOpen}
         proposalId={proposalId}
         existingRounds={rounds ?? []}
+        onCreated={(round) => setSelectedRoundId(round.id)}
       />
     </div>
   );

@@ -17,7 +17,8 @@ function stageIndexFor(status: string) {
   return 0;
 }
 
-export function ProposalStatusTimeline({ status }: { status: string }) {
+export function ProposalStatusTimeline({ status: rawStatus }: { status: string }) {
+  const status = rawStatus?.toUpperCase();
   const isTerminalNegative = status === PROPOSAL_STATUS.REJECTED || status === PROPOSAL_STATUS.WITHDRAWN;
   const activeIndex = stageIndexFor(status);
 

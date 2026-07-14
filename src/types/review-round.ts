@@ -17,7 +17,7 @@ export interface ReviewRound {
 }
 
 export interface CreateReviewRoundPayload {
-  dimension?: string;
+  dimension: string;
   roundType?: string;
   rubricTemplateId?: number;
   prerequisiteRoundId?: string;

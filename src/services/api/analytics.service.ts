@@ -1,16 +1,8 @@
 import { axiosClient } from "@/services/api/axiosClient";
 import type { ApiResponse } from "@/types/common";
-import type {
-  AdminDashboardData,
-  PiDashboardData,
-  ReviewerDashboardData,
-  StaffDashboardData,
-} from "@/types/dashboard";
+import type { PiDashboardData, ReviewerDashboardData, StaffDashboardData } from "@/types/dashboard";
 
 export const analyticsService = {
-  getAdminDashboard: () =>
-    axiosClient.get<ApiResponse<AdminDashboardData>>("/analytics/dashboard/admin").then((res) => res.data.data),
-
   getStaffDashboard: () =>
     axiosClient.get<ApiResponse<StaffDashboardData>>("/analytics/dashboard/staff").then((res) => res.data.data),
 

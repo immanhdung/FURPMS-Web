@@ -32,7 +32,7 @@ export function ProposalReviewWorkspace() {
     );
   }
 
-  const isAcceptanceRound = membership.roundType === REVIEW_ROUND_TYPE.ACCEPTANCE;
+  const isAcceptanceRound = membership.roundType?.toUpperCase() === REVIEW_ROUND_TYPE.ACCEPTANCE;
 
   return (
     <div className="mx-auto max-w-3xl space-y-5">

@@ -91,4 +91,7 @@ export const queryKeys = {
   decision: {
     detail: (councilId: string) => ["decision", "detail", councilId] as const,
   },
+  systemClock: {
+    detail: () => ["system-clock"] as const,
+  },
 } as const;

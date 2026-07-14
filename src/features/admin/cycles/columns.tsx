@@ -56,11 +56,12 @@ export function getCycleColumns({
       enableHiding: false,
       cell: ({ row }) => {
         const cycle = row.original;
+        const status = cycle.status?.toUpperCase();
         const extraActions = [];
-        if (cycle.status !== CYCLE_STATUS.OPEN && cycle.status !== CYCLE_STATUS.CLOSED) {
+        if (status !== CYCLE_STATUS.OPEN && status !== CYCLE_STATUS.CLOSED) {
           extraActions.push({ label: "Open cycle", icon: Unlock, onSelect: () => onOpen(cycle) });
         }
-        if (cycle.status === CYCLE_STATUS.OPEN) {
+        if (status === CYCLE_STATUS.OPEN) {
           extraActions.push({ label: "Close cycle", icon: Lock, onSelect: () => onClose(cycle), variant: "destructive" as const });
         }
         return (

@@ -20,7 +20,7 @@ export function Step1CycleFieldType({ form }: { form: UseFormReturn<ProposalWiza
   const { data: tracks, isLoading: isTracksLoading } = useTracksQuery();
   const { data: researchTypes, isLoading: isTypesLoading } = useResearchTypesQuery();
 
-  const openCycles = (cycles ?? []).filter((c) => c.status === CYCLE_STATUS.OPEN);
+  const openCycles = (cycles ?? []).filter((c) => c.status?.toUpperCase() === CYCLE_STATUS.OPEN);
 
   return (
     <div className="space-y-5">

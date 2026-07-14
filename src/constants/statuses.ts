@@ -29,6 +29,13 @@ export const REVIEW_ROUND_TYPE = {
 } as const;
 export type ReviewRoundType = (typeof REVIEW_ROUND_TYPE)[keyof typeof REVIEW_ROUND_TYPE];
 
+/** The backend rejects any other value here — confirmed via the "Dimension must be SCIENCE or FINANCE" validation error. */
+export const ROUND_DIMENSION = {
+  SCIENCE: "SCIENCE",
+  FINANCE: "FINANCE",
+} as const;
+export type RoundDimension = (typeof ROUND_DIMENSION)[keyof typeof ROUND_DIMENSION];
+
 /**
  * The backend's SaveCriterionRequest takes `roundType` as an integer enum ordinal with no
  * documented lookup. Best-effort mapping based on declaration order — verify once confirmed.

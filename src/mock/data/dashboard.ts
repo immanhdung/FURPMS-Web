@@ -1,60 +1,8 @@
-import type {
-  AdminDashboardData,
-  PiDashboardData,
-  ReviewerDashboardData,
-  StaffDashboardData,
-} from "@/types/dashboard";
+import type { PiDashboardData, ReviewerDashboardData, StaffDashboardData } from "@/types/dashboard";
 
 function hoursAgo(hours: number) {
   return new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
 }
-
-export const MOCK_ADMIN_DASHBOARD: AdminDashboardData = {
-  kpis: [
-    { id: "cycles", label: "Total Cycles", value: 6, format: "number", deltaLabel: "+1 this year" },
-    { id: "proposals", label: "Total Proposals", value: 284, format: "number", deltaLabel: "+18 this month" },
-    { id: "approved", label: "Approved Proposals", value: 162, format: "number", deltaLabel: "57% approval rate" },
-    { id: "pending-reviews", label: "Pending Reviews", value: 37, format: "number", deltaLabel: "-5 vs last week" },
-    { id: "councils", label: "Total Councils", value: 21, format: "number", deltaLabel: "+2 this cycle" },
-    { id: "contracts", label: "Total Contracts", value: 148, format: "number", deltaLabel: "+9 this month" },
-  ],
-  monthlyTrend: [
-    { label: "Jan", submitted: 24, approved: 14 },
-    { label: "Feb", submitted: 31, approved: 18 },
-    { label: "Mar", submitted: 28, approved: 19 },
-    { label: "Apr", submitted: 40, approved: 24 },
-    { label: "May", submitted: 46, approved: 29 },
-    { label: "Jun", submitted: 38, approved: 26 },
-  ],
-  proposalsByField: [
-    { field: "Info. Technology", count: 78 },
-    { field: "Artificial Intelligence", count: 64 },
-    { field: "Data Science", count: 52 },
-    { field: "Business", count: 41 },
-    { field: "Economics", count: 27 },
-    { field: "Language", count: 22 },
-  ],
-  budgetDistribution: [
-    { category: "Personnel", amount: 420_000_000 },
-    { category: "Equipment", amount: 210_000_000 },
-    { category: "Materials", amount: 95_000_000 },
-    { category: "Travel", amount: 48_000_000 },
-    { category: "Other", amount: 32_000_000 },
-  ],
-  reviewProgress: [
-    { label: "W1", completed: 12, pending: 28 },
-    { label: "W2", completed: 22, pending: 21 },
-    { label: "W3", completed: 35, pending: 16 },
-    { label: "W4", completed: 44, pending: 9 },
-  ],
-  activity: [
-    { id: "a1", message: "submitted a new proposal 'AI-based Plagiarism Detection'", actor: "Le Van Faculty", timestamp: hoursAgo(1), type: "proposal" },
-    { id: "a2", message: "approved contract for 'Smart Campus IoT Platform'", actor: "Admin System", timestamp: hoursAgo(3), type: "contract" },
-    { id: "a3", message: "created council 'AI & Data Science Review Board'", actor: "Tran Thi Staff", timestamp: hoursAgo(6), type: "council" },
-    { id: "a4", message: "completed review for 'Blockchain Voting System'", actor: "Pham Thi Reviewer", timestamp: hoursAgo(10), type: "review" },
-    { id: "a5", message: "scheduled council meeting for Cycle 2026-S1", actor: "Tran Thi Staff", timestamp: hoursAgo(20), type: "meeting" },
-  ],
-};
 
 export const MOCK_STAFF_DASHBOARD: StaffDashboardData = {
   kpis: [

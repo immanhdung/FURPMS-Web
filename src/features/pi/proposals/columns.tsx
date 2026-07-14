@@ -54,7 +54,7 @@ export function getMyProposalColumns({
       id: "actions",
       enableHiding: false,
       cell: ({ row }) => {
-        const status = row.original.status ?? PROPOSAL_STATUS.DRAFT;
+        const status = (row.original.status ?? PROPOSAL_STATUS.DRAFT).toUpperCase();
         const isDraft = status === PROPOSAL_STATUS.DRAFT;
         const canWithdraw = status === PROPOSAL_STATUS.SUBMITTED || status === PROPOSAL_STATUS.UNDER_REVIEW;
 

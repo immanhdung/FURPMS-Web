@@ -34,7 +34,7 @@ export function ProposalDetailPage() {
   if (isLoading) return <PageLoader label="Loading proposal..." />;
   if (isError || !proposal) return <ErrorState onRetry={() => refetch()} isRetrying={isRefetching} />;
 
-  const status = proposal.status ?? PROPOSAL_STATUS.DRAFT;
+  const status = (proposal.status ?? PROPOSAL_STATUS.DRAFT).toUpperCase();
   const isDraft = status === PROPOSAL_STATUS.DRAFT;
   const canWithdraw = status === PROPOSAL_STATUS.SUBMITTED || status === PROPOSAL_STATUS.UNDER_REVIEW;
 
