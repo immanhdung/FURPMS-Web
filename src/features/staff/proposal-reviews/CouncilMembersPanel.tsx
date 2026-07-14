@@ -73,7 +73,7 @@ export function CouncilMembersPanel({ councilId, trackId }: CouncilMembersPanelP
 
               <div className="flex shrink-0 items-center gap-1.5">
                 {member.status && <StatusBadge status={member.status} />}
-                {member.status?.toLowerCase() === "pending" && (
+                {member.status?.toLowerCase() === "invited" && (
                   <>
                     <Button
                       variant="ghost"

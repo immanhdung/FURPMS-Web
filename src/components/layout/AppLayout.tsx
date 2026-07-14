@@ -3,7 +3,6 @@ import { AnimatePresence, motion } from "motion/react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { CommandPalette } from "@/components/command/CommandPalette";
-import { DevClockWidget } from "@/components/shared/DevClockWidget";
 
 export function AppLayout() {
   const location = useLocation();
@@ -31,7 +30,6 @@ export function AppLayout() {
       </div>
 
       <CommandPalette />
-      <DevClockWidget />
     </div>
   );
 }

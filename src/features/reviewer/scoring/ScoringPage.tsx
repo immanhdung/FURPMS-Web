@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MembershipListPage } from "@/features/reviewer/shared/MembershipListPage";
-import { INVITATION_STATUS } from "@/constants/statuses";
+import { isAcceptedInvitation } from "@/constants/statuses";
 import { ROUTES } from "@/constants/routes";
 
 export function ScoringPage() {
@@ -15,7 +15,7 @@ export function ScoringPage() {
       emptyIcon={Star}
       emptyTitle="Nothing to score right now"
       emptyDescription="Reviews open for scoring will appear here."
-      filter={(m) => m.status?.toUpperCase() === INVITATION_STATUS.ACCEPTED && m.roundStatus?.toUpperCase() === "OPEN"}
+      filter={(m) => isAcceptedInvitation(m.status) && m.roundStatus?.toUpperCase() === "OPEN"}
       renderActions={(membership) => (
         <Button size="sm" onClick={() => navigate(`${ROUTES.ASSIGNED_REVIEWS}/${membership.councilId}`)}>
           <Star />

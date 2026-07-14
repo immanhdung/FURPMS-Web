@@ -15,12 +15,23 @@ export const CYCLE_STATUS = {
 } as const;
 export type CycleStatus = (typeof CYCLE_STATUS)[keyof typeof CYCLE_STATUS];
 
+/** Confirmed live: the backend actually returns "INVITED" for an awaiting-response invitation, not "PENDING". */
 export const INVITATION_STATUS = {
-  PENDING: "PENDING",
+  PENDING: "INVITED",
   ACCEPTED: "ACCEPTED",
   DECLINED: "DECLINED",
 } as const;
 export type InvitationStatus = (typeof INVITATION_STATUS)[keyof typeof INVITATION_STATUS];
+
+/**
+ * `CouncilMemberResponse` has a `confirmedAt` field (not `acceptedAt`), which hints the accepted
+ * state may be serialized as "CONFIRMED" rather than "ACCEPTED" — same class of mismatch as
+ * PENDING/INVITED above. Check both until confirmed live against a real accepted membership.
+ */
+export function isAcceptedInvitation(status?: string | null): boolean {
+  const normalized = status?.toUpperCase();
+  return normalized === INVITATION_STATUS.ACCEPTED || normalized === "CONFIRMED";
+}
 
 export const REVIEW_ROUND_TYPE = {
   SCREENING: "SCREENING",
