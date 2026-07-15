@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import type * as React from "react";
 import { Dialog as SheetPrimitive } from "radix-ui";
 
@@ -34,28 +35,112 @@ function SheetOverlay({ className, ...props }: React.ComponentProps<typeof Sheet
   );
 }
 
+const MIN_RESIZABLE_WIDTH = 360;
+const MAX_RESIZABLE_WIDTH = 960;
+
+function ResizeHandle({ side, onResize }: { side: "left" | "right"; onResize: (deltaX: number) => void }) {
+  const [isDragging, setIsDragging] = useState(false);
+  const lastX = useRef(0);
+
+  const handlePointerMove = useCallback(
+    (event: PointerEvent) => {
+      const deltaX = event.clientX - lastX.current;
+      lastX.current = event.clientX;
+      onResize(side === "right" ? -deltaX : deltaX);
+    },
+    [side, onResize]
+  );
+
+  const handlePointerUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  useEffect(() => {
+    if (!isDragging) return;
+    document.body.style.cursor = "ew-resize";
+    document.body.style.userSelect = "none";
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
+    return () => {
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+    };
+  }, [isDragging, handlePointerMove, handlePointerUp]);
+
+  return (
+    <div
+      role="separator"
+      aria-orientation="vertical"
+      aria-label="Resize panel"
+      onPointerDown={(event) => {
+        lastX.current = event.clientX;
+        setIsDragging(true);
+      }}
+      className={cn(
+        "group absolute inset-y-0 z-10 w-1.5 cursor-ew-resize touch-none",
+        side === "right" ? "left-0 -translate-x-1/2" : "right-0 translate-x-1/2"
+      )}
+    >
+      <div
+        className={cn(
+          "mx-auto h-full w-px bg-border transition-colors group-hover:bg-primary/50",
+          isDragging && "bg-primary"
+        )}
+      />
+    </div>
+  );
+}
+
 function SheetContent({
   className,
   children,
   side = "right",
   showCloseButton = true,
+  resizable = false,
+  defaultWidth = 480,
+  minWidth = MIN_RESIZABLE_WIDTH,
+  maxWidth = MAX_RESIZABLE_WIDTH,
+  style,
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Content> & {
   side?: "top" | "bottom" | "left" | "right";
   showCloseButton?: boolean;
+  /** Lets the user drag-resize the panel's width. Only meaningful for side="left" | "right". */
+  resizable?: boolean;
+  defaultWidth?: number;
+  minWidth?: number;
+  maxWidth?: number;
 }) {
+  const [width, setWidth] = useState(defaultWidth);
+  const isHorizontal = side === "left" || side === "right";
+
+  const handleResize = useCallback(
+    (deltaX: number) => {
+      setWidth((current) => Math.min(maxWidth, Math.max(minWidth, current + deltaX)));
+    },
+    [minWidth, maxWidth]
+  );
+
+  const resizableStyle: CSSProperties | undefined =
+    resizable && isHorizontal ? { width, maxWidth: "min(100%, 90vw)" } : undefined;
+
   return (
     <SheetPortal>
       <SheetOverlay />
       <SheetPrimitive.Content
         data-slot="sheet-content"
         data-side={side}
+        style={{ ...resizableStyle, ...style }}
         className={cn(
           "fixed z-50 flex flex-col gap-4 bg-popover bg-clip-padding text-sm text-popover-foreground shadow-lg transition duration-200 ease-in-out data-[side=bottom]:inset-x-0 data-[side=bottom]:bottom-0 data-[side=bottom]:h-auto data-[side=bottom]:border-t data-[side=left]:inset-y-0 data-[side=left]:left-0 data-[side=left]:h-full data-[side=left]:w-3/4 data-[side=left]:border-r data-[side=right]:inset-y-0 data-[side=right]:right-0 data-[side=right]:h-full data-[side=right]:w-3/4 data-[side=right]:border-l data-[side=top]:inset-x-0 data-[side=top]:top-0 data-[side=top]:h-auto data-[side=top]:border-b data-[side=left]:sm:max-w-sm data-[side=right]:sm:max-w-sm data-open:animate-in data-open:fade-in-0 data-[side=bottom]:data-open:slide-in-from-bottom-10 data-[side=left]:data-open:slide-in-from-left-10 data-[side=right]:data-open:slide-in-from-right-10 data-[side=top]:data-open:slide-in-from-top-10 data-closed:animate-out data-closed:fade-out-0 data-[side=bottom]:data-closed:slide-out-to-bottom-10 data-[side=left]:data-closed:slide-out-to-left-10 data-[side=right]:data-closed:slide-out-to-right-10 data-[side=top]:data-closed:slide-out-to-top-10",
+          resizable && isHorizontal && "max-w-none! transition-none",
           className
         )}
         {...props}
       >
+        {resizable && isHorizontal && <ResizeHandle side={side} onResize={handleResize} />}
         {children}
         {showCloseButton && (
           <SheetPrimitive.Close data-slot="sheet-close" asChild>
