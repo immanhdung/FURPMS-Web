@@ -35,7 +35,7 @@ export function RoundDetailSheet({ open, onOpenChange, proposalId, trackId, roun
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="flex w-full flex-col sm:max-w-2xl">
+      <SheetContent resizable defaultWidth={640} className="flex w-full flex-col sm:max-w-2xl">
         <SheetHeader>
           <SheetTitle>{roundTitle(round)}</SheetTitle>
           <SheetDescription>
