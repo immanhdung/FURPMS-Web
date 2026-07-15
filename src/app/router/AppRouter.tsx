@@ -20,6 +20,7 @@ const ChangePasswordPage = lazy(() =>
   import("@/features/auth/pages/ChangePasswordPage").then((m) => ({ default: m.ChangePasswordPage }))
 );
 const ProfilePage = lazy(() => import("@/features/auth/pages/ProfilePage").then((m) => ({ default: m.ProfilePage })));
+const SettingsPage = lazy(() => import("@/features/settings/SettingsPage").then((m) => ({ default: m.SettingsPage })));
 const DashboardPage = lazy(() =>
   import("@/features/dashboard/pages/DashboardPage").then((m) => ({ default: m.DashboardPage }))
 );
@@ -114,6 +115,7 @@ const FEATURE_PAGES: Partial<Record<string, ComponentType>> = {
   [ROUTES.COUNCIL_MEMBERSHIPS]: CouncilMembershipsPage,
   [ROUTES.ANALYTICS]: AnalyticsPage,
   [ROUTES.AI_SEARCH]: SemanticSearchPage,
+  [ROUTES.SETTINGS]: SettingsPage,
 };
 
 const proposalReviewsRoles = NAV_ITEMS.find((item) => item.path === ROUTES.PROPOSAL_REVIEWS)?.roles ?? [];

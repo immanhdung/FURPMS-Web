@@ -1,115 +1,169 @@
+import type { ReactNode } from "react";
 import type { UseFormReturn } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { ProposalWizardValues } from "@/features/pi/proposals/wizard/proposal-wizard.schema";
+
+/** Small helpers so labels/sections stay consistent without repeating classes. */
+function FieldLabel({ htmlFor, required, children }: { htmlFor: string; required?: boolean; children: ReactNode }) {
+  return (
+    <label htmlFor={htmlFor} className="mb-1.5 block text-sm font-medium text-foreground">
+      {children}
+      {required && <span className="text-destructive"> *</span>}
+    </label>
+  );
+}
+
+function Section({ title, hint, children }: { title: string; hint?: string; children: ReactNode }) {
+  return (
+    <section className="space-y-4 border-t border-border pt-5 first:border-t-0 first:pt-0">
+      <div>
+        <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+        {hint && <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>}
+      </div>
+      {children}
+    </section>
+  );
+}
 
 export function Step3Details({ form }: { form: UseFormReturn<ProposalWizardValues> }) {
   const {
     register,
+    control,
     formState: { errors },
   } = form;
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div>
-          <label htmlFor="titleEN" className="mb-1.5 block text-sm font-medium text-foreground">
-            Title (English)
-          </label>
-          <Input id="titleEN" aria-invalid={Boolean(errors.titleEN)} {...register("titleEN")} />
-          {errors.titleEN && <p className="mt-1 text-xs text-destructive">{errors.titleEN.message}</p>}
+    <div className="space-y-6">
+      <Section title="Title & abstract" hint="The Vietnamese title is what appears on official documents.">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <FieldLabel htmlFor="titleVI" required>
+              Title (Vietnamese)
+            </FieldLabel>
+            <Input
+              id="titleVI"
+              placeholder="Tên đề tài bằng tiếng Việt"
+              aria-invalid={Boolean(errors.titleVI)}
+              {...register("titleVI")}
+            />
+            {errors.titleVI && <p className="mt-1 text-xs text-destructive">{errors.titleVI.message}</p>}
+          </div>
+          <div>
+            <FieldLabel htmlFor="titleEN">Title (English)</FieldLabel>
+            <Input id="titleEN" placeholder="English title, if available" {...register("titleEN")} />
+          </div>
         </div>
-        <div>
-          <label htmlFor="titleVI" className="mb-1.5 block text-sm font-medium text-foreground">
-            Title (Vietnamese)
-          </label>
-          <Input id="titleVI" {...register("titleVI")} />
-        </div>
-      </div>
 
-      <div>
-        <label htmlFor="abstractEN" className="mb-1.5 block text-sm font-medium text-foreground">
-          Abstract
-        </label>
-        <Textarea id="abstractEN" rows={4} aria-invalid={Boolean(errors.abstractEN)} {...register("abstractEN")} />
-        {errors.abstractEN && <p className="mt-1 text-xs text-destructive">{errors.abstractEN.message}</p>}
-      </div>
-
-      <div>
-        <label htmlFor="objectives" className="mb-1.5 block text-sm font-medium text-foreground">
-          Objectives
-        </label>
-        <Textarea id="objectives" rows={3} {...register("objectives")} />
-      </div>
-
-      <div>
-        <label htmlFor="methodology" className="mb-1.5 block text-sm font-medium text-foreground">
-          Methodology
-        </label>
-        <Textarea id="methodology" rows={3} {...register("methodology")} />
-      </div>
-
-      <div>
-        <label htmlFor="expectedOutput" className="mb-1.5 block text-sm font-medium text-foreground">
-          Expected Output
-        </label>
-        <Textarea id="expectedOutput" rows={3} {...register("expectedOutput")} />
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="urgency" className="mb-1.5 block text-sm font-medium text-foreground">
-            Urgency
-          </label>
-          <Textarea id="urgency" rows={2} {...register("urgency")} />
-        </div>
-        <div>
-          <label htmlFor="novelty" className="mb-1.5 block text-sm font-medium text-foreground">
-            Novelty
-          </label>
-          <Textarea id="novelty" rows={2} {...register("novelty")} />
-        </div>
-        <div>
-          <label htmlFor="applicationPotential" className="mb-1.5 block text-sm font-medium text-foreground">
-            Application Potential
-          </label>
-          <Textarea id="applicationPotential" rows={2} {...register("applicationPotential")} />
-        </div>
-        <div>
-          <label htmlFor="transferPotential" className="mb-1.5 block text-sm font-medium text-foreground">
-            Transfer Potential
-          </label>
-          <Textarea id="transferPotential" rows={2} {...register("transferPotential")} />
-        </div>
-      </div>
-
-      <div>
-        <label htmlFor="facilities" className="mb-1.5 block text-sm font-medium text-foreground">
-          Facilities &amp; Resources
-        </label>
-        <Textarea id="facilities" rows={2} {...register("facilities")} />
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div>
-          <label htmlFor="fundingMethod" className="mb-1.5 block text-sm font-medium text-foreground">
-            Funding Method
-          </label>
-          <Input id="fundingMethod" {...register("fundingMethod")} />
-        </div>
-        <div>
-          <label htmlFor="durationMonths" className="mb-1.5 block text-sm font-medium text-foreground">
-            Duration (months)
-          </label>
-          <Input
-            id="durationMonths"
-            type="number"
-            aria-invalid={Boolean(errors.durationMonths)}
-            {...register("durationMonths", { valueAsNumber: true })}
+          <FieldLabel htmlFor="abstractEN">Abstract</FieldLabel>
+          <Textarea
+            id="abstractEN"
+            rows={4}
+            placeholder="A short summary of the problem, approach, and expected result"
+            {...register("abstractEN")}
           />
-          {errors.durationMonths && <p className="mt-1 text-xs text-destructive">{errors.durationMonths.message}</p>}
         </div>
-      </div>
+      </Section>
+
+      <Section title="Research description" hint="What you will do and how — reviewers score these sections.">
+        <div>
+          <FieldLabel htmlFor="objectives" required>
+            Objectives
+          </FieldLabel>
+          <Textarea
+            id="objectives"
+            rows={3}
+            placeholder="e.g. 1. Survey current practice  2. Build the model  3. Evaluate on real data"
+            aria-invalid={Boolean(errors.objectives)}
+            {...register("objectives")}
+          />
+          {errors.objectives && <p className="mt-1 text-xs text-destructive">{errors.objectives.message}</p>}
+        </div>
+
+        <div>
+          <FieldLabel htmlFor="methodology">Methodology</FieldLabel>
+          <Textarea id="methodology" rows={3} placeholder="How the research will be carried out" {...register("methodology")} />
+        </div>
+
+        <div>
+          <FieldLabel htmlFor="expectedOutput">Expected Output</FieldLabel>
+          <Textarea
+            id="expectedOutput"
+            rows={3}
+            placeholder="e.g. 1 conference paper, 1 demo application, 1 final report"
+            {...register("expectedOutput")}
+          />
+        </div>
+      </Section>
+
+      <Section title="Impact & feasibility" hint="Optional, but they strengthen the proposal during review.">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <FieldLabel htmlFor="urgency">Urgency</FieldLabel>
+            <Textarea id="urgency" rows={2} placeholder="Why this research is needed now" {...register("urgency")} />
+          </div>
+          <div>
+            <FieldLabel htmlFor="novelty">Novelty</FieldLabel>
+            <Textarea id="novelty" rows={2} placeholder="What is new compared to existing work" {...register("novelty")} />
+          </div>
+          <div>
+            <FieldLabel htmlFor="applicationPotential">Application Potential</FieldLabel>
+            <Textarea id="applicationPotential" rows={2} {...register("applicationPotential")} />
+          </div>
+          <div>
+            <FieldLabel htmlFor="transferPotential">Transfer Potential</FieldLabel>
+            <Textarea id="transferPotential" rows={2} {...register("transferPotential")} />
+          </div>
+        </div>
+
+        <div>
+          <FieldLabel htmlFor="facilities">Facilities &amp; Resources</FieldLabel>
+          <Textarea
+            id="facilities"
+            rows={2}
+            placeholder="Labs, equipment, or data you already have access to"
+            {...register("facilities")}
+          />
+        </div>
+      </Section>
+
+      <Section title="Plan & funding">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <FieldLabel htmlFor="fundingMethod">Funding Method</FieldLabel>
+            <Controller
+              control={control}
+              name="fundingMethod"
+              render={({ field }) => (
+                <Select value={field.value || undefined} onValueChange={field.onChange}>
+                  <SelectTrigger id="fundingMethod" className="w-full">
+                    <SelectValue placeholder="Select how funding is disbursed" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="WHOLE">Whole — disbursed in fixed installments</SelectItem>
+                    <SelectItem value="PARTIAL">Partial — disbursed per accepted milestone</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
+          <div>
+            <FieldLabel htmlFor="durationMonths" required>
+              Duration (months)
+            </FieldLabel>
+            <Input
+              id="durationMonths"
+              type="number"
+              aria-invalid={Boolean(errors.durationMonths)}
+              {...register("durationMonths", { valueAsNumber: true })}
+            />
+            {errors.durationMonths && <p className="mt-1 text-xs text-destructive">{errors.durationMonths.message}</p>}
+          </div>
+        </div>
+      </Section>
     </div>
   );
 }

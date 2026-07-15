@@ -12,6 +12,15 @@ export function useTracksQuery() {
   });
 }
 
+/** Fields attached to a specific cycle. Disabled until a cycle is chosen. */
+export function useTracksByCycleQuery(cycleId: number | undefined) {
+  return useQuery({
+    queryKey: queryKeys.tracks.byCycle(cycleId ?? 0),
+    queryFn: () => trackService.listByCycle(cycleId as number),
+    enabled: Boolean(cycleId),
+  });
+}
+
 export function useCreateTrackMutation() {
   const queryClient = useQueryClient();
   return useMutation({

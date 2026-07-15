@@ -5,7 +5,7 @@ import { Check } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCyclesQuery } from "@/hooks/useCycles";
-import { useTracksQuery } from "@/hooks/useTracks";
+import { useTracksByCycleQuery } from "@/hooks/useTracks";
 import { useResearchTypesQuery } from "@/hooks/useResearchTypes";
 import { CYCLE_STATUS } from "@/constants/statuses";
 import { cn } from "@/lib/utils";
@@ -14,10 +14,14 @@ import type { ProposalWizardValues } from "@/features/pi/proposals/wizard/propos
 export function Step1CycleFieldType({ form }: { form: UseFormReturn<ProposalWizardValues> }) {
   const {
     control,
+    watch,
+    setValue,
     formState: { errors },
   } = form;
   const { data: cycles, isLoading: isCyclesLoading } = useCyclesQuery();
-  const { data: tracks, isLoading: isTracksLoading } = useTracksQuery();
+  const selectedCycleId = watch("cycleId");
+  // Fields scoped to the chosen cycle — avoids offering fields not opened for this cycle.
+  const { data: tracks, isLoading: isTracksLoading } = useTracksByCycleQuery(selectedCycleId || undefined);
   const { data: researchTypes, isLoading: isTypesLoading } = useResearchTypesQuery();
 
   const openCycles = (cycles ?? []).filter((c) => c.status?.toUpperCase() === CYCLE_STATUS.OPEN);
@@ -32,7 +36,10 @@ export function Step1CycleFieldType({ form }: { form: UseFormReturn<ProposalWiza
           render={({ field }) => (
             <Select
               value={field.value ? field.value.toString() : undefined}
-              onValueChange={(value) => field.onChange(Number(value))}
+              onValueChange={(value) => {
+                field.onChange(Number(value));
+                setValue("trackId", ""); // fields differ per cycle — clear the previous choice
+              }}
               disabled={isCyclesLoading}
             >
               <SelectTrigger aria-invalid={Boolean(errors.cycleId)} className="w-full">
@@ -60,9 +67,13 @@ export function Step1CycleFieldType({ form }: { form: UseFormReturn<ProposalWiza
           control={control}
           name="trackId"
           render={({ field }) => (
-            <Select value={field.value || undefined} onValueChange={field.onChange} disabled={isTracksLoading}>
+            <Select
+              value={field.value || undefined}
+              onValueChange={field.onChange}
+              disabled={!selectedCycleId || isTracksLoading}
+            >
               <SelectTrigger aria-invalid={Boolean(errors.trackId)} className="w-full">
-                <SelectValue placeholder="Select a research field" />
+                <SelectValue placeholder={selectedCycleId ? "Select a research field" : "Choose a cycle first"} />
               </SelectTrigger>
               <SelectContent>
                 {tracks?.map((track) => (
@@ -75,6 +86,9 @@ export function Step1CycleFieldType({ form }: { form: UseFormReturn<ProposalWiza
           )}
         />
         {errors.trackId && <p className="mt-1 text-xs text-destructive">{errors.trackId.message}</p>}
+        {selectedCycleId && !isTracksLoading && (tracks?.length ?? 0) === 0 && (
+          <p className="mt-1 text-xs text-warning">This cycle has no research fields yet — contact the research office.</p>
+        )}
       </div>
 
       <div>
@@ -108,8 +122,8 @@ export function Step1CycleFieldType({ form }: { form: UseFormReturn<ProposalWiza
                           <p className="text-sm font-medium text-foreground">{type.name}</p>
                           <p className="mt-1 text-xs text-muted-foreground">
                             {type.requireOrderingUnit
-                              ? "Based on an imported topic from an ordering unit"
-                              : "Upload your own research paper (PDF/DOCX)"}
+                              ? "Register for a topic ordered by a unit — several PIs may compete for it"
+                              : "Propose your own topic — you define the problem, objectives, and plan"}
                           </p>
                         </div>
                         {isSelected && (

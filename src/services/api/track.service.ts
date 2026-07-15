@@ -5,6 +5,11 @@ import type { CreateTrackPayload, Track, UpdateTrackPayload } from "@/types/trac
 export const trackService = {
   list: () => axiosClient.get<ApiResponse<Track[]>>("/cycles/tracks").then((res) => res.data.data),
 
+  // Fields actually attached to a cycle (via cycle_track). Prefer this in submission flows so
+  // global-but-unattached fields (e.g. an orphan track) don't appear as choices.
+  listByCycle: (cycleId: number) =>
+    axiosClient.get<ApiResponse<Track[]>>(`/cycles/${cycleId}/tracks`).then((res) => res.data.data),
+
   create: (payload: CreateTrackPayload) =>
     axiosClient.post<ApiResponse<Track>>("/cycles/tracks", payload).then((res) => res.data.data),
 
