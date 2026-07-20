@@ -16,6 +16,7 @@ import { SubmitProposalDialog } from "@/features/pi/proposals/SubmitProposalDial
 import { AiSummaryCard } from "@/features/pi/proposals/AiSummaryCard";
 import { AiFeedbackCard } from "@/features/pi/proposals/AiFeedbackCard";
 import { ExpectedProductsCard } from "@/features/pi/proposals/ExpectedProductsCard";
+import { ProposalDocumentsCard } from "@/features/pi/proposals/ProposalDocumentsCard";
 import { PROPOSAL_STATUS } from "@/constants/statuses";
 import { ROUTES } from "@/constants/routes";
 
@@ -94,6 +95,9 @@ export function ProposalDetailPage() {
         editable={isDraft}
         fundingMethod={proposal.fundingMethod}
       />
+
+      {/* Tài liệu đính kèm — gỡ/thêm được khi còn nháp; nộp xong chỉ tải về. */}
+      <ProposalDocumentsCard proposalId={proposal.id} editable={isDraft} />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <AiSummaryCard proposalId={proposal.id} />
