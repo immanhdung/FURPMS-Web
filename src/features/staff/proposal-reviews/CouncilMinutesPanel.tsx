@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { useProposalQuery } from "@/hooks/useProposals";
@@ -46,7 +45,6 @@ export function CouncilMinutesPanel({ councilId, proposalId }: CouncilMinutesPan
   const saveMinutesMutation = useSaveMinutesMutation(councilId);
   const finalizeMutation = useFinalizeDecisionMutation(councilId);
 
-  const [result, setResult] = useState<string>(PROPOSAL_STATUS.APPROVED);
   const [councilComments, setCouncilComments] = useState("");
   const [recommendations, setRecommendations] = useState("");
   const [confirmingResult, setConfirmingResult] = useState<string | null>(null);
@@ -178,19 +176,10 @@ export function CouncilMinutesPanel({ councilId, proposalId }: CouncilMinutesPan
       {isSecretary && (
         <Card>
           <CardContent className="space-y-3 p-4">
-            <p className="text-sm font-medium text-foreground">Kết luận của Hội đồng (Secretary)</p>
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Result</label>
-              <Select value={result} onValueChange={setResult}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={PROPOSAL_STATUS.APPROVED}>Đạt / Pass</SelectItem>
-                  <SelectItem value={PROPOSAL_STATUS.REJECTED}>Không đạt / Fail</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <p className="text-sm font-medium text-foreground">Meeting minutes review (Secretary)</p>
+            <p className="text-xs text-muted-foreground">
+              Review the minutes above, add any notes, then submit. The chairman decides the outcome.
+            </p>
             <div>
               <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Council comments</label>
               <Textarea rows={3} value={councilComments} onChange={(e) => setCouncilComments(e.target.value)} />
@@ -201,7 +190,7 @@ export function CouncilMinutesPanel({ councilId, proposalId }: CouncilMinutesPan
             </div>
             <Button
               onClick={() =>
-                saveMinutesMutation.mutate({ projectId: proposalId, result, councilComments, recommendations })
+                saveMinutesMutation.mutate({ projectId: proposalId, councilComments, recommendations })
               }
               disabled={saveMinutesMutation.isPending}
             >

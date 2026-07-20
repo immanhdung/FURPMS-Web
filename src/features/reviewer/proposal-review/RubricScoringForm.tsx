@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ClipboardList, Loader2, Save } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -7,9 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
-import { useRubricCriteriaQuery } from "@/hooks/useRubricCriteria";
 import { useMyScoreQuery, useRubricTemplatesQuery, useSubmitScoreMutation } from "@/hooks/useReviewScoring";
-import { rubricRoundTypeToAppType } from "@/constants/statuses";
+import { ROUTES } from "@/constants/routes";
 import type { ScoreDetailPayload } from "@/types/review-scoring";
 
 interface RubricScoringFormProps {
@@ -18,41 +18,27 @@ interface RubricScoringFormProps {
 }
 
 export function RubricScoringForm({ councilId, roundType }: RubricScoringFormProps) {
-  /**
-   * Fetching unfiltered and matching client-side because the GET /rubric-criteria?roundType=
-   * query filter's expected value is unconfirmed (a round created as "REVIEW" produced zero
-   * results even for admin-created, active "Review"-labeled criteria) — the label mapping used
-   * to display the round type in the admin list is proven correct, so we reuse it here instead.
-   */
-  const { data: criteria, isLoading: isCriteriaLoading } = useRubricCriteriaQuery();
+  const navigate = useNavigate();
   const { data: templates, isLoading: isTemplatesLoading } = useRubricTemplatesQuery();
   const { data: existingScore, isLoading: isScoreLoading } = useMyScoreQuery(councilId);
   const submitMutation = useSubmitScoreMutation(councilId);
 
-  const matchingTemplate = templates?.find((t) => t.roundType === roundType) ?? templates?.[0];
-
   /**
-   * The backend rejected a submission with "Missing scores for criterion IDs: 7" even though
-   * criterion 7 wasn't in our roundType-filtered list — its actual scoring requirement is driven
-   * by the matched template's own `criteria` list, not by re-deriving membership from each
-   * criterion's roundType client-side. Prefer the template's list when present; fall back to the
-   * roundType filter only if the template didn't come with one.
+   * Confirmed live: `templateType` (not `roundType`, which doesn't exist on this response) uses
+   * this app's exact casing ("REVIEW", "PROGRESS_CHECK") — no name conversion needed. The list
+   * endpoint already returns each template's full `criteria` array, which is the sole source of
+   * truth for what the backend requires — don't cross-reference the standalone /rubric-criteria
+   * list or fall back to "all active criteria"; both produced wrong submissions in live testing.
    */
-  const normalizedRoundType = roundType?.toUpperCase();
-  const activeCriteria = useMemo(() => {
-    const templateCriteria = matchingTemplate?.criteria?.filter((c) => c.isActive);
-    if (templateCriteria && templateCriteria.length > 0) return templateCriteria;
-    return (criteria ?? []).filter(
-      (c) => c.isActive && rubricRoundTypeToAppType(c.roundType) === normalizedRoundType
-    );
-  }, [matchingTemplate, criteria, normalizedRoundType]);
+  const matchingTemplate = templates?.find((t) => t.templateType?.toUpperCase() === roundType?.toUpperCase());
+  const activeCriteria = useMemo(() => matchingTemplate?.criteria ?? [], [matchingTemplate]);
 
   const [scores, setScores] = useState<Record<number, { givenScore: number; comments: string }>>({});
   const [generalComments, setGeneralComments] = useState("");
   const [otherRecommendations, setOtherRecommendations] = useState("");
   const [seededFor, setSeededFor] = useState<string | null>(null);
 
-  const isLoading = isCriteriaLoading || isTemplatesLoading || isScoreLoading;
+  const isLoading = isTemplatesLoading || isScoreLoading;
   const isReady = !isLoading && activeCriteria.length > 0;
   const seedKey = isReady ? `${existingScore?.id ?? "none"}:${activeCriteria.length}` : null;
 
@@ -83,7 +69,7 @@ export function RubricScoringForm({ councilId, roundType }: RubricScoringFormPro
       <EmptyState
         icon={ClipboardList}
         title="No rubric criteria configured"
-        description={`No active criteria found for ${roundType} rounds. Contact an administrator.`}
+        description="No rubric template is configured for this round type. Contact an administrator."
       />
     );
   }
@@ -101,12 +87,15 @@ export function RubricScoringForm({ councilId, roundType }: RubricScoringFormPro
       givenScore: scores[criterion.id]?.givenScore ?? 0,
       comments: scores[criterion.id]?.comments || undefined,
     }));
-    submitMutation.mutate({
-      templateId: matchingTemplate.id,
-      generalComments: generalComments || undefined,
-      otherRecommendations: otherRecommendations || undefined,
-      scoreDetails,
-    });
+    submitMutation.mutate(
+      {
+        templateId: matchingTemplate.id,
+        generalComments: generalComments || undefined,
+        otherRecommendations: otherRecommendations || undefined,
+        scoreDetails,
+      },
+      { onSuccess: () => navigate(ROUTES.ASSIGNED_REVIEWS) }
+    );
   };
 
   return (
@@ -123,7 +112,7 @@ export function RubricScoringForm({ councilId, roundType }: RubricScoringFormPro
           <Card key={criterion.id}>
             <CardContent className="space-y-2.5 p-4">
               <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-medium text-foreground">{criterion.name}</p>
+                <p className="text-sm font-medium text-foreground">{criterion.criterionName}</p>
                 <div className="flex shrink-0 items-center gap-1.5">
                   <Input
                     type="number"
