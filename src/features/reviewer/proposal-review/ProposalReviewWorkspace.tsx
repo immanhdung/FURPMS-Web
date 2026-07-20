@@ -11,8 +11,7 @@ import { useCouncilMeetingsQuery } from "@/hooks/useMeetings";
 import { RubricScoringForm } from "@/features/reviewer/proposal-review/RubricScoringForm";
 import { FeedbackForm } from "@/features/reviewer/proposal-review/FeedbackForm";
 import { AcceptanceEvaluationForm } from "@/features/reviewer/proposal-review/AcceptanceEvaluationForm";
-import { DecisionView } from "@/features/reviewer/proposal-review/DecisionView";
-import { CouncilMinutesPanel } from "@/features/staff/proposal-reviews/CouncilMinutesPanel";
+import { MinutesPanel } from "@/features/reviewer/proposal-review/MinutesPanel";
 import { COUNCIL_MEMBER_ROLE, REVIEW_ROUND_TYPE } from "@/constants/statuses";
 import { ROUTES } from "@/constants/routes";
 import { formatDateTime } from "@/utils/format";
@@ -96,7 +95,6 @@ export function ProposalReviewWorkspace() {
           <TabsTrigger value="feedback">Feedback</TabsTrigger>
           {isAcceptanceRound && <TabsTrigger value="acceptance">Acceptance</TabsTrigger>}
           <TabsTrigger value="minutes">Minutes</TabsTrigger>
-          <TabsTrigger value="decision">Decision</TabsTrigger>
         </TabsList>
 
         {!isSecretary && (
@@ -116,11 +114,7 @@ export function ProposalReviewWorkspace() {
         )}
 
         <TabsContent value="minutes">
-          <CouncilMinutesPanel councilId={councilId} proposalId={membership.proposalId} />
-        </TabsContent>
-
-        <TabsContent value="decision">
-          <DecisionView councilId={councilId} />
+          <MinutesPanel councilId={councilId} memberRole={membership.memberRole} />
         </TabsContent>
       </Tabs>
     </div>

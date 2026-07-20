@@ -10,7 +10,7 @@ import { CreateCouncilSheet } from "@/features/staff/proposal-reviews/CreateCoun
 import { CloseRoundDialog } from "@/features/staff/proposal-reviews/CloseRoundDialog";
 import { CouncilMembersPanel } from "@/features/staff/proposal-reviews/CouncilMembersPanel";
 import { MeetingsPanel } from "@/features/staff/proposal-reviews/MeetingsPanel";
-import { CouncilMinutesPanel } from "@/features/staff/proposal-reviews/CouncilMinutesPanel";
+import { MinutesPanel } from "@/features/reviewer/proposal-review/MinutesPanel";
 import { formatDateTime } from "@/utils/format";
 import { roundTitle } from "@/features/staff/proposal-reviews/round-utils";
 import type { ReviewRound } from "@/types/review-round";
@@ -83,7 +83,8 @@ export function RoundDetailSheet({ open, onOpenChange, proposalId, trackId, roun
                   <MeetingsPanel councilId={round.councilId} />
                 </TabsContent>
                 <TabsContent value="minutes">
-                  <CouncilMinutesPanel councilId={round.councilId} proposalId={proposalId} />
+                  {/* Staff không phải thành viên hội đồng → chỉ xem, không soạn/duyệt (rule #12). */}
+                  <MinutesPanel councilId={round.councilId} />
                 </TabsContent>
               </Tabs>
             ) : (

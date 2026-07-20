@@ -4,6 +4,9 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useUiStore, type Theme } from "@/store/ui.store";
+import { useAuthStore } from "@/store/auth.store";
+import { ROLES } from "@/constants/roles";
+import { UploadLimitsCard } from "@/features/settings/UploadLimitsCard";
 
 const THEME_OPTIONS: { value: Theme; label: string; icon: typeof Sun }[] = [
   { value: "light", label: "Light", icon: Sun },
@@ -16,12 +19,16 @@ export function SettingsPage() {
   const setTheme = useUiStore((state) => state.setTheme);
   const sampleFillEnabled = useUiStore((state) => state.sampleFillEnabled);
   const setSampleFillEnabled = useUiStore((state) => state.setSampleFillEnabled);
+  const isAdmin = useAuthStore((state) => state.user?.roles.includes(ROLES.ADMIN) ?? false);
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">Settings</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Preferences for this browser. They are saved locally.</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Appearance and demo helpers are saved in this browser only.
+          {isAdmin && " System settings below apply to everyone."}
+        </p>
       </div>
 
       <Card>
@@ -69,6 +76,8 @@ export function SettingsPage() {
           </label>
         </CardContent>
       </Card>
+
+      {isAdmin && <UploadLimitsCard />}
     </div>
   );
 }

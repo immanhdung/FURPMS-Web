@@ -1,6 +1,6 @@
 import { axiosClient } from "@/services/api/axiosClient";
 import type { ApiResponse } from "@/types/common";
-import type { DecisionResponse, FinalizeDecisionPayload } from "@/types/decision";
+import type { DecisionResponse, SaveMinutesPayload } from "@/types/decision";
 
 export const decisionService = {
   get: (councilId: string) =>
@@ -8,8 +8,15 @@ export const decisionService = {
       .get<ApiResponse<DecisionResponse | null>>(`/review-scoring/councils/${councilId}/decision`)
       .then((res) => res.data.data),
 
-  finalize: (councilId: string, payload: FinalizeDecisionPayload) =>
+  /** Thư ký soạn/sửa biên bản → lưu bản NHÁP (chưa đổi trạng thái đề tài). */
+  saveMinutes: (councilId: string, payload: SaveMinutesPayload) =>
     axiosClient
-      .post<ApiResponse<DecisionResponse>>(`/review-scoring/councils/${councilId}/decision`, payload)
+      .post<ApiResponse<DecisionResponse>>(`/review-scoring/councils/${councilId}/minutes`, payload)
+      .then((res) => res.data.data),
+
+  /** Chủ tịch duyệt = KHÓA biên bản; BE tự cập nhật đề tài + vòng chấm (rule #12). */
+  approveMinutes: (councilId: string) =>
+    axiosClient
+      .post<ApiResponse<DecisionResponse>>(`/review-scoring/councils/${councilId}/minutes/approve`)
       .then((res) => res.data.data),
 };
