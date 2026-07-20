@@ -65,6 +65,11 @@ export const queryKeys = {
     all: () => ["financial-configs"] as const,
     list: () => ["financial-configs", "list"] as const,
   },
+  systemSettings: {
+    all: () => ["system-settings"] as const,
+    list: () => ["system-settings", "list"] as const,
+    uploadPolicy: () => ["system-settings", "upload-policy"] as const,
+  },
   organizationalUnits: {
     all: () => ["organizational-units"] as const,
     list: () => ["organizational-units", "list"] as const,
