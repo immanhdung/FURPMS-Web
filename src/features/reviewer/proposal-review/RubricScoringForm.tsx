@@ -25,27 +25,35 @@ export function RubricScoringForm({ councilId, roundType }: RubricScoringFormPro
    * to display the round type in the admin list is proven correct, so we reuse it here instead.
    */
   const { data: criteria, isLoading: isCriteriaLoading } = useRubricCriteriaQuery();
-  const { data: templates } = useRubricTemplatesQuery();
+  const { data: templates, isLoading: isTemplatesLoading } = useRubricTemplatesQuery();
   const { data: existingScore, isLoading: isScoreLoading } = useMyScoreQuery(councilId);
   const submitMutation = useSubmitScoreMutation(councilId);
 
   const matchingTemplate = templates?.find((t) => t.roundType === roundType) ?? templates?.[0];
 
+  /**
+   * The backend rejected a submission with "Missing scores for criterion IDs: 7" even though
+   * criterion 7 wasn't in our roundType-filtered list — its actual scoring requirement is driven
+   * by the matched template's own `criteria` list, not by re-deriving membership from each
+   * criterion's roundType client-side. Prefer the template's list when present; fall back to the
+   * roundType filter only if the template didn't come with one.
+   */
   const normalizedRoundType = roundType?.toUpperCase();
-  const activeCriteria = useMemo(
-    () =>
-      (criteria ?? []).filter(
-        (c) => c.isActive && rubricRoundTypeToAppType(c.roundType) === normalizedRoundType
-      ),
-    [criteria, normalizedRoundType]
-  );
+  const activeCriteria = useMemo(() => {
+    const templateCriteria = matchingTemplate?.criteria?.filter((c) => c.isActive);
+    if (templateCriteria && templateCriteria.length > 0) return templateCriteria;
+    return (criteria ?? []).filter(
+      (c) => c.isActive && rubricRoundTypeToAppType(c.roundType) === normalizedRoundType
+    );
+  }, [matchingTemplate, criteria, normalizedRoundType]);
 
   const [scores, setScores] = useState<Record<number, { givenScore: number; comments: string }>>({});
   const [generalComments, setGeneralComments] = useState("");
   const [otherRecommendations, setOtherRecommendations] = useState("");
   const [seededFor, setSeededFor] = useState<string | null>(null);
 
-  const isReady = !isCriteriaLoading && !isScoreLoading && activeCriteria.length > 0;
+  const isLoading = isCriteriaLoading || isTemplatesLoading || isScoreLoading;
+  const isReady = !isLoading && activeCriteria.length > 0;
   const seedKey = isReady ? `${existingScore?.id ?? "none"}:${activeCriteria.length}` : null;
 
   if (seedKey !== null && seedKey !== seededFor) {
@@ -60,7 +68,7 @@ export function RubricScoringForm({ councilId, roundType }: RubricScoringFormPro
     setOtherRecommendations(existingScore?.otherRecommendations ?? "");
   }
 
-  if (isCriteriaLoading || isScoreLoading) {
+  if (isLoading) {
     return (
       <div className="space-y-3">
         {Array.from({ length: 3 }).map((_, index) => (
