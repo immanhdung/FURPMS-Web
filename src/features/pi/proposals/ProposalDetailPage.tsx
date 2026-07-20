@@ -15,6 +15,7 @@ import { ProposalSummaryView } from "@/features/pi/proposals/ProposalSummaryView
 import { SubmitProposalDialog } from "@/features/pi/proposals/SubmitProposalDialog";
 import { AiSummaryCard } from "@/features/pi/proposals/AiSummaryCard";
 import { AiFeedbackCard } from "@/features/pi/proposals/AiFeedbackCard";
+import { ExpectedProductsCard } from "@/features/pi/proposals/ExpectedProductsCard";
 import { PROPOSAL_STATUS } from "@/constants/statuses";
 import { ROUTES } from "@/constants/routes";
 
@@ -86,6 +87,13 @@ export function ProposalDetailPage() {
       </div>
 
       <ProposalSummaryView data={proposal} cycleName={cycleName} trackName={trackName} researchTypeName={researchTypeName} />
+
+      {/* Sản phẩm cam kết — chỉ sửa được khi còn nháp, vì nộp xong là khóa đề cương. */}
+      <ExpectedProductsCard
+        proposalId={proposal.id}
+        editable={isDraft}
+        fundingMethod={proposal.fundingMethod}
+      />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <AiSummaryCard proposalId={proposal.id} />
