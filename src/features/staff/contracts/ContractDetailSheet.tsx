@@ -8,6 +8,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useContractQuery, useSignContractMutation } from "@/hooks/useContracts";
 import { useProposalQuery } from "@/hooks/useProposals";
 import { ProgressReportsPanel } from "@/features/staff/contracts/ProgressReportsPanel";
+import { DisbursementsPanel } from "@/features/staff/contracts/DisbursementsPanel";
+import { DeliverablesPanel } from "@/features/staff/contracts/DeliverablesPanel";
+import { FinalReportPanel } from "@/features/staff/contracts/FinalReportPanel";
+import { AmendmentsPanel } from "@/features/staff/contracts/AmendmentsPanel";
+import { SettlementPanel } from "@/features/staff/contracts/SettlementPanel";
+import { useAuthStore } from "@/store/auth.store";
+import { ROLES } from "@/constants/roles";
 import { formatDate } from "@/utils/format";
 
 interface ContractDetailSheetProps {
@@ -20,6 +27,11 @@ export function ContractDetailSheet({ open, onOpenChange, contractId }: Contract
   const { data: contract, isLoading } = useContractQuery(contractId);
   const { data: proposal } = useProposalQuery(contract?.proposalId ?? null);
   const signMutation = useSignContractMutation();
+  // Chỉ Admin/Staff được sinh lịch & xác nhận chi tiền; PI chỉ xem (BE cũng chặn 403).
+  const canManage = useAuthStore((state) => {
+    const roles = state.user?.roles ?? [];
+    return roles.includes(ROLES.ADMIN) || roles.includes(ROLES.STAFF);
+  });
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -73,12 +85,33 @@ export function ContractDetailSheet({ open, onOpenChange, contractId }: Contract
                 Sign contract
               </Button>
 
-              <Tabs defaultValue="progress">
-                <TabsList>
+              {/* Thứ tự tab theo đúng dòng đời hợp đồng: tiền → sản phẩm → báo cáo → tổng kết → điều chỉnh → chốt sổ */}
+              <Tabs defaultValue="disbursements">
+                <TabsList className="flex-wrap">
+                  <TabsTrigger value="disbursements">Disbursements</TabsTrigger>
+                  <TabsTrigger value="deliverables">Deliverables</TabsTrigger>
                   <TabsTrigger value="progress">Progress Reports</TabsTrigger>
+                  <TabsTrigger value="final">Final Report</TabsTrigger>
+                  <TabsTrigger value="amendments">Amendments</TabsTrigger>
+                  <TabsTrigger value="settlement">Settlement</TabsTrigger>
                 </TabsList>
+                <TabsContent value="disbursements">
+                  <DisbursementsPanel contractId={contract.id} canManage={canManage} />
+                </TabsContent>
+                <TabsContent value="deliverables">
+                  <DeliverablesPanel contractId={contract.id} canManage={canManage} />
+                </TabsContent>
                 <TabsContent value="progress">
                   <ProgressReportsPanel contractId={contract.id} />
+                </TabsContent>
+                <TabsContent value="final">
+                  <FinalReportPanel contractId={contract.id} canManage={canManage} />
+                </TabsContent>
+                <TabsContent value="amendments">
+                  <AmendmentsPanel contractId={contract.id} canManage={canManage} />
+                </TabsContent>
+                <TabsContent value="settlement">
+                  <SettlementPanel contractId={contract.id} canManage={canManage} />
                 </TabsContent>
               </Tabs>
             </div>
