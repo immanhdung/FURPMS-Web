@@ -17,10 +17,6 @@ import {
 import { useAuthStore } from "@/store/auth.store";
 import { formatCurrency, formatDate } from "@/utils/format";
 
-function today() {
-  return new Date().toISOString().slice(0, 10);
-}
-
 /**
  * Quyết toán hợp đồng: lập bảng số liệu → Chủ tài khoản ký → kế toán xác nhận → tài sản xác nhận.
  * Số liệu lấy sẵn từ lịch giải ngân để Staff khỏi cộng tay.
@@ -156,7 +152,7 @@ export function SettlementPanel({ contractId, canManage }: { contractId: string;
       label: "Accounting cleared",
       at: settlement.accountingClearedAt,
       icon: Landmark,
-      action: () => accountingMutation.mutate({ id: settlement.id, clearedDate: today() }),
+      action: () => accountingMutation.mutate({ id: settlement.id }),
       pending: accountingMutation.isPending,
       cta: "Mark cleared",
     },
@@ -165,7 +161,7 @@ export function SettlementPanel({ contractId, canManage }: { contractId: string;
       label: "Assets cleared",
       at: settlement.assetsClearedAt,
       icon: Boxes,
-      action: () => assetsMutation.mutate({ id: settlement.id, clearedDate: today() }),
+      action: () => assetsMutation.mutate({ id: settlement.id }),
       pending: assetsMutation.isPending,
       cta: "Mark cleared",
     },

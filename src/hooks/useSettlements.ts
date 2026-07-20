@@ -50,7 +50,7 @@ export function useSignSettlementMutation(contractId: string) {
 }
 
 export function useMarkAccountingClearedMutation(contractId: string) {
-  return useSettlementAction<{ id: number; clearedDate: string }>(
+  return useSettlementAction<{ id: number; clearedDate?: string }>(
     contractId,
     ({ id, clearedDate }) => settlementService.markAccountingCleared(id, clearedDate),
     "Accounting marked as cleared.",
@@ -59,7 +59,7 @@ export function useMarkAccountingClearedMutation(contractId: string) {
 }
 
 export function useMarkAssetsClearedMutation(contractId: string) {
-  return useSettlementAction<{ id: number; clearedDate: string }>(
+  return useSettlementAction<{ id: number; clearedDate?: string }>(
     contractId,
     ({ id, clearedDate }) => settlementService.markAssetsCleared(id, clearedDate),
     "Assets marked as cleared.",

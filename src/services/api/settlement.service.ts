@@ -15,12 +15,12 @@ export const settlementService = {
   sign: (id: number, sideASigneeId: string) =>
     axiosClient.post<ApiResponse<Settlement>>(`/settlements/${id}/sign`, { sideASigneeId }).then((res) => res.data.data),
 
-  markAccountingCleared: (id: number, clearedDate: string) =>
+  markAccountingCleared: (id: number, clearedDate?: string) =>
     axiosClient
       .post<ApiResponse<Settlement>>(`/settlements/${id}/accounting-cleared`, { clearedDate })
       .then((res) => res.data.data),
 
-  markAssetsCleared: (id: number, clearedDate: string) =>
+  markAssetsCleared: (id: number, clearedDate?: string) =>
     axiosClient
       .post<ApiResponse<Settlement>>(`/settlements/${id}/assets-cleared`, { clearedDate })
       .then((res) => res.data.data),
