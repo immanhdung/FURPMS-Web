@@ -72,6 +72,11 @@ export function Step2ResearchContent({ form, file, onFileChange }: Step2Props) {
 
   return (
     <div className="space-y-5">
+      <p className="rounded-lg border border-border bg-muted/40 p-3 text-sm text-muted-foreground">
+        This step is optional. Upload your draft to prefill the form with AI, or press{" "}
+        <span className="font-medium text-foreground">Next</span> and enter everything manually.
+      </p>
+
       {isApplied && (
         <div>
           <label className="mb-1.5 block text-sm font-medium text-foreground">Imported Research Topic</label>

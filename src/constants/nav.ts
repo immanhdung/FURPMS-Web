@@ -25,7 +25,7 @@ import {
   Star,
   Contact,
 } from "lucide-react";
-import { ROLES } from "@/constants/roles";
+import { ALL_ROLES, ROLES } from "@/constants/roles";
 import type { Role } from "@/constants/roles";
 import { ROUTES } from "@/constants/routes";
 import type { NavItem } from "@/types/nav";
@@ -43,7 +43,7 @@ export const NAV_ITEMS: NavItem[] = [
   { label: "Financial Config", path: ROUTES.FINANCIAL_CONFIG, icon: Settings2, roles: [ROLES.ADMIN] },
   { label: "Analytics", path: ROUTES.ANALYTICS, icon: BarChart3, roles: [ROLES.ADMIN, ROLES.STAFF] },
   { label: "Notifications", path: ROUTES.NOTIFICATIONS, icon: Bell, roles: [ROLES.ADMIN, ROLES.STAFF, ROLES.FACULTY, ROLES.REVIEW_COMMITTEE] },
-  { label: "Settings", path: ROUTES.SETTINGS, icon: Settings, roles: [ROLES.ADMIN] },
+  { label: "Settings", path: ROUTES.SETTINGS, icon: Settings, roles: ALL_ROLES },
 
   // Staff
   { label: "Dashboard", path: ROUTES.DASHBOARD, icon: LayoutDashboard, roles: [ROLES.STAFF] },

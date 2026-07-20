@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Env local của từng máy (template: .env.example)
+.env
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

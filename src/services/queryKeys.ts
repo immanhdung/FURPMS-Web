@@ -36,6 +36,7 @@ export const queryKeys = {
   tracks: {
     all: () => ["tracks"] as const,
     list: () => ["tracks", "list"] as const,
+    byCycle: (cycleId: number) => ["tracks", "byCycle", cycleId] as const,
   },
   notifications: {
     all: () => ["notifications"] as const,
