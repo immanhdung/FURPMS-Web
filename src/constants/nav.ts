@@ -18,6 +18,7 @@ import {
   FilePlus2,
   FileBarChart,
   FileCheck2,
+  FileSignature,
   Sparkles,
   Mail,
   ClipboardCheck,
@@ -50,6 +51,7 @@ export const NAV_ITEMS: NavItem[] = [
   { label: "Councils", path: ROUTES.COUNCILS, icon: Gavel, roles: [ROLES.STAFF] },
   { label: "Meetings", path: ROUTES.MEETINGS, icon: CalendarClock, roles: [ROLES.STAFF, ROLES.REVIEW_COMMITTEE] },
   { label: "Assignments", path: ROUTES.ASSIGNMENTS, icon: UserCheck, roles: [ROLES.STAFF] },
+  { label: "Contracts", path: ROUTES.CONTRACTS, icon: FileSignature, roles: [ROLES.STAFF] },
 
   // PI (Faculty)
   { label: "Dashboard", path: ROUTES.DASHBOARD, icon: LayoutDashboard, roles: [ROLES.FACULTY] },

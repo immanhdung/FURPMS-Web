@@ -23,6 +23,7 @@ export const ROUTES = {
   COUNCILS: "/councils",
   MEETINGS: "/meetings",
   ASSIGNMENTS: "/assignments",
+  CONTRACTS: "/contracts",
 
   MY_PROPOSALS: "/my-proposals",
   SUBMIT_PROPOSAL: "/proposals/submit",

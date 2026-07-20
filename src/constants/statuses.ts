@@ -96,6 +96,14 @@ export const REVIEW_DECISION = {
 } as const;
 export type ReviewDecision = (typeof REVIEW_DECISION)[keyof typeof REVIEW_DECISION];
 
+/** Exact strings expected by AddCouncilMemberRequest.memberRole (confirmed via the working create-member flow). */
+export const COUNCIL_MEMBER_ROLE = {
+  CHAIRMAN: "Chairman",
+  SECRETARY: "Secretary",
+  MEMBER: "Member",
+} as const;
+export type CouncilMemberRole = (typeof COUNCIL_MEMBER_ROLE)[keyof typeof COUNCIL_MEMBER_ROLE];
+
 export const RESEARCH_TYPE = {
   BASIC: "BASIC",
   APPLIED: "APPLIED",

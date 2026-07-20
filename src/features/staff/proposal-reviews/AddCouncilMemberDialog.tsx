@@ -16,8 +16,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAddCouncilMemberMutation } from "@/hooks/useCouncilMembers";
 import { useUsersQuery } from "@/hooks/useUsers";
 import { useSuggestReviewersMutation } from "@/hooks/useProposalAi";
+import { COUNCIL_MEMBER_ROLE } from "@/constants/statuses";
 
-const COUNCIL_MEMBER_ROLES = ["Chairman", "Secretary", "Member"];
+const COUNCIL_MEMBER_ROLES = Object.values(COUNCIL_MEMBER_ROLE);
 
 interface AddCouncilMemberDialogProps {
   open: boolean;

@@ -12,6 +12,7 @@ import { RubricScoringForm } from "@/features/reviewer/proposal-review/RubricSco
 import { FeedbackForm } from "@/features/reviewer/proposal-review/FeedbackForm";
 import { AcceptanceEvaluationForm } from "@/features/reviewer/proposal-review/AcceptanceEvaluationForm";
 import { DecisionView } from "@/features/reviewer/proposal-review/DecisionView";
+import { CouncilMinutesPanel } from "@/features/staff/proposal-reviews/CouncilMinutesPanel";
 import { REVIEW_ROUND_TYPE } from "@/constants/statuses";
 import { ROUTES } from "@/constants/routes";
 import { formatDateTime } from "@/utils/format";
@@ -92,6 +93,7 @@ export function ProposalReviewWorkspace() {
           <TabsTrigger value="scoring">Scoring</TabsTrigger>
           <TabsTrigger value="feedback">Feedback</TabsTrigger>
           {isAcceptanceRound && <TabsTrigger value="acceptance">Acceptance</TabsTrigger>}
+          <TabsTrigger value="minutes">Minutes</TabsTrigger>
           <TabsTrigger value="decision">Decision</TabsTrigger>
         </TabsList>
 
@@ -108,6 +110,10 @@ export function ProposalReviewWorkspace() {
             <AcceptanceEvaluationForm councilId={councilId} />
           </TabsContent>
         )}
+
+        <TabsContent value="minutes">
+          <CouncilMinutesPanel councilId={councilId} proposalId={membership.proposalId} />
+        </TabsContent>
 
         <TabsContent value="decision">
           <DecisionView councilId={councilId} />

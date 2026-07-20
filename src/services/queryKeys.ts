@@ -81,6 +81,7 @@ export const queryKeys = {
   },
   scores: {
     my: (councilId: string) => ["scores", "my", councilId] as const,
+    all: (councilId: string) => ["scores", "all", councilId] as const,
   },
   feedback: {
     list: (councilId: string) => ["feedback", "list", councilId] as const,
@@ -93,5 +94,15 @@ export const queryKeys = {
   },
   systemClock: {
     detail: () => ["system-clock"] as const,
+  },
+  contracts: {
+    all: () => ["contracts"] as const,
+    list: () => ["contracts", "list"] as const,
+    detail: (id: string) => ["contracts", "detail", id] as const,
+  },
+  progressReports: {
+    all: () => ["progress-reports"] as const,
+    list: (contractId: string) => ["progress-reports", "list", contractId] as const,
+    detail: (id: string) => ["progress-reports", "detail", id] as const,
   },
 } as const;

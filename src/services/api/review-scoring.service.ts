@@ -18,4 +18,9 @@ export const reviewScoringService = {
     axiosClient
       .get<ApiResponse<ScoreResponse | null>>(`/review-scoring/councils/${councilId}/scores/my`)
       .then((res) => res.data.data),
+
+  getAllScores: (councilId: string) =>
+    axiosClient
+      .get<ApiResponse<ScoreResponse[]>>(`/review-scoring/councils/${councilId}/scores`)
+      .then((res) => res.data.data),
 };

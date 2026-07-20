@@ -8,3 +8,12 @@ export interface DecisionResponse {
   secretaryUserId?: string | null;
   finalizedAt?: string | null;
 }
+
+export interface FinalizeDecisionPayload {
+  projectId?: string;
+  result: string;
+  councilComments?: string;
+  recommendations?: string;
+  chairUserId?: string;
+  secretaryUserId?: string;
+}

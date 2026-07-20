@@ -61,6 +61,9 @@ const AssignmentsPage = lazy(() =>
   import("@/features/staff/assignments/AssignmentsPage").then((m) => ({ default: m.AssignmentsPage }))
 );
 const MeetingsPage = lazy(() => import("@/features/staff/meetings/MeetingsPage").then((m) => ({ default: m.MeetingsPage })));
+const ContractsPage = lazy(() =>
+  import("@/features/staff/contracts/ContractsPage").then((m) => ({ default: m.ContractsPage }))
+);
 const MyProposalsPage = lazy(() =>
   import("@/features/pi/proposals/MyProposalsPage").then((m) => ({ default: m.MyProposalsPage }))
 );
@@ -106,6 +109,7 @@ const FEATURE_PAGES: Partial<Record<string, ComponentType>> = {
   [ROUTES.COUNCILS]: CouncilsPage,
   [ROUTES.ASSIGNMENTS]: AssignmentsPage,
   [ROUTES.MEETINGS]: MeetingsPage,
+  [ROUTES.CONTRACTS]: ContractsPage,
   [ROUTES.MY_PROPOSALS]: MyProposalsPage,
   [ROUTES.SUBMIT_PROPOSAL]: ProposalWizardPage,
   [ROUTES.INVITATIONS]: InvitationsPage,
