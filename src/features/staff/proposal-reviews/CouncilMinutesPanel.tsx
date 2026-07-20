@@ -14,9 +14,10 @@ import { useFeedbackListQuery } from "@/hooks/useFeedback";
 import { useDecisionQuery, useFinalizeDecisionMutation } from "@/hooks/useDecision";
 import { useSaveMinutesMutation } from "@/hooks/useMinutes";
 import { useAuthStore } from "@/store/auth.store";
-import { COUNCIL_MEMBER_ROLE, PROPOSAL_STATUS } from "@/constants/statuses";
+import { COUNCIL_MEMBER_ROLE, PROPOSAL_STATUS, REVIEW_DECISION } from "@/constants/statuses";
 import { formatDateTime } from "@/utils/format";
 import { DecisionView } from "@/features/reviewer/proposal-review/DecisionView";
+import type { ApiError } from "@/types/common";
 
 interface CouncilMinutesPanelProps {
   councilId: string;
@@ -38,8 +39,10 @@ export function CouncilMinutesPanel({ councilId, proposalId }: CouncilMinutesPan
   const { data: proposal, isLoading: isProposalLoading } = useProposalQuery(proposalId);
   const { data: members, isLoading: isMembersLoading } = useCouncilMembersQuery(councilId);
   const { data: meetings } = useCouncilMeetingsQuery(councilId);
-  const { data: scores } = useAllScoresQuery(councilId);
-  const { data: feedbackList } = useFeedbackListQuery(councilId);
+  const { data: scores, error: scoresError } = useAllScoresQuery(councilId);
+  const { data: feedbackList, error: feedbackError } = useFeedbackListQuery(councilId);
+  const isScoresForbidden = (scoresError as ApiError | null)?.status === 403;
+  const isFeedbackForbidden = (feedbackError as ApiError | null)?.status === 403;
   const { data: decision, isLoading: isDecisionLoading } = useDecisionQuery(councilId);
 
   const saveMinutesMutation = useSaveMinutesMutation(councilId);
@@ -137,7 +140,11 @@ export function CouncilMinutesPanel({ councilId, proposalId }: CouncilMinutesPan
 
         <div>
           <p className="text-xs font-medium text-muted-foreground">Scores</p>
-          {scores && scores.length > 0 ? (
+          {isScoresForbidden ? (
+            <p className="mt-1 text-sm text-warning">
+              You don't have permission to view council scores. Ask staff to check this with you.
+            </p>
+          ) : scores && scores.length > 0 ? (
             <ul className="mt-1 space-y-1">
               {scores.map((score) => {
                 const total = score.scoreDetails?.reduce((sum, d) => sum + (d.givenScore || 0), 0) ?? 0;
@@ -159,7 +166,11 @@ export function CouncilMinutesPanel({ councilId, proposalId }: CouncilMinutesPan
 
         <div>
           <p className="text-xs font-medium text-muted-foreground">Reviewer feedback</p>
-          {feedbackList && feedbackList.length > 0 ? (
+          {isFeedbackForbidden ? (
+            <p className="mt-1 text-sm text-warning">
+              You don't have permission to view reviewer feedback. Ask staff to check this with you.
+            </p>
+          ) : feedbackList && feedbackList.length > 0 ? (
             <ul className="mt-1 space-y-1">
               {feedbackList.map((feedback) => (
                 <li key={feedback.id} className="text-sm text-foreground">
@@ -190,7 +201,17 @@ export function CouncilMinutesPanel({ councilId, proposalId }: CouncilMinutesPan
             </div>
             <Button
               onClick={() =>
-                saveMinutesMutation.mutate({ projectId: proposalId, councilComments, recommendations })
+                saveMinutesMutation.mutate({
+                  projectId: proposalId,
+                  // The backend requires Result to be one of APPROVED/REJECTED/REVISION_REQUIRED
+                  // (confirmed live) — but per this project's design, the secretary doesn't choose
+                  // the outcome, only the chairman does (via /decision). REVISION_REQUIRED is the
+                  // least presumptuous placeholder: it doesn't claim Pass or Fail before the
+                  // chairman actually decides.
+                  result: REVIEW_DECISION.REVISION_REQUIRED,
+                  councilComments,
+                  recommendations,
+                })
               }
               disabled={saveMinutesMutation.isPending}
             >

@@ -13,7 +13,7 @@ import { FeedbackForm } from "@/features/reviewer/proposal-review/FeedbackForm";
 import { AcceptanceEvaluationForm } from "@/features/reviewer/proposal-review/AcceptanceEvaluationForm";
 import { DecisionView } from "@/features/reviewer/proposal-review/DecisionView";
 import { CouncilMinutesPanel } from "@/features/staff/proposal-reviews/CouncilMinutesPanel";
-import { REVIEW_ROUND_TYPE } from "@/constants/statuses";
+import { COUNCIL_MEMBER_ROLE, REVIEW_ROUND_TYPE } from "@/constants/statuses";
 import { ROUTES } from "@/constants/routes";
 import { formatDateTime } from "@/utils/format";
 
@@ -37,6 +37,8 @@ export function ProposalReviewWorkspace() {
   }
 
   const isAcceptanceRound = membership.roundType?.toUpperCase() === REVIEW_ROUND_TYPE.ACCEPTANCE;
+  // The secretary compiles the meeting minutes rather than scoring the proposal themselves.
+  const isSecretary = membership.memberRole === COUNCIL_MEMBER_ROLE.SECRETARY;
 
   return (
     <div className="mx-auto max-w-3xl space-y-5">
@@ -88,18 +90,20 @@ export function ProposalReviewWorkspace() {
         </div>
       )}
 
-      <Tabs defaultValue="scoring">
+      <Tabs defaultValue={isSecretary ? "minutes" : "scoring"}>
         <TabsList>
-          <TabsTrigger value="scoring">Scoring</TabsTrigger>
+          {!isSecretary && <TabsTrigger value="scoring">Scoring</TabsTrigger>}
           <TabsTrigger value="feedback">Feedback</TabsTrigger>
           {isAcceptanceRound && <TabsTrigger value="acceptance">Acceptance</TabsTrigger>}
           <TabsTrigger value="minutes">Minutes</TabsTrigger>
           <TabsTrigger value="decision">Decision</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="scoring">
-          <RubricScoringForm councilId={councilId} roundType={membership.roundType ?? REVIEW_ROUND_TYPE.REVIEW} />
-        </TabsContent>
+        {!isSecretary && (
+          <TabsContent value="scoring">
+            <RubricScoringForm councilId={councilId} roundType={membership.roundType ?? REVIEW_ROUND_TYPE.REVIEW} />
+          </TabsContent>
+        )}
 
         <TabsContent value="feedback">
           <FeedbackForm councilId={councilId} />
