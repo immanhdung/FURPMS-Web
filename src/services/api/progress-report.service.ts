@@ -30,4 +30,7 @@ export const progressReportService = {
     axiosClient
       .post<ApiResponse<ProgressReport>>(`/progress-reports/${id}/evaluate`, payload)
       .then((res) => res.data.data),
+
+  submit: (id: string) =>
+    axiosClient.post<ApiResponse<ProgressReport>>(`/progress-reports/${id}/submit`).then((res) => res.data.data),
 };

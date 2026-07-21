@@ -104,6 +104,34 @@ export const COUNCIL_MEMBER_ROLE = {
 } as const;
 export type CouncilMemberRole = (typeof COUNCIL_MEMBER_ROLE)[keyof typeof COUNCIL_MEMBER_ROLE];
 
+/**
+ * The backend doesn't document response schemas for Disbursement/Settlement/FinalReport (the
+ * swagger spec has request DTOs only, no response DTOs — same weak-typing pattern seen elsewhere
+ * in this API). Status field names/values below are unconfirmed guesses following the naming
+ * convention of confirmed enums elsewhere (e.g. REVIEW_DECISION); verify against a live response
+ * and adjust once seen.
+ */
+export const DISBURSEMENT_STATUS = {
+  PENDING: "PENDING",
+  CONFIRMED: "CONFIRMED",
+} as const;
+
+export const SETTLEMENT_STATUS = {
+  DRAFT: "DRAFT",
+  SIGNED: "SIGNED",
+  ACCOUNTING_CLEARED: "ACCOUNTING_CLEARED",
+  ASSETS_CLEARED: "ASSETS_CLEARED",
+  COMPLETED: "COMPLETED",
+} as const;
+
+export const FINAL_REPORT_STATUS = {
+  DRAFT: "DRAFT",
+  SUBMITTED: "SUBMITTED",
+  REVISION_REQUESTED: "REVISION_REQUESTED",
+  ACCEPTED: "ACCEPTED",
+  ARCHIVED: "ARCHIVED",
+} as const;
+
 export const RESEARCH_TYPE = {
   BASIC: "BASIC",
   APPLIED: "APPLIED",

@@ -22,10 +22,10 @@ export function useCreateProgressReportMutation(contractId: string) {
   return useMutation({
     mutationFn: (payload: CreateProgressReportPayload) => progressReportService.create(contractId, payload),
     onSuccess: () => {
-      toast.success("Progress report period created.");
+      toast.success("Progress report saved.");
       queryClient.invalidateQueries({ queryKey: queryKeys.progressReports.list(contractId) });
     },
-    onError: (error: ApiError) => toast.error(error.message || "Unable to create progress report period."),
+    onError: (error: ApiError) => toast.error(error.message || "Unable to save progress report."),
   });
 }
 
@@ -52,5 +52,17 @@ export function useEvaluateProgressReportMutation(contractId: string) {
       queryClient.invalidateQueries({ queryKey: queryKeys.progressReports.list(contractId) });
     },
     onError: (error: ApiError) => toast.error(error.message || "Unable to evaluate progress report."),
+  });
+}
+
+export function useSubmitProgressReportMutation(contractId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => progressReportService.submit(id),
+    onSuccess: () => {
+      toast.success("Progress report submitted.");
+      queryClient.invalidateQueries({ queryKey: queryKeys.progressReports.list(contractId) });
+    },
+    onError: (error: ApiError) => toast.error(error.message || "Unable to submit progress report."),
   });
 }

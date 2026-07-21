@@ -18,10 +18,20 @@ export interface ProgressReport {
   submittedAt?: string | null;
 }
 
-/** Staff only sets the reporting period when creating a round — see CreateProgressReportPayload note below. */
+/**
+ * The backend's CreateProgressReportRequest bundles the reporting period together with all of
+ * the PI-authored content in one DTO, with no separate "edit content" endpoint — so the PI fills
+ * this out directly when creating the report, then calls POST /{id}/submit to finalize it.
+ */
 export interface CreateProgressReportPayload {
   reportingPeriodStart?: string;
   reportingPeriodEnd?: string;
+  completedContent?: string;
+  pendingContent?: string;
+  overallCompletionPct?: number;
+  expenditureToDate?: number;
+  nextPeriodPlan?: string;
+  piRecommendations?: string;
 }
 
 export interface ScheduleProgressReportPayload {
