@@ -3,7 +3,9 @@ export interface ProposalSummary {
   titleVI?: string | null;
   titleEN?: string | null;
   cycleId?: number | null;
+  cycleName?: string | null;
   trackId?: string | null;
+  trackName?: string | null;
   status?: string | null;
   researchType?: number | null;
   createdAt?: string | null;

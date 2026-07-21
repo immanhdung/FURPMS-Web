@@ -50,8 +50,9 @@ export function ProposalSummaryView({ data, cycleName, trackName, researchTypeNa
           </div>
 
           <div>
-            <p className="text-lg font-semibold text-foreground">{data.titleEN || "Untitled proposal"}</p>
-            {data.titleVI && <p className="text-sm text-muted-foreground">{data.titleVI}</p>}
+            {/* Đề tài có thể chỉ có tên tiếng Việt — ưu tiên tên chính, đừng để "Untitled" khi vẫn có titleVI. */}
+            <p className="text-lg font-semibold text-foreground">{data.titleVI || data.titleEN || "Untitled proposal"}</p>
+            {data.titleEN && data.titleVI && <p className="text-sm text-muted-foreground">{data.titleEN}</p>}
           </div>
 
           {data.abstractEN && (

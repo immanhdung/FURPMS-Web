@@ -27,17 +27,18 @@ export function getMyProposalColumns({
   return [
     {
       id: "title",
-      accessorFn: (row) => row.titleEN || row.titleVI || "Untitled proposal",
+      accessorFn: (row) => row.titleVI || row.titleEN || "Untitled proposal",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Title" />,
     },
     {
       id: "cycle",
-      accessorFn: (row) => (row.cycleId ? (cycleNames[row.cycleId] ?? row.cycleId) : "-"),
+      // Ưu tiên tên BE trả sẵn; nếu thiếu thì resolve qua map, cuối cùng mới hiện dấu "-".
+      accessorFn: (row) => row.cycleName ?? (row.cycleId ? cycleNames[row.cycleId] : null) ?? "-",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Cycle" />,
     },
     {
       id: "track",
-      accessorFn: (row) => (row.trackId ? (trackNames[row.trackId] ?? row.trackId) : "-"),
+      accessorFn: (row) => row.trackName ?? (row.trackId ? trackNames[row.trackId] : null) ?? "-",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Research Field" />,
     },
     {
