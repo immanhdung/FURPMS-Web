@@ -20,6 +20,7 @@ export const ROUTES = {
   CHANGE_PASSWORD: "/change-password",
 
   PROPOSAL_REVIEWS: "/proposal-reviews",
+  REVIEW_BOARD: "/review-board",
   COUNCILS: "/councils",
   MEETINGS: "/meetings",
   ASSIGNMENTS: "/assignments",

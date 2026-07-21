@@ -24,6 +24,7 @@ import {
   ClipboardCheck,
   Star,
   Contact,
+  Scale,
 } from "lucide-react";
 import { ALL_ROLES, ROLES } from "@/constants/roles";
 import type { Role } from "@/constants/roles";
@@ -48,6 +49,7 @@ export const NAV_ITEMS: NavItem[] = [
   // Staff
   { labelKey: "nav.dashboard", path: ROUTES.DASHBOARD, icon: LayoutDashboard, roles: [ROLES.STAFF] },
   { labelKey: "nav.proposalReviews", path: ROUTES.PROPOSAL_REVIEWS, icon: FileCheck2, roles: [ROLES.STAFF] },
+  { labelKey: "nav.reviewBoard", path: ROUTES.REVIEW_BOARD, icon: Scale, roles: [ROLES.ADMIN, ROLES.STAFF] },
   { labelKey: "nav.councils", path: ROUTES.COUNCILS, icon: Gavel, roles: [ROLES.STAFF] },
   { labelKey: "nav.meetings", path: ROUTES.MEETINGS, icon: CalendarClock, roles: [ROLES.STAFF, ROLES.REVIEW_COMMITTEE] },
   { labelKey: "nav.assignments", path: ROUTES.ASSIGNMENTS, icon: UserCheck, roles: [ROLES.STAFF] },

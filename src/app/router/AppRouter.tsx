@@ -57,6 +57,9 @@ const ProposalReviewWorkspace = lazy(() =>
     default: m.ProposalReviewWorkspace,
   }))
 );
+const ReviewBoardPage = lazy(() =>
+  import("@/features/staff/review-board/ReviewBoardPage").then((m) => ({ default: m.ReviewBoardPage }))
+);
 const CouncilsPage = lazy(() => import("@/features/staff/councils/CouncilsPage").then((m) => ({ default: m.CouncilsPage })));
 const AssignmentsPage = lazy(() =>
   import("@/features/staff/assignments/AssignmentsPage").then((m) => ({ default: m.AssignmentsPage }))
@@ -113,6 +116,7 @@ const FEATURE_PAGES: Partial<Record<string, ComponentType>> = {
   [ROUTES.ORGANIZATIONAL_UNITS]: OrganizationalUnitsPage,
   [ROUTES.RUBRIC_CRITERIA]: RubricCriteriaPage,
   [ROUTES.PROPOSAL_REVIEWS]: ProposalReviewsPage,
+  [ROUTES.REVIEW_BOARD]: ReviewBoardPage,
   [ROUTES.COUNCILS]: CouncilsPage,
   [ROUTES.ASSIGNMENTS]: AssignmentsPage,
   [ROUTES.MEETINGS]: MeetingsPage,

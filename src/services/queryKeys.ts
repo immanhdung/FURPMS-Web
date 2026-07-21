@@ -24,6 +24,10 @@ export const queryKeys = {
     all: () => ["review-rounds"] as const,
     list: (proposalId: string) => ["review-rounds", "list", proposalId] as const,
   },
+  reviewBoard: {
+    all: () => ["review-board"] as const,
+    board: (cycleId: number, trackId: number) => ["review-board", cycleId, trackId] as const,
+  },
   councilMembers: {
     all: () => ["council-members"] as const,
     list: (councilId: string) => ["council-members", "list", councilId] as const,
