@@ -1,28 +1,30 @@
 import { Fragment } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ChevronRight, Home } from "lucide-react";
 import { NAV_ITEMS } from "@/constants/nav";
 import { ROUTES } from "@/constants/routes";
 import { cn } from "@/lib/utils";
 
-function labelForSegment(fullPath: string, segment: string): string {
-  const match = NAV_ITEMS.find((item) => item.path === fullPath);
-  if (match) return match.label;
-  return segment
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
-
 export function Breadcrumb() {
   const { pathname } = useLocation();
+  const { t } = useTranslation();
   const segments = pathname.split("/").filter(Boolean);
+
+  const labelForSegment = (fullPath: string, segment: string): string => {
+    const match = NAV_ITEMS.find((item) => item.path === fullPath);
+    if (match) return t(match.labelKey);
+    return segment
+      .split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
 
   if (pathname === ROUTES.DASHBOARD) {
     return (
       <div className="flex items-center gap-1.5 text-sm font-medium text-foreground">
         <Home className="size-3.5 text-muted-foreground" />
-        Dashboard
+        {t("nav.dashboard")}
       </div>
     );
   }

@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 import { ChevronsLeft, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -28,6 +29,8 @@ function Brand({ collapsed }: { collapsed: boolean }) {
 }
 
 function NavLinkItem({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
+  const { t } = useTranslation();
+  const label = t(item.labelKey);
   const link = (
     <NavLink
       to={item.path}
@@ -41,7 +44,7 @@ function NavLinkItem({ item, collapsed }: { item: NavItem; collapsed: boolean })
       }
     >
       <item.icon className="size-4 shrink-0" />
-      {!collapsed && <span className="truncate">{item.label}</span>}
+      {!collapsed && <span className="truncate">{label}</span>}
     </NavLink>
   );
 
@@ -50,7 +53,7 @@ function NavLinkItem({ item, collapsed }: { item: NavItem; collapsed: boolean })
   return (
     <Tooltip>
       <TooltipTrigger asChild>{link}</TooltipTrigger>
-      <TooltipContent side="right">{item.label}</TooltipContent>
+      <TooltipContent side="right">{label}</TooltipContent>
     </Tooltip>
   );
 }

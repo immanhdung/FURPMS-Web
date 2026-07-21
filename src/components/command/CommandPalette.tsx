@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { KeyRound, LayoutDashboard, LogOut, Moon, Sun, User as UserIcon } from "lucide-react";
 import {
   CommandDialog,
@@ -24,6 +25,7 @@ export function CommandPalette() {
   const user = useAuthStore((state) => state.user);
   const navigate = useNavigate();
   const logout = useLogout();
+  const { t } = useTranslation();
 
   const navItems = useMemo(() => (user ? getNavItemsForRoles(user.roles) : []), [user]);
 
@@ -53,7 +55,7 @@ export function CommandPalette() {
           {navItems.map((item) => (
             <CommandItem key={item.path} onSelect={() => runCommand(() => navigate(item.path))}>
               <item.icon />
-              {item.label}
+              {t(item.labelKey)}
             </CommandItem>
           ))}
         </CommandGroup>
