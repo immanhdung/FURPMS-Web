@@ -106,4 +106,16 @@ export const queryKeys = {
     list: (contractId: string) => ["progress-reports", "list", contractId] as const,
     detail: (id: string) => ["progress-reports", "detail", id] as const,
   },
+  disbursements: {
+    all: () => ["disbursements"] as const,
+    list: (contractId: string) => ["disbursements", "list", contractId] as const,
+  },
+  settlements: {
+    all: () => ["settlements"] as const,
+    detail: (contractId: string) => ["settlements", "detail", contractId] as const,
+  },
+  finalReports: {
+    all: () => ["final-reports"] as const,
+    detail: (contractId: string) => ["final-reports", "detail", contractId] as const,
+  },
 } as const;

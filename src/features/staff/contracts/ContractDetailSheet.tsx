@@ -8,6 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useContractQuery, useSignContractMutation } from "@/hooks/useContracts";
 import { useProposalQuery } from "@/hooks/useProposals";
 import { ProgressReportsPanel } from "@/features/staff/contracts/ProgressReportsPanel";
+import { DisbursementsPanel } from "@/features/staff/contracts/DisbursementsPanel";
+import { FinalReportPanel } from "@/features/staff/contracts/FinalReportPanel";
+import { SettlementPanel } from "@/features/staff/contracts/SettlementPanel";
 import { formatDate } from "@/utils/format";
 
 interface ContractDetailSheetProps {
@@ -76,9 +79,21 @@ export function ContractDetailSheet({ open, onOpenChange, contractId }: Contract
               <Tabs defaultValue="progress">
                 <TabsList>
                   <TabsTrigger value="progress">Progress Reports</TabsTrigger>
+                  <TabsTrigger value="disbursements">Disbursements</TabsTrigger>
+                  <TabsTrigger value="final-report">Final Report</TabsTrigger>
+                  <TabsTrigger value="settlement">Settlement</TabsTrigger>
                 </TabsList>
                 <TabsContent value="progress">
                   <ProgressReportsPanel contractId={contract.id} />
+                </TabsContent>
+                <TabsContent value="disbursements">
+                  <DisbursementsPanel contractId={contract.id} />
+                </TabsContent>
+                <TabsContent value="final-report">
+                  <FinalReportPanel contractId={contract.id} />
+                </TabsContent>
+                <TabsContent value="settlement">
+                  <SettlementPanel contractId={contract.id} />
                 </TabsContent>
               </Tabs>
             </div>

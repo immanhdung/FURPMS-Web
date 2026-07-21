@@ -1,55 +1,22 @@
 import { useState } from "react";
-import { CalendarClock, CalendarPlus, ClipboardCheck, ExternalLink, FileBarChart } from "lucide-react";
+import { CalendarClock, ClipboardCheck, ExternalLink, FileBarChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { useCreateProgressReportMutation, useProgressReportsQuery } from "@/hooks/useProgressReports";
+import { useProgressReportsQuery } from "@/hooks/useProgressReports";
 import { ScheduleProgressReportDialog } from "@/features/staff/contracts/ScheduleProgressReportDialog";
 import { EvaluateProgressReportDialog } from "@/features/staff/contracts/EvaluateProgressReportDialog";
 import { formatDate, formatDateTime } from "@/utils/format";
 
 export function ProgressReportsPanel({ contractId }: { contractId: string }) {
   const { data: reports, isLoading } = useProgressReportsQuery(contractId);
-  const createMutation = useCreateProgressReportMutation(contractId);
 
-  const [periodStart, setPeriodStart] = useState("");
-  const [periodEnd, setPeriodEnd] = useState("");
   const [schedulingReportId, setSchedulingReportId] = useState<string | null>(null);
   const [evaluatingReportId, setEvaluatingReportId] = useState<string | null>(null);
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap items-end gap-2 rounded-lg border border-dashed border-border p-3">
-        <div className="flex-1 min-w-32">
-          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Period start</label>
-          <Input type="date" value={periodStart} onChange={(e) => setPeriodStart(e.target.value)} />
-        </div>
-        <div className="flex-1 min-w-32">
-          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Period end</label>
-          <Input type="date" value={periodEnd} onChange={(e) => setPeriodEnd(e.target.value)} />
-        </div>
-        <Button
-          size="sm"
-          disabled={!periodStart || !periodEnd || createMutation.isPending}
-          onClick={() =>
-            createMutation.mutate(
-              { reportingPeriodStart: periodStart, reportingPeriodEnd: periodEnd },
-              {
-                onSuccess: () => {
-                  setPeriodStart("");
-                  setPeriodEnd("");
-                },
-              }
-            )
-          }
-        >
-          <CalendarPlus />
-          New report period
-        </Button>
-      </div>
-
       {isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 2 }).map((_, index) => (
@@ -57,7 +24,12 @@ export function ProgressReportsPanel({ contractId }: { contractId: string }) {
           ))}
         </div>
       ) : !reports || reports.length === 0 ? (
-        <EmptyState icon={FileBarChart} title="No progress report periods yet" className="min-h-32 border-none p-4" />
+        <EmptyState
+          icon={FileBarChart}
+          title="No progress reports yet"
+          description="The PI hasn't submitted a progress report for this contract."
+          className="min-h-32 border-none p-4"
+        />
       ) : (
         <ul className="space-y-2">
           {reports.map((report) => (
@@ -66,7 +38,11 @@ export function ProgressReportsPanel({ contractId }: { contractId: string }) {
                 <p className="text-sm font-medium text-foreground">
                   {formatDate(report.reportingPeriodStart)} – {formatDate(report.reportingPeriodEnd)}
                 </p>
-                {report.status && <StatusBadge status={report.status} />}
+                {report.status ? (
+                  <StatusBadge status={report.status} />
+                ) : !report.submittedAt ? (
+                  <span className="text-xs text-muted-foreground">Not submitted yet</span>
+                ) : null}
               </div>
 
               {report.dueDate && (

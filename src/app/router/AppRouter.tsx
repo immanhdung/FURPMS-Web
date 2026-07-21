@@ -95,6 +95,12 @@ const AnalyticsPage = lazy(() => import("@/features/analytics/AnalyticsPage").th
 const SemanticSearchPage = lazy(() =>
   import("@/features/pi/ai-search/SemanticSearchPage").then((m) => ({ default: m.SemanticSearchPage }))
 );
+const PiProgressReportsPage = lazy(() =>
+  import("@/features/pi/progress-reports/ProgressReportsPage").then((m) => ({ default: m.ProgressReportsPage }))
+);
+const PiFinalReportsPage = lazy(() =>
+  import("@/features/pi/final-reports/FinalReportsPage").then((m) => ({ default: m.FinalReportsPage }))
+);
 
 const FEATURE_PAGES: Partial<Record<string, ComponentType>> = {
   [ROUTES.NOTIFICATIONS]: NotificationsPage,
@@ -120,6 +126,8 @@ const FEATURE_PAGES: Partial<Record<string, ComponentType>> = {
   [ROUTES.ANALYTICS]: AnalyticsPage,
   [ROUTES.AI_SEARCH]: SemanticSearchPage,
   [ROUTES.SETTINGS]: SettingsPage,
+  [ROUTES.PROGRESS_REPORTS]: PiProgressReportsPage,
+  [ROUTES.FINAL_REPORTS]: PiFinalReportsPage,
 };
 
 const proposalReviewsRoles = NAV_ITEMS.find((item) => item.path === ROUTES.PROPOSAL_REVIEWS)?.roles ?? [];
