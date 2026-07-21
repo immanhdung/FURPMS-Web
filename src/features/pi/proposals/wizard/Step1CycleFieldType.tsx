@@ -1,4 +1,5 @@
 import type { UseFormReturn } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { Controller } from "react-hook-form";
 import { motion } from "motion/react";
 import { Check } from "lucide-react";
@@ -12,6 +13,7 @@ import { cn } from "@/lib/utils";
 import type { ProposalWizardValues } from "@/features/pi/proposals/wizard/proposal-wizard.schema";
 
 export function Step1CycleFieldType({ form }: { form: UseFormReturn<ProposalWizardValues> }) {
+  const { t } = useTranslation();
   const {
     control,
     watch,
@@ -29,7 +31,7 @@ export function Step1CycleFieldType({ form }: { form: UseFormReturn<ProposalWiza
   return (
     <div className="space-y-5">
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Research Cycle</label>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("wizard.step1.cycle")}</label>
         <Controller
           control={control}
           name="cycleId"
@@ -43,7 +45,7 @@ export function Step1CycleFieldType({ form }: { form: UseFormReturn<ProposalWiza
               disabled={isCyclesLoading}
             >
               <SelectTrigger aria-invalid={Boolean(errors.cycleId)} className="w-full">
-                <SelectValue placeholder="Select an open cycle" />
+                <SelectValue placeholder={t("wizard.step1.selectCycle")} />
               </SelectTrigger>
               <SelectContent>
                 {openCycles.map((cycle) => (
@@ -57,12 +59,12 @@ export function Step1CycleFieldType({ form }: { form: UseFormReturn<ProposalWiza
         />
         {errors.cycleId && <p className="mt-1 text-xs text-destructive">{errors.cycleId.message}</p>}
         {!isCyclesLoading && openCycles.length === 0 && (
-          <p className="mt-1 text-xs text-warning">No cycles are currently open for submission.</p>
+          <p className="mt-1 text-xs text-warning">{t("wizard.step1.noCycles")}</p>
         )}
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Research Field</label>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("wizard.step1.field")}</label>
         <Controller
           control={control}
           name="trackId"
@@ -73,7 +75,7 @@ export function Step1CycleFieldType({ form }: { form: UseFormReturn<ProposalWiza
               disabled={!selectedCycleId || isTracksLoading}
             >
               <SelectTrigger aria-invalid={Boolean(errors.trackId)} className="w-full">
-                <SelectValue placeholder={selectedCycleId ? "Select a research field" : "Choose a cycle first"} />
+                <SelectValue placeholder={selectedCycleId ? t("wizard.step1.selectField") : t("wizard.step1.chooseCycleFirst")} />
               </SelectTrigger>
               <SelectContent>
                 {tracks?.map((track) => (
@@ -87,12 +89,12 @@ export function Step1CycleFieldType({ form }: { form: UseFormReturn<ProposalWiza
         />
         {errors.trackId && <p className="mt-1 text-xs text-destructive">{errors.trackId.message}</p>}
         {selectedCycleId && !isTracksLoading && (tracks?.length ?? 0) === 0 && (
-          <p className="mt-1 text-xs text-warning">This cycle has no research fields yet — contact the research office.</p>
+          <p className="mt-1 text-xs text-warning">{t("wizard.step1.noFields")}</p>
         )}
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Research Type</label>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("wizard.step1.type")}</label>
         <Controller
           control={control}
           name="researchType"
@@ -122,8 +124,8 @@ export function Step1CycleFieldType({ form }: { form: UseFormReturn<ProposalWiza
                           <p className="text-sm font-medium text-foreground">{type.name}</p>
                           <p className="mt-1 text-xs text-muted-foreground">
                             {type.requireOrderingUnit
-                              ? "Register for a topic ordered by a unit — several PIs may compete for it"
-                              : "Propose your own topic — you define the problem, objectives, and plan"}
+                              ? t("wizard.step1.appliedHint")
+                              : t("wizard.step1.basicHint")}
                           </p>
                         </div>
                         {isSelected && (
@@ -140,7 +142,7 @@ export function Step1CycleFieldType({ form }: { form: UseFormReturn<ProposalWiza
           )}
         />
         {errors.researchType && <p className="mt-1 text-xs text-destructive">{errors.researchType.message}</p>}
-        {isTypesLoading && <p className="mt-1 text-xs text-muted-foreground">Loading research types...</p>}
+        {isTypesLoading && <p className="mt-1 text-xs text-muted-foreground">{t("wizard.step1.loadingTypes")}</p>}
       </div>
     </div>
   );

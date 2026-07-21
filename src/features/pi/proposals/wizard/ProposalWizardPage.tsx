@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -84,6 +85,7 @@ const SAMPLE_CONTENT: Partial<ProposalWizardValues> = {
 export function ProposalWizardPage() {
   const { proposalId: routeProposalId } = useParams<{ proposalId: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const isEdit = Boolean(routeProposalId);
   const sampleFillEnabled = useUiStore((state) => state.sampleFillEnabled);
   const { data: cycles } = useCyclesQuery();
@@ -135,13 +137,13 @@ export function ProposalWizardPage() {
 
     if (proposalId) {
       const result = await updateMutation.mutateAsync({ id: proposalId, payload });
-      toast.success("Draft saved.");
+      toast.success(t("wizard.draftSaved"));
       return result.id;
     }
 
     const result = await createMutation.mutateAsync(payload);
     setProposalId(result.id);
-    toast.success("Draft saved.");
+    toast.success(t("wizard.draftSaved"));
     return result.id;
   };
 
@@ -185,9 +187,9 @@ export function ProposalWizardPage() {
 
     if (openCycle && trackId && selfProposeType) {
       setCurrentStep(WIZARD_STEPS.length - 1); // jump to Preview & Submit
-      toast.success("Sample proposal ready — review and submit.");
+      toast.success(t("wizard.sampleReady"));
     } else {
-      toast.success("Sample content filled — pick the cycle, field, and type to continue.");
+      toast.success(t("wizard.samplePicked"));
     }
   };
 
@@ -202,7 +204,7 @@ export function ProposalWizardPage() {
   const handleOpenSubmit = async () => {
     const isValid = await form.trigger();
     if (!isValid) {
-      toast.error("Please complete the required fields before submitting.");
+      toast.error(t("wizard.completeRequired"));
       return;
     }
     try {
@@ -214,7 +216,7 @@ export function ProposalWizardPage() {
   };
 
   if (isEdit && isLoadingExisting) {
-    return <PageLoader label="Loading proposal..." />;
+    return <PageLoader label={t("wizard.loadingProposal")} />;
   }
 
   const isLastStep = currentStep === WIZARD_STEPS.length - 1;
@@ -224,19 +226,19 @@ export function ProposalWizardPage() {
       <div>
         <Button variant="ghost" size="sm" className="-ml-2" onClick={() => navigate(ROUTES.MY_PROPOSALS)}>
           <ArrowLeft />
-          Back to my proposals
+          {t("wizard.backToProposals")}
         </Button>
         <div className="mt-2 flex items-start justify-between gap-3">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-              {isEdit ? "Edit Proposal" : "Submit New Proposal"}
+              {isEdit ? t("wizard.editTitle") : t("wizard.newTitle")}
             </h1>
-            <p className="mt-1 text-sm text-muted-foreground">{WIZARD_STEPS[currentStep].description}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{t(WIZARD_STEPS[currentStep].descKey)}</p>
           </div>
           {sampleFillEnabled && (
             <Button type="button" variant="outline" size="sm" className="shrink-0" onClick={handleFillSample}>
               <Wand2 />
-              Fill with sample data
+              {t("wizard.fillSample")}
             </Button>
           )}
         </div>
@@ -263,17 +265,17 @@ export function ProposalWizardPage() {
         <div className="flex items-center gap-2">
           <Button type="button" variant="outline" onClick={handleSaveDraft} disabled={isSaving}>
             {isSaving ? <Loader2 className="animate-spin" /> : <Save />}
-            Save draft
+            {t("wizard.saveDraft")}
           </Button>
 
           {isLastStep ? (
             <Button type="button" onClick={handleOpenSubmit} disabled={isSaving}>
               {isSaving && <Loader2 className="animate-spin" />}
-              Submit proposal
+              {t("common.submit")}
             </Button>
           ) : (
             <Button type="button" onClick={handleNext}>
-              Next
+              {t("wizard.next")}
               <ArrowRight />
             </Button>
           )}

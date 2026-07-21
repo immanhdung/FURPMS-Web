@@ -45,10 +45,11 @@ export const WIZARD_STEP_FIELDS: Record<number, (keyof ProposalWizardValues)[]> 
   4: [],
 };
 
+// Nhãn dịch lúc render (t(titleKey)) vì đây là const cấp module, không gọi được hook.
 export const WIZARD_STEPS = [
-  { title: "Cycle & Field", description: "Choose the cycle, field, and type of research" },
-  { title: "Research Content", description: "Optional: upload a draft and let AI prefill the form" },
-  { title: "Proposal Details", description: "Describe your research" },
-  { title: "Team Members", description: "Add collaborators" },
-  { title: "Preview & Submit", description: "Review everything before submitting" },
+  { titleKey: "wizard.steps.cycle.title", descKey: "wizard.steps.cycle.desc" },
+  { titleKey: "wizard.steps.content.title", descKey: "wizard.steps.content.desc" },
+  { titleKey: "wizard.steps.details.title", descKey: "wizard.steps.details.desc" },
+  { titleKey: "wizard.steps.team.title", descKey: "wizard.steps.team.desc" },
+  { titleKey: "wizard.steps.preview.title", descKey: "wizard.steps.preview.desc" },
 ];
