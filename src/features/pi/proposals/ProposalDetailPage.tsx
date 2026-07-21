@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, Ban, Pencil, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -23,6 +24,7 @@ import { ROUTES } from "@/constants/routes";
 export function ProposalDetailPage() {
   const { proposalId } = useParams<{ proposalId: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const { data: proposal, isLoading, isError, refetch, isRefetching } = useProposalQuery(proposalId ?? null);
   const { data: cycles } = useCyclesQuery();
@@ -48,14 +50,14 @@ export function ProposalDetailPage() {
     <div className="mx-auto max-w-3xl space-y-5">
       <Button variant="ghost" size="sm" className="-ml-2" onClick={() => navigate(ROUTES.MY_PROPOSALS)}>
         <ArrowLeft />
-        Back to my proposals
+        {t("proposal.backToList")}
       </Button>
 
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-              {proposal.titleEN || proposal.titleVI || "Untitled proposal"}
+              {proposal.titleVI || proposal.titleEN || t("proposal.untitled")}
             </h1>
             <StatusBadge status={status} />
           </div>
@@ -65,19 +67,19 @@ export function ProposalDetailPage() {
           {isDraft && (
             <Button variant="outline" onClick={() => navigate(`${ROUTES.SUBMIT_PROPOSAL}/${proposal.id}`)}>
               <Pencil />
-              Edit
+              {t("common.edit")}
             </Button>
           )}
           {isDraft && (
             <Button onClick={() => setSubmitOpen(true)}>
               <Send />
-              Submit
+              {t("common.submit")}
             </Button>
           )}
           {canWithdraw && (
             <Button variant="destructive" onClick={() => setWithdrawOpen(true)}>
               <Ban />
-              Withdraw
+              {t("proposal.withdraw")}
             </Button>
           )}
         </div>
@@ -109,10 +111,10 @@ export function ProposalDetailPage() {
       <ConfirmDialog
         open={withdrawOpen}
         onOpenChange={setWithdrawOpen}
-        title="Withdraw proposal"
-        description="Are you sure you want to withdraw this proposal? This cannot be undone."
+        title={t("proposal.withdrawConfirmTitle")}
+        description={t("proposal.withdrawConfirmDesc")}
         variant="destructive"
-        confirmLabel="Withdraw"
+        confirmLabel={t("proposal.withdraw")}
         isLoading={withdrawMutation.isPending}
         onConfirm={() => withdrawMutation.mutate(proposal.id, { onSuccess: () => setWithdrawOpen(false) })}
       />

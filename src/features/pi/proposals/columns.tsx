@@ -7,7 +7,10 @@ import { PROPOSAL_STATUS } from "@/constants/statuses";
 import { formatDate } from "@/utils/format";
 import type { ProposalSummary } from "@/types/proposal-summary";
 
+import type { TFunction } from "i18next";
+
 interface GetMyProposalColumnsOptions {
+  t: TFunction;
   cycleNames: Record<number, string>;
   trackNames: Record<string, string>;
   onView: (proposal: ProposalSummary) => void;
@@ -17,6 +20,7 @@ interface GetMyProposalColumnsOptions {
 }
 
 export function getMyProposalColumns({
+  t,
   cycleNames,
   trackNames,
   onView,
@@ -27,28 +31,28 @@ export function getMyProposalColumns({
   return [
     {
       id: "title",
-      accessorFn: (row) => row.titleVI || row.titleEN || "Untitled proposal",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Title" />,
+      accessorFn: (row) => row.titleVI || row.titleEN || t("proposal.untitled"),
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t("proposal.title")} />,
     },
     {
       id: "cycle",
       // Ưu tiên tên BE trả sẵn; nếu thiếu thì resolve qua map, cuối cùng mới hiện dấu "-".
       accessorFn: (row) => row.cycleName ?? (row.cycleId ? cycleNames[row.cycleId] : null) ?? "-",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Cycle" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t("proposal.cycle")} />,
     },
     {
       id: "track",
       accessorFn: (row) => row.trackName ?? (row.trackId ? trackNames[row.trackId] : null) ?? "-",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Research Field" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t("proposal.researchField")} />,
     },
     {
       accessorKey: "status",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t("common.status")} />,
       cell: ({ row }) => (row.original.status ? <StatusBadge status={row.original.status} /> : <StatusBadge status={PROPOSAL_STATUS.DRAFT} />),
     },
     {
       accessorKey: "createdAt",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Created" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t("common.createdAt")} />,
       cell: ({ row }) => (row.original.createdAt ? formatDate(row.original.createdAt) : "-"),
     },
     {
@@ -65,9 +69,9 @@ export function getMyProposalColumns({
               onView={() => onView(row.original)}
               onEdit={isDraft ? () => onEdit(row.original) : undefined}
               extraActions={[
-                ...(isDraft ? [{ label: "Submit", icon: Send, onSelect: () => onSubmit(row.original) }] : []),
+                ...(isDraft ? [{ label: t("common.submit"), icon: Send, onSelect: () => onSubmit(row.original) }] : []),
                 ...(canWithdraw
-                  ? [{ label: "Withdraw", icon: Ban, onSelect: () => onWithdraw(row.original), variant: "destructive" as const }]
+                  ? [{ label: t("proposal.withdraw"), icon: Ban, onSelect: () => onWithdraw(row.original), variant: "destructive" as const }]
                   : []),
               ]}
             />

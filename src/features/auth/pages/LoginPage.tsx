@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,6 +11,7 @@ import { loginSchema, type LoginFormValues } from "@/features/auth/schemas/login
 
 export function LoginPage() {
   const loginMutation = useLoginMutation();
+  const { t } = useTranslation();
 
   const {
     register,
@@ -30,18 +32,18 @@ export function LoginPage() {
       <CardContent className="p-8">
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold text-white">FURPMS</h1>
-          <p className="mt-2 text-slate-300">Research Project Management System</p>
+          <p className="mt-2 text-slate-300">{t("auth.subtitle")}</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
           <div>
             <label htmlFor="email" className="mb-2 block text-sm text-slate-200">
-              Email
+              {t("auth.email")}
             </label>
             <Input
               id="email"
               type="email"
-              placeholder="Enter email"
+              placeholder={t("auth.emailPlaceholder")}
               autoComplete="email"
               aria-invalid={Boolean(errors.email)}
               disabled={loginMutation.isPending}
@@ -53,12 +55,12 @@ export function LoginPage() {
 
           <div>
             <label htmlFor="password" className="mb-2 block text-sm text-slate-200">
-              Password
+              {t("auth.password")}
             </label>
             <Input
               id="password"
               type="password"
-              placeholder="Enter password"
+              placeholder={t("auth.passwordPlaceholder")}
               autoComplete="current-password"
               aria-invalid={Boolean(errors.password)}
               disabled={loginMutation.isPending}
@@ -79,7 +81,7 @@ export function LoginPage() {
                   disabled={loginMutation.isPending}
                   className="border-white/30 data-[state=checked]:border-blue-500 data-[state=checked]:bg-blue-500"
                 />
-                Keep me signed in
+                {t("auth.keepSignedIn")}
               </label>
             )}
           />
@@ -90,12 +92,12 @@ export function LoginPage() {
             className="w-full bg-linear-to-r from-blue-500 to-purple-600 text-white hover:opacity-90"
           >
             {loginMutation.isPending && <Loader2 className="animate-spin" />}
-            Sign In
+            {t("auth.signIn")}
           </Button>
         </form>
 
         <div className="mt-6 text-center text-sm text-slate-400">
-          FPT University Research Project Management System
+          {t("auth.footer")}
         </div>
       </CardContent>
     </Card>

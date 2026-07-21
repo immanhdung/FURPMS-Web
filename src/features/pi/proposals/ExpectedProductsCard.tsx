@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Package, Plus, Trash2, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +26,7 @@ export function ExpectedProductsCard({
   editable: boolean;
   fundingMethod?: string | null;
 }) {
+  const { t } = useTranslation();
   const { data: products, isLoading } = useExpectedProductsQuery(proposalId);
   const createMutation = useCreateExpectedProductMutation(proposalId);
   const deleteMutation = useDeleteExpectedProductMutation(proposalId);
@@ -38,10 +40,9 @@ export function ExpectedProductsCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Expected products</CardTitle>
+        <CardTitle>{t("proposal.expectedProducts")}</CardTitle>
         <CardDescription>
-          What this project commits to deliver. These become the items accepted (and paid against) after the contract is
-          signed.
+{t("proposal.expectedProductsDesc")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -49,8 +50,7 @@ export function ExpectedProductsCard({
           <div className="flex items-start gap-2 rounded-lg border border-warning/40 bg-warning/5 p-3">
             <TriangleAlert className="mt-0.5 size-4 shrink-0 text-warning" />
             <p className="text-xs text-foreground">
-              This project is funded by milestone (PARTIAL). Without at least one product, staff won't be able to
-              generate the disbursement schedule after the contract is signed.
+              {t("proposal.partialWarning")}
             </p>
           </div>
         )}
@@ -60,7 +60,7 @@ export function ExpectedProductsCard({
         ) : isEmpty ? (
           <div className="flex items-center gap-2 rounded-lg border border-dashed border-border p-4 text-sm text-muted-foreground">
             <Package className="size-4" />
-            No products declared yet.
+            {t("proposal.noProducts")}
           </div>
         ) : (
           <ul className="space-y-2">
@@ -92,13 +92,13 @@ export function ExpectedProductsCard({
         {editable && (
           <div className="space-y-2 rounded-lg border border-dashed border-border p-3">
             <Input
-              placeholder="Product name — e.g. 01 bài báo tạp chí Q2"
+              placeholder={t("proposal.productName")}
               value={productName}
               onChange={(e) => setProductName(e.target.value)}
             />
             <Textarea
               rows={2}
-              placeholder="Requirements — journal ranking, dataset size, acceptance criteria…"
+              placeholder={t("proposal.productRequirements")}
               value={requirements}
               onChange={(e) => setRequirements(e.target.value)}
             />
@@ -124,7 +124,7 @@ export function ExpectedProductsCard({
                 }
               >
                 <Plus />
-                Add product
+                {t("proposal.addProduct")}
               </Button>
             </div>
           </div>

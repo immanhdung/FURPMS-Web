@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Download, FileUp, Loader2, Paperclip, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,6 +27,7 @@ function formatSize(bytes: number) {
  * thay vì để người dùng chờ upload xong mới báo lỗi.
  */
 export function ProposalDocumentsCard({ proposalId, editable }: { proposalId: string; editable: boolean }) {
+  const { t } = useTranslation();
   const { data: documents, isLoading } = useProposalDocumentsQuery(proposalId);
   const { data: policy } = useUploadPolicyQuery();
   const uploadMutation = useUploadProposalDocumentMutation(proposalId);
@@ -61,9 +63,9 @@ export function ProposalDocumentsCard({ proposalId, editable }: { proposalId: st
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Attachments</CardTitle>
+        <CardTitle>{t("proposal.attachments")}</CardTitle>
         <CardDescription>
-          Supporting files for this proposal — the signed thuyết minh, the PI's lý lịch khoa học, and any evidence.
+          {t("proposal.attachmentsDesc")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -72,7 +74,7 @@ export function ProposalDocumentsCard({ proposalId, editable }: { proposalId: st
         ) : !documents || documents.length === 0 ? (
           <div className="flex items-center gap-2 rounded-lg border border-dashed border-border p-4 text-sm text-muted-foreground">
             <Paperclip className="size-4" />
-            No files attached yet.
+            {t("proposal.noFiles")}
           </div>
         ) : (
           <ul className="space-y-2">
@@ -121,9 +123,9 @@ export function ProposalDocumentsCard({ proposalId, editable }: { proposalId: st
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {DOCUMENT_TYPES.map((t) => (
-                    <SelectItem key={t} value={t}>
-                      {t}
+                  {DOCUMENT_TYPES.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -143,7 +145,7 @@ export function ProposalDocumentsCard({ proposalId, editable }: { proposalId: st
                 onClick={() => inputRef.current?.click()}
               >
                 {uploadMutation.isPending ? <Loader2 className="animate-spin" /> : <FileUp />}
-                Choose file
+                {t("proposal.chooseFile")}
               </Button>
             </div>
 
@@ -151,7 +153,10 @@ export function ProposalDocumentsCard({ proposalId, editable }: { proposalId: st
               <p className="text-xs text-destructive">{localError}</p>
             ) : (
               <p className="text-xs text-muted-foreground">
-                Up to {maxMb} MB. {allowed.length > 0 && `Accepted: ${allowed.join(", ")}`}
+                {t("proposal.uploadHint", {
+                  max: maxMb,
+                  types: allowed.length > 0 ? t("proposal.uploadAccepted", { types: allowed.join(", ") }) : "",
+                })}
               </p>
             )}
           </div>

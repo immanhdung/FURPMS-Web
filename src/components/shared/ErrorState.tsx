@@ -1,5 +1,6 @@
 import { AlertTriangle, RotateCw } from "lucide-react";
 import { motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 
 interface ErrorStateProps {
@@ -9,12 +10,8 @@ interface ErrorStateProps {
   isRetrying?: boolean;
 }
 
-export function ErrorState({
-  title = "Something went wrong",
-  message = "We couldn't load this data. Please try again.",
-  onRetry,
-  isRetrying = false,
-}: ErrorStateProps) {
+export function ErrorState({ title, message, onRetry, isRetrying = false }: ErrorStateProps) {
+  const { t } = useTranslation();
   return (
     <motion.div
       initial={{ opacity: 0, y: 4 }}
@@ -26,13 +23,13 @@ export function ErrorState({
         <AlertTriangle className="size-5 text-destructive" />
       </div>
       <div className="space-y-1">
-        <p className="text-sm font-medium text-foreground">{title}</p>
-        <p className="max-w-sm text-sm text-muted-foreground">{message}</p>
+        <p className="text-sm font-medium text-foreground">{title ?? t("errorState.title")}</p>
+        <p className="max-w-sm text-sm text-muted-foreground">{message ?? t("errorState.description")}</p>
       </div>
       {onRetry && (
         <Button variant="outline" size="sm" onClick={onRetry} disabled={isRetrying}>
           <RotateCw className={isRetrying ? "animate-spin" : undefined} />
-          Try again
+          {t("common.retry")}
         </Button>
       )}
     </motion.div>
