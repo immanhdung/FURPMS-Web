@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Archive, CircleCheck, ExternalLink, FileCheck2, Loader2, RotateCcw, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,6 +23,7 @@ import { formatDateTime } from "@/utils/format";
  * Chỉ có 1 báo cáo cho mỗi hợp đồng; nộp lại sẽ ghi đè bản cũ.
  */
 export function FinalReportPanel({ contractId, canManage }: { contractId: string; canManage: boolean }) {
+  const { t } = useTranslation();
   const { data: report, isLoading } = useFinalReportQuery(contractId);
   const submitMutation = useSubmitFinalReportMutation(contractId);
   const revisionMutation = useRequestFinalReportRevisionMutation(contractId);
@@ -56,15 +58,15 @@ export function FinalReportPanel({ contractId, canManage }: { contractId: string
         <Card>
           <CardContent className="space-y-3 p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-sm font-medium text-foreground">Final report</p>
+              <p className="text-sm font-medium text-foreground">{t("contract.finalReport.title")}</p>
               {status && <StatusBadge status={status} />}
             </div>
 
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-              {report.submittedAt && <span>Submitted {formatDateTime(report.submittedAt)}</span>}
-              {report.finalSubmittedAt && <span>Final version {formatDateTime(report.finalSubmittedAt)}</span>}
-              {report.archivedAt && <span>Archived {formatDateTime(report.archivedAt)}</span>}
-              <span>Language: {report.language}</span>
+              {report.submittedAt && <span>{t("contract.finalReport.submittedAt", { date: formatDateTime(report.submittedAt) })}</span>}
+              {report.finalSubmittedAt && <span>{t("contract.finalReport.finalVersion", { date: formatDateTime(report.finalSubmittedAt) })}</span>}
+              {report.archivedAt && <span>{t("contract.finalReport.archivedAt", { date: formatDateTime(report.archivedAt) })}</span>}
+              <span>{t("contract.finalReport.language")}: {report.language}</span>
             </div>
 
             <div className="flex flex-wrap gap-3">
@@ -76,7 +78,7 @@ export function FinalReportPanel({ contractId, canManage }: { contractId: string
                   className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
                 >
                   <ExternalLink className="size-3.5" />
-                  Full report
+                  {t("contract.finalReport.fullReport")}
                 </a>
               )}
               {report.summaryFileUrl && (
@@ -87,14 +89,14 @@ export function FinalReportPanel({ contractId, canManage }: { contractId: string
                   className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
                 >
                   <ExternalLink className="size-3.5" />
-                  Summary
+                  {t("contract.finalReport.summary")}
                 </a>
               )}
             </div>
 
             {report.revisionNotes && (
               <div className="rounded-lg border border-warning/40 bg-warning/5 p-2.5">
-                <p className="text-xs font-medium text-warning">Revision requested</p>
+                <p className="text-xs font-medium text-warning">{t("contract.finalReport.revisionRequested")}</p>
                 <p className="mt-0.5 text-sm whitespace-pre-line text-foreground">{report.revisionNotes}</p>
               </div>
             )}
@@ -106,11 +108,11 @@ export function FinalReportPanel({ contractId, canManage }: { contractId: string
         <Card>
           <CardContent className="space-y-3 p-4">
             <p className="text-sm font-medium text-foreground">
-              {needsRevision ? "Submit the revised report" : "Submit the final report"}
+              {needsRevision ? t("contract.finalReport.submitRevised") : t("contract.finalReport.submitTitle")}
             </p>
             <div>
               <label htmlFor="final-report-url" className="mb-1.5 block text-sm font-medium text-foreground">
-                Report file link <span className="text-destructive">*</span>
+                {t("contract.finalReport.reportFile")} <span className="text-destructive">*</span>
               </label>
               <Input
                 id="final-report-url"
@@ -121,7 +123,7 @@ export function FinalReportPanel({ contractId, canManage }: { contractId: string
             </div>
             <div>
               <label htmlFor="final-summary-url" className="mb-1.5 block text-sm font-medium text-foreground">
-                Summary file link
+                {t("contract.finalReport.summaryFile")}
               </label>
               <Input
                 id="final-summary-url"
@@ -131,14 +133,14 @@ export function FinalReportPanel({ contractId, canManage }: { contractId: string
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-foreground">Language</label>
+              <label className="mb-1.5 block text-sm font-medium text-foreground">{t("contract.finalReport.language")}</label>
               <Select value={language} onValueChange={setLanguage}>
                 <SelectTrigger className="w-40">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="VI">Vietnamese</SelectItem>
-                  <SelectItem value="EN">English</SelectItem>
+                  <SelectItem value="VI">{t("contract.finalReport.langVI")}</SelectItem>
+                  <SelectItem value="EN">{t("contract.finalReport.langEN")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -155,7 +157,7 @@ export function FinalReportPanel({ contractId, canManage }: { contractId: string
                 }
               >
                 {submitMutation.isPending ? <Loader2 className="animate-spin" /> : <Upload />}
-                Submit
+                {t("common.submit")}
               </Button>
             </div>
           </CardContent>
@@ -166,13 +168,13 @@ export function FinalReportPanel({ contractId, canManage }: { contractId: string
       {canManage && report && !isArchived && (
         <Card>
           <CardContent className="space-y-3 p-4">
-            <p className="text-sm font-medium text-foreground">Review (staff)</p>
+            <p className="text-sm font-medium text-foreground">{t("contract.finalReport.reviewStaff")}</p>
 
             {!isAccepted && (
               <>
                 <Textarea
                   rows={2}
-                  placeholder="What the PI needs to fix…"
+                  placeholder={t("contract.finalReport.revisionPlaceholder")}
                   value={revisionNotes}
                   onChange={(e) => setRevisionNotes(e.target.value)}
                 />
@@ -190,7 +192,7 @@ export function FinalReportPanel({ contractId, canManage }: { contractId: string
                     }
                   >
                     {revisionMutation.isPending ? <Loader2 className="animate-spin" /> : <RotateCcw />}
-                    Request revision
+                    {t("contract.finalReport.requestRevision")}
                   </Button>
                   <Button
                     type="button"
@@ -199,7 +201,7 @@ export function FinalReportPanel({ contractId, canManage }: { contractId: string
                     onClick={() => acceptMutation.mutate(report.id)}
                   >
                     {acceptMutation.isPending ? <Loader2 className="animate-spin" /> : <CircleCheck />}
-                    Accept
+                    {t("contract.finalReport.accept")}
                   </Button>
                 </div>
               </>
@@ -207,7 +209,7 @@ export function FinalReportPanel({ contractId, canManage }: { contractId: string
 
             {isAccepted && (
               <div className="flex items-center justify-between gap-2">
-                <p className="text-xs text-muted-foreground">Accepted — archive it to close out the project record.</p>
+                <p className="text-xs text-muted-foreground">{t("contract.finalReport.acceptedHint")}</p>
                 <Button
                   type="button"
                   size="sm"
@@ -215,7 +217,7 @@ export function FinalReportPanel({ contractId, canManage }: { contractId: string
                   onClick={() => archiveMutation.mutate(report.id)}
                 >
                   {archiveMutation.isPending ? <Loader2 className="animate-spin" /> : <Archive />}
-                  Archive
+                  {t("contract.finalReport.archive")}
                 </Button>
               </div>
             )}
@@ -226,7 +228,7 @@ export function FinalReportPanel({ contractId, canManage }: { contractId: string
       {!report && !canSubmit && (
         <div className="flex items-center gap-2 rounded-lg border border-dashed border-border p-4 text-sm text-muted-foreground">
           <FileCheck2 className="size-4" />
-          The PI hasn't submitted the final report yet.
+          {t("contract.finalReport.notSubmitted")}
         </div>
       )}
     </div>

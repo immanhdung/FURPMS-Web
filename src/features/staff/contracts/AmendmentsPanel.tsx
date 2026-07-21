@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { CircleCheck, CircleX, FilePenLine, Loader2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +21,7 @@ import { formatDateTime } from "@/utils/format";
 
 /** Điều chỉnh hợp đồng: PI mô tả thay đổi + lý do → Staff duyệt hoặc từ chối. */
 export function AmendmentsPanel({ contractId, canManage }: { contractId: string; canManage: boolean }) {
+  const { t } = useTranslation();
   const { data: amendments, isLoading } = useAmendmentsQuery(contractId);
   const { data: categories } = useAmendmentCategoriesQuery();
   const createMutation = useCreateAmendmentMutation(contractId);
@@ -51,7 +53,7 @@ export function AmendmentsPanel({ contractId, canManage }: { contractId: string;
         <div className="flex justify-end">
           <Button size="sm" variant="outline" onClick={() => setShowForm(true)}>
             <Plus />
-            Request a change
+            {t("contract.amendment.requestChange")}
           </Button>
         </div>
       )}
@@ -59,15 +61,15 @@ export function AmendmentsPanel({ contractId, canManage }: { contractId: string;
       {showForm && (
         <Card>
           <CardContent className="space-y-3 p-4">
-            <p className="text-sm font-medium text-foreground">New amendment request</p>
+            <p className="text-sm font-medium text-foreground">{t("contract.amendment.newRequest")}</p>
 
             <div>
               <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                Type <span className="text-destructive">*</span>
+                {t("contract.amendment.type")} <span className="text-destructive">*</span>
               </label>
               <Select value={categoryId} onValueChange={setCategoryId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="What is being changed?" />
+                  <SelectValue placeholder={t("contract.amendment.typePlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
                   {categories?.map((c) => (
@@ -81,7 +83,7 @@ export function AmendmentsPanel({ contractId, canManage }: { contractId: string;
 
             <div>
               <label htmlFor="a-desc" className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                What changes <span className="text-destructive">*</span>
+                {t("contract.amendment.whatChanges")} <span className="text-destructive">*</span>
               </label>
               <Textarea
                 id="a-desc"
@@ -93,7 +95,7 @@ export function AmendmentsPanel({ contractId, canManage }: { contractId: string;
 
             <div>
               <label htmlFor="a-just" className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                Why <span className="text-destructive">*</span>
+                {t("contract.amendment.why")} <span className="text-destructive">*</span>
               </label>
               <Textarea id="a-just" rows={2} value={justification} onChange={(e) => setJustification(e.target.value)} />
             </div>
@@ -101,13 +103,13 @@ export function AmendmentsPanel({ contractId, canManage }: { contractId: string;
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <label htmlFor="a-old" className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                  From
+                  {t("contract.amendment.from")}
                 </label>
                 <Input id="a-old" value={oldValue} onChange={(e) => setOldValue(e.target.value)} />
               </div>
               <div>
                 <label htmlFor="a-new" className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                  To
+                  {t("contract.amendment.to")}
                 </label>
                 <Input id="a-new" value={newValue} onChange={(e) => setNewValue(e.target.value)} />
               </div>
@@ -136,7 +138,7 @@ export function AmendmentsPanel({ contractId, canManage }: { contractId: string;
                 }
               >
                 {createMutation.isPending ? <Loader2 className="animate-spin" /> : <FilePenLine />}
-                Submit request
+                {t("contract.amendment.submitRequest")}
               </Button>
             </div>
           </CardContent>
@@ -148,8 +150,8 @@ export function AmendmentsPanel({ contractId, canManage }: { contractId: string;
       ) : !amendments || amendments.length === 0 ? (
         <EmptyState
           icon={FilePenLine}
-          title="No amendment requests"
-          description="Changes to scope, budget, timeline or team are recorded here."
+          title={t("contract.amendment.none")}
+          description={t("contract.amendment.noneDesc")}
           className="min-h-28 border-none p-4"
         />
       ) : (
@@ -160,7 +162,7 @@ export function AmendmentsPanel({ contractId, canManage }: { contractId: string;
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-foreground">{a.categoryName ?? `Category ${a.categoryId}`}</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">Requested {formatDateTime(a.requestedAt)}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{t("contract.amendment.requestedAt", { date: formatDateTime(a.requestedAt) })}</p>
                 </div>
                 <StatusBadge status={a.status} />
               </div>
@@ -174,12 +176,12 @@ export function AmendmentsPanel({ contractId, canManage }: { contractId: string;
                 </p>
               )}
 
-              {a.reviewerComments && <p className="text-xs text-muted-foreground">Reviewer: {a.reviewerComments}</p>}
+              {a.reviewerComments && <p className="text-xs text-muted-foreground">{t("contract.amendment.reviewer")} {a.reviewerComments}</p>}
 
               {canManage && isPending && (
                 <div className="space-y-2 border-t border-border pt-2">
                   <Input
-                    placeholder="Comments (optional)"
+                    placeholder={t("contract.amendment.commentsPlaceholder")}
                     value={comments[a.id] ?? ""}
                     onChange={(e) => setComments((prev) => ({ ...prev, [a.id]: e.target.value }))}
                   />
@@ -191,7 +193,7 @@ export function AmendmentsPanel({ contractId, canManage }: { contractId: string;
                       onClick={() => approveMutation.mutate({ id: a.id, reviewerComments: comments[a.id] || undefined })}
                     >
                       <CircleCheck />
-                      Approve
+                      {t("common.approve")}
                     </Button>
                     <Button
                       type="button"
@@ -201,7 +203,7 @@ export function AmendmentsPanel({ contractId, canManage }: { contractId: string;
                       onClick={() => rejectMutation.mutate({ id: a.id, reviewerComments: comments[a.id] || undefined })}
                     >
                       <CircleX />
-                      Reject
+                      {t("common.reject")}
                     </Button>
                   </div>
                 </div>

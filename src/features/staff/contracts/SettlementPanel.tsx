@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { CircleCheck, Landmark, Loader2, PenLine, Boxes } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,6 +23,7 @@ import { formatCurrency, formatDate } from "@/utils/format";
  * Số liệu lấy sẵn từ lịch giải ngân để Staff khỏi cộng tay.
  */
 export function SettlementPanel({ contractId, canManage }: { contractId: string; canManage: boolean }) {
+  const { t } = useTranslation();
   const { data: settlement, isLoading } = useSettlementQuery(contractId);
   const { data: disbursements } = useDisbursementsQuery(contractId);
   const currentUserId = useAuthStore((state) => state.user?.id);
@@ -54,8 +56,8 @@ export function SettlementPanel({ contractId, canManage }: { contractId: string;
       return (
         <EmptyState
           icon={Landmark}
-          title="No settlement yet"
-          description="Staff will prepare the settlement once the project wraps up."
+          title={t("contract.settlement.noneStaff")}
+          description={t("contract.settlement.noneStaffDesc")}
           className="min-h-32 border-none p-4"
         />
       );
@@ -65,28 +67,28 @@ export function SettlementPanel({ contractId, canManage }: { contractId: string;
       <Card>
         <CardContent className="space-y-3 p-4">
           <div>
-            <p className="text-sm font-medium text-foreground">Prepare settlement</p>
+            <p className="text-sm font-medium text-foreground">{t("contract.settlement.prepare")}</p>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              Amounts are pre-filled from the disbursement schedule — adjust if the books say otherwise.
+              {t("contract.settlement.prepareHint")}
             </p>
           </div>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div>
               <label htmlFor="s-contracted" className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                Contracted
+                {t("contract.settlement.contracted")}
               </label>
               <Input id="s-contracted" type="number" value={contracted} onChange={(e) => setContracted(e.target.value)} />
             </div>
             <div>
               <label htmlFor="s-disbursed" className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                Disbursed
+                {t("contract.settlement.disbursed")}
               </label>
               <Input id="s-disbursed" type="number" value={disbursed} onChange={(e) => setDisbursed(e.target.value)} />
             </div>
             <div>
               <label htmlFor="s-returned" className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                Returned
+                {t("contract.settlement.returned")}
               </label>
               <Input id="s-returned" type="number" value={returned} onChange={(e) => setReturned(e.target.value)} />
             </div>
@@ -94,12 +96,12 @@ export function SettlementPanel({ contractId, canManage }: { contractId: string;
 
           <div>
             <label htmlFor="s-products" className="mb-1.5 block text-xs font-medium text-muted-foreground">
-              Products submitted
+              {t("contract.settlement.products")}
             </label>
             <Textarea
               id="s-products"
               rows={2}
-              placeholder="Summary of what was delivered and accepted"
+              placeholder={t("contract.settlement.productsPlaceholder")}
               value={productsSummary}
               onChange={(e) => setProductsSummary(e.target.value)}
             />
@@ -107,7 +109,7 @@ export function SettlementPanel({ contractId, canManage }: { contractId: string;
 
           <div>
             <label htmlFor="s-notes" className="mb-1.5 block text-xs font-medium text-muted-foreground">
-              Notes
+              {t("contract.settlement.notes")}
             </label>
             <Textarea id="s-notes" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
           </div>
@@ -127,7 +129,7 @@ export function SettlementPanel({ contractId, canManage }: { contractId: string;
               }
             >
               {createMutation.isPending ? <Loader2 className="animate-spin" /> : <Landmark />}
-              Create settlement
+              {t("contract.settlement.create")}
             </Button>
           </div>
         </CardContent>
@@ -138,32 +140,32 @@ export function SettlementPanel({ contractId, canManage }: { contractId: string;
   const steps = [
     {
       key: "sign",
-      label: "Signed",
+      label: t("contract.settlement.signed"),
       at: settlement.settlementSignedAt,
       by: settlement.sideASigneeName,
       icon: PenLine,
       action: () =>
         currentUserId && signMutation.mutate({ id: settlement.id, sideASigneeId: currentUserId }),
       pending: signMutation.isPending,
-      cta: "Sign as side A",
+      cta: t("contract.settlement.signAsSideA"),
     },
     {
       key: "accounting",
-      label: "Accounting cleared",
+      label: t("contract.settlement.accountingCleared"),
       at: settlement.accountingClearedAt,
       icon: Landmark,
       action: () => accountingMutation.mutate({ id: settlement.id }),
       pending: accountingMutation.isPending,
-      cta: "Mark cleared",
+      cta: t("contract.settlement.markCleared"),
     },
     {
       key: "assets",
-      label: "Assets cleared",
+      label: t("contract.settlement.assetsCleared"),
       at: settlement.assetsClearedAt,
       icon: Boxes,
       action: () => assetsMutation.mutate({ id: settlement.id }),
       pending: assetsMutation.isPending,
-      cta: "Mark cleared",
+      cta: t("contract.settlement.markCleared"),
     },
   ];
 
@@ -171,12 +173,12 @@ export function SettlementPanel({ contractId, canManage }: { contractId: string;
     <div className="space-y-3">
       <Card>
         <CardContent className="p-4">
-          <p className="text-sm font-medium text-foreground">Settlement figures</p>
+          <p className="text-sm font-medium text-foreground">{t("contract.settlement.figures")}</p>
           <dl className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
             {[
-              { label: "Contracted", value: settlement.totalContractedAmount },
-              { label: "Disbursed", value: settlement.totalDisbursedAmount },
-              { label: "Returned", value: settlement.totalReturnedAmount },
+              { label: t("contract.settlement.contracted"), value: settlement.totalContractedAmount },
+              { label: t("contract.settlement.disbursed"), value: settlement.totalDisbursedAmount },
+              { label: t("contract.settlement.returned"), value: settlement.totalReturnedAmount },
             ].map((item) => (
               <div key={item.label} className="rounded-lg border border-border p-2">
                 <dt className="text-xs text-muted-foreground">{item.label}</dt>
@@ -198,7 +200,7 @@ export function SettlementPanel({ contractId, canManage }: { contractId: string;
             <div>
               <p className="text-sm font-medium text-foreground">{label}</p>
               <p className="text-xs text-muted-foreground">
-                {at ? `${formatDate(at)}${by ? ` · ${by}` : ""}` : "Not done yet"}
+                {at ? `${formatDate(at)}${by ? ` · ${by}` : ""}` : t("contract.settlement.notDone")}
               </p>
             </div>
           </div>
