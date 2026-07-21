@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { FormSheet } from "@/components/shared/FormSheet";
 import { Input } from "@/components/ui/input";
@@ -25,6 +26,7 @@ interface CreateCouncilSheetProps {
 }
 
 export function CreateCouncilSheet({ open, onOpenChange, proposalId, round }: CreateCouncilSheetProps) {
+  const { t } = useTranslation();
   const createMutation = useCreateCouncilMutation(proposalId);
 
   const {
@@ -69,18 +71,18 @@ export function CreateCouncilSheet({ open, onOpenChange, proposalId, round }: Cr
     <FormSheet
       open={open}
       onOpenChange={onOpenChange}
-      title="Establish Council"
+      title={t("reviewBoard.establishCouncil")}
       description={`Create a review council for Round ${round.roundNumber}.`}
       formId="create-council-form"
       onSubmit={handleSubmit(onSubmit)}
       isSubmitting={createMutation.isPending}
-      submitLabel="Create council"
+      submitLabel={t("reviewBoard.createCouncil")}
     >
       <div>
         <label htmlFor="council-type" className="mb-1.5 block text-sm font-medium text-foreground">
           Council type
         </label>
-        <Input id="council-type" placeholder="e.g. Screening Council" aria-invalid={Boolean(errors.councilType)} {...register("councilType")} />
+        <Input id="council-type" placeholder={t("reviewBoard.councilNamePlaceholder")} aria-invalid={Boolean(errors.councilType)} {...register("councilType")} />
         {errors.councilType && <p className="mt-1 text-xs text-destructive">{errors.councilType.message}</p>}
       </div>
 

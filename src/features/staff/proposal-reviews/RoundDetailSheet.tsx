@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Gavel, Lock, Unlock } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -24,6 +25,7 @@ interface RoundDetailSheetProps {
 }
 
 export function RoundDetailSheet({ open, onOpenChange, proposalId, trackId, round }: RoundDetailSheetProps) {
+  const { t } = useTranslation();
   const openMutation = useOpenRoundMutation(proposalId);
   const [createCouncilOpen, setCreateCouncilOpen] = useState(false);
   const [closeRoundOpen, setCloseRoundOpen] = useState(false);
@@ -72,9 +74,9 @@ export function RoundDetailSheet({ open, onOpenChange, proposalId, trackId, roun
             {round.councilId ? (
               <Tabs defaultValue="members">
                 <TabsList>
-                  <TabsTrigger value="members">Members</TabsTrigger>
-                  <TabsTrigger value="meetings">Meetings</TabsTrigger>
-                  <TabsTrigger value="minutes">Minutes</TabsTrigger>
+                  <TabsTrigger value="members">{t("reviewBoard.members")}</TabsTrigger>
+                  <TabsTrigger value="meetings">{t("reviewBoard.meetings")}</TabsTrigger>
+                  <TabsTrigger value="minutes">{t("reviewBoard.minutes")}</TabsTrigger>
                 </TabsList>
                 <TabsContent value="members">
                   <CouncilMembersPanel councilId={round.councilId} trackId={trackId} />
@@ -93,8 +95,8 @@ export function RoundDetailSheet({ open, onOpenChange, proposalId, trackId, roun
                   <Gavel className="size-5 text-muted-foreground" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-foreground">No council established</p>
-                  <p className="text-xs text-muted-foreground">Create a council to add reviewers and schedule meetings.</p>
+                  <p className="text-sm font-medium text-foreground">{t("reviewBoard.noCouncil")}</p>
+                  <p className="text-xs text-muted-foreground">{t("reviewBoard.noCouncilDesc")}</p>
                 </div>
                 <Button size="sm" onClick={() => setCreateCouncilOpen(true)}>
                   <Gavel />

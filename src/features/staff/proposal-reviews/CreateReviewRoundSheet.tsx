@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { FormSheet } from "@/components/shared/FormSheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -35,6 +36,7 @@ export function CreateReviewRoundSheet({
   existingRounds,
   onCreated,
 }: CreateReviewRoundSheetProps) {
+  const { t } = useTranslation();
   const createMutation = useCreateReviewRoundMutation(proposalId);
 
   /**
@@ -96,12 +98,12 @@ export function CreateReviewRoundSheet({
     <FormSheet
       open={open}
       onOpenChange={onOpenChange}
-      title={nextRoundType ? `Create ${ROUND_TYPE_LABELS[nextRoundType]} Round` : "Create Review Round"}
-      description="Add the next round for this proposal."
+      title={nextRoundType ? `Create ${ROUND_TYPE_LABELS[nextRoundType]} Round` : t("reviewBoard.createRound")}
+      description={t("reviewBoard.createRoundHint")}
       formId="review-round-form"
       onSubmit={handleSubmit(onSubmit)}
       isSubmitting={createMutation.isPending || isDecisionLoading || !nextRoundType}
-      submitLabel="Create round"
+      submitLabel={t("reviewBoard.createRoundBtn")}
     >
       {blockedReason ? (
         <p className="rounded-lg border border-dashed border-border bg-muted/40 px-3 py-2.5 text-sm text-muted-foreground">
@@ -110,21 +112,21 @@ export function CreateReviewRoundSheet({
       ) : (
         <>
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">Round type</label>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">{t("reviewBoard.roundType")}</label>
             <p className="text-sm text-foreground">
               {nextRoundType ? ROUND_TYPE_LABELS[nextRoundType] : "-"}
             </p>
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">Dimension</label>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">{t("reviewBoard.dimension")}</label>
             <Controller
               control={control}
               name="dimension"
               render={({ field }) => (
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger aria-invalid={Boolean(errors.dimension)}>
-                    <SelectValue placeholder="Select dimension" />
+                    <SelectValue placeholder={t("reviewBoard.selectDimension")} />
                   </SelectTrigger>
                   <SelectContent>
                     {Object.values(ROUND_DIMENSION).map((dimension) => (
@@ -141,7 +143,7 @@ export function CreateReviewRoundSheet({
 
           {existingRounds.length > 0 && (
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-foreground">Prerequisite round</label>
+              <label className="mb-1.5 block text-sm font-medium text-foreground">{t("reviewBoard.prerequisiteRound")}</label>
               <Controller
                 control={control}
                 name="prerequisiteRoundId"
@@ -151,7 +153,7 @@ export function CreateReviewRoundSheet({
                     onValueChange={(value) => field.onChange(value === NONE_VALUE ? undefined : value)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="None" />
+                      <SelectValue placeholder={t("reviewBoard.none")} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value={NONE_VALUE}>None</SelectItem>

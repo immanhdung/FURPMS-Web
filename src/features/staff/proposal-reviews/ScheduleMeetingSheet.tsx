@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -29,6 +30,7 @@ interface ScheduleMeetingSheetProps {
 }
 
 export function ScheduleMeetingSheet({ open, onOpenChange, councilId }: ScheduleMeetingSheetProps) {
+  const { t } = useTranslation();
   const scheduleMutation = useScheduleMeetingMutation(councilId);
   const generateLinkMutation = useGenerateGoogleMeetLink();
   const [generatedLink, setGeneratedLink] = useState<string | null>(null);
@@ -65,12 +67,12 @@ export function ScheduleMeetingSheet({ open, onOpenChange, councilId }: Schedule
     <FormSheet
       open={open}
       onOpenChange={onOpenChange}
-      title="Schedule Meeting"
-      description="Set up a council review meeting."
+      title={t("reviewBoard.scheduleMeeting")}
+      description={t("reviewBoard.scheduleMeetingHint")}
       formId="schedule-meeting-form"
       onSubmit={handleSubmit(onSubmit)}
       isSubmitting={scheduleMutation.isPending}
-      submitLabel="Schedule meeting"
+      submitLabel={t("reviewBoard.scheduleMeetingBtn")}
     >
       <div>
         <label htmlFor="meeting-title" className="mb-1.5 block text-sm font-medium text-foreground">
@@ -81,7 +83,7 @@ export function ScheduleMeetingSheet({ open, onOpenChange, councilId }: Schedule
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Platform</label>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("reviewBoard.platform")}</label>
         <Controller
           control={control}
           name="platform"
