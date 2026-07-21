@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -10,13 +11,14 @@ import { UploadLimitsCard } from "@/features/settings/UploadLimitsCard";
 import { SystemSettingsCard } from "@/features/settings/SystemSettingsCard";
 import { useSystemSettingsQuery } from "@/hooks/useSystemSettings";
 
-const THEME_OPTIONS: { value: Theme; label: string; icon: typeof Sun }[] = [
-  { value: "light", label: "Light", icon: Sun },
-  { value: "dark", label: "Dark", icon: Moon },
-  { value: "system", label: "System", icon: Monitor },
+const THEME_OPTIONS: { value: Theme; labelKey: string; icon: typeof Sun }[] = [
+  { value: "light", labelKey: "settings.themeLight", icon: Sun },
+  { value: "dark", labelKey: "settings.themeDark", icon: Moon },
+  { value: "system", labelKey: "settings.themeSystem", icon: Monitor },
 ];
 
 export function SettingsPage() {
+  const { t } = useTranslation();
   const theme = useUiStore((state) => state.theme);
   const setTheme = useUiStore((state) => state.setTheme);
   const sampleFillEnabled = useUiStore((state) => state.sampleFillEnabled);
@@ -33,21 +35,21 @@ export function SettingsPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Settings</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("settings.title")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Appearance and demo helpers are saved in this browser only.
-          {isAdmin && " System settings below apply to everyone."}
+          {t("settings.subtitleBase")}
+          {isAdmin && t("settings.subtitleAdmin")}
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Appearance</CardTitle>
-          <CardDescription>Choose how FURPMS looks on this device.</CardDescription>
+          <CardTitle>{t("settings.appearance")}</CardTitle>
+          <CardDescription>{t("settings.appearanceDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex gap-2">
-            {THEME_OPTIONS.map(({ value, label, icon: Icon }) => (
+            {THEME_OPTIONS.map(({ value, labelKey, icon: Icon }) => (
               <Button
                 key={value}
                 type="button"
@@ -57,7 +59,7 @@ export function SettingsPage() {
                 onClick={() => setTheme(value)}
               >
                 <Icon />
-                {label}
+                {t(labelKey)}
               </Button>
             ))}
           </div>
@@ -66,21 +68,21 @@ export function SettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Demo tools</CardTitle>
-          <CardDescription>Helpers for demos and testing — turn them off for a clean experience.</CardDescription>
+          <CardTitle>{t("settings.demoTools")}</CardTitle>
+          <CardDescription>{t("settings.demoToolsDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <label className="flex items-start justify-between gap-4">
             <span>
-              <span className="block text-sm font-medium text-foreground">Sample-fill button on the proposal form</span>
+              <span className="block text-sm font-medium text-foreground">{t("settings.sampleFill")}</span>
               <span className="mt-0.5 block text-xs text-muted-foreground">
-                Shows a "Fill with sample data" button so you can complete the wizard quickly during a demo.
+                {t("settings.sampleFillDesc")}
               </span>
             </span>
             <Switch
               checked={sampleFillEnabled}
               onCheckedChange={setSampleFillEnabled}
-              aria-label="Toggle the sample-fill button"
+              aria-label={t("settings.toggleSampleFill")}
             />
           </label>
         </CardContent>
@@ -89,18 +91,18 @@ export function SettingsPage() {
       {isAdmin && (
         <>
           <SystemSettingsCard
-            title="Notifications"
-            description="When people get reminded, and whether email actually goes out."
+            title={t("settings.grpNotifications")}
+            description={t("settings.grpNotificationsDesc")}
             settings={notificationSettings}
           />
           <SystemSettingsCard
-            title="Review councils"
-            description="Rules that apply when inviting reviewers."
+            title={t("settings.grpCouncils")}
+            description={t("settings.grpCouncilsDesc")}
             settings={councilSettings}
           />
           <SystemSettingsCard
-            title="Contracts & funding"
-            description="Defaults applied when contracts and disbursement schedules are created."
+            title={t("settings.grpContracts")}
+            description={t("settings.grpContractsDesc")}
             settings={financeSettings}
           />
           <UploadLimitsCard />

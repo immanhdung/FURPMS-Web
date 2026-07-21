@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Gavel, Loader2, Lock, Save, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,9 +13,9 @@ import { REVIEW_DECISION } from "@/constants/statuses";
 import { formatDateTime } from "@/utils/format";
 
 const RESULT_OPTIONS = [
-  { value: REVIEW_DECISION.APPROVED, label: "Approved — proposal passes this round" },
-  { value: REVIEW_DECISION.REVISION_REQUIRED, label: "Revision required — PI edits and resubmits" },
-  { value: REVIEW_DECISION.REJECTED, label: "Rejected — proposal is closed" },
+  { value: REVIEW_DECISION.APPROVED, labelKey: "minutes.resultApproved" },
+  { value: REVIEW_DECISION.REVISION_REQUIRED, labelKey: "minutes.resultRevision" },
+  { value: REVIEW_DECISION.REJECTED, labelKey: "minutes.resultRejected" },
 ];
 
 function isChair(role?: string | null) {
@@ -31,6 +32,7 @@ function isSecretary(role?: string | null) {
  * Điểm/phiếu chỉ hiển thị để THAM KHẢO, hệ thống không tự đếm phiếu ra kết quả.
  */
 export function MinutesPanel({ councilId, memberRole }: { councilId: string; memberRole?: string | null }) {
+  const { t } = useTranslation();
   const { data: decision, isLoading } = useDecisionQuery(councilId);
   const saveMutation = useSaveMinutesMutation(councilId);
   const approveMutation = useApproveMinutesMutation(councilId);
@@ -61,21 +63,21 @@ export function MinutesPanel({ councilId, memberRole }: { councilId: string; mem
       <Card>
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-foreground">Meeting tally</p>
+            <p className="text-sm font-medium text-foreground">{t("minutes.meetingTally")}</p>
             {locked ? (
               <span className="inline-flex items-center gap-1 text-xs font-medium text-success">
-                <Lock className="size-3" /> Locked
+                <Lock className="size-3" /> {t("minutes.locked")}
               </span>
             ) : hasDraft ? (
-              <span className="text-xs font-medium text-warning">Draft — not yet approved</span>
+              <span className="text-xs font-medium text-warning">{t("minutes.draftNotApproved")}</span>
             ) : null}
           </div>
           <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[
-              { label: "Members", value: decision?.totalMembers },
-              { label: "Attending", value: decision?.attendingMembers },
-              { label: "Valid ballots", value: decision?.validBallots },
-              { label: "Average score", value: decision?.averageScore },
+              { label: t("minutes.members"), value: decision?.totalMembers },
+              { label: t("minutes.attending"), value: decision?.attendingMembers },
+              { label: t("minutes.validBallots"), value: decision?.validBallots },
+              { label: t("minutes.averageScore"), value: decision?.averageScore },
             ].map((item) => (
               <div key={item.label} className="rounded-lg border border-border p-2">
                 <dt className="text-xs text-muted-foreground">{item.label}</dt>
@@ -84,7 +86,7 @@ export function MinutesPanel({ councilId, memberRole }: { councilId: string; mem
             ))}
           </dl>
           <p className="mt-2 text-xs text-muted-foreground">
-            Scores are shown for reference only — the chair decides the outcome after the closed-door discussion.
+            {t("minutes.referenceOnly")}
           </p>
         </CardContent>
       </Card>
@@ -94,24 +96,24 @@ export function MinutesPanel({ councilId, memberRole }: { councilId: string; mem
         <Card>
           <CardContent className="space-y-4 p-4">
             <div>
-              <p className="text-sm font-medium text-foreground">Draft the minutes</p>
+              <p className="text-sm font-medium text-foreground">{t("minutes.draftTitle")}</p>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                As secretary, record the council's conclusion. Saving keeps it as a draft — the chair approves it.
+                {t("minutes.draftHint")}
               </p>
             </div>
 
             <div>
               <label htmlFor="minutes-result" className="mb-1.5 block text-sm font-medium text-foreground">
-                Council conclusion <span className="text-destructive">*</span>
+                {t("minutes.conclusion")} <span className="text-destructive">*</span>
               </label>
               <Select value={result || undefined} onValueChange={setResult}>
                 <SelectTrigger id="minutes-result" className="w-full">
-                  <SelectValue placeholder="Select the outcome agreed in the meeting" />
+                  <SelectValue placeholder={t("minutes.conclusionPlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
                   {RESULT_OPTIONS.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
-                      {option.label}
+                      {t(option.labelKey)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -120,12 +122,12 @@ export function MinutesPanel({ councilId, memberRole }: { councilId: string; mem
 
             <div>
               <label htmlFor="minutes-comments" className="mb-1.5 block text-sm font-medium text-foreground">
-                Council comments
+                {t("minutes.councilComments")}
               </label>
               <Textarea
                 id="minutes-comments"
                 rows={4}
-                placeholder="Conclusion of the council: scientific merit, budget, required edits…"
+                placeholder={t("minutes.councilCommentsPlaceholder")}
                 value={councilComments}
                 onChange={(e) => setCouncilComments(e.target.value)}
               />
@@ -133,12 +135,12 @@ export function MinutesPanel({ councilId, memberRole }: { councilId: string; mem
 
             <div>
               <label htmlFor="minutes-recommendations" className="mb-1.5 block text-sm font-medium text-foreground">
-                Recommendations
+                {t("minutes.recommendations")}
               </label>
               <Textarea
                 id="minutes-recommendations"
                 rows={3}
-                placeholder="Suggestions for the principal investigator"
+                placeholder={t("minutes.recommendationsPlaceholder")}
                 value={recommendations}
                 onChange={(e) => setRecommendations(e.target.value)}
               />
@@ -157,7 +159,7 @@ export function MinutesPanel({ councilId, memberRole }: { councilId: string; mem
                 }
               >
                 {saveMutation.isPending ? <Loader2 className="animate-spin" /> : <Save />}
-                Save draft
+                {t("minutes.saveDraft")}
               </Button>
             </div>
           </CardContent>
@@ -169,23 +171,23 @@ export function MinutesPanel({ councilId, memberRole }: { councilId: string; mem
         <Card>
           <CardContent className="space-y-3 p-4">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-foreground">Minutes</p>
+              <p className="text-sm font-medium text-foreground">{t("minutes.minutesTitle")}</p>
               {decision.result && <StatusBadge status={decision.result} />}
             </div>
             {decision.councilComments && (
               <div>
-                <p className="text-xs font-medium text-muted-foreground">Council comments</p>
+                <p className="text-xs font-medium text-muted-foreground">{t("minutes.councilComments")}</p>
                 <p className="mt-0.5 text-sm whitespace-pre-line text-foreground">{decision.councilComments}</p>
               </div>
             )}
             {decision.recommendations && (
               <div>
-                <p className="text-xs font-medium text-muted-foreground">Recommendations</p>
+                <p className="text-xs font-medium text-muted-foreground">{t("minutes.recommendations")}</p>
                 <p className="mt-0.5 text-sm whitespace-pre-line text-foreground">{decision.recommendations}</p>
               </div>
             )}
             {decision.finalizedAt && (
-              <p className="text-xs text-muted-foreground">Approved {formatDateTime(decision.finalizedAt)}</p>
+              <p className="text-xs text-muted-foreground">{t("minutes.approvedAt", { date: formatDateTime(decision.finalizedAt) })}</p>
             )}
           </CardContent>
         </Card>
@@ -196,9 +198,9 @@ export function MinutesPanel({ councilId, memberRole }: { councilId: string; mem
         <Card>
           <CardContent className="space-y-3 p-4">
             <div>
-              <p className="text-sm font-medium text-foreground">Approve as chair</p>
+              <p className="text-sm font-medium text-foreground">{t("minutes.approveAsChair")}</p>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                Approving locks the minutes and updates the proposal. This cannot be undone.
+                {t("minutes.approveHint")}
               </p>
             </div>
             <Button
@@ -207,7 +209,7 @@ export function MinutesPanel({ councilId, memberRole }: { councilId: string; mem
               onClick={() => approveMutation.mutate()}
             >
               {approveMutation.isPending ? <Loader2 className="animate-spin" /> : <ShieldCheck />}
-              Approve and lock
+              {t("minutes.approveAndLock")}
             </Button>
           </CardContent>
         </Card>
@@ -217,8 +219,8 @@ export function MinutesPanel({ councilId, memberRole }: { councilId: string; mem
       {!decision && !canDraft && (
         <EmptyState
           icon={Gavel}
-          title="No minutes yet"
-          description="The secretary hasn't drafted the minutes for this council meeting yet."
+          title={t("minutes.noMinutes")}
+          description={t("minutes.noMinutesDesc")}
         />
       )}
     </div>
