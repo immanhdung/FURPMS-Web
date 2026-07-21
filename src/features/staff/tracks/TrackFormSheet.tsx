@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCreateTrackMutation, useUpdateTrackMutation } from "@/hooks/useTracks";
 import { useUsersQuery } from "@/hooks/useUsers";
+import { useCyclesQuery } from "@/hooks/useCycles";
 import { trackSchema, type TrackFormValues } from "@/features/staff/tracks/track.schema";
 import type { Track } from "@/types/track";
 
@@ -17,12 +18,15 @@ interface TrackFormSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   track: Track | null;
+  /** When set (e.g. opened from a cycle row's "Add research field" action), the cycle is fixed and not asked for. */
+  fixedCycleId?: number;
 }
 
-export function TrackFormSheet({ open, onOpenChange, track }: TrackFormSheetProps) {
+export function TrackFormSheet({ open, onOpenChange, track, fixedCycleId }: TrackFormSheetProps) {
   const { t } = useTranslation();
   const isEdit = Boolean(track);
   const { data: users } = useUsersQuery();
+  const { data: cycles } = useCyclesQuery();
   const createMutation = useCreateTrackMutation();
   const updateMutation = useUpdateTrackMutation();
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
@@ -32,10 +36,11 @@ export function TrackFormSheet({ open, onOpenChange, track }: TrackFormSheetProp
     handleSubmit,
     control,
     reset,
+    setError,
     formState: { errors },
   } = useForm<TrackFormValues>({
     resolver: zodResolver(trackSchema),
-    defaultValues: { name: "", description: "", ownerId: undefined },
+    defaultValues: { name: "", description: "", ownerId: undefined, cycleId: undefined },
   });
 
   useEffect(() => {
@@ -43,10 +48,10 @@ export function TrackFormSheet({ open, onOpenChange, track }: TrackFormSheetProp
       reset(
         track
           ? { name: track.name, description: track.description ?? "", ownerId: track.ownerId ?? undefined }
-          : { name: "", description: "", ownerId: undefined }
+          : { name: "", description: "", ownerId: undefined, cycleId: fixedCycleId }
       );
     }
-  }, [open, track, reset]);
+  }, [open, track, fixedCycleId, reset]);
 
   const onSubmit = (values: TrackFormValues) => {
     if (isEdit && track) {
@@ -55,7 +60,15 @@ export function TrackFormSheet({ open, onOpenChange, track }: TrackFormSheetProp
         { onSuccess: () => onOpenChange(false) }
       );
     } else {
-      createMutation.mutate(values, { onSuccess: () => onOpenChange(false) });
+      const cycleId = fixedCycleId ?? values.cycleId;
+      if (!cycleId) {
+        setError("cycleId", { message: t("staff.selectCycle") });
+        return;
+      }
+      createMutation.mutate(
+        { cycleId, payload: { name: values.name, description: values.description, ownerId: values.ownerId } },
+        { onSuccess: () => onOpenChange(false) }
+      );
     }
   };
 
@@ -70,6 +83,34 @@ export function TrackFormSheet({ open, onOpenChange, track }: TrackFormSheetProp
       isSubmitting={isSubmitting}
       submitLabel={isEdit ? t("common.saveChanges") : t("common.create")}
     >
+      {!isEdit && !fixedCycleId && (
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-foreground">{t("staff.fieldCycle")}</label>
+          <Controller
+            control={control}
+            name="cycleId"
+            render={({ field }) => (
+              <Select
+                value={field.value ? field.value.toString() : undefined}
+                onValueChange={(value) => field.onChange(Number(value))}
+              >
+                <SelectTrigger aria-invalid={Boolean(errors.cycleId)}>
+                  <SelectValue placeholder={t("staff.selectCycle")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {cycles?.map((cycle) => (
+                    <SelectItem key={cycle.id} value={cycle.id.toString()}>
+                      {cycle.name} ({cycle.academicYear})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
+          {errors.cycleId && <p className="mt-1 text-xs text-destructive">{errors.cycleId.message}</p>}
+        </div>
+      )}
+
       <div>
         <label htmlFor="track-name" className="mb-1.5 block text-sm font-medium text-foreground">
           {t("common.name")}

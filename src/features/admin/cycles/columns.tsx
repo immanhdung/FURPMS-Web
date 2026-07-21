@@ -1,8 +1,8 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import type { TFunction } from "i18next";
-import { Lock, Unlock } from "lucide-react";
+import { FolderPlus, Lock, Unlock } from "lucide-react";
 import { DataTableColumnHeader } from "@/components/tables/DataTableColumnHeader";
-import { DataTableRowActions } from "@/components/tables/DataTableRowActions";
+import { DataTableRowActions, type RowAction } from "@/components/tables/DataTableRowActions";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { CYCLE_STATUS } from "@/constants/statuses";
 import { formatDate } from "@/utils/format";
@@ -15,6 +15,7 @@ interface GetCycleColumnsOptions {
   onEdit: (cycle: Cycle) => void;
   onOpen: (cycle: Cycle) => void;
   onClose: (cycle: Cycle) => void;
+  onAddField: (cycle: Cycle) => void;
 }
 
 export function getCycleColumns({
@@ -24,6 +25,7 @@ export function getCycleColumns({
   onEdit,
   onOpen,
   onClose,
+  onAddField,
 }: GetCycleColumnsOptions): ColumnDef<Cycle>[] {
   return [
     {
@@ -60,7 +62,9 @@ export function getCycleColumns({
       cell: ({ row }) => {
         const cycle = row.original;
         const status = cycle.status?.toUpperCase();
-        const extraActions = [];
+        const extraActions: RowAction[] = [
+          { label: t("staff.addField"), icon: FolderPlus, onSelect: () => onAddField(cycle) },
+        ];
         if (status !== CYCLE_STATUS.OPEN && status !== CYCLE_STATUS.CLOSED) {
           extraActions.push({ label: t("cycles.openCycle"), icon: Unlock, onSelect: () => onOpen(cycle) });
         }

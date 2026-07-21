@@ -12,6 +12,7 @@ import { getCycleColumns } from "@/features/admin/cycles/columns";
 import { CycleFormSheet } from "@/features/admin/cycles/CycleFormSheet";
 import { CycleDetailSheet } from "@/features/admin/cycles/CycleDetailSheet";
 import { TracksTabContent } from "@/features/staff/tracks/TracksTabContent";
+import { TrackFormSheet } from "@/features/staff/tracks/TrackFormSheet";
 import { sortByIdDesc } from "@/utils/sort";
 import type { Cycle } from "@/types/cycle";
 
@@ -26,6 +27,7 @@ export function CyclesPage() {
   const [editingCycle, setEditingCycle] = useState<Cycle | null>(null);
   const [detailCycleId, setDetailCycleId] = useState<number | null>(null);
   const [closingCycle, setClosingCycle] = useState<Cycle | null>(null);
+  const [addingFieldToCycle, setAddingFieldToCycle] = useState<Cycle | null>(null);
 
   const researchTypeNames = useMemo(
     () => Object.fromEntries((researchTypes ?? []).map((rt) => [rt.id, rt.name])),
@@ -45,6 +47,7 @@ export function CyclesPage() {
         },
         onOpen: (cycle) => openMutation.mutate(cycle.id),
         onClose: (cycle) => setClosingCycle(cycle),
+        onAddField: (cycle) => setAddingFieldToCycle(cycle),
       }),
     [t, researchTypeNames, openMutation]
   );
@@ -102,6 +105,13 @@ export function CyclesPage() {
         open={Boolean(detailCycleId)}
         onOpenChange={(open) => !open && setDetailCycleId(null)}
         cycleId={detailCycleId}
+      />
+
+      <TrackFormSheet
+        open={Boolean(addingFieldToCycle)}
+        onOpenChange={(open) => !open && setAddingFieldToCycle(null)}
+        track={null}
+        fixedCycleId={addingFieldToCycle?.id}
       />
 
       <ConfirmDialog

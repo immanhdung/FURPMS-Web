@@ -10,8 +10,9 @@ export const trackService = {
   listByCycle: (cycleId: number) =>
     axiosClient.get<ApiResponse<Track[]>>(`/cycles/${cycleId}/tracks`).then((res) => res.data.data),
 
-  create: (payload: CreateTrackPayload) =>
-    axiosClient.post<ApiResponse<Track>>("/cycles/tracks", payload).then((res) => res.data.data),
+  // A field is always attached to a cycle on creation — there's no "unattached" track anymore.
+  create: (cycleId: number, payload: CreateTrackPayload) =>
+    axiosClient.post<ApiResponse<Track>>(`/cycles/${cycleId}/tracks`, payload).then((res) => res.data.data),
 
   update: (id: number, payload: UpdateTrackPayload) =>
     axiosClient.put<ApiResponse<Track>>(`/cycles/tracks/${id}`, payload).then((res) => res.data.data),

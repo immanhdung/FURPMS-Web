@@ -24,10 +24,12 @@ export function useTracksByCycleQuery(cycleId: number | undefined) {
 export function useCreateTrackMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: CreateTrackPayload) => trackService.create(payload),
-    onSuccess: () => {
+    mutationFn: ({ cycleId, payload }: { cycleId: number; payload: CreateTrackPayload }) =>
+      trackService.create(cycleId, payload),
+    onSuccess: (_data, variables) => {
       toast.success("Research field created.");
       queryClient.invalidateQueries({ queryKey: queryKeys.tracks.all() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tracks.byCycle(variables.cycleId) });
     },
     onError: (error: ApiError) => toast.error(error.message || "Unable to create research field."),
   });
