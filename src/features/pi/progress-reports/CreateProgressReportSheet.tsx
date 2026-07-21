@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FormSheet } from "@/components/shared/FormSheet";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useCreateProgressReportMutation } from "@/hooks/useProgressReports";
+import { useCreateProgressReportMutation, useSubmitProgressReportMutation } from "@/hooks/useProgressReports";
 
 interface CreateProgressReportSheetProps {
   open: boolean;
@@ -10,8 +10,17 @@ interface CreateProgressReportSheetProps {
   contractId: string;
 }
 
+/**
+ * The backend has no endpoint to edit a progress report's content after creation (only create,
+ * schedule, evaluate, submit) — so this form does create + submit as one action instead of
+ * leaving an uneditable "draft" sitting around. All editing happens here, client-side, before
+ * anything is sent; once submitted there's no way to fix a typo without asking staff to help
+ * (a real backend gap — flagged for a PATCH content endpoint).
+ */
 export function CreateProgressReportSheet({ open, onOpenChange, contractId }: CreateProgressReportSheetProps) {
   const createMutation = useCreateProgressReportMutation(contractId);
+  const submitMutation = useSubmitProgressReportMutation(contractId);
+  const isSubmitting = createMutation.isPending || submitMutation.isPending;
 
   const [reportingPeriodStart, setReportingPeriodStart] = useState("");
   const [reportingPeriodEnd, setReportingPeriodEnd] = useState("");
@@ -46,9 +55,13 @@ export function CreateProgressReportSheet({ open, onOpenChange, contractId }: Cr
         piRecommendations: piRecommendations || undefined,
       },
       {
-        onSuccess: () => {
-          reset();
-          onOpenChange(false);
+        onSuccess: (report) => {
+          submitMutation.mutate(report.id, {
+            onSuccess: () => {
+              reset();
+              onOpenChange(false);
+            },
+          });
         },
       }
     );
@@ -59,11 +72,11 @@ export function CreateProgressReportSheet({ open, onOpenChange, contractId }: Cr
       open={open}
       onOpenChange={onOpenChange}
       title="New progress report"
-      description="Fill in this reporting period's progress. You can submit it once saved."
+      description="Fill in this reporting period's progress carefully — the content can't be edited once submitted."
       formId="progress-report-form"
       onSubmit={onSubmit}
-      isSubmitting={createMutation.isPending}
-      submitLabel="Save report"
+      isSubmitting={isSubmitting}
+      submitLabel="Submit report"
     >
       <div className="grid grid-cols-2 gap-3">
         <div>

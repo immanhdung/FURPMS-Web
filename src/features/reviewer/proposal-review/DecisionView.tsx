@@ -19,7 +19,7 @@ export function DecisionView({ councilId }: { councilId: string }) {
     );
   }
 
-  if (!decision) {
+  if (!decision?.finalizedAt) {
     return (
       <EmptyState
         icon={Gavel}

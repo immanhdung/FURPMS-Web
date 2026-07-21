@@ -22,6 +22,13 @@ import type { ApiError } from "@/types/common";
 interface CouncilMinutesPanelProps {
   councilId: string;
   proposalId: string;
+  /**
+   * Round-scoped project id required by SaveMinutes/FinalizeDecision — distinct from proposalId
+   * (confirmed live: sending proposalId there causes a 404 "not in this council's scope"). Comes
+   * from the caller's own council membership; a non-member viewer (e.g. staff browsing a round)
+   * won't have one, but the submit/finalize actions never render for them anyway.
+   */
+  projectId?: string;
 }
 
 function Field({ label, value }: { label: string; value?: ReactNode }) {
@@ -33,7 +40,7 @@ function Field({ label, value }: { label: string; value?: ReactNode }) {
   );
 }
 
-export function CouncilMinutesPanel({ councilId, proposalId }: CouncilMinutesPanelProps) {
+export function CouncilMinutesPanel({ councilId, proposalId, projectId }: CouncilMinutesPanelProps) {
   const currentUserId = useAuthStore((state) => state.user?.id);
 
   const { data: proposal, isLoading: isProposalLoading } = useProposalQuery(proposalId);
@@ -51,6 +58,16 @@ export function CouncilMinutesPanel({ councilId, proposalId }: CouncilMinutesPan
   const [councilComments, setCouncilComments] = useState("");
   const [recommendations, setRecommendations] = useState("");
   const [confirmingResult, setConfirmingResult] = useState<string | null>(null);
+  const [loadedDraftId, setLoadedDraftId] = useState<string | null>(null);
+
+  // GET decision returns the draft too (not just finalized ones) — prefill the form from it so a
+  // reload doesn't lose what the secretary already wrote. Setting state during render (rather than
+  // in an effect) is the React-recommended way to sync from a prop/query that just arrived.
+  if (decision && !decision.finalizedAt && decision.id !== loadedDraftId) {
+    setLoadedDraftId(decision.id);
+    setCouncilComments(decision.councilComments ?? "");
+    setRecommendations(decision.recommendations ?? "");
+  }
 
   const isLoading = isProposalLoading || isMembersLoading || isDecisionLoading;
 
@@ -64,8 +81,9 @@ export function CouncilMinutesPanel({ councilId, proposalId }: CouncilMinutesPan
     );
   }
 
-  // Once the chairman has finalized a decision, there's nothing left to compose — show the result.
-  if (decision) {
+  // Only a finalized decision is the end of the road — an unfinalized draft still needs the
+  // secretary/chairman forms below.
+  if (decision?.finalizedAt) {
     return <DecisionView councilId={councilId} />;
   }
 
@@ -79,10 +97,10 @@ export function CouncilMinutesPanel({ councilId, proposalId }: CouncilMinutesPan
   const membersById = new Map((members ?? []).map((m) => [m.userId, m]));
 
   const handleConfirmDecision = () => {
-    if (!confirmingResult) return;
+    if (!confirmingResult || !projectId) return;
     finalizeMutation.mutate(
       {
-        projectId: proposalId,
+        projectId,
         result: confirmingResult,
         chairUserId: chairman?.userId,
         secretaryUserId: secretary?.userId,
@@ -201,8 +219,9 @@ export function CouncilMinutesPanel({ councilId, proposalId }: CouncilMinutesPan
             </div>
             <Button
               onClick={() =>
+                projectId &&
                 saveMinutesMutation.mutate({
-                  projectId: proposalId,
+                  projectId,
                   // The backend requires Result to be one of APPROVED/REJECTED/REVISION_REQUIRED
                   // (confirmed live) — but per this project's design, the secretary doesn't choose
                   // the outcome, only the chairman does (via /decision). REVISION_REQUIRED is the
@@ -213,7 +232,7 @@ export function CouncilMinutesPanel({ councilId, proposalId }: CouncilMinutesPan
                   recommendations,
                 })
               }
-              disabled={saveMinutesMutation.isPending}
+              disabled={saveMinutesMutation.isPending || !projectId}
             >
               Submit minutes
             </Button>
@@ -231,7 +250,7 @@ export function CouncilMinutesPanel({ councilId, proposalId }: CouncilMinutesPan
             <div className="flex gap-2">
               <Button
                 onClick={() => setConfirmingResult(PROPOSAL_STATUS.APPROVED)}
-                disabled={finalizeMutation.isPending}
+                disabled={finalizeMutation.isPending || !projectId}
               >
                 <CheckCircle2 />
                 Pass
@@ -239,7 +258,7 @@ export function CouncilMinutesPanel({ councilId, proposalId }: CouncilMinutesPan
               <Button
                 variant="destructive"
                 onClick={() => setConfirmingResult(PROPOSAL_STATUS.REJECTED)}
-                disabled={finalizeMutation.isPending}
+                disabled={finalizeMutation.isPending || !projectId}
               >
                 <XCircle />
                 Fail

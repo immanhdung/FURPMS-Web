@@ -116,7 +116,7 @@ export function ProposalReviewWorkspace() {
         )}
 
         <TabsContent value="minutes">
-          <CouncilMinutesPanel councilId={councilId} proposalId={membership.proposalId} />
+          <CouncilMinutesPanel councilId={councilId} proposalId={membership.proposalId} projectId={membership.projectId} />
         </TabsContent>
 
         <TabsContent value="decision">
