@@ -335,6 +335,8 @@ export const en = {
     langPlaceholder: "Vietnamese / English",
   },
   reviewBoard: {
+    openRound: "Open round",
+    sequence: "Sequence {{n}}",
     createCouncilDesc: "Create a review council for Round {{num}}.",
     councilType: "Council type",
     establishmentDecisionNo: "Establishment decision no.",

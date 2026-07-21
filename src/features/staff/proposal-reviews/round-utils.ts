@@ -9,9 +9,16 @@ export const ROUND_BUCKETS: { id: RoundBucket; labelKey: string }[] = [
   { id: "completed", labelKey: "staff.bucketCompleted" },
 ];
 
-/** The round status string is undocumented, so bucket by the more reliable opened/closed timestamps. */
+/**
+ * Xếp cột Kanban theo góc nhìn CỦA ĐỀ TÀI NÀY.
+ * BE trả `status` đã đè bằng project_round.Status (kết quả riêng của đề tài trong vòng),
+ * nên khi Chủ tịch duyệt biên bản → PASSED/FAILED thì đề tài coi như XONG cột "Hoàn thành",
+ * kể cả khi vòng chung (dùng chung cả lĩnh vực) chưa đóng vì còn đề tài khác đang chờ.
+ * REVISION_REQUIRED giữ vòng OPEN (rule #1) → vẫn nằm "đang tiến hành".
+ */
 export function getRoundBucket(round: ReviewRound): RoundBucket {
-  if (round.closedAt) return "completed";
+  const status = round.status?.toUpperCase();
+  if (round.closedAt || status === "PASSED" || status === "FAILED") return "completed";
   if (round.openedAt) return "in_progress";
   return "not_started";
 }

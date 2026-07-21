@@ -338,6 +338,8 @@ export const vi = {
     langPlaceholder: "Tiếng Việt / Tiếng Anh",
   },
   reviewBoard: {
+    openRound: "Mở vòng",
+    sequence: "Thứ tự {{n}}",
     createCouncilDesc: "Tạo hội đồng xét duyệt cho Vòng {{num}}.",
     councilType: "Loại hội đồng",
     establishmentDecisionNo: "Số quyết định thành lập",
