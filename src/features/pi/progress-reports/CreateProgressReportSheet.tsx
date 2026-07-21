@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { FormSheet } from "@/components/shared/FormSheet";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,6 +19,7 @@ interface CreateProgressReportSheetProps {
  * (a real backend gap — flagged for a PATCH content endpoint).
  */
 export function CreateProgressReportSheet({ open, onOpenChange, contractId }: CreateProgressReportSheetProps) {
+  const { t } = useTranslation();
   const createMutation = useCreateProgressReportMutation(contractId);
   const submitMutation = useSubmitProgressReportMutation(contractId);
   const isSubmitting = createMutation.isPending || submitMutation.isPending;
@@ -71,37 +73,37 @@ export function CreateProgressReportSheet({ open, onOpenChange, contractId }: Cr
     <FormSheet
       open={open}
       onOpenChange={onOpenChange}
-      title="New progress report"
-      description="Fill in this reporting period's progress carefully — the content can't be edited once submitted."
+      title={t("reports.newProgress")}
+      description={t("reports.newProgressHint")}
       formId="progress-report-form"
       onSubmit={onSubmit}
       isSubmitting={isSubmitting}
-      submitLabel="Submit report"
+      submitLabel={t("reports.submitReport")}
     >
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-foreground">Period start</label>
+          <label className="mb-1.5 block text-sm font-medium text-foreground">{t("reports.periodStart")}</label>
           <Input type="date" value={reportingPeriodStart} onChange={(e) => setReportingPeriodStart(e.target.value)} />
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-foreground">Period end</label>
+          <label className="mb-1.5 block text-sm font-medium text-foreground">{t("reports.periodEnd")}</label>
           <Input type="date" value={reportingPeriodEnd} onChange={(e) => setReportingPeriodEnd(e.target.value)} />
         </div>
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Completed work</label>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("reports.completedWork")}</label>
         <Textarea rows={3} value={completedContent} onChange={(e) => setCompletedContent(e.target.value)} />
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Pending work</label>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("reports.pendingWork")}</label>
         <Textarea rows={3} value={pendingContent} onChange={(e) => setPendingContent(e.target.value)} />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-foreground">Overall completion (%)</label>
+          <label className="mb-1.5 block text-sm font-medium text-foreground">{t("reports.overallCompletion")}</label>
           <Input
             type="number"
             min={0}
@@ -111,18 +113,18 @@ export function CreateProgressReportSheet({ open, onOpenChange, contractId }: Cr
           />
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-foreground">Expenditure to date</label>
+          <label className="mb-1.5 block text-sm font-medium text-foreground">{t("reports.expenditure")}</label>
           <Input type="number" min={0} value={expenditureToDate} onChange={(e) => setExpenditureToDate(e.target.value)} />
         </div>
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Next period plan</label>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("reports.nextPeriodPlan")}</label>
         <Textarea rows={3} value={nextPeriodPlan} onChange={(e) => setNextPeriodPlan(e.target.value)} />
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Recommendations</label>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("reports.recommendations")}</label>
         <Textarea rows={2} value={piRecommendations} onChange={(e) => setPiRecommendations(e.target.value)} />
       </div>
     </FormSheet>

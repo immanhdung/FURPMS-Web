@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Loader2, RotateCcw, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +10,7 @@ import type { SystemSetting } from "@/types/system-setting";
 
 /** Một dòng cấu hình: nhập số/chuỗi, có nút trả về mức khuyến cáo. */
 function SettingRow({ setting }: { setting: SystemSetting }) {
+  const { t } = useTranslation();
   const updateMutation = useUpdateSystemSettingMutation();
   const [value, setValue] = useState(setting.value);
 
@@ -36,12 +38,12 @@ function SettingRow({ setting }: { setting: SystemSetting }) {
           onClick={() => updateMutation.mutate({ key: setting.key, value: value.trim() })}
         >
           {updateMutation.isPending ? <Loader2 className="animate-spin" /> : <Save />}
-          Save
+          {t("common.save")}
         </Button>
         {!isRecommended && (
           <Button type="button" size="sm" variant="ghost" onClick={() => setValue(setting.recommendedValue)}>
             <RotateCcw />
-            Recommended: {setting.recommendedValue}
+            {t("settings.recommendedPrefix", { value: setting.recommendedValue })}
           </Button>
         )}
       </div>

@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { KeyRound, Mail, ShieldCheck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -20,17 +21,18 @@ function initials(name: string) {
 }
 
 export function ProfilePage() {
+  const { t } = useTranslation();
   const user = useAuthStore((state) => state.user);
 
   if (!user) {
-    return <PageLoader label="Loading your profile..." />;
+    return <PageLoader label={t("profile.loading")} />;
   }
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Profile</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Your account information within FURPMS.</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("profile.title")}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t("profile.subtitle")}</p>
       </div>
 
       <Card>
@@ -58,7 +60,7 @@ export function ProfilePage() {
           <Button asChild variant="outline" size="sm" className="shrink-0">
             <Link to={ROUTES.CHANGE_PASSWORD}>
               <KeyRound />
-              Change password
+              {t("auth.changePassword")}
             </Link>
           </Button>
         </CardContent>
@@ -71,19 +73,19 @@ export function ProfilePage() {
               <ShieldCheck className="size-4.5" />
             </div>
             <div>
-              <CardTitle>Account details</CardTitle>
-              <CardDescription>Read-only information managed by your administrator.</CardDescription>
+              <CardTitle>{t("profile.accountDetails")}</CardTitle>
+              <CardDescription>{t("profile.accountDetailsDesc")}</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Status</span>
-            <span className="font-medium text-foreground">{user.status ?? "Active"}</span>
+            <span className="text-muted-foreground">{t("profile.status")}</span>
+            <span className="font-medium text-foreground">{user.status ?? t("common.active")}</span>
           </div>
           <Separator />
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Last login</span>
+            <span className="text-muted-foreground">{t("profile.lastLogin")}</span>
             <span className="font-medium text-foreground">{formatDateTime(user.lastLoginAt)}</span>
           </div>
         </CardContent>

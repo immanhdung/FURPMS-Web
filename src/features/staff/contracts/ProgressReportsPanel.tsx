@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { CalendarClock, ClipboardCheck, ExternalLink, FileBarChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -10,6 +11,7 @@ import { EvaluateProgressReportDialog } from "@/features/staff/contracts/Evaluat
 import { formatDate, formatDateTime } from "@/utils/format";
 
 export function ProgressReportsPanel({ contractId }: { contractId: string }) {
+  const { t } = useTranslation();
   const { data: reports, isLoading } = useProgressReportsQuery(contractId);
 
   const [schedulingReportId, setSchedulingReportId] = useState<string | null>(null);
@@ -26,8 +28,8 @@ export function ProgressReportsPanel({ contractId }: { contractId: string }) {
       ) : !reports || reports.length === 0 ? (
         <EmptyState
           icon={FileBarChart}
-          title="No progress reports yet"
-          description="The PI hasn't submitted a progress report for this contract."
+          title={t("reports.noProgressYet")}
+          description={t("reports.staffNoProgress")}
           className="min-h-32 border-none p-4"
         />
       ) : (
@@ -41,7 +43,7 @@ export function ProgressReportsPanel({ contractId }: { contractId: string }) {
                 {report.status ? (
                   <StatusBadge status={report.status} />
                 ) : !report.submittedAt ? (
-                  <span className="text-xs text-muted-foreground">Not submitted yet</span>
+                  <span className="text-xs text-muted-foreground">{t("reports.notSubmittedYet")}</span>
                 ) : null}
               </div>
 

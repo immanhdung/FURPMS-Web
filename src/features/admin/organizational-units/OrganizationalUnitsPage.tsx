@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/tables/DataTable";
@@ -10,6 +11,7 @@ import { OrgUnitFormSheet } from "@/features/admin/organizational-units/OrgUnitF
 import type { OrganizationalUnit } from "@/types/organizational-unit";
 
 export function OrganizationalUnitsPage() {
+  const { t } = useTranslation();
   const { data, isLoading, isError, refetch, isRefetching } = useOrganizationalUnitsQuery();
 
   const [formOpen, setFormOpen] = useState(false);
@@ -27,16 +29,17 @@ export function OrganizationalUnitsPage() {
           setEditingUnit(unit);
           setFormOpen(true);
         },
+        t,
       }),
-    [parentNames]
+    [parentNames, t]
   );
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Organizational Units</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Faculties, departments, and offices structure.</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("orgUnits.title")}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t("orgUnits.subtitle")}</p>
         </div>
         <Button
           onClick={() => {
@@ -45,7 +48,7 @@ export function OrganizationalUnitsPage() {
           }}
         >
           <Plus />
-          New unit
+          {t("orgUnits.newBtn")}
         </Button>
       </div>
 
@@ -56,10 +59,10 @@ export function OrganizationalUnitsPage() {
           columns={columns}
           data={data ?? []}
           isLoading={isLoading}
-          searchPlaceholder="Search organizational units..."
+          searchPlaceholder={t("orgUnits.searchPlaceholder")}
           exportFileName="organizational-units"
-          emptyTitle="No organizational units found"
-          emptyDescription="Create a unit to build the organization structure."
+          emptyTitle={t("orgUnits.emptyTitle")}
+          emptyDescription={t("orgUnits.emptyDesc")}
         />
       )}
 
@@ -68,12 +71,12 @@ export function OrganizationalUnitsPage() {
       <DetailSheet
         open={Boolean(viewingUnit)}
         onOpenChange={(open) => !open && setViewingUnit(null)}
-        title={viewingUnit?.name ?? "Unit details"}
+        title={viewingUnit?.name ?? t("orgUnits.detailsTitle")}
         description={viewingUnit?.code}
         fields={[
-          { label: "Type", value: viewingUnit?.unitType },
-          { label: "Parent unit", value: viewingUnit?.parentId ? parentNames[viewingUnit.parentId] : "-" },
-          { label: "Sort order", value: viewingUnit?.sortOrder ?? "-" },
+          { label: t("orgUnits.type"), value: viewingUnit?.unitType },
+          { label: t("orgUnits.parentUnit"), value: viewingUnit?.parentId ? parentNames[viewingUnit.parentId] : "-" },
+          { label: t("orgUnits.sortOrder"), value: viewingUnit?.sortOrder ?? "-" },
         ]}
       />
     </div>

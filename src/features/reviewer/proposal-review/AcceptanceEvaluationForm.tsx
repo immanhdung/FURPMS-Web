@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Loader2, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,6 +9,7 @@ import { useAcceptanceQuery, useSubmitAcceptanceMutation } from "@/hooks/useAcce
 import { ACCEPTANCE_RESULTS } from "@/types/acceptance";
 
 export function AcceptanceEvaluationForm({ councilId }: { councilId: string }) {
+  const { t } = useTranslation();
   const { data: existing, isLoading } = useAcceptanceQuery(councilId);
   const submitMutation = useSubmitAcceptanceMutation(councilId);
 
@@ -34,7 +36,7 @@ export function AcceptanceEvaluationForm({ councilId }: { councilId: string }) {
   return (
     <div className="space-y-4">
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Result</label>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("review.result")}</label>
         <Select value={result} onValueChange={setResult}>
           <SelectTrigger className="w-full">
             <SelectValue />
@@ -51,7 +53,7 @@ export function AcceptanceEvaluationForm({ councilId }: { councilId: string }) {
 
       {result === "FAIL" && (
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-foreground">Fail reason</label>
+          <label className="mb-1.5 block text-sm font-medium text-foreground">{t("review.failReason")}</label>
           <Textarea rows={3} value={failReason} onChange={(e) => setFailReason(e.target.value)} />
         </div>
       )}
@@ -62,7 +64,7 @@ export function AcceptanceEvaluationForm({ councilId }: { councilId: string }) {
           disabled={submitMutation.isPending}
         >
           {submitMutation.isPending ? <Loader2 className="animate-spin" /> : <Save />}
-          {existing ? "Update evaluation" : "Submit evaluation"}
+          {existing ? t("review.updateEvaluation") : t("review.submitEvaluation")}
         </Button>
       </div>
     </div>

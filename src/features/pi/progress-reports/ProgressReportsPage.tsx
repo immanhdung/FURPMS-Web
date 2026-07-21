@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { CalendarClock, ExternalLink, FileBarChart, Plus, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,6 +12,7 @@ import { CreateProgressReportSheet } from "@/features/pi/progress-reports/Create
 import { formatDate, formatDateTime } from "@/utils/format";
 
 export function ProgressReportsPage() {
+  const { t } = useTranslation();
   const { data: contracts, proposalTitleById, isLoading: isContractsLoading } = useMyContractsQuery();
   const [selectedContractId, setSelectedContractId] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
@@ -24,7 +26,7 @@ export function ProgressReportsPage() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Progress Reports</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("reports.progressTitle")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Report progress against your signed research contract.
           </p>
@@ -42,14 +44,14 @@ export function ProgressReportsPage() {
       ) : !contracts || contracts.length === 0 ? (
         <EmptyState
           icon={FileBarChart}
-          title="No contracts yet"
-          description="Progress reports become available once you have a signed research contract."
+          title={t("reports.noContracts")}
+          description={t("reports.progressNoContractsDesc")}
         />
       ) : (
         <>
           <Select value={contractId ?? undefined} onValueChange={setSelectedContractId}>
             <SelectTrigger className="w-full sm:w-80">
-              <SelectValue placeholder="Select a contract" />
+              <SelectValue placeholder={t("reports.selectContract")} />
             </SelectTrigger>
             <SelectContent>
               {contracts.map((contract) => (
@@ -69,8 +71,8 @@ export function ProgressReportsPage() {
           ) : !reports || reports.length === 0 ? (
             <EmptyState
               icon={FileBarChart}
-              title="No progress reports yet"
-              description="Create your first progress report for this contract."
+              title={t("reports.noProgressYet")}
+              description={t("reports.createFirstProgress")}
               className="min-h-40"
             />
           ) : (

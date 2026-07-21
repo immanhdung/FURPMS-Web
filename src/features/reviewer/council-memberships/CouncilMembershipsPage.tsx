@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { DataTable } from "@/components/tables/DataTable";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { useMyMembershipsQuery } from "@/hooks/useMemberships";
@@ -8,18 +9,19 @@ import { ROUTES } from "@/constants/routes";
 
 export function CouncilMembershipsPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { data, isLoading, isError, refetch, isRefetching } = useMyMembershipsQuery();
 
   const columns = useMemo(
-    () => getMembershipColumns((membership) => navigate(`${ROUTES.ASSIGNED_REVIEWS}/${membership.councilId}`)),
-    [navigate]
+    () => getMembershipColumns(t, (membership) => navigate(`${ROUTES.ASSIGNED_REVIEWS}/${membership.councilId}`)),
+    [t, navigate]
   );
 
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Council Memberships</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Your full history of council memberships, past and present.</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("reviewer.membershipsTitle")}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t("reviewer.membershipsSubtitle")}</p>
       </div>
 
       {isError ? (
@@ -29,10 +31,10 @@ export function CouncilMembershipsPage() {
           columns={columns}
           data={data ?? []}
           isLoading={isLoading}
-          searchPlaceholder="Search memberships..."
+          searchPlaceholder={t("reviewer.membershipsSearch")}
           exportFileName="council-memberships"
-          emptyTitle="No council memberships yet"
-          emptyDescription="Your council memberships will appear here once you accept an invitation."
+          emptyTitle={t("reviewer.noMemberships")}
+          emptyDescription={t("reviewer.noMembershipsDesc")}
         />
       )}
     </div>

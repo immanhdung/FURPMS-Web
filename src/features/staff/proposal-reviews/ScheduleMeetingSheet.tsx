@@ -76,7 +76,7 @@ export function ScheduleMeetingSheet({ open, onOpenChange, councilId }: Schedule
     >
       <div>
         <label htmlFor="meeting-title" className="mb-1.5 block text-sm font-medium text-foreground">
-          Title
+          {t("reviewBoard.meetingTitle")}
         </label>
         <Input id="meeting-title" aria-invalid={Boolean(errors.title)} {...register("title")} />
         {errors.title && <p className="mt-1 text-xs text-destructive">{errors.title.message}</p>}
@@ -106,7 +106,7 @@ export function ScheduleMeetingSheet({ open, onOpenChange, councilId }: Schedule
 
       <div>
         <label htmlFor="meeting-link" className="mb-1.5 block text-sm font-medium text-foreground">
-          Meeting link
+          {t("reviewBoard.meetingLinkLabel")}
         </label>
         <div className="flex gap-2">
           <Input id="meeting-link" placeholder="https://..." {...register("meetingLink")} />
@@ -125,24 +125,24 @@ export function ScheduleMeetingSheet({ open, onOpenChange, councilId }: Schedule
               }
             >
               {generateLinkMutation.isPending ? <Loader2 className="animate-spin" /> : <Sparkles />}
-              Generate
+              {t("reviewBoard.generate")}
             </Button>
           )}
         </div>
-        {generatedLink && <p className="mt-1 text-xs text-muted-foreground">Generated: {generatedLink}</p>}
+        {generatedLink && <p className="mt-1 text-xs text-muted-foreground">{t("reviewBoard.generatedLink", { link: generatedLink })}</p>}
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label htmlFor="meeting-scheduled" className="mb-1.5 block text-sm font-medium text-foreground">
-            Date &amp; time
+            {t("reviewBoard.dateTime")}
           </label>
           <Input id="meeting-scheduled" type="datetime-local" aria-invalid={Boolean(errors.scheduledAt)} {...register("scheduledAt")} />
           {errors.scheduledAt && <p className="mt-1 text-xs text-destructive">{errors.scheduledAt.message}</p>}
         </div>
         <div>
           <label htmlFor="meeting-duration" className="mb-1.5 block text-sm font-medium text-foreground">
-            Duration (min)
+            {t("reviewBoard.durationLabel")}
           </label>
           <Input id="meeting-duration" type="number" aria-invalid={Boolean(errors.durationMinutes)} {...register("durationMinutes", { valueAsNumber: true })} />
           {errors.durationMinutes && <p className="mt-1 text-xs text-destructive">{errors.durationMinutes.message}</p>}
@@ -151,7 +151,7 @@ export function ScheduleMeetingSheet({ open, onOpenChange, councilId }: Schedule
 
       <div>
         <label htmlFor="meeting-agenda" className="mb-1.5 block text-sm font-medium text-foreground">
-          Agenda
+          {t("reviewBoard.agenda")}
         </label>
         <Textarea id="meeting-agenda" rows={3} {...register("agenda")} />
       </div>

@@ -38,11 +38,11 @@ export function CouncilMembersPanel({ councilId, trackId }: CouncilMembersPanelP
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={() => sendInvitationsMutation.mutate({})} disabled={sendInvitationsMutation.isPending}>
             <Mail />
-            Send invitations
+            {t("reviewBoard.sendInvitations")}
           </Button>
           <Button size="sm" onClick={() => setAddOpen(true)}>
             <UserPlus />
-            Add member
+            {t("reviewBoard.addMemberBtn")}
           </Button>
         </div>
       </div>
@@ -66,10 +66,10 @@ export function CouncilMembersPanel({ councilId, trackId }: CouncilMembersPanelP
                 </p>
                 <p className="truncate text-xs text-muted-foreground">{member.reviewerEmail}</p>
                 {member.confirmedAt && (
-                  <p className="text-[11px] text-muted-foreground">Confirmed {formatDateTime(member.confirmedAt)}</p>
+                  <p className="text-[11px] text-muted-foreground">{t("reviewBoard.confirmedAt", { at: formatDateTime(member.confirmedAt) })}</p>
                 )}
                 {member.declinedAt && (
-                  <p className="text-[11px] text-muted-foreground">Declined {formatDateTime(member.declinedAt)}</p>
+                  <p className="text-[11px] text-muted-foreground">{t("reviewBoard.declinedAt", { at: formatDateTime(member.declinedAt) })}</p>
                 )}
               </div>
 
@@ -112,7 +112,7 @@ export function CouncilMembersPanel({ councilId, trackId }: CouncilMembersPanelP
         open={Boolean(removingMember)}
         onOpenChange={(open) => !open && setRemovingMember(null)}
         title={t("reviewBoard.removeMember")}
-        description={`Remove ${removingMember?.reviewerName ?? "this member"} from the council?`}
+        description={t("reviewBoard.removeMemberDesc", { name: removingMember?.reviewerName ?? t("reviewBoard.thisMember") })}
         variant="destructive"
         confirmLabel={t("reviewBoard.remove")}
         isLoading={removeMutation.isPending}

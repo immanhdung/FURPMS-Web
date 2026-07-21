@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { FormSheet } from "@/components/shared/FormSheet";
@@ -14,6 +15,7 @@ interface CreateContractSheetProps {
 }
 
 export function CreateContractSheet({ open, onOpenChange }: CreateContractSheetProps) {
+  const { t } = useTranslation();
   const { data: approvedProposals } = useProposalsQuery({ status: PROPOSAL_STATUS.APPROVED });
   const createMutation = useCreateContractMutation();
 
@@ -50,22 +52,22 @@ export function CreateContractSheet({ open, onOpenChange }: CreateContractSheetP
     <FormSheet
       open={open}
       onOpenChange={onOpenChange}
-      title="Create Contract"
-      description="Set up a research contract for an approved proposal."
+      title={t("contract.createTitle")}
+      description={t("contract.createHint")}
       formId="contract-form"
       onSubmit={handleSubmit(onSubmit)}
       isSubmitting={createMutation.isPending}
-      submitLabel="Create contract"
+      submitLabel={t("contract.createBtn")}
     >
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Approved proposal</label>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("contract.approvedProposal")}</label>
         <Controller
           control={control}
           name="proposalId"
           render={({ field }) => (
             <Select value={field.value || undefined} onValueChange={field.onChange}>
               <SelectTrigger aria-invalid={Boolean(errors.proposalId)}>
-                <SelectValue placeholder="Select an approved proposal" />
+                <SelectValue placeholder={t("contract.selectApproved")} />
               </SelectTrigger>
               <SelectContent>
                 {approvedProposals?.map((proposal) => (
@@ -79,7 +81,7 @@ export function CreateContractSheet({ open, onOpenChange }: CreateContractSheetP
         />
         {errors.proposalId && <p className="mt-1 text-xs text-destructive">{errors.proposalId.message}</p>}
         {approvedProposals && approvedProposals.length === 0 && (
-          <p className="mt-1 text-xs text-warning">No approved proposals are available yet.</p>
+          <p className="mt-1 text-xs text-warning">{t("contract.noApproved")}</p>
         )}
       </div>
 

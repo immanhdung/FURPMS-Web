@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, LayoutGrid, ListTree, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -19,6 +20,7 @@ type ViewMode = "kanban" | "timeline";
 export function ProposalReviewWorkspace() {
   const { proposalId } = useParams<{ proposalId: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const { data: proposal, isLoading: isProposalLoading } = useProposalQuery(proposalId ?? null);
   const { data: rounds, isLoading, isError, refetch, isRefetching } = useReviewRoundsQuery(proposalId ?? null);
@@ -35,29 +37,29 @@ export function ProposalReviewWorkspace() {
     <div className="space-y-4">
       <Button variant="ghost" size="sm" className="-ml-2" onClick={() => navigate(ROUTES.PROPOSAL_REVIEWS)}>
         <ArrowLeft />
-        Back to proposals
+        {t("staff.backToProposals")}
       </Button>
 
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           {isProposalLoading ? (
-            <PageLoader label="Loading proposal..." />
+            <PageLoader label={t("staff.loadingProposal")} />
           ) : (
             <>
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-                  {proposal?.titleEN || proposal?.titleVI || "Proposal"}
+                  {proposal?.titleEN || proposal?.titleVI || t("staff.proposalFallback")}
                 </h1>
                 {proposal?.status && <StatusBadge status={proposal.status} />}
               </div>
-              <p className="mt-1 text-sm text-muted-foreground">Manage review rounds, councils, and meetings.</p>
+              <p className="mt-1 text-sm text-muted-foreground">{t("staff.manageRounds")}</p>
             </>
           )}
         </div>
 
         <Button onClick={() => setCreateRoundOpen(true)}>
           <Plus />
-          New round
+          {t("staff.newRound")}
         </Button>
       </div>
 
@@ -70,7 +72,7 @@ export function ProposalReviewWorkspace() {
           )}
         >
           <LayoutGrid className="size-3.5" />
-          Kanban
+          {t("staff.kanban")}
         </button>
         <button
           onClick={() => setView("timeline")}
@@ -80,14 +82,14 @@ export function ProposalReviewWorkspace() {
           )}
         >
           <ListTree className="size-3.5" />
-          Timeline
+          {t("staff.timelineView")}
         </button>
       </div>
 
       {isError ? (
         <ErrorState onRetry={() => refetch()} isRetrying={isRefetching} />
       ) : isLoading ? (
-        <PageLoader label="Loading review rounds..." />
+        <PageLoader label={t("staff.loadingRounds")} />
       ) : view === "kanban" ? (
         <RoundKanbanBoard rounds={rounds ?? []} onSelect={(round) => setSelectedRoundId(round.id)} />
       ) : (

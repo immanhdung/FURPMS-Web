@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ExternalLink, FileCheck2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +12,7 @@ import { useFinalReportQuery, useSubmitFinalReportMutation } from "@/hooks/useFi
 import { formatDateTime } from "@/utils/format";
 
 export function FinalReportsPage() {
+  const { t } = useTranslation();
   const { data: contracts, proposalTitleById, isLoading: isContractsLoading } = useMyContractsQuery();
   const [selectedContractId, setSelectedContractId] = useState<string | null>(null);
 
@@ -28,8 +30,8 @@ export function FinalReportsPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Final Report</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Submit the summary report to close out your contract.</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("reports.finalTitle")}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t("reports.finalSubtitle")}</p>
       </div>
 
       {isContractsLoading ? (
@@ -37,14 +39,14 @@ export function FinalReportsPage() {
       ) : !contracts || contracts.length === 0 ? (
         <EmptyState
           icon={FileCheck2}
-          title="No contracts yet"
-          description="The final report becomes available once you have a signed research contract."
+          title={t("reports.noContracts")}
+          description={t("reports.finalNoContractsDesc")}
         />
       ) : (
         <>
           <Select value={contractId ?? undefined} onValueChange={setSelectedContractId}>
             <SelectTrigger className="w-full sm:w-80">
-              <SelectValue placeholder="Select a contract" />
+              <SelectValue placeholder={t("reports.selectContract")} />
             </SelectTrigger>
             <SelectContent>
               {contracts.map((contract) => (
@@ -62,11 +64,11 @@ export function FinalReportsPage() {
               {finalReport && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-medium text-foreground">Current submission</p>
+                    <p className="text-sm font-medium text-foreground">{t("reports.currentSubmission")}</p>
                     {finalReport.status && <StatusBadge status={finalReport.status} />}
                   </div>
                   {finalReport.submittedAt && (
-                    <p className="text-xs text-muted-foreground">Submitted {formatDateTime(finalReport.submittedAt)}</p>
+                    <p className="text-xs text-muted-foreground">{t("reports.submittedAt", { at: formatDateTime(finalReport.submittedAt) })}</p>
                   )}
                   {finalReport.reportFileUrl && (
                     <a
@@ -76,11 +78,11 @@ export function FinalReportsPage() {
                       className="flex items-center gap-1 text-xs font-medium text-primary hover:underline"
                     >
                       <ExternalLink className="size-3.5" />
-                      Report file
+                      {t("reports.reportFile")}
                     </a>
                   )}
                   {finalReport.revisionNotes && (
-                    <p className="text-xs text-warning">Revision requested: {finalReport.revisionNotes}</p>
+                    <p className="text-xs text-warning">{t("reports.revisionRequested", { notes: finalReport.revisionNotes })}</p>
                   )}
                 </div>
               )}
@@ -88,19 +90,19 @@ export function FinalReportsPage() {
               {canEdit && (
                 <div className="space-y-3">
                   <p className="text-sm font-medium text-foreground">
-                    {finalReport ? "Resubmit report" : "Submit report"}
+                    {finalReport ? t("reports.resubmitReport") : t("reports.submitReport")}
                   </p>
                   <div>
-                    <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Report file URL</label>
+                    <label className="mb-1.5 block text-xs font-medium text-muted-foreground">{t("reports.reportFileUrl")}</label>
                     <Input value={reportFileUrl} onChange={(e) => setReportFileUrl(e.target.value)} placeholder="https://..." />
                   </div>
                   <div>
-                    <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Summary file URL</label>
+                    <label className="mb-1.5 block text-xs font-medium text-muted-foreground">{t("reports.summaryFileUrl")}</label>
                     <Input value={summaryFileUrl} onChange={(e) => setSummaryFileUrl(e.target.value)} placeholder="https://..." />
                   </div>
                   <div>
-                    <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Language</label>
-                    <Input value={language} onChange={(e) => setLanguage(e.target.value)} placeholder="Vietnamese / English" />
+                    <label className="mb-1.5 block text-xs font-medium text-muted-foreground">{t("reports.language")}</label>
+                    <Input value={language} onChange={(e) => setLanguage(e.target.value)} placeholder={t("reports.langPlaceholder")} />
                   </div>
                   <Button
                     disabled={submitMutation.isPending || !reportFileUrl}
@@ -113,7 +115,7 @@ export function FinalReportsPage() {
                     }
                   >
                     <Send />
-                    Submit final report
+                    {t("reports.submitFinalReport")}
                   </Button>
                 </div>
               )}

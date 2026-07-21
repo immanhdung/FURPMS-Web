@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { DataTable } from "@/components/tables/DataTable";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { useProposalsQuery } from "@/hooks/useProposals";
@@ -15,6 +16,7 @@ interface ProposalsTableProps {
 }
 
 export function ProposalsTable({ params, onOpen, emptyTitle, emptyDescription }: ProposalsTableProps) {
+  const { t } = useTranslation();
   const { data, isLoading, isError, refetch, isRefetching } = useProposalsQuery(params);
   const { data: cycles } = useCyclesQuery();
   const { data: tracks } = useTracksQuery();
@@ -25,7 +27,7 @@ export function ProposalsTable({ params, onOpen, emptyTitle, emptyDescription }:
     [tracks]
   );
 
-  const columns = useMemo(() => getProposalColumns({ cycleNames, trackNames, onOpen }), [cycleNames, trackNames, onOpen]);
+  const columns = useMemo(() => getProposalColumns({ t, cycleNames, trackNames, onOpen }), [t, cycleNames, trackNames, onOpen]);
 
   if (isError) {
     return <ErrorState onRetry={() => refetch()} isRetrying={isRefetching} />;
@@ -36,10 +38,10 @@ export function ProposalsTable({ params, onOpen, emptyTitle, emptyDescription }:
       columns={columns}
       data={data ?? []}
       isLoading={isLoading}
-      searchPlaceholder="Search proposals..."
+      searchPlaceholder={t("staff.proposalsSearch")}
       exportFileName="proposals"
-      emptyTitle={emptyTitle ?? "No proposals found"}
-      emptyDescription={emptyDescription ?? "Proposals will appear here once submitted for this cycle."}
+      emptyTitle={emptyTitle ?? t("staff.noProposals")}
+      emptyDescription={emptyDescription ?? t("staff.noProposalsDesc")}
     />
   );
 }

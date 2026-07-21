@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { BellOff, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/EmptyState";
@@ -11,6 +12,7 @@ import { formatRelativeTime } from "@/utils/format";
 import { cn } from "@/lib/utils";
 
 export function NotificationsPage() {
+  const { t } = useTranslation();
   const { isLoading } = useNotificationsQuery();
   const notifications = useNotificationStore((state) => state.notifications);
   const unreadCount = useNotificationStore((state) => state.unreadCount);
@@ -21,14 +23,14 @@ export function NotificationsPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Notifications</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("notifications.title")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {unreadCount > 0 ? `${unreadCount} unread notification${unreadCount > 1 ? "s" : ""}` : "You're all caught up"}
+            {unreadCount > 0 ? t("notifications.unread", { count: unreadCount }) : t("notifications.allCaughtUp")}
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={() => markAllAsRead.mutate()} disabled={unreadCount === 0}>
           <CheckCheck />
-          Read all
+          {t("notifications.readAll")}
         </Button>
       </div>
 
@@ -39,7 +41,7 @@ export function NotificationsPage() {
           ))}
         </div>
       ) : notifications.length === 0 ? (
-        <EmptyState icon={BellOff} title="No notifications" description="You're all caught up for now." />
+        <EmptyState icon={BellOff} title={t("notifications.empty")} description={t("notifications.emptyDesc")} />
       ) : (
         <ul className="divide-y divide-border rounded-xl border border-border bg-card">
           {notifications.map((notification) => (

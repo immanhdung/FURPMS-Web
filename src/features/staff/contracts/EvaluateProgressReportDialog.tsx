@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 import {
   Dialog,
@@ -27,6 +28,7 @@ export function EvaluateProgressReportDialog({
   contractId,
   reportId,
 }: EvaluateProgressReportDialogProps) {
+  const { t } = useTranslation();
   const evaluateMutation = useEvaluateProgressReportMutation(contractId);
   const [evaluationResult, setEvaluationResult] = useState<string>(REVIEW_DECISION.APPROVED);
   const [evaluationComments, setEvaluationComments] = useState("");
@@ -40,33 +42,33 @@ export function EvaluateProgressReportDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Evaluate progress report</DialogTitle>
-          <DialogDescription>Record the outcome of this reporting period's review.</DialogDescription>
+          <DialogTitle>{t("contract.evalReportTitle")}</DialogTitle>
+          <DialogDescription>{t("contract.evalReportDesc")}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">Result</label>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">{t("contract.evalResult")}</label>
             <Select value={evaluationResult} onValueChange={setEvaluationResult}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={REVIEW_DECISION.APPROVED}>Approved</SelectItem>
-                <SelectItem value={REVIEW_DECISION.REVISION_REQUIRED}>Revision required</SelectItem>
-                <SelectItem value={REVIEW_DECISION.REJECTED}>Rejected</SelectItem>
+                <SelectItem value={REVIEW_DECISION.APPROVED}>{t("contract.evalApproved")}</SelectItem>
+                <SelectItem value={REVIEW_DECISION.REVISION_REQUIRED}>{t("contract.evalRevision")}</SelectItem>
+                <SelectItem value={REVIEW_DECISION.REJECTED}>{t("contract.evalRejected")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">Comments</label>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">{t("contract.evalComments")}</label>
             <Textarea rows={3} value={evaluationComments} onChange={(e) => setEvaluationComments(e.target.value)} />
           </div>
         </div>
 
         <DialogFooter>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={evaluateMutation.isPending}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button
             type="button"
@@ -85,7 +87,7 @@ export function EvaluateProgressReportDialog({
             }
           >
             {evaluateMutation.isPending && <Loader2 className="animate-spin" />}
-            Save evaluation
+            {t("contract.saveEvaluation")}
           </Button>
         </DialogFooter>
       </DialogContent>

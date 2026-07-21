@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { FormSheet } from "@/components/shared/FormSheet";
@@ -18,6 +19,7 @@ interface BudgetCategoryFormSheetProps {
 }
 
 export function BudgetCategoryFormSheet({ open, onOpenChange, category }: BudgetCategoryFormSheetProps) {
+  const { t } = useTranslation();
   const isEdit = Boolean(category);
   const createMutation = useCreateBudgetCategoryMutation();
   const updateMutation = useUpdateBudgetCategoryMutation();
@@ -52,16 +54,16 @@ export function BudgetCategoryFormSheet({ open, onOpenChange, category }: Budget
     <FormSheet
       open={open}
       onOpenChange={onOpenChange}
-      title={isEdit ? "Edit Budget Category" : "Create Budget Category"}
-      description="Expense categories used in proposal budgets."
+      title={isEdit ? t("budgetCategories.editTitle") : t("budgetCategories.createTitle")}
+      description={t("budgetCategories.formDesc")}
       formId="budget-category-form"
       onSubmit={handleSubmit(onSubmit)}
       isSubmitting={isSubmitting}
-      submitLabel={isEdit ? "Save changes" : "Create"}
+      submitLabel={isEdit ? t("common.saveChanges") : t("common.create")}
     >
       <div>
         <label htmlFor="bc-code" className="mb-1.5 block text-sm font-medium text-foreground">
-          Code
+          {t("common.code")}
         </label>
         <Input id="bc-code" aria-invalid={Boolean(errors.code)} {...register("code")} />
         {errors.code && <p className="mt-1 text-xs text-destructive">{errors.code.message}</p>}
@@ -69,7 +71,7 @@ export function BudgetCategoryFormSheet({ open, onOpenChange, category }: Budget
 
       <div>
         <label htmlFor="bc-name" className="mb-1.5 block text-sm font-medium text-foreground">
-          Name
+          {t("common.name")}
         </label>
         <Input id="bc-name" aria-invalid={Boolean(errors.name)} {...register("name")} />
         {errors.name && <p className="mt-1 text-xs text-destructive">{errors.name.message}</p>}
@@ -77,7 +79,7 @@ export function BudgetCategoryFormSheet({ open, onOpenChange, category }: Budget
 
       <div>
         <label htmlFor="bc-sequence" className="mb-1.5 block text-sm font-medium text-foreground">
-          Sequence
+          {t("common.sequence")}
         </label>
         <Input id="bc-sequence" type="number" aria-invalid={Boolean(errors.sequence)} {...register("sequence", { valueAsNumber: true })} />
         {errors.sequence && <p className="mt-1 text-xs text-destructive">{errors.sequence.message}</p>}
@@ -89,7 +91,7 @@ export function BudgetCategoryFormSheet({ open, onOpenChange, category }: Budget
         render={({ field }) => (
           <label className="flex items-center gap-2 text-sm text-foreground">
             <Checkbox checked={field.value} onCheckedChange={(checked) => field.onChange(Boolean(checked))} />
-            Active
+            {t("common.active")}
           </label>
         )}
       />

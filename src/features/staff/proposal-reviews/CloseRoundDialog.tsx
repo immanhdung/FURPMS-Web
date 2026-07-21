@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 import {
   Dialog,
@@ -21,6 +22,7 @@ interface CloseRoundDialogProps {
 }
 
 export function CloseRoundDialog({ open, onOpenChange, proposalId, round }: CloseRoundDialogProps) {
+  const { t } = useTranslation();
   const [result, setResult] = useState("");
   const closeMutation = useCloseRoundMutation(proposalId);
 
@@ -28,19 +30,19 @@ export function CloseRoundDialog({ open, onOpenChange, proposalId, round }: Clos
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Close round</DialogTitle>
+          <DialogTitle>{t("staff.closeRound")}</DialogTitle>
           <DialogDescription>
-            Record the outcome for Round {round?.roundNumber}. This closes it to further scoring.
+            {t("staff.closeRoundDesc", { num: round?.roundNumber ?? "" })}
           </DialogDescription>
         </DialogHeader>
 
         <div>
           <label htmlFor="round-result" className="mb-1.5 block text-sm font-medium text-foreground">
-            Result
+            {t("staff.result")}
           </label>
           <Input
             id="round-result"
-            placeholder="e.g. APPROVED, REJECTED, REVISION_REQUIRED"
+            placeholder={t("staff.resultPlaceholder")}
             value={result}
             onChange={(e) => setResult(e.target.value)}
           />
@@ -48,7 +50,7 @@ export function CloseRoundDialog({ open, onOpenChange, proposalId, round }: Clos
 
         <DialogFooter>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={closeMutation.isPending}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button
             type="button"
@@ -68,7 +70,7 @@ export function CloseRoundDialog({ open, onOpenChange, proposalId, round }: Clos
             }
           >
             {closeMutation.isPending && <Loader2 className="animate-spin" />}
-            Close round
+            {t("staff.closeRound")}
           </Button>
         </DialogFooter>
       </DialogContent>

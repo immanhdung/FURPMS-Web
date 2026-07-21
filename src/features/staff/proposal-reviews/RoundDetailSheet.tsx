@@ -40,7 +40,7 @@ export function RoundDetailSheet({ open, onOpenChange, proposalId, trackId, roun
       <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent resizable defaultWidth={640} className="flex w-full flex-col sm:max-w-2xl">
         <SheetHeader>
-          <SheetTitle>{roundTitle(round)}</SheetTitle>
+          <SheetTitle>{roundTitle(round, t)}</SheetTitle>
           <SheetDescription>
             {round.dimension && `${round.dimension} · `}
             Sequence {round.sequence}

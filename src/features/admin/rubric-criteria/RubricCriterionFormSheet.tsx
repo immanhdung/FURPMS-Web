@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { FormSheet } from "@/components/shared/FormSheet";
@@ -29,6 +30,7 @@ interface RubricCriterionFormSheetProps {
 }
 
 export function RubricCriterionFormSheet({ open, onOpenChange, criterion }: RubricCriterionFormSheetProps) {
+  const { t } = useTranslation();
   const isEdit = Boolean(criterion);
   const createMutation = useCreateRubricCriterionMutation();
   const updateMutation = useUpdateRubricCriterionMutation();
@@ -77,22 +79,22 @@ export function RubricCriterionFormSheet({ open, onOpenChange, criterion }: Rubr
     <FormSheet
       open={open}
       onOpenChange={onOpenChange}
-      title={isEdit ? "Edit Rubric Criterion" : "Create Rubric Criterion"}
-      description="Scoring criteria used in review rounds."
+      title={isEdit ? t("rubricCriteria.editTitle") : t("rubricCriteria.createTitle")}
+      description={t("rubricCriteria.formDesc")}
       formId="rubric-criterion-form"
       onSubmit={handleSubmit(onSubmit)}
       isSubmitting={isSubmitting}
-      submitLabel={isEdit ? "Save changes" : "Create"}
+      submitLabel={isEdit ? t("common.saveChanges") : t("common.create")}
     >
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Round type</label>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("rubricCriteria.roundType")}</label>
         <Controller
           control={control}
           name="roundType"
           render={({ field }) => (
             <Select value={field.value} onValueChange={field.onChange}>
               <SelectTrigger>
-                <SelectValue placeholder="Select round type" />
+                <SelectValue placeholder={t("rubricCriteria.roundTypePlaceholder")} />
               </SelectTrigger>
               <SelectContent>
                 {Object.values(REVIEW_ROUND_TYPE).map((type) => (
@@ -109,7 +111,7 @@ export function RubricCriterionFormSheet({ open, onOpenChange, criterion }: Rubr
 
       <div>
         <label htmlFor="rc-name" className="mb-1.5 block text-sm font-medium text-foreground">
-          Name
+          {t("common.name")}
         </label>
         <Input id="rc-name" aria-invalid={Boolean(errors.name)} {...register("name")} />
         {errors.name && <p className="mt-1 text-xs text-destructive">{errors.name.message}</p>}
@@ -118,13 +120,13 @@ export function RubricCriterionFormSheet({ open, onOpenChange, criterion }: Rubr
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label htmlFor="rc-order" className="mb-1.5 block text-sm font-medium text-foreground">
-            Order index
+            {t("rubricCriteria.orderIndex")}
           </label>
           <Input id="rc-order" type="number" {...register("orderIndex", { valueAsNumber: true })} />
         </div>
         <div>
           <label htmlFor="rc-maxscore" className="mb-1.5 block text-sm font-medium text-foreground">
-            Max score
+            {t("rubricCriteria.maxScore")}
           </label>
           <Input id="rc-maxscore" type="number" step="any" aria-invalid={Boolean(errors.maxScore)} {...register("maxScore", { valueAsNumber: true })} />
           {errors.maxScore && <p className="mt-1 text-xs text-destructive">{errors.maxScore.message}</p>}
@@ -137,7 +139,7 @@ export function RubricCriterionFormSheet({ open, onOpenChange, criterion }: Rubr
         render={({ field }) => (
           <label className="flex items-center gap-2 text-sm text-foreground">
             <Checkbox checked={field.value} onCheckedChange={(checked) => field.onChange(Boolean(checked))} />
-            Active
+            {t("common.active")}
           </label>
         )}
       />

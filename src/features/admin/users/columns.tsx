@@ -1,4 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
+import type { TFunction } from "i18next";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { DataTableColumnHeader } from "@/components/tables/DataTableColumnHeader";
@@ -15,15 +16,16 @@ function initials(name: string) {
 }
 
 interface GetUserColumnsOptions {
+  t: TFunction;
   onView: (user: AdminUser) => void;
   onEdit: (user: AdminUser) => void;
 }
 
-export function getUserColumns({ onView, onEdit }: GetUserColumnsOptions): ColumnDef<AdminUser>[] {
+export function getUserColumns({ t, onView, onEdit }: GetUserColumnsOptions): ColumnDef<AdminUser>[] {
   return [
     {
       accessorKey: "fullName",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t("users.name")} />,
       cell: ({ row }) => (
         <div className="flex items-center gap-2.5">
           <Avatar size="sm">
@@ -39,7 +41,7 @@ export function getUserColumns({ onView, onEdit }: GetUserColumnsOptions): Colum
     },
     {
       accessorKey: "roles",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Roles" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t("users.roles")} />,
       cell: ({ row }) => (
         <div className="flex flex-wrap gap-1">
           {row.original.roles.map((role) => (
@@ -52,12 +54,12 @@ export function getUserColumns({ onView, onEdit }: GetUserColumnsOptions): Colum
     },
     {
       accessorKey: "department",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Department" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t("users.department")} />,
       cell: ({ row }) => row.original.department ?? "-",
     },
     {
       accessorKey: "status",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t("common.status")} />,
       cell: ({ row }) => row.original.status ?? "-",
     },
     {

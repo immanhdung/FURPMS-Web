@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { AlertTriangle } from "lucide-react";
 import {
   Dialog,
@@ -17,6 +18,7 @@ interface SimilarityWarningDialogProps {
 }
 
 export function SimilarityWarningDialog({ open, onOpenChange, score, onContinue }: SimilarityWarningDialogProps) {
+  const { t } = useTranslation();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -25,17 +27,16 @@ export function SimilarityWarningDialog({ open, onOpenChange, score, onContinue 
             <div className="flex size-9 items-center justify-center rounded-full bg-warning/10 text-warning">
               <AlertTriangle className="size-4.5" />
             </div>
-            <DialogTitle>Low similarity match ({score}%)</DialogTitle>
+            <DialogTitle>{t("proposal.similarityTitle", { score })}</DialogTitle>
           </div>
           <DialogDescription>
-            The uploaded file does not appear to match the selected research topic. Do you want to continue
-            submission?
+            {t("proposal.similarityDesc")}
           </DialogDescription>
         </DialogHeader>
 
         <DialogFooter>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button
             type="button"
@@ -44,7 +45,7 @@ export function SimilarityWarningDialog({ open, onOpenChange, score, onContinue 
               onOpenChange(false);
             }}
           >
-            Continue
+            {t("proposal.continueSubmit")}
           </Button>
         </DialogFooter>
       </DialogContent>

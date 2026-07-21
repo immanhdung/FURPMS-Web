@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 import {
   Dialog,
@@ -25,6 +26,7 @@ export function ScheduleProgressReportDialog({
   contractId,
   reportId,
 }: ScheduleProgressReportDialogProps) {
+  const { t } = useTranslation();
   const scheduleMutation = useScheduleProgressReportMutation(contractId);
   const [dueDate, setDueDate] = useState("");
   const [scheduledMeetingAt, setScheduledMeetingAt] = useState("");
@@ -40,28 +42,28 @@ export function ScheduleProgressReportDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Schedule progress report</DialogTitle>
-          <DialogDescription>Set the due date and review meeting for this reporting period.</DialogDescription>
+          <DialogTitle>{t("contract.scheduleReportTitle")}</DialogTitle>
+          <DialogDescription>{t("contract.scheduleReportDesc")}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">Due date</label>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">{t("contract.dueDate")}</label>
             <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
           </div>
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">Meeting date/time</label>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">{t("contract.meetingDateTime")}</label>
             <Input type="datetime-local" value={scheduledMeetingAt} onChange={(e) => setScheduledMeetingAt(e.target.value)} />
           </div>
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">Meeting link</label>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">{t("contract.meetingLink")}</label>
             <Input value={meetingLink} onChange={(e) => setMeetingLink(e.target.value)} placeholder="https://meet.google.com/..." />
           </div>
         </div>
 
         <DialogFooter>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={scheduleMutation.isPending}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button
             type="button"
@@ -87,7 +89,7 @@ export function ScheduleProgressReportDialog({
             }
           >
             {scheduleMutation.isPending && <Loader2 className="animate-spin" />}
-            Save schedule
+            {t("contract.saveSchedule")}
           </Button>
         </DialogFooter>
       </DialogContent>

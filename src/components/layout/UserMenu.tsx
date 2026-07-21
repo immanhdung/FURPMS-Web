@@ -1,5 +1,6 @@
 import { KeyRound, LogOut, Settings, User as UserIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -23,6 +24,7 @@ function initials(name: string) {
 }
 
 export function UserMenu() {
+  const { t } = useTranslation();
   const user = useAuthStore((state) => state.user);
   const logout = useLogout();
   const navigate = useNavigate();
@@ -50,20 +52,20 @@ export function UserMenu() {
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={() => navigate(ROUTES.PROFILE)}>
           <UserIcon />
-          Profile
+          {t("header.profile")}
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => navigate(ROUTES.CHANGE_PASSWORD)}>
           <KeyRound />
-          Change password
+          {t("auth.changePassword")}
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => navigate(ROUTES.SETTINGS)}>
           <Settings />
-          Settings
+          {t("nav.settings")}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem variant="destructive" onSelect={logout}>
           <LogOut />
-          Sign out
+          {t("header.logout")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -72,7 +72,7 @@ export function CreateCouncilSheet({ open, onOpenChange, proposalId, round }: Cr
       open={open}
       onOpenChange={onOpenChange}
       title={t("reviewBoard.establishCouncil")}
-      description={`Create a review council for Round ${round.roundNumber}.`}
+      description={t("reviewBoard.createCouncilDesc", { num: round.roundNumber })}
       formId="create-council-form"
       onSubmit={handleSubmit(onSubmit)}
       isSubmitting={createMutation.isPending}
@@ -80,7 +80,7 @@ export function CreateCouncilSheet({ open, onOpenChange, proposalId, round }: Cr
     >
       <div>
         <label htmlFor="council-type" className="mb-1.5 block text-sm font-medium text-foreground">
-          Council type
+          {t("reviewBoard.councilType")}
         </label>
         <Input id="council-type" placeholder={t("reviewBoard.councilNamePlaceholder")} aria-invalid={Boolean(errors.councilType)} {...register("councilType")} />
         {errors.councilType && <p className="mt-1 text-xs text-destructive">{errors.councilType.message}</p>}
@@ -88,7 +88,7 @@ export function CreateCouncilSheet({ open, onOpenChange, proposalId, round }: Cr
 
       <div>
         <label htmlFor="council-decision" className="mb-1.5 block text-sm font-medium text-foreground">
-          Establishment decision no.
+          {t("reviewBoard.establishmentDecisionNo")}
         </label>
         <Input id="council-decision" {...register("establishmentDecisionNo")} />
       </div>
@@ -96,13 +96,13 @@ export function CreateCouncilSheet({ open, onOpenChange, proposalId, round }: Cr
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label htmlFor="council-established" className="mb-1.5 block text-sm font-medium text-foreground">
-            Established date
+            {t("reviewBoard.establishedDate")}
           </label>
           <Input id="council-established" type="date" {...register("establishedAt")} />
         </div>
         <div>
           <label htmlFor="council-deadline" className="mb-1.5 block text-sm font-medium text-foreground">
-            Meeting deadline
+            {t("reviewBoard.meetingDeadlineLabel")}
           </label>
           <Input id="council-deadline" type="date" {...register("meetingDeadline")} />
         </div>
@@ -111,14 +111,14 @@ export function CreateCouncilSheet({ open, onOpenChange, proposalId, round }: Cr
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label htmlFor="council-min" className="mb-1.5 block text-sm font-medium text-foreground">
-            Min. members
+            {t("reviewBoard.minMembers")}
           </label>
           <Input id="council-min" type="number" aria-invalid={Boolean(errors.minMembersRequired)} {...register("minMembersRequired", { valueAsNumber: true })} />
           {errors.minMembersRequired && <p className="mt-1 text-xs text-destructive">{errors.minMembersRequired.message}</p>}
         </div>
         <div>
           <label htmlFor="council-max" className="mb-1.5 block text-sm font-medium text-foreground">
-            Max. members
+            {t("reviewBoard.maxMembers")}
           </label>
           <Input id="council-max" type="number" aria-invalid={Boolean(errors.maxMembersAllowed)} {...register("maxMembersAllowed", { valueAsNumber: true })} />
           {errors.maxMembersAllowed && <p className="mt-1 text-xs text-destructive">{errors.maxMembersAllowed.message}</p>}

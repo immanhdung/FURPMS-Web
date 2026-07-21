@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { FormSheet } from "@/components/shared/FormSheet";
@@ -22,6 +23,7 @@ interface OrgUnitFormSheetProps {
 }
 
 export function OrgUnitFormSheet({ open, onOpenChange, orgUnit }: OrgUnitFormSheetProps) {
+  const { t } = useTranslation();
   const isEdit = Boolean(orgUnit);
   const { data: units } = useOrganizationalUnitsQuery();
   const { data: users } = useUsersQuery();
@@ -71,16 +73,16 @@ export function OrgUnitFormSheet({ open, onOpenChange, orgUnit }: OrgUnitFormShe
     <FormSheet
       open={open}
       onOpenChange={onOpenChange}
-      title={isEdit ? "Edit Organizational Unit" : "Create Organizational Unit"}
-      description="Faculties, departments, and offices within the university."
+      title={isEdit ? t("orgUnits.editTitle") : t("orgUnits.createTitle")}
+      description={t("orgUnits.formDesc")}
       formId="org-unit-form"
       onSubmit={handleSubmit(onSubmit)}
       isSubmitting={isSubmitting}
-      submitLabel={isEdit ? "Save changes" : "Create"}
+      submitLabel={isEdit ? t("common.saveChanges") : t("common.create")}
     >
       <div>
         <label htmlFor="ou-code" className="mb-1.5 block text-sm font-medium text-foreground">
-          Code
+          {t("common.code")}
         </label>
         <Input id="ou-code" aria-invalid={Boolean(errors.code)} {...register("code")} />
         {errors.code && <p className="mt-1 text-xs text-destructive">{errors.code.message}</p>}
@@ -88,7 +90,7 @@ export function OrgUnitFormSheet({ open, onOpenChange, orgUnit }: OrgUnitFormShe
 
       <div>
         <label htmlFor="ou-name" className="mb-1.5 block text-sm font-medium text-foreground">
-          Name
+          {t("common.name")}
         </label>
         <Input id="ou-name" aria-invalid={Boolean(errors.name)} {...register("name")} />
         {errors.name && <p className="mt-1 text-xs text-destructive">{errors.name.message}</p>}
@@ -96,14 +98,14 @@ export function OrgUnitFormSheet({ open, onOpenChange, orgUnit }: OrgUnitFormShe
 
       <div>
         <label htmlFor="ou-type" className="mb-1.5 block text-sm font-medium text-foreground">
-          Unit type
+          {t("orgUnits.unitType")}
         </label>
-        <Input id="ou-type" placeholder="Faculty, Department, Office..." aria-invalid={Boolean(errors.unitType)} {...register("unitType")} />
+        <Input id="ou-type" placeholder={t("orgUnits.unitTypePlaceholder")} aria-invalid={Boolean(errors.unitType)} {...register("unitType")} />
         {errors.unitType && <p className="mt-1 text-xs text-destructive">{errors.unitType.message}</p>}
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Parent unit</label>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("orgUnits.parentUnit")}</label>
         <Controller
           control={control}
           name="parentId"
@@ -113,10 +115,10 @@ export function OrgUnitFormSheet({ open, onOpenChange, orgUnit }: OrgUnitFormShe
               onValueChange={(value) => field.onChange(value === NONE_VALUE ? undefined : Number(value))}
             >
               <SelectTrigger>
-                <SelectValue placeholder="No parent" />
+                <SelectValue placeholder={t("orgUnits.noParent")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={NONE_VALUE}>No parent</SelectItem>
+                <SelectItem value={NONE_VALUE}>{t("orgUnits.noParent")}</SelectItem>
                 {availableParents.map((unit) => (
                   <SelectItem key={unit.id} value={unit.id.toString()}>
                     {unit.name}
@@ -129,17 +131,17 @@ export function OrgUnitFormSheet({ open, onOpenChange, orgUnit }: OrgUnitFormShe
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Head of unit</label>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("orgUnits.headOfUnit")}</label>
         <Controller
           control={control}
           name="headUserId"
           render={({ field }) => (
             <Select value={field.value ?? NONE_VALUE} onValueChange={(value) => field.onChange(value === NONE_VALUE ? undefined : value)}>
               <SelectTrigger>
-                <SelectValue placeholder="Unassigned" />
+                <SelectValue placeholder={t("orgUnits.unassigned")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={NONE_VALUE}>Unassigned</SelectItem>
+                <SelectItem value={NONE_VALUE}>{t("orgUnits.unassigned")}</SelectItem>
                 {users?.map((user) => (
                   <SelectItem key={user.id} value={user.id}>
                     {user.fullName}
@@ -153,7 +155,7 @@ export function OrgUnitFormSheet({ open, onOpenChange, orgUnit }: OrgUnitFormShe
 
       <div>
         <label htmlFor="ou-sort" className="mb-1.5 block text-sm font-medium text-foreground">
-          Sort order
+          {t("orgUnits.sortOrder")}
         </label>
         <Input id="ou-sort" type="number" {...register("sortOrder", { valueAsNumber: true })} />
       </div>

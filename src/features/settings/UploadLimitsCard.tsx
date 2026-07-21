@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Loader2, RotateCcw, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +13,7 @@ import { SYSTEM_SETTING_KEYS } from "@/types/system-setting";
  * BE chặn cứng trong khoảng 1–100 MB và khuyến cáo 10 MB — hồ sơ QĐ 543 là văn bản, không phải file nặng.
  */
 export function UploadLimitsCard() {
+  const { t } = useTranslation();
   const { data: settings, isLoading } = useSystemSettingsQuery();
   const updateMutation = useUpdateSystemSettingMutation();
 
@@ -33,13 +35,13 @@ export function UploadLimitsCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Attachment upload limits</CardTitle>
-        <CardDescription>Applies to every document uploaded to a proposal. Saved for the whole system.</CardDescription>
+        <CardTitle>{t("settings.uploadTitle")}</CardTitle>
+        <CardDescription>{t("settings.uploadDesc")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
           <label htmlFor="upload-max-size" className="mb-1.5 block text-sm font-medium text-foreground">
-            Maximum file size (MB)
+            {t("settings.maxFileSize")}
           </label>
           <div className="flex items-center gap-2">
             <Input
@@ -60,25 +62,25 @@ export function UploadLimitsCard() {
               }
             >
               {updateMutation.isPending ? <Loader2 className="animate-spin" /> : <Save />}
-              Save
+              {t("common.save")}
             </Button>
             {!isRecommended && (
               <Button type="button" size="sm" variant="ghost" onClick={() => setSizeMb(recommended)}>
                 <RotateCcw />
-                Use recommended ({recommended} MB)
+                {t("settings.useRecommended", { value: recommended })}
               </Button>
             )}
           </div>
           <p className="mt-1.5 text-xs text-muted-foreground">
-            Allowed range 1–100 MB. <span className="font-medium text-foreground">Recommended: {recommended} MB</span> —
-            proposal paperwork is text documents, so a higher cap mostly costs disk space.
-            {isRecommended && " You're on the recommended value."}
+            {t("settings.allowedRange")} <span className="font-medium text-foreground">{t("settings.recommended", { value: recommended })}</span>
+            {t("settings.recommendedHint")}
+            {isRecommended && t("settings.onRecommended")}
           </p>
         </div>
 
         {extSetting && (
           <div>
-            <p className="text-sm font-medium text-foreground">Allowed file types</p>
+            <p className="text-sm font-medium text-foreground">{t("settings.allowedFileTypes")}</p>
             <div className="mt-1.5 flex flex-wrap gap-1.5">
               {extSetting.value.split(",").map((ext) => (
                 <span key={ext} className="rounded border border-border px-1.5 py-0.5 font-mono text-xs text-muted-foreground">

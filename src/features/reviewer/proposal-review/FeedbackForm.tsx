@@ -87,7 +87,7 @@ export function FeedbackForm({ councilId }: { councilId: string }) {
       <div className="flex justify-end">
         <Button onClick={() => submitMutation.mutate(form)} disabled={submitMutation.isPending}>
           {submitMutation.isPending ? <Loader2 className="animate-spin" /> : <Save />}
-          {myFeedback ? "Update feedback" : "Submit feedback"}
+          {myFeedback ? t("review.updateFeedback") : t("review.submitFeedback")}
         </Button>
       </div>
     </div>

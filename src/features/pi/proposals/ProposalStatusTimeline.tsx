@@ -28,7 +28,7 @@ export function ProposalStatusTimeline({ status: rawStatus }: { status: string }
     <div className="space-y-3">
       {status === PROPOSAL_STATUS.WITHDRAWN && (
         <div className="rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
-          This proposal was withdrawn by the PI. The exact stage at withdrawal isn't tracked by the system.
+          {t("timeline.withdrawnNote")}
         </div>
       )}
 

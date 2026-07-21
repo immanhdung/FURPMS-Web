@@ -116,7 +116,7 @@ export function ResearchTypeFormSheet({ open, onOpenChange, researchType }: Rese
         render={({ field }) => (
           <label className="flex items-center gap-2 text-sm text-foreground">
             <Checkbox checked={field.value} onCheckedChange={(checked) => field.onChange(Boolean(checked))} />
-            {t("researchTypes.requiresOrderingUnitLabel")}
+            Requires an ordering unit (Applied Research)
           </label>
         )}
       />

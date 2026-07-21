@@ -1,4 +1,5 @@
 import type { LucideIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { CalendarClock, ClipboardCheck, FileSignature, FileText, Gavel, History, Info } from "lucide-react";
 import { motion } from "motion/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,17 +23,18 @@ interface ActivityFeedProps {
   title?: string;
 }
 
-export function ActivityFeed({ items, isLoading = false, title = "Recent Activity" }: ActivityFeedProps) {
+export function ActivityFeed({ items, isLoading = false, title }: ActivityFeedProps) {
+  const { t } = useTranslation();
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-sm">{title}</CardTitle>
+        <CardTitle className="text-sm">{title ?? t("activity.recent")}</CardTitle>
       </CardHeader>
       <CardContent>
         {isLoading ? (
           <ActivityFeedSkeleton />
         ) : items.length === 0 ? (
-          <EmptyState icon={History} title="No recent activity" className="min-h-40 border-none p-0" />
+          <EmptyState icon={History} title={t("activity.noRecent")} className="min-h-40 border-none p-0" />
         ) : (
           <ul className="space-y-4">
             {items.map((item, index) => {

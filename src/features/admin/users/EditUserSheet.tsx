@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { FormSheet } from "@/components/shared/FormSheet";
@@ -18,6 +19,7 @@ interface EditUserSheetProps {
 }
 
 export function EditUserSheet({ open, onOpenChange, user }: EditUserSheetProps) {
+  const { t } = useTranslation();
   const updateUserMutation = useUpdateUserMutation();
 
   const {
@@ -64,16 +66,16 @@ export function EditUserSheet({ open, onOpenChange, user }: EditUserSheetProps) 
     <FormSheet
       open={open}
       onOpenChange={onOpenChange}
-      title="Edit User"
-      description={user ? `Update details for ${user.fullName}` : undefined}
+      title={t("users.editTitle")}
+      description={user ? t("users.editDesc", { name: user.fullName }) : undefined}
       formId="edit-user-form"
       onSubmit={handleSubmit(onSubmit)}
       isSubmitting={updateUserMutation.isPending}
-      submitLabel="Save changes"
+      submitLabel={t("common.saveChanges")}
     >
       <div>
         <label htmlFor="edit-fullName" className="mb-1.5 block text-sm font-medium text-foreground">
-          Full name
+          {t("users.fullName")}
         </label>
         <Input id="edit-fullName" aria-invalid={Boolean(errors.fullName)} {...register("fullName")} />
         {errors.fullName && <p className="mt-1 text-xs text-destructive">{errors.fullName.message}</p>}
@@ -81,27 +83,27 @@ export function EditUserSheet({ open, onOpenChange, user }: EditUserSheetProps) 
 
       <div>
         <label htmlFor="edit-phoneNumber" className="mb-1.5 block text-sm font-medium text-foreground">
-          Phone number
+          {t("users.phoneNumber")}
         </label>
         <Input id="edit-phoneNumber" {...register("phoneNumber")} />
       </div>
 
       <div>
         <label htmlFor="edit-department" className="mb-1.5 block text-sm font-medium text-foreground">
-          Department
+          {t("users.department")}
         </label>
         <Input id="edit-department" {...register("department")} />
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Academic degree</label>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("users.academicDegree")}</label>
         <Controller
           control={control}
           name="academicDegree"
           render={({ field }) => (
             <Select value={field.value?.toString()} onValueChange={(value) => field.onChange(Number(value))}>
               <SelectTrigger>
-                <SelectValue placeholder="Select degree" />
+                <SelectValue placeholder={t("users.selectDegree")} />
               </SelectTrigger>
               <SelectContent>
                 {ACADEMIC_DEGREES.map((degree) => (
@@ -116,7 +118,7 @@ export function EditUserSheet({ open, onOpenChange, user }: EditUserSheetProps) 
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Roles</label>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("users.roles")}</label>
         <Controller
           control={control}
           name="roles"

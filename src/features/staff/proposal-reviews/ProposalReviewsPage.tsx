@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ProposalsTable } from "@/features/staff/proposal-reviews/ProposalsTable";
 import { PROPOSAL_STATUS } from "@/constants/statuses";
@@ -10,6 +11,7 @@ const ALL_VALUE = "all";
 
 export function ProposalReviewsPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [status, setStatus] = useState<string>(ALL_VALUE);
 
   const handleOpen = (proposal: ProposalSummary) => {
@@ -20,9 +22,9 @@ export function ProposalReviewsPage() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Proposal Reviews</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("staff.reviewsTitle")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Track proposal review progress and manage review rounds.
+            {t("staff.reviewsSubtitle")}
           </p>
         </div>
 
@@ -31,7 +33,7 @@ export function ProposalReviewsPage() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={ALL_VALUE}>All statuses</SelectItem>
+            <SelectItem value={ALL_VALUE}>{t("staff.allStatuses")}</SelectItem>
             {Object.values(PROPOSAL_STATUS).map((value) => (
               <SelectItem key={value} value={value}>
                 {value.replace("_", " ")}
