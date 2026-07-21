@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 import {
   Dialog,
@@ -27,6 +28,7 @@ export function SubmitDeliverableDialog({
   contractId,
   deliverable,
 }: SubmitDeliverableDialogProps) {
+  const { t } = useTranslation();
   const submitMutation = useSubmitDeliverableMutation(contractId);
   const [fileUrl, setFileUrl] = useState("");
   const [description, setDescription] = useState("");
@@ -44,30 +46,30 @@ export function SubmitDeliverableDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Submit deliverable</DialogTitle>
+          <DialogTitle>{t("contract.deliverable.submitTitle")}</DialogTitle>
           <DialogDescription>{deliverable?.productName}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
           <div>
             <label htmlFor="deliverable-url" className="mb-1.5 block text-sm font-medium text-foreground">
-              File link <span className="text-destructive">*</span>
+              {t("contract.deliverable.fileLink")} <span className="text-destructive">*</span>
             </label>
             <Input
               id="deliverable-url"
-              placeholder="https://… link to the paper, dataset or software"
+              placeholder={t("contract.deliverable.fileLinkPlaceholder")}
               value={fileUrl}
               onChange={(e) => setFileUrl(e.target.value)}
             />
           </div>
           <div>
             <label htmlFor="deliverable-desc" className="mb-1.5 block text-sm font-medium text-foreground">
-              Notes
+              {t("contract.disbursement.notes")}
             </label>
             <Textarea
               id="deliverable-desc"
               rows={3}
-              placeholder="What is included, where it was published…"
+              placeholder={t("contract.deliverable.notesPlaceholder")}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
@@ -90,7 +92,7 @@ export function SubmitDeliverableDialog({
             }
           >
             {submitMutation.isPending && <Loader2 className="animate-spin" />}
-            Submit
+            {t("contract.deliverable.submit")}
           </Button>
         </DialogFooter>
       </DialogContent>

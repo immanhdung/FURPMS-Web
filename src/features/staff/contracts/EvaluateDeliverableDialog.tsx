@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 import {
   Dialog,
@@ -28,6 +29,7 @@ export function EvaluateDeliverableDialog({
   contractId,
   deliverable,
 }: EvaluateDeliverableDialogProps) {
+  const { t } = useTranslation();
   const evaluateMutation = useEvaluateDeliverableMutation(contractId);
   const [acceptanceStatus, setAcceptanceStatus] = useState<string>(ACCEPTANCE_STATUS.PASSED);
   const [qualityAssessment, setQualityAssessment] = useState("");
@@ -43,31 +45,31 @@ export function EvaluateDeliverableDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Evaluate deliverable</DialogTitle>
+          <DialogTitle>{t("contract.deliverable.evaluateTitle")}</DialogTitle>
           <DialogDescription>{deliverable?.productName}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">Result</label>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">{t("contract.deliverable.result")}</label>
             <Select value={acceptanceStatus} onValueChange={setAcceptanceStatus}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={ACCEPTANCE_STATUS.PASSED}>Passed — meets the requirements</SelectItem>
-                <SelectItem value={ACCEPTANCE_STATUS.FAILED}>Failed — PI must resubmit</SelectItem>
+                <SelectItem value={ACCEPTANCE_STATUS.PASSED}>{t("contract.deliverable.passed")}</SelectItem>
+                <SelectItem value={ACCEPTANCE_STATUS.FAILED}>{t("contract.deliverable.failed")}</SelectItem>
               </SelectContent>
             </Select>
             {acceptanceStatus === ACCEPTANCE_STATUS.PASSED && (
               <p className="mt-1 text-xs text-muted-foreground">
-                Accepting unlocks the matching disbursement tranche. Payment still has to be confirmed by hand.
+                {t("contract.deliverable.passHint")}
               </p>
             )}
           </div>
           <div>
             <label htmlFor="quality-assessment" className="mb-1.5 block text-sm font-medium text-foreground">
-              Assessment
+              {t("contract.deliverable.assessment")}
             </label>
             <Textarea
               id="quality-assessment"
@@ -102,7 +104,7 @@ export function EvaluateDeliverableDialog({
             }
           >
             {evaluateMutation.isPending && <Loader2 className="animate-spin" />}
-            Save evaluation
+            {t("contract.deliverable.saveEvaluation")}
           </Button>
         </DialogFooter>
       </DialogContent>

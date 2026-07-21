@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 import {
   Dialog,
@@ -32,6 +33,7 @@ export function ConfirmDisbursementDialog({
   contractId,
   disbursement,
 }: ConfirmDisbursementDialogProps) {
+  const { t } = useTranslation();
   const confirmMutation = useConfirmDisbursementMutation(contractId);
   const [actualAmount, setActualAmount] = useState("");
   const [bankReference, setBankReference] = useState("");
@@ -57,9 +59,9 @@ export function ConfirmDisbursementDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Confirm disbursement{disbursement ? ` — tranche ${disbursement.roundNumber}` : ""}</DialogTitle>
+          <DialogTitle>{disbursement ? t("contract.disbursement.confirmTitle", { n: disbursement.roundNumber }) : t("contract.disbursement.confirmPayment")}</DialogTitle>
           <DialogDescription>
-            Record a payment that has already been made. The system never transfers money on its own.
+            {t("contract.disbursement.confirmDesc")}
           </DialogDescription>
         </DialogHeader>
 
@@ -67,7 +69,7 @@ export function ConfirmDisbursementDialog({
           {disbursement && (
             <div className="rounded-lg border border-border bg-muted/40 p-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Planned</span>
+                <span className="text-muted-foreground">{t("contract.disbursement.planned")}</span>
                 <span className="font-medium text-foreground">
                   {formatCurrency(disbursement.plannedAmount)} ({disbursement.percentage}%)
                 </span>
@@ -78,7 +80,7 @@ export function ConfirmDisbursementDialog({
 
           <div>
             <label htmlFor="actual-amount" className="mb-1.5 block text-sm font-medium text-foreground">
-              Amount actually paid <span className="text-destructive">*</span>
+              {t("contract.disbursement.amountPaid")} <span className="text-destructive">*</span>
             </label>
             <Input
               id="actual-amount"
@@ -88,17 +90,17 @@ export function ConfirmDisbursementDialog({
               onChange={(e) => setActualAmount(e.target.value)}
             />
             {differsFromPlan && (
-              <p className="mt-1 text-xs text-warning">This differs from the planned amount — add a note explaining why.</p>
+              <p className="mt-1 text-xs text-warning">{t("contract.disbursement.differsWarn")}</p>
             )}
           </div>
 
           <div>
             <label htmlFor="bank-reference" className="mb-1.5 block text-sm font-medium text-foreground">
-              Bank reference <span className="text-destructive">*</span>
+              {t("contract.disbursement.bankRef")} <span className="text-destructive">*</span>
             </label>
             <Input
               id="bank-reference"
-              placeholder="Transaction ID from the bank statement"
+              placeholder={t("contract.disbursement.bankRefPlaceholder")}
               value={bankReference}
               onChange={(e) => setBankReference(e.target.value)}
             />
@@ -106,7 +108,7 @@ export function ConfirmDisbursementDialog({
 
           <div>
             <label htmlFor="disbursement-notes" className="mb-1.5 block text-sm font-medium text-foreground">
-              Notes
+              {t("contract.disbursement.notes")}
             </label>
             <Textarea id="disbursement-notes" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
           </div>
@@ -135,7 +137,7 @@ export function ConfirmDisbursementDialog({
             }
           >
             {confirmMutation.isPending && <Loader2 className="animate-spin" />}
-            Confirm payment
+            {t("contract.disbursement.confirm")}
           </Button>
         </DialogFooter>
       </DialogContent>

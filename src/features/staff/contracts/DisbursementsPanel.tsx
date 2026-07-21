@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { BanknoteArrowUp, CircleCheck, Clock, Loader2, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,6 +16,7 @@ import { formatCurrency, formatDate } from "@/utils/format";
  * Rule #3: điều kiện đạt chỉ bật cờ "sẵn sàng chi" — Staff vẫn phải xác nhận tay sau khi chi thật.
  */
 export function DisbursementsPanel({ contractId, canManage }: { contractId: string; canManage: boolean }) {
+  const { t } = useTranslation();
   const { data: disbursements, isLoading } = useDisbursementsQuery(contractId);
   const generateMutation = useGenerateDisbursementsMutation(contractId);
   const [confirming, setConfirming] = useState<Disbursement | null>(null);
@@ -33,18 +35,18 @@ export function DisbursementsPanel({ contractId, canManage }: { contractId: stri
     return (
       <EmptyState
         icon={Wallet}
-        title="No disbursement schedule yet"
+        title={t("contract.disbursement.noSchedule")}
         description={
           canManage
-            ? "Generate the schedule from the project's funding method. For milestone-based funding, add the deliverables first."
-            : "Staff hasn't generated the disbursement schedule for this contract yet."
+            ? t("contract.disbursement.generateHint")
+            : t("contract.disbursement.staffNotGenerated")
         }
         className="min-h-32 border-none p-4"
         action={
           canManage ? (
             <Button size="sm" onClick={() => generateMutation.mutate()} disabled={generateMutation.isPending}>
               {generateMutation.isPending ? <Loader2 className="animate-spin" /> : <BanknoteArrowUp />}
-              Generate schedule
+              {t("contract.disbursement.generate")}
             </Button>
           ) : undefined
         }
@@ -59,11 +61,11 @@ export function DisbursementsPanel({ contractId, canManage }: { contractId: stri
     <div className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2.5 text-sm">
         <span className="text-muted-foreground">
-          Paid <span className="font-medium text-foreground">{formatCurrency(totalPaid)}</span> of{" "}
+          {t("contract.disbursement.paid")} <span className="font-medium text-foreground">{formatCurrency(totalPaid)}</span> {t("contract.disbursement.of")}{" "}
           <span className="font-medium text-foreground">{formatCurrency(totalPlanned)}</span>
         </span>
         <span className="text-xs text-muted-foreground">
-          {disbursements.filter((d) => d.status === DISBURSEMENT_STATUS.DISBURSED).length}/{disbursements.length} tranches
+          {disbursements.filter((d) => d.status === DISBURSEMENT_STATUS.DISBURSED).length}/{disbursements.length} {t("contract.disbursement.tranches")}
         </span>
       </div>
 
@@ -76,7 +78,7 @@ export function DisbursementsPanel({ contractId, canManage }: { contractId: stri
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div>
                 <p className="text-sm font-medium text-foreground">
-                  Tranche {d.roundNumber} · {formatCurrency(d.plannedAmount)}{" "}
+                  {t("contract.disbursement.tranche")} {d.roundNumber} · {formatCurrency(d.plannedAmount)}{" "}
                   <span className="text-muted-foreground">({d.percentage}%)</span>
                 </p>
                 <p className="mt-0.5 text-xs text-muted-foreground">{d.conditionDescription}</p>
@@ -88,9 +90,9 @@ export function DisbursementsPanel({ contractId, canManage }: { contractId: stri
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                 <span className="inline-flex items-center gap-1 text-success">
                   <CircleCheck className="size-3" />
-                  Paid {formatCurrency(d.actualAmount ?? 0)} on {formatDate(d.disbursedAt)}
+                  {t("contract.disbursement.paidOn", { amount: formatCurrency(d.actualAmount ?? 0), date: formatDate(d.disbursedAt) })}
                 </span>
-                {d.bankReference && <span>Ref: {d.bankReference}</span>}
+                {d.bankReference && <span>{t("contract.disbursement.ref")} {d.bankReference}</span>}
                 {d.notes && <span className="w-full">{d.notes}</span>}
               </div>
             ) : (
@@ -98,13 +100,13 @@ export function DisbursementsPanel({ contractId, canManage }: { contractId: stri
                 <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                   <Clock className="size-3" />
                   {isReady
-                    ? `Condition met ${formatDate(d.conditionMetAt)} — ready to pay`
-                    : "Waiting for the condition to be met"}
+                    ? t("contract.disbursement.conditionMet", { date: formatDate(d.conditionMetAt) })
+                    : t("contract.disbursement.waiting")}
                 </span>
                 {canManage && (
                   <Button size="sm" variant={isReady ? "default" : "outline"} onClick={() => setConfirming(d)}>
                     <BanknoteArrowUp />
-                    Confirm payment
+                    {t("contract.disbursement.confirmPayment")}
                   </Button>
                 )}
               </div>

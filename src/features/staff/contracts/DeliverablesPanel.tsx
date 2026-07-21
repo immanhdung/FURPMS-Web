@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { CircleCheck, CircleX, ClipboardCheck, ExternalLink, Package, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,6 +16,7 @@ import { formatDate, formatDateTime } from "@/utils/format";
  * PI nộp file → Staff nghiệm thu. Nghiệm thu ĐẠT sẽ mở điều kiện chi tiền cho đợt giải ngân tương ứng.
  */
 export function DeliverablesPanel({ contractId, canManage }: { contractId: string; canManage: boolean }) {
+  const { t } = useTranslation();
   const { data: deliverables, isLoading } = useDeliverablesQuery(contractId);
   const [submitting, setSubmitting] = useState<Deliverable | null>(null);
   const [evaluating, setEvaluating] = useState<Deliverable | null>(null);
@@ -33,8 +35,8 @@ export function DeliverablesPanel({ contractId, canManage }: { contractId: strin
     return (
       <EmptyState
         icon={Package}
-        title="No deliverables on this contract"
-        description="Products come from what the PI declared in the proposal. They're attached to the contract when it's created."
+        title={t("contract.deliverable.none")}
+        description={t("contract.deliverable.noneDesc")}
         className="min-h-32 border-none p-4"
       />
     );
@@ -45,8 +47,8 @@ export function DeliverablesPanel({ contractId, canManage }: { contractId: strin
   return (
     <div className="space-y-3">
       <div className="rounded-lg border border-border bg-muted/40 px-3 py-2.5 text-sm text-muted-foreground">
-        <span className="font-medium text-foreground">{passedCount}</span> of{" "}
-        <span className="font-medium text-foreground">{deliverables.length}</span> products accepted
+        <span className="font-medium text-foreground">{passedCount}</span> {t("contract.disbursement.of")}{" "}
+        <span className="font-medium text-foreground">{deliverables.length}</span> {t("contract.deliverable.accepted")}
       </div>
 
       {deliverables.map((d) => {
@@ -61,7 +63,7 @@ export function DeliverablesPanel({ contractId, canManage }: { contractId: strin
                 <p className="text-sm font-medium text-foreground">{d.productName}</p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
                   {d.categoryName && <span>{d.categoryName} · </span>}
-                  {d.dueDate ? `Due ${formatDate(d.dueDate)}` : "No due date"}
+                  {d.dueDate ? t("contract.deliverable.due", { date: formatDate(d.dueDate) }) : t("contract.deliverable.noDueDate")}
                 </p>
               </div>
               {d.acceptanceStatus && <StatusBadge status={d.acceptanceStatus} />}
@@ -71,7 +73,7 @@ export function DeliverablesPanel({ contractId, canManage }: { contractId: strin
 
             {isSubmitted && (
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                <span>Submitted {formatDateTime(d.submittedAt)}</span>
+                <span>{t("contract.deliverable.submitted", { date: formatDateTime(d.submittedAt) })}</span>
                 {d.fileUrl && (
                   <a
                     href={d.fileUrl}
@@ -80,7 +82,7 @@ export function DeliverablesPanel({ contractId, canManage }: { contractId: strin
                     className="inline-flex items-center gap-1 text-primary hover:underline"
                   >
                     <ExternalLink className="size-3" />
-                    Open file
+                    {t("contract.deliverable.openFile")}
                   </a>
                 )}
               </div>
@@ -101,13 +103,13 @@ export function DeliverablesPanel({ contractId, canManage }: { contractId: strin
               {!isPassed && (
                 <Button size="sm" variant="outline" onClick={() => setSubmitting(d)}>
                   <Upload />
-                  {isSubmitted ? "Resubmit" : "Submit"}
+                  {isSubmitted ? t("contract.deliverable.resubmit") : t("contract.deliverable.submit")}
                 </Button>
               )}
               {canManage && isSubmitted && !isPassed && (
                 <Button size="sm" onClick={() => setEvaluating(d)}>
                   <ClipboardCheck />
-                  Evaluate
+                  {t("contract.deliverable.evaluate")}
                 </Button>
               )}
             </div>

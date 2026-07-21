@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { FileSignature } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -24,6 +25,7 @@ interface ContractDetailSheetProps {
 }
 
 export function ContractDetailSheet({ open, onOpenChange, contractId }: ContractDetailSheetProps) {
+  const { t } = useTranslation();
   const { data: contract, isLoading } = useContractQuery(contractId);
   const { data: proposal } = useProposalQuery(contract?.proposalId ?? null);
   const signMutation = useSignContractMutation();
@@ -82,18 +84,18 @@ export function ContractDetailSheet({ open, onOpenChange, contractId }: Contract
 
               <Button size="sm" onClick={() => contractId && signMutation.mutate(contractId)} disabled={signMutation.isPending}>
                 <FileSignature />
-                Sign contract
+                {t("contract.signContract")}
               </Button>
 
               {/* Thứ tự tab theo đúng dòng đời hợp đồng: tiền → sản phẩm → báo cáo → tổng kết → điều chỉnh → chốt sổ */}
               <Tabs defaultValue="disbursements">
                 <TabsList className="flex-wrap">
-                  <TabsTrigger value="disbursements">Disbursements</TabsTrigger>
-                  <TabsTrigger value="deliverables">Deliverables</TabsTrigger>
-                  <TabsTrigger value="progress">Progress Reports</TabsTrigger>
-                  <TabsTrigger value="final">Final Report</TabsTrigger>
-                  <TabsTrigger value="amendments">Amendments</TabsTrigger>
-                  <TabsTrigger value="settlement">Settlement</TabsTrigger>
+                  <TabsTrigger value="disbursements">{t("contract.tabs.disbursements")}</TabsTrigger>
+                  <TabsTrigger value="deliverables">{t("contract.tabs.deliverables")}</TabsTrigger>
+                  <TabsTrigger value="progress">{t("contract.tabs.progressReports")}</TabsTrigger>
+                  <TabsTrigger value="final">{t("contract.tabs.finalReport")}</TabsTrigger>
+                  <TabsTrigger value="amendments">{t("contract.tabs.amendments")}</TabsTrigger>
+                  <TabsTrigger value="settlement">{t("contract.tabs.settlement")}</TabsTrigger>
                 </TabsList>
                 <TabsContent value="disbursements">
                   <DisbursementsPanel contractId={contract.id} canManage={canManage} />
