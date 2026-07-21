@@ -1,4 +1,5 @@
 import { CalendarClock, Gavel, Mail, TrendingUp, UserPlus, type LucideIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { KpiCard, KpiCardSkeleton } from "@/components/shared/KpiCard";
 import { ChartCard, ChartCardSkeleton } from "@/components/charts/ChartCard";
 import { AreaChartCardBody } from "@/components/charts/AreaChartCard";
@@ -18,13 +19,14 @@ const KPI_ICONS: Record<string, LucideIcon> = {
 };
 
 const QUICK_ACTIONS: QuickAction[] = [
-  { label: "Create Council", path: ROUTES.COUNCILS, icon: Gavel },
-  { label: "Schedule Meeting", path: ROUTES.MEETINGS, icon: CalendarClock },
-  { label: "Invite Reviewer", path: ROUTES.ASSIGNMENTS, icon: UserPlus },
-  { label: "Proposal Reviews", path: ROUTES.PROPOSAL_REVIEWS, icon: TrendingUp },
+  { labelKey: "dashboard.actions.createCouncil", path: ROUTES.COUNCILS, icon: Gavel },
+  { labelKey: "dashboard.actions.scheduleMeeting", path: ROUTES.MEETINGS, icon: CalendarClock },
+  { labelKey: "dashboard.actions.inviteReviewer", path: ROUTES.ASSIGNMENTS, icon: UserPlus },
+  { labelKey: "nav.proposalReviews", path: ROUTES.PROPOSAL_REVIEWS, icon: TrendingUp },
 ];
 
 export function StaffDashboardPage() {
+  const { t } = useTranslation();
   const { data, isLoading, isError, refetch, isRefetching } = useStaffDashboardQuery();
 
   if (isError) {
@@ -34,8 +36,8 @@ export function StaffDashboardPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Staff Dashboard</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Review workflow, councils, and meetings at a glance.</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("dashboard.staff.title")}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t("dashboard.staff.subtitle")}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -54,7 +56,7 @@ export function StaffDashboardPage() {
           </>
         ) : (
           <>
-            <ChartCard title="Review Progress" description="Completed vs. pending reviews per week">
+            <ChartCard title={t("dashboard.staff.reviewProgress")} description={t("dashboard.staff.reviewProgressDesc")}>
               <AreaChartCardBody
                 data={data?.reviewProgress ?? []}
                 xKey="label"
@@ -64,7 +66,7 @@ export function StaffDashboardPage() {
                 ]}
               />
             </ChartCard>
-            <ChartCard title="Council Performance" description="Average score by council">
+            <ChartCard title={t("dashboard.staff.councilPerformance")} description={t("dashboard.staff.councilPerformanceDesc")}>
               <BarChartCardBody
                 data={data?.councilPerformance ?? []}
                 categoryKey="council"

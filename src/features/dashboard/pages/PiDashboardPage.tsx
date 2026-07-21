@@ -1,4 +1,5 @@
 import { CalendarClock, CheckCircle2, Clock, FileBarChart, FilePlus2, FileText, Sparkles, type LucideIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { KpiCard, KpiCardSkeleton } from "@/components/shared/KpiCard";
 import { ChartCard, ChartCardSkeleton } from "@/components/charts/ChartCard";
 import { PieChartCardBody } from "@/components/charts/PieChartCard";
@@ -20,13 +21,14 @@ const KPI_ICONS: Record<string, LucideIcon> = {
 };
 
 const QUICK_ACTIONS: QuickAction[] = [
-  { label: "Submit Proposal", path: ROUTES.SUBMIT_PROPOSAL, icon: FilePlus2 },
-  { label: "My Proposals", path: ROUTES.MY_PROPOSALS, icon: FileText },
-  { label: "Progress Reports", path: ROUTES.PROGRESS_REPORTS, icon: FileBarChart },
-  { label: "AI Search", path: ROUTES.AI_SEARCH, icon: Sparkles },
+  { labelKey: "dashboard.actions.submitProposal", path: ROUTES.SUBMIT_PROPOSAL, icon: FilePlus2 },
+  { labelKey: "nav.myProposals", path: ROUTES.MY_PROPOSALS, icon: FileText },
+  { labelKey: "nav.progressReports", path: ROUTES.PROGRESS_REPORTS, icon: FileBarChart },
+  { labelKey: "nav.aiSearch", path: ROUTES.AI_SEARCH, icon: Sparkles },
 ];
 
 export function PiDashboardPage() {
+  const { t } = useTranslation();
   const { data, isLoading, isError, refetch, isRefetching } = usePiDashboardQuery();
 
   if (isError) {
@@ -36,8 +38,8 @@ export function PiDashboardPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">My Dashboard</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Track your proposals, deadlines, and feedback.</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("dashboard.pi.title")}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t("dashboard.pi.subtitle")}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -56,10 +58,10 @@ export function PiDashboardPage() {
           </>
         ) : (
           <>
-            <ChartCard title="Proposal Status" description="Breakdown of your proposals by status">
+            <ChartCard title={t("dashboard.pi.proposalStatus")} description={t("dashboard.pi.proposalStatusDesc")}>
               <PieChartCardBody data={data?.proposalStatus ?? []} nameKey="status" valueKey="count" />
             </ChartCard>
-            <ChartCard title="Upcoming Deadlines" description="By deliverable type">
+            <ChartCard title={t("dashboard.pi.upcomingDeadlines")} description={t("dashboard.pi.byDeliverableType")}>
               <BarChartCardBody data={data?.upcomingDeadlines ?? []} categoryKey="type" valueKey="count" colorful />
             </ChartCard>
           </>
@@ -73,7 +75,7 @@ export function PiDashboardPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Sparkles className="size-4 text-primary" />
-              <CardTitle className="text-sm">AI Suggestions</CardTitle>
+              <CardTitle className="text-sm">{t("dashboard.pi.aiSuggestions")}</CardTitle>
             </div>
           </CardHeader>
           <CardContent>

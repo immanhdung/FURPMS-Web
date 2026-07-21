@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   BarChart3,
   CalendarRange,
@@ -33,13 +34,14 @@ const KPI_ICONS: Record<string, LucideIcon> = {
 };
 
 const QUICK_ACTIONS: QuickAction[] = [
-  { label: "New Research Cycle", path: ROUTES.RESEARCH_CYCLES, icon: CalendarRange },
-  { label: "Import Topics", path: ROUTES.RESEARCH_TYPES, icon: FolderPlus },
-  { label: "Manage Users", path: ROUTES.USERS, icon: UsersRound },
-  { label: "View Analytics", path: ROUTES.ANALYTICS, icon: BarChart3 },
+  { labelKey: "dashboard.actions.newCycle", path: ROUTES.RESEARCH_CYCLES, icon: CalendarRange },
+  { labelKey: "dashboard.actions.importTopics", path: ROUTES.RESEARCH_TYPES, icon: FolderPlus },
+  { labelKey: "dashboard.actions.manageUsers", path: ROUTES.USERS, icon: UsersRound },
+  { labelKey: "dashboard.actions.viewAnalytics", path: ROUTES.ANALYTICS, icon: BarChart3 },
 ];
 
 export function AdminDashboardPage() {
+  const { t } = useTranslation();
   const { data, isLoading, isError, refetch, isRefetching } = useAdminDashboardQuery();
 
   if (isError) {
@@ -49,8 +51,8 @@ export function AdminDashboardPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Admin Dashboard</h1>
-        <p className="mt-1 text-sm text-muted-foreground">System-wide overview across all research cycles.</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("dashboard.admin.title")}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t("dashboard.admin.subtitle")}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
@@ -69,7 +71,7 @@ export function AdminDashboardPage() {
           </>
         ) : (
           <>
-            <ChartCard title="Monthly Submission Trend" description="Proposals submitted vs. approved">
+            <ChartCard title={t("dashboard.admin.monthlyTrend")} description={t("dashboard.admin.monthlyTrendDesc")}>
               <AreaChartCardBody
                 data={data?.monthlyTrend ?? []}
                 xKey="label"
@@ -79,7 +81,7 @@ export function AdminDashboardPage() {
                 ]}
               />
             </ChartCard>
-            <ChartCard title="Proposals by Research Field" description="Distribution across active fields">
+            <ChartCard title={t("dashboard.admin.byField")} description={t("dashboard.admin.byFieldDesc")}>
               <BarChartCardBody data={data?.proposalsByField ?? []} categoryKey="field" valueKey="count" colorful />
             </ChartCard>
           </>
@@ -94,7 +96,7 @@ export function AdminDashboardPage() {
           </>
         ) : (
           <>
-            <ChartCard title="Review Progress" description="Completed vs. pending reviews per week">
+            <ChartCard title={t("dashboard.staff.reviewProgress")} description={t("dashboard.staff.reviewProgressDesc")}>
               <LineChartCardBody
                 data={data?.reviewProgress ?? []}
                 xKey="label"
@@ -104,7 +106,7 @@ export function AdminDashboardPage() {
                 ]}
               />
             </ChartCard>
-            <ChartCard title="Budget Distribution" description="Allocated budget by category">
+            <ChartCard title={t("dashboard.admin.budgetDist")} description={t("dashboard.admin.budgetDistDesc")}>
               <PieChartCardBody data={data?.budgetDistribution ?? []} nameKey="category" valueKey="amount" />
             </ChartCard>
           </>

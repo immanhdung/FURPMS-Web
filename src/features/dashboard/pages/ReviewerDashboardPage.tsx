@@ -1,4 +1,5 @@
 import { CalendarClock, ClipboardCheck, Gavel, Mail, Star, TrendingUp, type LucideIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { KpiCard, KpiCardSkeleton } from "@/components/shared/KpiCard";
 import { ChartCard, ChartCardSkeleton } from "@/components/charts/ChartCard";
 import { LineChartCardBody } from "@/components/charts/LineChartCard";
@@ -19,13 +20,14 @@ const KPI_ICONS: Record<string, LucideIcon> = {
 };
 
 const QUICK_ACTIONS: QuickAction[] = [
-  { label: "Invitations", path: ROUTES.INVITATIONS, icon: Mail },
-  { label: "Assigned Reviews", path: ROUTES.ASSIGNED_REVIEWS, icon: ClipboardCheck },
-  { label: "Scoring", path: ROUTES.SCORING, icon: Star },
-  { label: "Meetings", path: ROUTES.MEETINGS, icon: CalendarClock },
+  { labelKey: "nav.invitations", path: ROUTES.INVITATIONS, icon: Mail },
+  { labelKey: "nav.assignedReviews", path: ROUTES.ASSIGNED_REVIEWS, icon: ClipboardCheck },
+  { labelKey: "nav.scoring", path: ROUTES.SCORING, icon: Star },
+  { labelKey: "nav.meetings", path: ROUTES.MEETINGS, icon: CalendarClock },
 ];
 
 export function ReviewerDashboardPage() {
+  const { t } = useTranslation();
   const { data, isLoading, isError, refetch, isRefetching } = useReviewerDashboardQuery();
 
   if (isError) {
@@ -35,8 +37,8 @@ export function ReviewerDashboardPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Reviewer Dashboard</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Your assigned reviews, councils, and meetings.</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("dashboard.reviewer.title")}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t("dashboard.reviewer.subtitle")}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -55,7 +57,7 @@ export function ReviewerDashboardPage() {
           </>
         ) : (
           <>
-            <ChartCard title="Review Completion Trend" description="Completed vs. pending per week">
+            <ChartCard title={t("dashboard.reviewer.completionTrend")} description={t("dashboard.reviewer.completionTrendDesc")}>
               <LineChartCardBody
                 data={data?.reviewCompletionTrend ?? []}
                 xKey="label"
@@ -65,7 +67,7 @@ export function ReviewerDashboardPage() {
                 ]}
               />
             </ChartCard>
-            <ChartCard title="Review Decisions" description="Breakdown of your submitted decisions">
+            <ChartCard title={t("dashboard.reviewer.decisions")} description={t("dashboard.reviewer.decisionsDesc")}>
               <PieChartCardBody data={data?.reviewDecisions ?? []} nameKey="decision" valueKey="count" />
             </ChartCard>
           </>

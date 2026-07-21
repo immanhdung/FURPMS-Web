@@ -1,4 +1,5 @@
 import { useAuthStore } from "@/store/auth.store";
+import { useTranslation } from "react-i18next";
 import { ROLES, getPrimaryRole } from "@/constants/roles";
 import { AdminDashboardPage } from "@/features/dashboard/pages/AdminDashboardPage";
 import { StaffDashboardPage } from "@/features/dashboard/pages/StaffDashboardPage";
@@ -9,10 +10,11 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { LayoutDashboard } from "lucide-react";
 
 export function DashboardPage() {
+  const { t } = useTranslation();
   const user = useAuthStore((state) => state.user);
 
   if (!user) {
-    return <PageLoader label="Loading your dashboard..." />;
+    return <PageLoader label={t("dashboard.loading")} />;
   }
 
   const primaryRole = getPrimaryRole(user.roles);
@@ -31,8 +33,8 @@ export function DashboardPage() {
         <div className="flex min-h-[70vh] items-center justify-center">
           <EmptyState
             icon={LayoutDashboard}
-            title="No dashboard configured"
-            description="Your account doesn't have a role with an associated dashboard yet. Contact your administrator."
+            title={t("dashboard.notConfigured")}
+            description={t("dashboard.notConfiguredDesc")}
           />
         </div>
       );
