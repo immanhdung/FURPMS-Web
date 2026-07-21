@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { UseFormReturn } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { Loader2, Sparkles, SearchCheck } from "lucide-react";
@@ -22,6 +23,7 @@ interface Step2Props {
 }
 
 export function Step2ResearchContent({ form, file, onFileChange }: Step2Props) {
+  const { t } = useTranslation();
   const { control, watch, setValue } = form;
   const researchTypeId = watch("researchType");
   const cycleId = watch("cycleId");
@@ -67,19 +69,19 @@ export function Step2ResearchContent({ form, file, onFileChange }: Step2Props) {
   };
 
   if (!selectedType) {
-    return <p className="text-sm text-muted-foreground">Select a research type in the previous step first.</p>;
+    return <p className="text-sm text-muted-foreground">{t("wizard.step2.selectTypeFirst")}</p>;
   }
 
   return (
     <div className="space-y-5">
       <p className="rounded-lg border border-border bg-muted/40 p-3 text-sm text-muted-foreground">
-        This step is optional. Upload your draft to prefill the form with AI, or press{" "}
-        <span className="font-medium text-foreground">Next</span> and enter everything manually.
+        {t("wizard.step2.optionalHint")}{" "}
+        <span className="font-medium text-foreground">{t("wizard.next")}</span> {t("wizard.step2.optionalHintNext")}
       </p>
 
       {isApplied && (
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-foreground">Imported Research Topic</label>
+          <label className="mb-1.5 block text-sm font-medium text-foreground">{t("wizard.step2.importedTopic")}</label>
           <Controller
             control={control}
             name="orderId"
@@ -89,7 +91,7 @@ export function Step2ResearchContent({ form, file, onFileChange }: Step2Props) {
                 onValueChange={(value) => field.onChange(Number(value))}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder={cycleOrders.length ? "Select a topic" : "No topics for this cycle"} />
+                  <SelectValue placeholder={cycleOrders.length ? t("wizard.step2.selectTopic") : t("wizard.step2.noTopics")} />
                 </SelectTrigger>
                 <SelectContent>
                   {cycleOrders.map((order) => (
@@ -117,8 +119,8 @@ export function Step2ResearchContent({ form, file, onFileChange }: Step2Props) {
             setExtraction(null);
             setSimilarity(null);
           }}
-          label={isApplied ? "Upload your proposal" : "Upload PDF or DOCX"}
-          hint="Drag & drop, or click to browse (.pdf, .doc, .docx)"
+          label={isApplied ? t("wizard.step2.uploadApplied") : t("wizard.step2.uploadBasic")}
+          hint={t("wizard.step2.dropHint")}
         />
       </div>
 
@@ -131,10 +133,10 @@ export function Step2ResearchContent({ form, file, onFileChange }: Step2Props) {
             onClick={runSimilarityCheck}
           >
             {similarityMutation.isPending ? <Loader2 className="animate-spin" /> : <SearchCheck />}
-            Check similarity
+            {t("wizard.step2.checkSimilarity")}
           </Button>
 
-          {similarityMutation.isPending && <IndeterminateProgressBar label="Comparing your file against the selected topic..." />}
+          {similarityMutation.isPending && <IndeterminateProgressBar label={t("wizard.step2.comparing")} />}
 
           {similarity && (
             <motion.div
@@ -142,9 +144,9 @@ export function Step2ResearchContent({ form, file, onFileChange }: Step2Props) {
               animate={{ opacity: 1, y: 0 }}
               className="flex items-center gap-2 rounded-lg border border-border p-3 text-sm"
             >
-              <Badge variant={similarity.passed ? "secondary" : "destructive"}>{similarity.score}% match</Badge>
+              <Badge variant={similarity.passed ? "secondary" : "destructive"}>{similarity.score}{t("wizard.step2.matchSuffix")}</Badge>
               <span className="text-muted-foreground">
-                {similarity.passed ? "Looks like a good match with the selected topic." : "Similarity is below the recommended threshold."}
+                {similarity.passed ? t("wizard.step2.matchGood") : t("wizard.step2.matchLow")}
               </span>
             </motion.div>
           )}
@@ -160,10 +162,10 @@ export function Step2ResearchContent({ form, file, onFileChange }: Step2Props) {
         <div className="space-y-3">
           <Button type="button" variant="outline" disabled={!file || extractMutation.isPending} onClick={runExtraction}>
             {extractMutation.isPending ? <Loader2 className="animate-spin" /> : <Sparkles />}
-            Analyze with AI
+            {t("wizard.step2.analyzeAi")}
           </Button>
 
-          {extractMutation.isPending && <IndeterminateProgressBar label="Extracting title, abstract, and keywords..." />}
+          {extractMutation.isPending && <IndeterminateProgressBar label={t("wizard.step2.extracting")} />}
 
           {extraction && (
             <motion.div
@@ -171,9 +173,9 @@ export function Step2ResearchContent({ form, file, onFileChange }: Step2Props) {
               animate={{ opacity: 1, y: 0 }}
               className="space-y-2 rounded-lg border border-border p-3 text-sm"
             >
-              <p className="text-xs font-medium text-muted-foreground">AI suggested research area</p>
+              <p className="text-xs font-medium text-muted-foreground">{t("wizard.step2.aiSuggestedArea")}</p>
               <Badge variant="secondary">{extraction.researchArea}</Badge>
-              <p className="pt-1 text-xs font-medium text-muted-foreground">Keywords</p>
+              <p className="pt-1 text-xs font-medium text-muted-foreground">{t("wizard.step2.keywords")}</p>
               <div className="flex flex-wrap gap-1">
                 {extraction.keywords.map((keyword) => (
                   <Badge key={keyword} variant="outline">
@@ -182,7 +184,7 @@ export function Step2ResearchContent({ form, file, onFileChange }: Step2Props) {
                 ))}
               </div>
               <p className="pt-1 text-xs text-muted-foreground">
-                Title and abstract were auto-filled into the next step — feel free to edit them.
+                {t("wizard.step2.autoFilled")}
               </p>
             </motion.div>
           )}

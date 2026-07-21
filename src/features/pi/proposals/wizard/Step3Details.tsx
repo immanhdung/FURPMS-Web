@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import type { UseFormReturn } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { Input } from "@/components/ui/input";
@@ -29,6 +30,7 @@ function Section({ title, hint, children }: { title: string; hint?: string; chil
 }
 
 export function Step3Details({ form }: { form: UseFormReturn<ProposalWizardValues> }) {
+  const { t } = useTranslation();
   const {
     register,
     control,
@@ -37,46 +39,46 @@ export function Step3Details({ form }: { form: UseFormReturn<ProposalWizardValue
 
   return (
     <div className="space-y-6">
-      <Section title="Title & abstract" hint="The Vietnamese title is what appears on official documents.">
+      <Section title={t("wizard.step3.secTitleAbstract")} hint={t("wizard.step3.secTitleAbstractHint")}>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <FieldLabel htmlFor="titleVI" required>
-              Title (Vietnamese)
+              {t("wizard.step3.titleVI")}
             </FieldLabel>
             <Input
               id="titleVI"
-              placeholder="Tên đề tài bằng tiếng Việt"
+              placeholder={t("wizard.step3.titleVIPlaceholder")}
               aria-invalid={Boolean(errors.titleVI)}
               {...register("titleVI")}
             />
             {errors.titleVI && <p className="mt-1 text-xs text-destructive">{errors.titleVI.message}</p>}
           </div>
           <div>
-            <FieldLabel htmlFor="titleEN">Title (English)</FieldLabel>
-            <Input id="titleEN" placeholder="English title, if available" {...register("titleEN")} />
+            <FieldLabel htmlFor="titleEN">{t("wizard.step3.titleEN")}</FieldLabel>
+            <Input id="titleEN" placeholder={t("wizard.step3.titleENPlaceholder")} {...register("titleEN")} />
           </div>
         </div>
 
         <div>
-          <FieldLabel htmlFor="abstractEN">Abstract</FieldLabel>
+          <FieldLabel htmlFor="abstractEN">{t("wizard.step3.abstract")}</FieldLabel>
           <Textarea
             id="abstractEN"
             rows={4}
-            placeholder="A short summary of the problem, approach, and expected result"
+            placeholder={t("wizard.step3.abstractPlaceholder")}
             {...register("abstractEN")}
           />
         </div>
       </Section>
 
-      <Section title="Research description" hint="What you will do and how — reviewers score these sections.">
+      <Section title={t("wizard.step3.secDescription")} hint={t("wizard.step3.secDescriptionHint")}>
         <div>
           <FieldLabel htmlFor="objectives" required>
-            Objectives
+            {t("wizard.step3.objectives")}
           </FieldLabel>
           <Textarea
             id="objectives"
             rows={3}
-            placeholder="e.g. 1. Survey current practice  2. Build the model  3. Evaluate on real data"
+            placeholder={t("wizard.step3.objectivesPlaceholder")}
             aria-invalid={Boolean(errors.objectives)}
             {...register("objectives")}
           />
@@ -84,67 +86,67 @@ export function Step3Details({ form }: { form: UseFormReturn<ProposalWizardValue
         </div>
 
         <div>
-          <FieldLabel htmlFor="methodology">Methodology</FieldLabel>
-          <Textarea id="methodology" rows={3} placeholder="How the research will be carried out" {...register("methodology")} />
+          <FieldLabel htmlFor="methodology">{t("wizard.step3.methodology")}</FieldLabel>
+          <Textarea id="methodology" rows={3} placeholder={t("wizard.step3.methodologyPlaceholder")} {...register("methodology")} />
         </div>
 
         <div>
-          <FieldLabel htmlFor="expectedOutput">Expected Output</FieldLabel>
+          <FieldLabel htmlFor="expectedOutput">{t("wizard.step3.expectedOutput")}</FieldLabel>
           <Textarea
             id="expectedOutput"
             rows={3}
-            placeholder="e.g. 1 conference paper, 1 demo application, 1 final report"
+            placeholder={t("wizard.step3.expectedOutputPlaceholder")}
             {...register("expectedOutput")}
           />
         </div>
       </Section>
 
-      <Section title="Impact & feasibility" hint="Optional, but they strengthen the proposal during review.">
+      <Section title={t("wizard.step3.secImpact")} hint={t("wizard.step3.secImpactHint")}>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <FieldLabel htmlFor="urgency">Urgency</FieldLabel>
-            <Textarea id="urgency" rows={2} placeholder="Why this research is needed now" {...register("urgency")} />
+            <FieldLabel htmlFor="urgency">{t("wizard.step3.urgency")}</FieldLabel>
+            <Textarea id="urgency" rows={2} placeholder={t("wizard.step3.urgencyPlaceholder")} {...register("urgency")} />
           </div>
           <div>
-            <FieldLabel htmlFor="novelty">Novelty</FieldLabel>
-            <Textarea id="novelty" rows={2} placeholder="What is new compared to existing work" {...register("novelty")} />
+            <FieldLabel htmlFor="novelty">{t("wizard.step3.novelty")}</FieldLabel>
+            <Textarea id="novelty" rows={2} placeholder={t("wizard.step3.noveltyPlaceholder")} {...register("novelty")} />
           </div>
           <div>
-            <FieldLabel htmlFor="applicationPotential">Application Potential</FieldLabel>
+            <FieldLabel htmlFor="applicationPotential">{t("wizard.step3.applicationPotential")}</FieldLabel>
             <Textarea id="applicationPotential" rows={2} {...register("applicationPotential")} />
           </div>
           <div>
-            <FieldLabel htmlFor="transferPotential">Transfer Potential</FieldLabel>
+            <FieldLabel htmlFor="transferPotential">{t("wizard.step3.transferPotential")}</FieldLabel>
             <Textarea id="transferPotential" rows={2} {...register("transferPotential")} />
           </div>
         </div>
 
         <div>
-          <FieldLabel htmlFor="facilities">Facilities &amp; Resources</FieldLabel>
+          <FieldLabel htmlFor="facilities">{t("wizard.step3.facilities")}</FieldLabel>
           <Textarea
             id="facilities"
             rows={2}
-            placeholder="Labs, equipment, or data you already have access to"
+            placeholder={t("wizard.step3.facilitiesPlaceholder")}
             {...register("facilities")}
           />
         </div>
       </Section>
 
-      <Section title="Plan & funding">
+      <Section title={t("wizard.step3.secPlan")}>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <FieldLabel htmlFor="fundingMethod">Funding Method</FieldLabel>
+            <FieldLabel htmlFor="fundingMethod">{t("wizard.step3.fundingMethod")}</FieldLabel>
             <Controller
               control={control}
               name="fundingMethod"
               render={({ field }) => (
                 <Select value={field.value || undefined} onValueChange={field.onChange}>
                   <SelectTrigger id="fundingMethod" className="w-full">
-                    <SelectValue placeholder="Select how funding is disbursed" />
+                    <SelectValue placeholder={t("wizard.step3.fundingPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="WHOLE">Whole — disbursed in fixed installments</SelectItem>
-                    <SelectItem value="PARTIAL">Partial — disbursed per accepted milestone</SelectItem>
+                    <SelectItem value="WHOLE">{t("wizard.step3.fundingWhole")}</SelectItem>
+                    <SelectItem value="PARTIAL">{t("wizard.step3.fundingPartial")}</SelectItem>
                   </SelectContent>
                 </Select>
               )}
@@ -152,7 +154,7 @@ export function Step3Details({ form }: { form: UseFormReturn<ProposalWizardValue
           </div>
           <div>
             <FieldLabel htmlFor="durationMonths" required>
-              Duration (months)
+              {t("wizard.step3.duration")}
             </FieldLabel>
             <Input
               id="durationMonths"
