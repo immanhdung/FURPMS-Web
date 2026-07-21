@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, CalendarClock, ExternalLink } from "lucide-react";
+import { ArrowLeft, CalendarClock, ExternalLink, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -10,10 +10,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMyMembershipsQuery } from "@/hooks/useMemberships";
 import { useCouncilMeetingsQuery } from "@/hooks/useMeetings";
 import { RubricScoringForm } from "@/features/reviewer/proposal-review/RubricScoringForm";
-import { FeedbackForm } from "@/features/reviewer/proposal-review/FeedbackForm";
 import { AcceptanceEvaluationForm } from "@/features/reviewer/proposal-review/AcceptanceEvaluationForm";
 import { MinutesPanel } from "@/features/reviewer/proposal-review/MinutesPanel";
-import { COUNCIL_MEMBER_ROLE, REVIEW_ROUND_TYPE } from "@/constants/statuses";
+import { COUNCIL_MEMBER_ROLE, REVIEW_ROUND_TYPE, ROUND_STATUS } from "@/constants/statuses";
 import { ROUTES } from "@/constants/routes";
 import { formatDateTime } from "@/utils/format";
 
@@ -40,6 +39,8 @@ export function ProposalReviewWorkspace() {
   const isAcceptanceRound = membership.roundType?.toUpperCase() === REVIEW_ROUND_TYPE.ACCEPTANCE;
   // The secretary compiles the meeting minutes rather than scoring the proposal themselves.
   const isSecretary = membership.memberRole === COUNCIL_MEMBER_ROLE.SECRETARY;
+  // Staff must open the round before reviewers can score/evaluate it.
+  const isRoundOpen = membership.roundStatus?.toUpperCase() === ROUND_STATUS.OPEN;
 
   return (
     <div className="mx-auto max-w-3xl space-y-5">
@@ -94,24 +95,35 @@ export function ProposalReviewWorkspace() {
       <Tabs defaultValue={isSecretary ? "minutes" : "scoring"}>
         <TabsList>
           {!isSecretary && <TabsTrigger value="scoring">{t("reviewWorkspace.tabScoring")}</TabsTrigger>}
-          <TabsTrigger value="feedback">{t("reviewWorkspace.tabFeedback")}</TabsTrigger>
           {isAcceptanceRound && <TabsTrigger value="acceptance">{t("reviewWorkspace.tabAcceptance")}</TabsTrigger>}
           <TabsTrigger value="minutes">{t("reviewWorkspace.tabMinutes")}</TabsTrigger>
         </TabsList>
 
         {!isSecretary && (
           <TabsContent value="scoring">
-            <RubricScoringForm councilId={councilId} roundType={membership.roundType ?? REVIEW_ROUND_TYPE.REVIEW} />
+            {isRoundOpen ? (
+              <RubricScoringForm councilId={councilId} roundType={membership.roundType ?? REVIEW_ROUND_TYPE.REVIEW} />
+            ) : (
+              <EmptyState
+                icon={Lock}
+                title={t("reviewWorkspace.roundNotOpen")}
+                description={t("reviewWorkspace.roundNotOpenDesc")}
+              />
+            )}
           </TabsContent>
         )}
 
-        <TabsContent value="feedback">
-          <FeedbackForm councilId={councilId} />
-        </TabsContent>
-
         {isAcceptanceRound && (
           <TabsContent value="acceptance">
-            <AcceptanceEvaluationForm councilId={councilId} />
+            {isRoundOpen ? (
+              <AcceptanceEvaluationForm councilId={councilId} />
+            ) : (
+              <EmptyState
+                icon={Lock}
+                title={t("reviewWorkspace.roundNotOpen")}
+                description={t("reviewWorkspace.roundNotOpenDesc")}
+              />
+            )}
           </TabsContent>
         )}
 

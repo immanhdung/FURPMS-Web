@@ -40,6 +40,14 @@ export const REVIEW_ROUND_TYPE = {
 } as const;
 export type ReviewRoundType = (typeof REVIEW_ROUND_TYPE)[keyof typeof REVIEW_ROUND_TYPE];
 
+/** Confirmed live (seen in ReviewRound.status responses): PENDING before staff opens the round, OPEN once opened, CLOSED after closing. */
+export const ROUND_STATUS = {
+  PENDING: "PENDING",
+  OPEN: "OPEN",
+  CLOSED: "CLOSED",
+} as const;
+export type RoundStatus = (typeof ROUND_STATUS)[keyof typeof ROUND_STATUS];
+
 export const ROUND_TYPE_LABELS: Record<ReviewRoundType, string> = {
   [REVIEW_ROUND_TYPE.REVIEW]: "Review",
   [REVIEW_ROUND_TYPE.ACCEPTANCE]: "Final",

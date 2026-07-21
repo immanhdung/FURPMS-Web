@@ -9,12 +9,14 @@ import { useProposalsQuery } from "@/hooks/useProposals";
 import { getContractColumns } from "@/features/staff/contracts/columns";
 import { CreateContractSheet } from "@/features/staff/contracts/CreateContractSheet";
 import { ContractDetailSheet } from "@/features/staff/contracts/ContractDetailSheet";
+import { sortByDateDesc } from "@/utils/sort";
 import type { Contract } from "@/types/contract";
 
 export function ContractsPage() {
   const { t } = useTranslation();
   const { data, isLoading, isError, refetch, isRefetching } = useContractsQuery();
   const { data: proposals } = useProposalsQuery();
+  const sortedData = useMemo(() => sortByDateDesc(data, (c) => c.createdAt), [data]);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [detailContractId, setDetailContractId] = useState<string | null>(null);
@@ -54,7 +56,7 @@ export function ContractsPage() {
       ) : (
         <DataTable
           columns={columns}
-          data={data ?? []}
+          data={sortedData}
           isLoading={isLoading}
           searchPlaceholder={t("staff.contractsSearch")}
           exportFileName="contracts"

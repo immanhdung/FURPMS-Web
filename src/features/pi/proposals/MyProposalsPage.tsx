@@ -12,6 +12,7 @@ import { useTracksQuery } from "@/hooks/useTracks";
 import { getMyProposalColumns } from "@/features/pi/proposals/columns";
 import { SubmitProposalDialog } from "@/features/pi/proposals/SubmitProposalDialog";
 import { ROUTES } from "@/constants/routes";
+import { sortByDateDesc } from "@/utils/sort";
 import type { ProposalSummary } from "@/types/proposal-summary";
 
 export function MyProposalsPage() {
@@ -27,6 +28,7 @@ export function MyProposalsPage() {
 
   const cycleNames = useMemo(() => Object.fromEntries((cycles ?? []).map((c) => [c.id, c.name])), [cycles]);
   const trackNames = useMemo(() => Object.fromEntries((tracks ?? []).map((t) => [t.id.toString(), t.name])), [tracks]);
+  const sortedData = useMemo(() => sortByDateDesc(data, (p) => p.createdAt), [data]);
 
   const columns = useMemo(
     () =>
@@ -60,7 +62,7 @@ export function MyProposalsPage() {
       ) : (
         <DataTable
           columns={columns}
-          data={data ?? []}
+          data={sortedData}
           isLoading={isLoading}
           searchPlaceholder="Search proposals..."
           exportFileName="my-proposals"

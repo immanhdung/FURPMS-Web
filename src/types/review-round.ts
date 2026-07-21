@@ -25,4 +25,11 @@ export interface CreateReviewRoundPayload {
 
 export interface CloseRoundPayload {
   result?: string;
+  /**
+   * Only required when the round has multiple proposals (Phase B: one round can host several
+   * councils, each grading a different proposal) — confirmed via a live 400 asking for it.
+   * The staff proposal detail already has this exact proposal in view, so it's passed
+   * automatically rather than asking the user to look it up.
+   */
+  proposalProjectId?: string;
 }

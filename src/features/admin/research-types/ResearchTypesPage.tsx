@@ -8,12 +8,14 @@ import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { useDeleteResearchTypeMutation, useResearchTypesQuery } from "@/hooks/useResearchTypes";
 import { getResearchTypeColumns } from "@/features/admin/research-types/columns";
 import { ResearchTypeFormSheet } from "@/features/admin/research-types/ResearchTypeFormSheet";
+import { sortByIdDesc } from "@/utils/sort";
 import type { ResearchType } from "@/types/research-type";
 
 export function ResearchTypesPage() {
   const { t } = useTranslation();
   const { data, isLoading, isError, refetch, isRefetching } = useResearchTypesQuery(true);
   const deleteMutation = useDeleteResearchTypeMutation();
+  const sortedData = useMemo(() => sortByIdDesc(data), [data]);
 
   const [formOpen, setFormOpen] = useState(false);
   const [editingType, setEditingType] = useState<ResearchType | null>(null);
@@ -57,7 +59,7 @@ export function ResearchTypesPage() {
       ) : (
         <DataTable
           columns={columns}
-          data={data ?? []}
+          data={sortedData}
           isLoading={isLoading}
           searchPlaceholder={t("researchTypes.searchPlaceholder")}
           exportFileName="research-types"

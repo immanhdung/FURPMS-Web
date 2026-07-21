@@ -12,6 +12,7 @@ import { getCycleColumns } from "@/features/admin/cycles/columns";
 import { CycleFormSheet } from "@/features/admin/cycles/CycleFormSheet";
 import { CycleDetailSheet } from "@/features/admin/cycles/CycleDetailSheet";
 import { TracksTabContent } from "@/features/staff/tracks/TracksTabContent";
+import { sortByIdDesc } from "@/utils/sort";
 import type { Cycle } from "@/types/cycle";
 
 export function CyclesPage() {
@@ -30,6 +31,7 @@ export function CyclesPage() {
     () => Object.fromEntries((researchTypes ?? []).map((rt) => [rt.id, rt.name])),
     [researchTypes]
   );
+  const sortedData = useMemo(() => sortByIdDesc(data), [data]);
 
   const columns = useMemo(
     () =>
@@ -80,7 +82,7 @@ export function CyclesPage() {
           ) : (
             <DataTable
               columns={columns}
-              data={data ?? []}
+              data={sortedData}
               isLoading={isLoading}
               searchPlaceholder={t("cycles.searchPlaceholder")}
               exportFileName="research-cycles"

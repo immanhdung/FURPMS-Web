@@ -59,7 +59,7 @@ export function CloseRoundDialog({ open, onOpenChange, proposalId, round }: Clos
             onClick={() =>
               round &&
               closeMutation.mutate(
-                { roundId: round.id, payload: { result: result || undefined } },
+                { roundId: round.id, payload: { result: result || undefined, proposalProjectId: proposalId } },
                 {
                   onSuccess: () => {
                     setResult("");

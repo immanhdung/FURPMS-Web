@@ -6,6 +6,7 @@ import { useProposalsQuery } from "@/hooks/useProposals";
 import { useCyclesQuery } from "@/hooks/useCycles";
 import { useTracksQuery } from "@/hooks/useTracks";
 import { getProposalColumns } from "@/features/staff/proposal-reviews/columns";
+import { sortByDateDesc } from "@/utils/sort";
 import type { ProposalListParams, ProposalSummary } from "@/types/proposal-summary";
 
 interface ProposalsTableProps {
@@ -28,6 +29,7 @@ export function ProposalsTable({ params, onOpen, emptyTitle, emptyDescription }:
   );
 
   const columns = useMemo(() => getProposalColumns({ t, cycleNames, trackNames, onOpen }), [t, cycleNames, trackNames, onOpen]);
+  const sortedData = useMemo(() => sortByDateDesc(data, (p) => p.createdAt), [data]);
 
   if (isError) {
     return <ErrorState onRetry={() => refetch()} isRetrying={isRefetching} />;
@@ -36,7 +38,7 @@ export function ProposalsTable({ params, onOpen, emptyTitle, emptyDescription }:
   return (
     <DataTable
       columns={columns}
-      data={data ?? []}
+      data={sortedData}
       isLoading={isLoading}
       searchPlaceholder={t("staff.proposalsSearch")}
       exportFileName="proposals"

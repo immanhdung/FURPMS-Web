@@ -105,12 +105,12 @@ export function FinalReportsPage() {
                     <Input value={language} onChange={(e) => setLanguage(e.target.value)} placeholder={t("reports.langPlaceholder")} />
                   </div>
                   <Button
-                    disabled={submitMutation.isPending || !reportFileUrl}
+                    disabled={submitMutation.isPending || !reportFileUrl || !language}
                     onClick={() =>
                       submitMutation.mutate({
-                        reportFileUrl: reportFileUrl || undefined,
+                        reportFileUrl,
                         summaryFileUrl: summaryFileUrl || undefined,
-                        language: language || undefined,
+                        language,
                       })
                     }
                   >

@@ -11,6 +11,9 @@ export function CouncilMembershipsPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { data, isLoading, isError, refetch, isRefetching } = useMyMembershipsQuery();
+  // MyMembershipDto has no timestamp field to sort by — the backend returns rows in creation
+  // order (oldest first), so reversing approximates "newest first" until it exposes a real one.
+  const sortedData = useMemo(() => [...(data ?? [])].reverse(), [data]);
 
   const columns = useMemo(
     () => getMembershipColumns(t, (membership) => navigate(`${ROUTES.ASSIGNED_REVIEWS}/${membership.councilId}`)),
@@ -29,7 +32,7 @@ export function CouncilMembershipsPage() {
       ) : (
         <DataTable
           columns={columns}
-          data={data ?? []}
+          data={sortedData}
           isLoading={isLoading}
           searchPlaceholder={t("reviewer.membershipsSearch")}
           exportFileName="council-memberships"

@@ -7,12 +7,14 @@ import { ErrorState } from "@/components/shared/ErrorState";
 import { useEndMeetingMutation, useMeetingsQuery, useStartMeetingMutation } from "@/hooks/useMeetings";
 import { getMeetingColumns } from "@/features/staff/meetings/columns";
 import { ROUTES } from "@/constants/routes";
+import { sortByDateDesc } from "@/utils/sort";
 
 export function MeetingsPage() {
   const { t } = useTranslation();
   const { data, isLoading, isError, refetch, isRefetching } = useMeetingsQuery();
   const startMutation = useStartMeetingMutation();
   const endMutation = useEndMeetingMutation();
+  const sortedData = useMemo(() => sortByDateDesc(data, (m) => m.scheduledAt), [data]);
 
   const columns = useMemo(
     () =>
@@ -45,7 +47,7 @@ export function MeetingsPage() {
       ) : (
         <DataTable
           columns={columns}
-          data={data ?? []}
+          data={sortedData}
           isLoading={isLoading}
           searchPlaceholder={t("staff.meetingsSearch")}
           exportFileName="meetings"

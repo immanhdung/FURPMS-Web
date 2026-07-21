@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Gavel, Loader2, Lock, Save, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,8 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { useApproveMinutesMutation, useDecisionQuery, useSaveMinutesMutation } from "@/hooks/useDecision";
+import { useCouncilMembersQuery } from "@/hooks/useCouncilMembers";
+import { useAllScoresQuery } from "@/hooks/useReviewScoring";
+import { useFeedbackListQuery } from "@/hooks/useFeedback";
 import { REVIEW_DECISION } from "@/constants/statuses";
 import { formatDateTime } from "@/utils/format";
+import type { ApiError } from "@/types/common";
 
 const RESULT_OPTIONS = [
   { value: REVIEW_DECISION.APPROVED, labelKey: "minutes.resultApproved" },
@@ -37,18 +41,26 @@ export function MinutesPanel({ councilId, memberRole }: { councilId: string; mem
   const saveMutation = useSaveMinutesMutation(councilId);
   const approveMutation = useApproveMinutesMutation(councilId);
 
+  const { data: members } = useCouncilMembersQuery(councilId);
+  const { data: scores, error: scoresError } = useAllScoresQuery(councilId);
+  const { data: feedbackList, error: feedbackError } = useFeedbackListQuery(councilId);
+  const isScoresForbidden = (scoresError as ApiError | null)?.status === 403;
+  const isFeedbackForbidden = (feedbackError as ApiError | null)?.status === 403;
+  const membersById = new Map((members ?? []).map((m) => [m.userId, m]));
+
   const [result, setResult] = useState("");
   const [councilComments, setCouncilComments] = useState("");
   const [recommendations, setRecommendations] = useState("");
+  const [loadedDraftId, setLoadedDraftId] = useState<string | null>(null);
 
-  // Nạp bản nháp đang có vào form (chỉ khi chưa khóa).
-  useEffect(() => {
-    if (decision && !decision.finalizedAt) {
-      setResult(decision.result ?? "");
-      setCouncilComments(decision.councilComments ?? "");
-      setRecommendations(decision.recommendations ?? "");
-    }
-  }, [decision]);
+  // Nạp bản nháp đang có vào form (chỉ khi chưa khóa). Set state trong lúc render (thay vì
+  // trong effect) là cách React khuyến nghị để đồng bộ từ dữ liệu vừa tải xong.
+  if (decision && !decision.finalizedAt && decision.id !== loadedDraftId) {
+    setLoadedDraftId(decision.id);
+    setResult(decision.result ?? "");
+    setCouncilComments(decision.councilComments ?? "");
+    setRecommendations(decision.recommendations ?? "");
+  }
 
   if (isLoading) return <Skeleton className="h-40 w-full rounded-xl" />;
 
@@ -88,6 +100,54 @@ export function MinutesPanel({ councilId, memberRole }: { councilId: string; mem
           <p className="mt-2 text-xs text-muted-foreground">
             {t("minutes.referenceOnly")}
           </p>
+        </CardContent>
+      </Card>
+
+      {/* Điểm và nhận xét của từng thành viên — tham khảo, đặc biệt cho Thư ký soạn biên bản */}
+      <Card>
+        <CardContent className="space-y-4 p-4">
+          <div>
+            <p className="text-sm font-medium text-foreground">{t("minutes.scoresTitle")}</p>
+            {isScoresForbidden ? (
+              <p className="mt-1 text-sm text-warning">{t("minutes.scoresForbidden")}</p>
+            ) : scores && scores.length > 0 ? (
+              <ul className="mt-1.5 space-y-1.5">
+                {scores.map((score) => {
+                  const total = score.scoreDetails?.reduce((sum, d) => sum + (d.givenScore || 0), 0) ?? 0;
+                  const reviewer = score.reviewerId ? membersById.get(score.reviewerId) : undefined;
+                  return (
+                    <li key={score.id} className="text-sm text-foreground">
+                      <span className="font-medium">{reviewer?.reviewerName ?? score.reviewerId ?? "—"}</span>: {total.toFixed(1)}
+                      {score.generalComments && <span className="text-muted-foreground"> — {score.generalComments}</span>}
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="mt-1 text-sm text-muted-foreground">{t("minutes.noScores")}</p>
+            )}
+          </div>
+
+          <div>
+            <p className="text-sm font-medium text-foreground">{t("minutes.feedbackTitle")}</p>
+            {isFeedbackForbidden ? (
+              <p className="mt-1 text-sm text-warning">{t("minutes.feedbackForbidden")}</p>
+            ) : feedbackList && feedbackList.length > 0 ? (
+              <ul className="mt-1.5 space-y-1.5">
+                {feedbackList.map((feedback) => {
+                  const reviewer = feedback.reviewerId ? membersById.get(feedback.reviewerId) : undefined;
+                  return (
+                    <li key={feedback.id} className="text-sm text-foreground">
+                      <span className="font-medium">{reviewer?.reviewerName ?? feedback.reviewerId ?? "—"}</span>:{" "}
+                      {feedback.overallAssessment ?? feedback.otherComments ?? "—"}
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="mt-1 text-sm text-muted-foreground">{t("minutes.noFeedback")}</p>
+            )}
+          </div>
         </CardContent>
       </Card>
 

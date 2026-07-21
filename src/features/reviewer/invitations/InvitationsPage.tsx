@@ -16,7 +16,10 @@ export function InvitationsPage() {
   const respondMutation = useRespondToInvitationMutation();
   const [decliningMemberId, setDecliningMemberId] = useState<string | null>(null);
 
-  const pending = (data ?? []).filter((m) => m.status?.toUpperCase() === INVITATION_STATUS.PENDING);
+  // MyMembershipDto has no invitedAt/sentAt timestamp to sort by — the backend returns rows in
+  // creation order (oldest first), so reversing approximates "newest first" until it exposes a
+  // real timestamp field (same gap as CouncilMemberResponse.invitationSentAt, just missing here).
+  const pending = (data ?? []).filter((m) => m.status?.toUpperCase() === INVITATION_STATUS.PENDING).reverse();
 
   return (
     <div className="space-y-4">

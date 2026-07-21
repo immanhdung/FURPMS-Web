@@ -10,6 +10,7 @@ import { useOrganizationalUnitsQuery } from "@/hooks/useOrganizationalUnits";
 import { getResearchOrderColumns } from "@/features/admin/research-orders/columns";
 import { CreateResearchOrderSheet } from "@/features/admin/research-orders/CreateResearchOrderSheet";
 import { ResearchOrderDetailSheet } from "@/features/admin/research-orders/ResearchOrderDetailSheet";
+import { sortByIdDesc } from "@/utils/sort";
 
 export function ResearchOrdersPage() {
   const { t } = useTranslation();
@@ -22,6 +23,7 @@ export function ResearchOrdersPage() {
 
   const cycleNames = useMemo(() => Object.fromEntries((cycles ?? []).map((c) => [c.id, c.name])), [cycles]);
   const unitNames = useMemo(() => Object.fromEntries((units ?? []).map((u) => [u.id, u.name])), [units]);
+  const sortedData = useMemo(() => sortByIdDesc(data), [data]);
 
   const columns = useMemo(
     () =>
@@ -54,7 +56,7 @@ export function ResearchOrdersPage() {
       ) : (
         <DataTable
           columns={columns}
-          data={data ?? []}
+          data={sortedData}
           isLoading={isLoading}
           searchPlaceholder={t("researchOrders.searchPlaceholder")}
           exportFileName="research-orders"

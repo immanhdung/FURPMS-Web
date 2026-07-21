@@ -8,12 +8,14 @@ import { ToggleActiveDialog } from "@/components/shared/ToggleActiveDialog";
 import { useFinancialConfigsQuery, useUpdateFinancialConfigMutation } from "@/hooks/useFinancialConfigs";
 import { getFinancialConfigColumns } from "@/features/admin/financial-configs/columns";
 import { FinancialConfigFormSheet } from "@/features/admin/financial-configs/FinancialConfigFormSheet";
+import { sortByDateDesc } from "@/utils/sort";
 import type { FinancialConfig } from "@/types/financial-config";
 
 export function FinancialConfigsPage() {
   const { t } = useTranslation();
   const { data, isLoading, isError, refetch, isRefetching } = useFinancialConfigsQuery();
   const updateMutation = useUpdateFinancialConfigMutation();
+  const sortedData = useMemo(() => sortByDateDesc(data, (c) => c.effectiveDate), [data]);
 
   const [formOpen, setFormOpen] = useState(false);
   const [editingConfig, setEditingConfig] = useState<FinancialConfig | null>(null);
@@ -55,7 +57,7 @@ export function FinancialConfigsPage() {
       ) : (
         <DataTable
           columns={columns}
-          data={data ?? []}
+          data={sortedData}
           isLoading={isLoading}
           searchPlaceholder={t("financialConfigs.searchPlaceholder")}
           exportFileName="financial-configs"

@@ -73,7 +73,7 @@ export function getNavItemsForRoles(roles: Role[]): NavItem[] {
   const seen = new Set<string>();
   return NAV_ITEMS.filter((item) => {
     if (!item.roles.some((role) => roles.includes(role))) return false;
-    const key = `${item.label}:${item.path}`;
+    const key = `${item.labelKey}:${item.path}`;
     if (seen.has(key)) return false;
     seen.add(key);
     return true;

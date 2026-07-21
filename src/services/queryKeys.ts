@@ -54,7 +54,7 @@ export const queryKeys = {
   },
   researchOrders: {
     all: () => ["research-orders"] as const,
-    list: (params?: PaginationParams) => ["research-orders", "list", params] as const,
+    list: (params?: Record<string, unknown>) => ["research-orders", "list", params] as const,
     detail: (id: number) => ["research-orders", "detail", id] as const,
   },
   budgetCategories: {

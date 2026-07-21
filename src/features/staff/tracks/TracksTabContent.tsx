@@ -10,6 +10,7 @@ import { useUsersQuery } from "@/hooks/useUsers";
 import { getTrackColumns } from "@/features/staff/tracks/columns";
 import { TrackFormSheet } from "@/features/staff/tracks/TrackFormSheet";
 import { AssignTrackOwnerDialog } from "@/features/staff/tracks/AssignTrackOwnerDialog";
+import { sortByIdDesc } from "@/utils/sort";
 import type { Track } from "@/types/track";
 
 export function TracksTabContent() {
@@ -17,6 +18,7 @@ export function TracksTabContent() {
   const { data, isLoading, isError, refetch, isRefetching } = useTracksQuery();
   const { data: users } = useUsersQuery();
   const deactivateMutation = useDeactivateTrackMutation();
+  const sortedData = useMemo(() => sortByIdDesc(data), [data]);
 
   const [formOpen, setFormOpen] = useState(false);
   const [editingTrack, setEditingTrack] = useState<Track | null>(null);
@@ -62,7 +64,7 @@ export function TracksTabContent() {
       ) : (
         <DataTable
           columns={columns}
-          data={data ?? []}
+          data={sortedData}
           isLoading={isLoading}
           searchPlaceholder={t("staff.tracksSearch")}
           exportFileName="research-fields"

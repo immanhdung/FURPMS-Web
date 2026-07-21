@@ -32,8 +32,10 @@ export function Step2ResearchContent({ form, file, onFileChange }: Step2Props) {
   const selectedType = researchTypes?.find((rt) => rt.id === researchTypeId);
   const isApplied = Boolean(selectedType?.requireOrderingUnit);
 
-  const { data: orders } = useResearchOrdersQuery();
-  const cycleOrders = (orders ?? []).filter((order) => order.cycleId === cycleId);
+  // Filtered server-side (cycleId is a supported query param) rather than client-side, so a
+  // permission/scoping mismatch on the unfiltered list doesn't silently hide topics that do
+  // belong to this cycle.
+  const { data: cycleOrders } = useResearchOrdersQuery(cycleId ? { cycleId } : undefined);
 
   const extractMutation = useExtractProposalMutation();
   const similarityMutation = useSimilarityCheckMutation();
@@ -91,10 +93,10 @@ export function Step2ResearchContent({ form, file, onFileChange }: Step2Props) {
                 onValueChange={(value) => field.onChange(Number(value))}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder={cycleOrders.length ? t("wizard.step2.selectTopic") : t("wizard.step2.noTopics")} />
+                  <SelectValue placeholder={cycleOrders?.length ? t("wizard.step2.selectTopic") : t("wizard.step2.noTopics")} />
                 </SelectTrigger>
                 <SelectContent>
-                  {cycleOrders.map((order) => (
+                  {cycleOrders?.map((order) => (
                     <SelectItem key={order.id} value={order.id.toString()}>
                       {order.researchArea}
                     </SelectItem>

@@ -27,7 +27,9 @@ export function MembershipListPage({
   renderActions,
 }: MembershipListPageProps) {
   const { data, isLoading, isError, refetch, isRefetching } = useMyMembershipsQuery();
-  const items = (data ?? []).filter(filter);
+  // MyMembershipDto has no timestamp field to sort by — the backend returns rows in creation
+  // order (oldest first), so reversing approximates "newest first" until it exposes a real one.
+  const items = (data ?? []).filter(filter).reverse();
 
   return (
     <div className="space-y-4">
