@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Loader2, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,13 +10,14 @@ import { useFeedbackListQuery, useSubmitFeedbackMutation } from "@/hooks/useFeed
 import type { FeedbackPayload } from "@/types/feedback";
 
 const SCORE_FIELDS: { key: keyof FeedbackPayload; label: string }[] = [
-  { key: "urgencyScore", label: "Urgency (1-10)" },
-  { key: "scientificContributionScore", label: "Scientific Contribution (1-10)" },
-  { key: "practicalSignificanceScore", label: "Practical Significance (1-10)" },
-  { key: "actualVsExpectedScore", label: "Actual vs. Expected Output (1-10)" },
+  { key: "urgencyScore", label: "review.urgency" },
+  { key: "scientificContributionScore", label: "review.scientific" },
+  { key: "practicalSignificanceScore", label: "review.practical" },
+  { key: "actualVsExpectedScore", label: "review.actualVsExpected" },
 ];
 
 export function FeedbackForm({ councilId }: { councilId: string }) {
+  const { t } = useTranslation();
   const user = useAuthStore((state) => state.user);
   const { data: feedbackList, isLoading } = useFeedbackListQuery(councilId);
   const submitMutation = useSubmitFeedbackMutation(councilId);
@@ -52,7 +54,7 @@ export function FeedbackForm({ councilId }: { councilId: string }) {
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {SCORE_FIELDS.map(({ key, label }) => (
           <div key={key}>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">{label}</label>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">{t(label)}</label>
             <Input
               type="number"
               min={1}
@@ -65,7 +67,7 @@ export function FeedbackForm({ councilId }: { councilId: string }) {
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Overall assessment</label>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("review.overallAssessment")}</label>
         <Textarea
           rows={3}
           value={form.overallAssessment ?? ""}
@@ -74,7 +76,7 @@ export function FeedbackForm({ councilId }: { councilId: string }) {
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Other comments</label>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("review.otherComments")}</label>
         <Textarea
           rows={3}
           value={form.otherComments ?? ""}

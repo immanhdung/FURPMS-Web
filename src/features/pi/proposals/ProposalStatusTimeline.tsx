@@ -1,13 +1,14 @@
+import { useTranslation } from "react-i18next";
 import { Check, X } from "lucide-react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { PROPOSAL_STATUS } from "@/constants/statuses";
 
 const STAGES = [
-  { key: PROPOSAL_STATUS.DRAFT, label: "Draft" },
-  { key: PROPOSAL_STATUS.SUBMITTED, label: "Submitted" },
-  { key: PROPOSAL_STATUS.UNDER_REVIEW, label: "Under Review" },
-  { key: "DECISION", label: "Decision" },
+  { key: PROPOSAL_STATUS.DRAFT, label: "timeline.draft" },
+  { key: PROPOSAL_STATUS.SUBMITTED, label: "timeline.submitted" },
+  { key: PROPOSAL_STATUS.UNDER_REVIEW, label: "timeline.underReview" },
+  { key: "DECISION", label: "timeline.decision" },
 ];
 
 function stageIndexFor(status: string) {
@@ -18,6 +19,7 @@ function stageIndexFor(status: string) {
 }
 
 export function ProposalStatusTimeline({ status: rawStatus }: { status: string }) {
+  const { t } = useTranslation();
   const status = rawStatus?.toUpperCase();
   const isTerminalNegative = status === PROPOSAL_STATUS.REJECTED || status === PROPOSAL_STATUS.WITHDRAWN;
   const activeIndex = stageIndexFor(status);
@@ -55,7 +57,7 @@ export function ProposalStatusTimeline({ status: rawStatus }: { status: string }
                   {isNegativeTerminal ? <X className="size-4" /> : isCompleted || isPositiveTerminal ? <Check className="size-4" /> : index + 1}
                 </motion.div>
                 <p className={cn("text-center text-xs font-medium", isCurrent ? "text-foreground" : "text-muted-foreground")}>
-                  {index === 3 && isNegativeTerminal ? (status === PROPOSAL_STATUS.WITHDRAWN ? "Withdrawn" : "Rejected") : stage.label}
+                  {index === 3 && isNegativeTerminal ? (status === PROPOSAL_STATUS.WITHDRAWN ? t("timeline.withdrawn") : t("timeline.rejected")) : t(stage.label)}
                 </p>
               </div>
 

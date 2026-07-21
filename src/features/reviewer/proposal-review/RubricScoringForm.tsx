@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { ClipboardList, Loader2, Save } from "lucide-react";
 import { toast } from "sonner";
@@ -18,6 +19,7 @@ interface RubricScoringFormProps {
 }
 
 export function RubricScoringForm({ councilId, roundType }: RubricScoringFormProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: templates, isLoading: isTemplatesLoading } = useRubricTemplatesQuery();
   const { data: existingScore, isLoading: isScoreLoading } = useMyScoreQuery(councilId);
@@ -68,8 +70,8 @@ export function RubricScoringForm({ councilId, roundType }: RubricScoringFormPro
     return (
       <EmptyState
         icon={ClipboardList}
-        title="No rubric criteria configured"
-        description="No rubric template is configured for this round type. Contact an administrator."
+        title={t("review.noRubric")}
+        description={t("review.noRubricDesc")}
       />
     );
   }
@@ -79,7 +81,7 @@ export function RubricScoringForm({ councilId, roundType }: RubricScoringFormPro
 
   const handleSubmit = () => {
     if (!matchingTemplate) {
-      toast.error("No rubric template is available for this round.");
+      toast.error(t("review.noRubricRound"));
       return;
     }
     const scoreDetails: ScoreDetailPayload[] = activeCriteria.map((criterion) => ({
@@ -101,7 +103,7 @@ export function RubricScoringForm({ councilId, roundType }: RubricScoringFormPro
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-3 py-2">
-        <p className="text-sm font-medium text-foreground">Total score</p>
+        <p className="text-sm font-medium text-foreground">{t("review.totalScore")}</p>
         <p className="text-sm font-semibold text-foreground">
           {totalScore.toFixed(1)} / {maxTotal}
         </p>
@@ -132,7 +134,7 @@ export function RubricScoringForm({ councilId, roundType }: RubricScoringFormPro
                 </div>
               </div>
               <Textarea
-                placeholder="Comments (optional)"
+                placeholder={t("review.commentsOptional")}
                 rows={2}
                 value={scores[criterion.id]?.comments ?? ""}
                 onChange={(e) =>
@@ -148,19 +150,19 @@ export function RubricScoringForm({ councilId, roundType }: RubricScoringFormPro
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">General comments</label>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("review.generalComments")}</label>
         <Textarea rows={3} value={generalComments} onChange={(e) => setGeneralComments(e.target.value)} />
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Other recommendations</label>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("review.otherRecommendations")}</label>
         <Textarea rows={3} value={otherRecommendations} onChange={(e) => setOtherRecommendations(e.target.value)} />
       </div>
 
       <div className="flex justify-end">
         <Button onClick={handleSubmit} disabled={submitMutation.isPending}>
           {submitMutation.isPending ? <Loader2 className="animate-spin" /> : <Save />}
-          {existingScore ? "Update score" : "Submit score"}
+          {existingScore ? t("review.updateScore") : t("review.submitScore")}
         </Button>
       </div>
     </div>

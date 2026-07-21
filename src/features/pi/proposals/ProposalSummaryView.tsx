@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -38,6 +39,7 @@ function Field({ label, value }: { label: string; value?: string | null }) {
 }
 
 export function ProposalSummaryView({ data, cycleName, trackName, researchTypeName }: ProposalSummaryViewProps) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-4">
       <Card>
@@ -51,13 +53,13 @@ export function ProposalSummaryView({ data, cycleName, trackName, researchTypeNa
 
           <div>
             {/* Đề tài có thể chỉ có tên tiếng Việt — ưu tiên tên chính, đừng để "Untitled" khi vẫn có titleVI. */}
-            <p className="text-lg font-semibold text-foreground">{data.titleVI || data.titleEN || "Untitled proposal"}</p>
+            <p className="text-lg font-semibold text-foreground">{data.titleVI || data.titleEN || t("proposal.untitled")}</p>
             {data.titleEN && data.titleVI && <p className="text-sm text-muted-foreground">{data.titleEN}</p>}
           </div>
 
           {data.abstractEN && (
             <div>
-              <p className="text-xs font-medium text-muted-foreground">Abstract</p>
+              <p className="text-xs font-medium text-muted-foreground">{t("wizard.step3.abstract")}</p>
               <p className="mt-0.5 text-sm whitespace-pre-line text-foreground">{data.abstractEN}</p>
             </div>
           )}
@@ -66,24 +68,24 @@ export function ProposalSummaryView({ data, cycleName, trackName, researchTypeNa
 
       <Card>
         <CardContent className="space-y-3 p-4">
-          <Field label="Objectives" value={data.objectives} />
-          <Field label="Methodology" value={data.methodology} />
-          <Field label="Expected Output" value={data.expectedOutput} />
+          <Field label={t("wizard.step3.objectives")} value={data.objectives} />
+          <Field label={t("wizard.step3.methodology")} value={data.methodology} />
+          <Field label={t("wizard.step3.expectedOutput")} value={data.expectedOutput} />
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <Field label="Urgency" value={data.urgency} />
-            <Field label="Novelty" value={data.novelty} />
-            <Field label="Application Potential" value={data.applicationPotential} />
-            <Field label="Transfer Potential" value={data.transferPotential} />
+            <Field label={t("wizard.step3.urgency")} value={data.urgency} />
+            <Field label={t("wizard.step3.novelty")} value={data.novelty} />
+            <Field label={t("wizard.step3.applicationPotential")} value={data.applicationPotential} />
+            <Field label={t("wizard.step3.transferPotential")} value={data.transferPotential} />
           </div>
-          <Field label="Facilities & Resources" value={data.facilities} />
-          <Field label="Funding Method" value={data.fundingMethod} />
+          <Field label={t("wizard.step3.facilities")} value={data.facilities} />
+          <Field label={t("proposal.fundingMethod")} value={data.fundingMethod} />
         </CardContent>
       </Card>
 
       {data.members && data.members.length > 0 && (
         <Card>
           <CardContent className="p-4">
-            <p className="mb-2 text-xs font-medium text-muted-foreground">Team Members</p>
+            <p className="mb-2 text-xs font-medium text-muted-foreground">{t("wizard.step4.title")}</p>
             <ul className="space-y-2">
               {data.members.map((member, index) => (
                 <li key={index}>
@@ -92,7 +94,7 @@ export function ProposalSummaryView({ data, cycleName, trackName, researchTypeNa
                     {member.fullName}
                     {member.isSecretary && (
                       <Badge variant="secondary" className="ml-1.5">
-                        Secretary
+                        {t("wizard.step4.secretary")}
                       </Badge>
                     )}
                   </p>
