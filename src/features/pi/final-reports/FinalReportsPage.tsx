@@ -7,7 +7,7 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useMyContractsQuery } from "@/hooks/useMyContracts";
-import { useFinalReportQuery, useSubmitFinalReportMutation } from "@/hooks/useFinalReport";
+import { useFinalReportQuery, useSubmitFinalReportMutation } from "@/hooks/useFinalReports";
 import { formatDateTime } from "@/utils/format";
 
 export function FinalReportsPage() {
