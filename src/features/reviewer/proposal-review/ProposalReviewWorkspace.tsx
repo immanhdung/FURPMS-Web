@@ -12,6 +12,7 @@ import { useCouncilMeetingsQuery } from "@/hooks/useMeetings";
 import { RubricScoringForm } from "@/features/reviewer/proposal-review/RubricScoringForm";
 import { AcceptanceEvaluationForm } from "@/features/reviewer/proposal-review/AcceptanceEvaluationForm";
 import { MinutesPanel } from "@/features/reviewer/proposal-review/MinutesPanel";
+import { ProposalDocumentViewer } from "@/features/reviewer/proposal-review/ProposalDocumentViewer";
 import { COUNCIL_MEMBER_ROLE, REVIEW_ROUND_TYPE, ROUND_STATUS } from "@/constants/statuses";
 import { ROUTES } from "@/constants/routes";
 import { formatDateTime } from "@/utils/format";
@@ -43,7 +44,7 @@ export function ProposalReviewWorkspace() {
   const isRoundOpen = membership.roundStatus?.toUpperCase() === ROUND_STATUS.OPEN;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-5">
+    <div className="mx-auto max-w-7xl space-y-5">
       <Button variant="ghost" size="sm" className="-ml-2" onClick={() => navigate(ROUTES.ASSIGNED_REVIEWS)}>
         <ArrowLeft />
         {t("reviewWorkspace.backToAssigned")}
@@ -61,76 +62,85 @@ export function ProposalReviewWorkspace() {
         </div>
       </div>
 
-      {meetings && meetings.length > 0 && (
-        <div className="space-y-2">
-          {meetings.map((meeting) => (
-            <div
-              key={meeting.id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2.5"
-            >
-              <div className="flex items-center gap-1.5 text-sm text-foreground">
-                <CalendarClock className="size-4 shrink-0 text-muted-foreground" />
-                <span className="font-medium">{meeting.title ?? t("reviewWorkspace.councilMeeting")}</span>
-                <span className="text-muted-foreground">
-                  · {formatDateTime(meeting.scheduledAt)} · {meeting.durationMinutes}min
-                  {meeting.platform && ` · ${meeting.platform}`}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                {meeting.status && <StatusBadge status={meeting.status} />}
-                {meeting.meetingLink && (
-                  <Button size="sm" variant="outline" asChild>
-                    <a href={meeting.meetingLink} target="_blank" rel="noreferrer">
-                      <ExternalLink />
-                      {t("reviewWorkspace.joinMeeting")}
-                    </a>
-                  </Button>
-                )}
-              </div>
-            </div>
-          ))}
+      {/* Left: the PI's submitted file, so reviewers can read it while scoring on the right. */}
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:items-start">
+        <div className="lg:sticky lg:top-4">
+          <ProposalDocumentViewer proposalId={membership.proposalId} />
         </div>
-      )}
 
-      <Tabs defaultValue={isSecretary ? "minutes" : "scoring"}>
-        <TabsList>
-          {!isSecretary && <TabsTrigger value="scoring">{t("reviewWorkspace.tabScoring")}</TabsTrigger>}
-          {isAcceptanceRound && <TabsTrigger value="acceptance">{t("reviewWorkspace.tabAcceptance")}</TabsTrigger>}
-          <TabsTrigger value="minutes">{t("reviewWorkspace.tabMinutes")}</TabsTrigger>
-        </TabsList>
+        <div className="space-y-5">
+          {meetings && meetings.length > 0 && (
+            <div className="space-y-2">
+              {meetings.map((meeting) => (
+                <div
+                  key={meeting.id}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2.5"
+                >
+                  <div className="flex items-center gap-1.5 text-sm text-foreground">
+                    <CalendarClock className="size-4 shrink-0 text-muted-foreground" />
+                    <span className="font-medium">{meeting.title ?? t("reviewWorkspace.councilMeeting")}</span>
+                    <span className="text-muted-foreground">
+                      · {formatDateTime(meeting.scheduledAt)} · {meeting.durationMinutes}min
+                      {meeting.platform && ` · ${meeting.platform}`}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {meeting.status && <StatusBadge status={meeting.status} />}
+                    {meeting.meetingLink && (
+                      <Button size="sm" variant="outline" asChild>
+                        <a href={meeting.meetingLink} target="_blank" rel="noreferrer">
+                          <ExternalLink />
+                          {t("reviewWorkspace.joinMeeting")}
+                        </a>
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
-        {!isSecretary && (
-          <TabsContent value="scoring">
-            {isRoundOpen ? (
-              <RubricScoringForm councilId={councilId} roundType={membership.roundType ?? REVIEW_ROUND_TYPE.REVIEW} />
-            ) : (
-              <EmptyState
-                icon={Lock}
-                title={t("reviewWorkspace.roundNotOpen")}
-                description={t("reviewWorkspace.roundNotOpenDesc")}
-              />
+          <Tabs defaultValue={isSecretary ? "minutes" : "scoring"}>
+            <TabsList>
+              {!isSecretary && <TabsTrigger value="scoring">{t("reviewWorkspace.tabScoring")}</TabsTrigger>}
+              {isAcceptanceRound && <TabsTrigger value="acceptance">{t("reviewWorkspace.tabAcceptance")}</TabsTrigger>}
+              <TabsTrigger value="minutes">{t("reviewWorkspace.tabMinutes")}</TabsTrigger>
+            </TabsList>
+
+            {!isSecretary && (
+              <TabsContent value="scoring">
+                {isRoundOpen ? (
+                  <RubricScoringForm councilId={councilId} roundType={membership.roundType ?? REVIEW_ROUND_TYPE.REVIEW} />
+                ) : (
+                  <EmptyState
+                    icon={Lock}
+                    title={t("reviewWorkspace.roundNotOpen")}
+                    description={t("reviewWorkspace.roundNotOpenDesc")}
+                  />
+                )}
+              </TabsContent>
             )}
-          </TabsContent>
-        )}
 
-        {isAcceptanceRound && (
-          <TabsContent value="acceptance">
-            {isRoundOpen ? (
-              <AcceptanceEvaluationForm councilId={councilId} />
-            ) : (
-              <EmptyState
-                icon={Lock}
-                title={t("reviewWorkspace.roundNotOpen")}
-                description={t("reviewWorkspace.roundNotOpenDesc")}
-              />
+            {isAcceptanceRound && (
+              <TabsContent value="acceptance">
+                {isRoundOpen ? (
+                  <AcceptanceEvaluationForm councilId={councilId} />
+                ) : (
+                  <EmptyState
+                    icon={Lock}
+                    title={t("reviewWorkspace.roundNotOpen")}
+                    description={t("reviewWorkspace.roundNotOpenDesc")}
+                  />
+                )}
+              </TabsContent>
             )}
-          </TabsContent>
-        )}
 
-        <TabsContent value="minutes">
-          <MinutesPanel councilId={councilId} memberRole={membership.memberRole} />
-        </TabsContent>
-      </Tabs>
+            <TabsContent value="minutes">
+              <MinutesPanel councilId={councilId} memberRole={membership.memberRole} />
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
     </div>
   );
 }
