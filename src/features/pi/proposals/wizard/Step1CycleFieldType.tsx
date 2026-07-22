@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Controller } from "react-hook-form";
@@ -23,10 +24,22 @@ export function Step1CycleFieldType({ form }: { form: UseFormReturn<ProposalWiza
   const { data: researchTypes } = useResearchTypesQuery();
 
   const openCycles = (cycles ?? []).filter((c) => c.status?.toUpperCase() === CYCLE_STATUS.OPEN);
-  const typeName = (id?: number) => researchTypes?.find((rt) => rt.id === id)?.name;
+  // API có thể serialize id dạng string ⇒ so sánh phải coerce, nếu không lookup fail (loại về 0).
+  const eq = (a?: number | string, b?: number | string) => Number(a) === Number(b);
+  const typeName = (id?: number) => researchTypes?.find((rt) => eq(rt.id, id))?.name;
   // Loại đề tài do ĐỢT quy định (rule #7: 1 đợt = 1 loại) — không cho PI chọn.
-  const selectedCycle = openCycles.find((c) => c.id === selectedCycleId);
-  const selectedType = researchTypes?.find((rt) => rt.id === selectedCycle?.researchTypeId);
+  // Tra trong TẤT CẢ đợt để draft mở lại (đợt có thể đã đóng) vẫn suy được loại.
+  const selectedCycle = (cycles ?? []).find((c) => eq(c.id, selectedCycleId));
+  const selectedType = researchTypes?.find((rt) => eq(rt.id, selectedCycle?.researchTypeId));
+
+  // researchType là SUY RA thuần từ đợt — đồng bộ mọi khi đợt đổi (kể cả draft reset / điền mẫu),
+  // không chỉ dựa vào onValueChange, tránh kẹt ở 0 làm validation chặn "Tiếp tục".
+  useEffect(() => {
+    if (selectedCycle && !eq(watch("researchType"), selectedCycle.researchTypeId)) {
+      setValue("researchType", selectedCycle.researchTypeId, { shouldValidate: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCycle?.researchTypeId]);
 
   return (
     <div className="space-y-5">
@@ -42,9 +55,9 @@ export function Step1CycleFieldType({ form }: { form: UseFormReturn<ProposalWiza
                 const id = Number(value);
                 field.onChange(id);
                 setValue("trackId", ""); // fields differ per cycle — clear the previous choice
-                // Loại đề tài suy TỪ ĐỢT.
-                const cycle = openCycles.find((c) => c.id === id);
-                setValue("researchType", cycle?.researchTypeId ?? 0);
+                // Loại đề tài suy TỪ ĐỢT (effect cũng đồng bộ, đây chỉ để phản hồi tức thì).
+                const cycle = (cycles ?? []).find((c) => eq(c.id, id));
+                if (cycle) setValue("researchType", cycle.researchTypeId, { shouldValidate: true });
               }}
               disabled={isCyclesLoading}
             >

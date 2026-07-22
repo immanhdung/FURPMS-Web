@@ -160,9 +160,17 @@ export function ProposalWizardPage() {
     // Test helper: fill EVERYTHING (including cycle/field/type) and jump to the preview so the
     // whole proposal can be submitted in one go. Falls back to content-only if data is missing.
     const current = form.getValues();
-    const openCycle = (cycles ?? []).find((c) => c.status?.toUpperCase() === CYCLE_STATUS.OPEN);
-    // Prefer the self-propose type (no ordering unit) so no topic selection is required.
-    const selfProposeType = (researchTypes ?? []).find((t) => !t.requireOrderingUnit) ?? researchTypes?.[0];
+    // Prefer a self-propose (Basic) cycle so no ordering-unit topic is required; else any open cycle.
+    const openCycles = (cycles ?? []).filter((c) => c.status?.toUpperCase() === CYCLE_STATUS.OPEN);
+    const basicTypeIds = new Set(
+      (researchTypes ?? []).filter((t) => !t.requireOrderingUnit).map((t) => Number(t.id))
+    );
+    const openCycle =
+      openCycles.find((c) => basicTypeIds.has(Number(c.researchTypeId))) ?? openCycles[0];
+    // rule #7: loại đề tài do ĐỢT quy định → suy từ chính đợt đã chọn, không chọn rời.
+    const cycleType = openCycle
+      ? (researchTypes ?? []).find((t) => Number(t.id) === Number(openCycle.researchTypeId))
+      : undefined;
 
     let trackId = current.trackId;
     if (openCycle) {
@@ -181,11 +189,11 @@ export function ProposalWizardPage() {
       // (the normal Select flow already does Number(value)).
       cycleId: openCycle ? Number(openCycle.id) : current.cycleId,
       trackId,
-      researchType: selfProposeType ? Number(selfProposeType.id) : current.researchType,
+      researchType: openCycle ? Number(openCycle.researchTypeId) : current.researchType,
       orderId: undefined,
     });
 
-    if (openCycle && trackId && selfProposeType) {
+    if (openCycle && trackId && cycleType) {
       setCurrentStep(WIZARD_STEPS.length - 1); // jump to Preview & Submit
       toast.success(t("wizard.sampleReady"));
     } else {
