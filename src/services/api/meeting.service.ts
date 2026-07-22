@@ -1,6 +1,6 @@
 import { axiosClient } from "@/services/api/axiosClient";
 import type { ApiResponse } from "@/types/common";
-import type { Meeting, ScheduleMeetingPayload } from "@/types/meeting";
+import type { Meeting, ScheduleConflict, ScheduleMeetingPayload } from "@/types/meeting";
 
 export const meetingService = {
   list: () => axiosClient.get<ApiResponse<Meeting[]>>("/meetings").then((res) => res.data.data),
@@ -16,4 +16,9 @@ export const meetingService = {
   start: (id: string) => axiosClient.post<ApiResponse<Meeting>>(`/meetings/${id}/start`).then((res) => res.data.data),
 
   end: (id: string) => axiosClient.post<ApiResponse<Meeting>>(`/meetings/${id}/end`).then((res) => res.data.data),
+
+  scheduleConflicts: (councilId: string) =>
+    axiosClient
+      .get<ApiResponse<ScheduleConflict[]>>(`/councils/${councilId}/schedule-conflicts`)
+      .then((res) => res.data.data),
 };

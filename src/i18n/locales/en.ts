@@ -603,6 +603,8 @@ export const en = {
     meetingsPanel: "Meetings",
     scheduleMeeting: "Schedule meeting",
     noMeetingsScheduled: "No meetings scheduled",
+    conflictTitle: "Schedule conflict warning",
+    conflictRow: "{{name}} is also on another council at {{time}}",
     joinLink: "Join link",
     meetingInfo: "{{time}} · {{min}}min · {{platform}}",
   },

@@ -29,3 +29,13 @@ export const MEETING_MODES = [
 ] as const;
 
 export const IN_PERSON = "IN_PERSON";
+
+/** Cảnh báo 1 giảng viên trùng lịch giữa hội đồng này và hội đồng khác. */
+export interface ScheduleConflict {
+  memberUserId: string;
+  memberName: string;
+  otherCouncilId: string;
+  otherCouncilType?: string | null;
+  thisMeetingAt: string;
+  otherMeetingAt: string;
+}

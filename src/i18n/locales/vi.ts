@@ -606,6 +606,8 @@ export const vi = {
     meetingsPanel: "Lịch họp",
     scheduleMeeting: "Lên lịch họp",
     noMeetingsScheduled: "Chưa lên lịch họp nào",
+    conflictTitle: "Cảnh báo trùng lịch",
+    conflictRow: "{{name}} còn dự hội đồng khác lúc {{time}}",
     joinLink: "Link tham gia",
     meetingInfo: "{{time}} · {{min}} phút · {{platform}}",
   },
