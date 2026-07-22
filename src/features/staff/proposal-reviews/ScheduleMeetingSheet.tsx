@@ -10,16 +10,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useGenerateGoogleMeetLink, useScheduleMeetingMutation } from "@/hooks/useMeetings";
-import { MEETING_PLATFORMS } from "@/types/meeting";
+import { MEETING_MODES, IN_PERSON } from "@/types/meeting";
 
-const schema = z.object({
-  title: z.string().min(1, "Title is required"),
-  platform: z.string().min(1, "Select a platform"),
-  meetingLink: z.string().optional(),
-  scheduledAt: z.string().min(1, "Date and time are required"),
-  durationMinutes: z.number().min(15, "Must be at least 15 minutes"),
-  agenda: z.string().optional(),
-});
+const schema = z
+  .object({
+    title: z.string().min(1, "Title is required"),
+    platform: z.string().min(1, "Select a platform"),
+    meetingLink: z.string().optional(),
+    location: z.string().optional(),
+    scheduledAt: z.string().min(1, "Date and time are required"),
+    durationMinutes: z.number().min(15, "Must be at least 15 minutes"),
+    agenda: z.string().optional(),
+  })
+  .superRefine((v, ctx) => {
+    if (v.platform === IN_PERSON && !v.location?.trim())
+      ctx.addIssue({ code: "custom", path: ["location"], message: "Location is required for in-person meetings" });
+  });
 
 type FormValues = z.infer<typeof schema>;
 
@@ -45,14 +51,20 @@ export function ScheduleMeetingSheet({ open, onOpenChange, councilId }: Schedule
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { title: "", platform: MEETING_PLATFORMS[0], meetingLink: "", scheduledAt: "", durationMinutes: 60, agenda: "" },
+    defaultValues: { title: "", platform: MEETING_MODES[0].value, meetingLink: "", location: "", scheduledAt: "", durationMinutes: 60, agenda: "" },
   });
 
   const platform = watch("platform");
+  const isOffline = platform === IN_PERSON;
 
   const onSubmit = (values: FormValues) => {
     scheduleMutation.mutate(
-      { ...values, agenda: values.agenda || undefined, meetingLink: values.meetingLink || undefined },
+      {
+        ...values,
+        agenda: values.agenda || undefined,
+        meetingLink: isOffline ? undefined : values.meetingLink || undefined,
+        location: isOffline ? values.location || undefined : undefined,
+      },
       {
         onSuccess: () => {
           reset();
@@ -93,9 +105,9 @@ export function ScheduleMeetingSheet({ open, onOpenChange, councilId }: Schedule
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {MEETING_PLATFORMS.map((p) => (
-                  <SelectItem key={p} value={p}>
-                    {p}
+                {MEETING_MODES.map((m) => (
+                  <SelectItem key={m.value} value={m.value}>
+                    {t(m.labelKey)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -104,33 +116,48 @@ export function ScheduleMeetingSheet({ open, onOpenChange, councilId }: Schedule
         />
       </div>
 
-      <div>
-        <label htmlFor="meeting-link" className="mb-1.5 block text-sm font-medium text-foreground">
-          {t("reviewBoard.meetingLinkLabel")}
-        </label>
-        <div className="flex gap-2">
-          <Input id="meeting-link" placeholder="https://..." {...register("meetingLink")} />
-          {platform === "Google Meet" && (
-            <Button
-              type="button"
-              variant="outline"
-              disabled={generateLinkMutation.isPending}
-              onClick={() =>
-                generateLinkMutation.mutate(undefined, {
-                  onSuccess: (data) => {
-                    setValue("meetingLink", data.meetingLink);
-                    setGeneratedLink(data.meetingLink);
-                  },
-                })
-              }
-            >
-              {generateLinkMutation.isPending ? <Loader2 className="animate-spin" /> : <Sparkles />}
-              {t("reviewBoard.generate")}
-            </Button>
-          )}
+      {isOffline ? (
+        <div>
+          <label htmlFor="meeting-location" className="mb-1.5 block text-sm font-medium text-foreground">
+            {t("reviewBoard.locationLabel")} <span className="text-destructive">*</span>
+          </label>
+          <Input
+            id="meeting-location"
+            placeholder={t("reviewBoard.locationPlaceholder")}
+            aria-invalid={Boolean(errors.location)}
+            {...register("location")}
+          />
+          {errors.location && <p className="mt-1 text-xs text-destructive">{errors.location.message}</p>}
         </div>
-        {generatedLink && <p className="mt-1 text-xs text-muted-foreground">{t("reviewBoard.generatedLink", { link: generatedLink })}</p>}
-      </div>
+      ) : (
+        <div>
+          <label htmlFor="meeting-link" className="mb-1.5 block text-sm font-medium text-foreground">
+            {t("reviewBoard.meetingLinkLabel")}
+          </label>
+          <div className="flex gap-2">
+            <Input id="meeting-link" placeholder="https://..." {...register("meetingLink")} />
+            {platform === "GOOGLE_MEET" && (
+              <Button
+                type="button"
+                variant="outline"
+                disabled={generateLinkMutation.isPending}
+                onClick={() =>
+                  generateLinkMutation.mutate(undefined, {
+                    onSuccess: (data) => {
+                      setValue("meetingLink", data.meetingLink);
+                      setGeneratedLink(data.meetingLink);
+                    },
+                  })
+                }
+              >
+                {generateLinkMutation.isPending ? <Loader2 className="animate-spin" /> : <Sparkles />}
+                {t("reviewBoard.generate")}
+              </Button>
+            )}
+          </div>
+          {generatedLink && <p className="mt-1 text-xs text-muted-foreground">{t("reviewBoard.generatedLink", { link: generatedLink })}</p>}
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         <div>

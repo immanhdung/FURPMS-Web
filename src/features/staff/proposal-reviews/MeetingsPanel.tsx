@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { CalendarClock, CalendarPlus, ExternalLink, Video } from "lucide-react";
+import { CalendarClock, CalendarPlus, ExternalLink, MapPin, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
@@ -46,6 +46,12 @@ export function MeetingsPanel({ councilId }: { councilId: string }) {
                 <CalendarClock className="size-3.5" />
                 {t("staff.meetingInfo", { time: formatDateTime(meeting.scheduledAt), min: meeting.durationMinutes, platform: meeting.platform })}
               </p>
+              {meeting.location && (
+                <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <MapPin className="size-3.5" />
+                  {meeting.location}
+                </p>
+              )}
               {meeting.meetingLink && (
                 <a
                   href={meeting.meetingLink}
