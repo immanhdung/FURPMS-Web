@@ -107,6 +107,13 @@ export const en = {
     language: "Language",
     logout: "Log out",
     profile: "Profile",
+    viewingAs: "Viewing as",
+  },
+  roleName: {
+    Admin: "Administrator",
+    Staff: "Staff",
+    Faculty: "Faculty (PI)",
+    ReviewCommittee: "Review committee",
   },
   auth: {
     signIn: "Sign in",

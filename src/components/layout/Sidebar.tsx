@@ -60,7 +60,10 @@ function NavLinkItem({ item, collapsed }: { item: NavItem; collapsed: boolean })
 
 export function SidebarNav({ collapsed = false }: { collapsed?: boolean }) {
   const user = useAuthStore((state) => state.user);
-  const items = user ? getNavItemsForRoles(user.roles) : [];
+  const activeRole = useAuthStore((state) => state.activeRole);
+  // Show only the nav for the role currently being viewed (multi-role users switch it in the header);
+  // fall back to the union of all roles if no active role is resolved yet.
+  const items = user ? getNavItemsForRoles(activeRole ? [activeRole] : user.roles) : [];
 
   return (
     <ScrollArea className="flex-1 px-2 py-3">

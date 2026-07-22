@@ -1,6 +1,6 @@
 import { useAuthStore } from "@/store/auth.store";
 import { useTranslation } from "react-i18next";
-import { ROLES, getPrimaryRole } from "@/constants/roles";
+import { ROLES } from "@/constants/roles";
 import { AdminDashboardPage } from "@/features/dashboard/pages/AdminDashboardPage";
 import { StaffDashboardPage } from "@/features/dashboard/pages/StaffDashboardPage";
 import { PiDashboardPage } from "@/features/dashboard/pages/PiDashboardPage";
@@ -12,14 +12,13 @@ import { LayoutDashboard } from "lucide-react";
 export function DashboardPage() {
   const { t } = useTranslation();
   const user = useAuthStore((state) => state.user);
+  const activeRole = useAuthStore((state) => state.activeRole);
 
   if (!user) {
     return <PageLoader label={t("dashboard.loading")} />;
   }
 
-  const primaryRole = getPrimaryRole(user.roles);
-
-  switch (primaryRole) {
+  switch (activeRole) {
     case ROLES.ADMIN:
       return <AdminDashboardPage />;
     case ROLES.STAFF:

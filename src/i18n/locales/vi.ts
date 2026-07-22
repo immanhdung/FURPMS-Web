@@ -108,6 +108,13 @@ export const vi = {
     language: "Ngôn ngữ",
     logout: "Đăng xuất",
     profile: "Hồ sơ",
+    viewingAs: "Đang xem với vai trò",
+  },
+  roleName: {
+    Admin: "Quản trị viên",
+    Staff: "Cán bộ",
+    Faculty: "Giảng viên",
+    ReviewCommittee: "Hội đồng",
   },
   auth: {
     signIn: "Đăng nhập",
