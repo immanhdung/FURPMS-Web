@@ -12,7 +12,7 @@ import { getCycleColumns } from "@/features/admin/cycles/columns";
 import { CycleFormSheet } from "@/features/admin/cycles/CycleFormSheet";
 import { CycleDetailSheet } from "@/features/admin/cycles/CycleDetailSheet";
 import { TracksTabContent } from "@/features/staff/tracks/TracksTabContent";
-import { TrackFormSheet } from "@/features/staff/tracks/TrackFormSheet";
+import { ManageCycleFieldsDialog } from "@/features/admin/cycles/ManageCycleFieldsDialog";
 import { sortByIdDesc } from "@/utils/sort";
 import type { Cycle } from "@/types/cycle";
 
@@ -107,11 +107,10 @@ export function CyclesPage() {
         cycleId={detailCycleId}
       />
 
-      <TrackFormSheet
+      <ManageCycleFieldsDialog
         open={Boolean(addingFieldToCycle)}
         onOpenChange={(open) => !open && setAddingFieldToCycle(null)}
-        track={null}
-        fixedCycleId={addingFieldToCycle?.id}
+        cycle={addingFieldToCycle}
       />
 
       <ConfirmDialog

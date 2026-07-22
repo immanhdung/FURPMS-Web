@@ -1,15 +1,12 @@
 import type { UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Controller } from "react-hook-form";
-import { motion } from "motion/react";
-import { Check } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCyclesQuery } from "@/hooks/useCycles";
 import { useTracksByCycleQuery } from "@/hooks/useTracks";
 import { useResearchTypesQuery } from "@/hooks/useResearchTypes";
 import { CYCLE_STATUS } from "@/constants/statuses";
-import { cn } from "@/lib/utils";
 import type { ProposalWizardValues } from "@/features/pi/proposals/wizard/proposal-wizard.schema";
 
 export function Step1CycleFieldType({ form }: { form: UseFormReturn<ProposalWizardValues> }) {
@@ -22,11 +19,14 @@ export function Step1CycleFieldType({ form }: { form: UseFormReturn<ProposalWiza
   } = form;
   const { data: cycles, isLoading: isCyclesLoading } = useCyclesQuery();
   const selectedCycleId = watch("cycleId");
-  // Fields scoped to the chosen cycle — avoids offering fields not opened for this cycle.
   const { data: tracks, isLoading: isTracksLoading } = useTracksByCycleQuery(selectedCycleId || undefined);
-  const { data: researchTypes, isLoading: isTypesLoading } = useResearchTypesQuery();
+  const { data: researchTypes } = useResearchTypesQuery();
 
   const openCycles = (cycles ?? []).filter((c) => c.status?.toUpperCase() === CYCLE_STATUS.OPEN);
+  const typeName = (id?: number) => researchTypes?.find((rt) => rt.id === id)?.name;
+  // Loại đề tài do ĐỢT quy định (rule #7: 1 đợt = 1 loại) — không cho PI chọn.
+  const selectedCycle = openCycles.find((c) => c.id === selectedCycleId);
+  const selectedType = researchTypes?.find((rt) => rt.id === selectedCycle?.researchTypeId);
 
   return (
     <div className="space-y-5">
@@ -39,8 +39,12 @@ export function Step1CycleFieldType({ form }: { form: UseFormReturn<ProposalWiza
             <Select
               value={field.value ? field.value.toString() : undefined}
               onValueChange={(value) => {
-                field.onChange(Number(value));
+                const id = Number(value);
+                field.onChange(id);
                 setValue("trackId", ""); // fields differ per cycle — clear the previous choice
+                // Loại đề tài suy TỪ ĐỢT.
+                const cycle = openCycles.find((c) => c.id === id);
+                setValue("researchType", cycle?.researchTypeId ?? 0);
               }}
               disabled={isCyclesLoading}
             >
@@ -50,7 +54,7 @@ export function Step1CycleFieldType({ form }: { form: UseFormReturn<ProposalWiza
               <SelectContent>
                 {openCycles.map((cycle) => (
                   <SelectItem key={cycle.id} value={cycle.id.toString()}>
-                    {cycle.name} ({cycle.academicYear})
+                    {cycle.name} ({cycle.academicYear}){typeName(cycle.researchTypeId) ? ` · ${typeName(cycle.researchTypeId)}` : ""}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -93,56 +97,25 @@ export function Step1CycleFieldType({ form }: { form: UseFormReturn<ProposalWiza
         )}
       </div>
 
+      {/* Loại đề tài — READ-ONLY, do đợt quy định (không cho PI chọn) */}
       <div>
         <label className="mb-1.5 block text-sm font-medium text-foreground">{t("wizard.step1.type")}</label>
-        <Controller
-          control={control}
-          name="researchType"
-          render={({ field }) => (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {researchTypes?.map((type, index) => {
-                const isSelected = field.value === type.id;
-                return (
-                  <motion.div
-                    key={type.id}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.15, delay: index * 0.05 }}
-                  >
-                    <Card
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => field.onChange(type.id)}
-                      onKeyDown={(e) => e.key === "Enter" && field.onChange(type.id)}
-                      className={cn(
-                        "cursor-pointer transition-colors",
-                        isSelected ? "border-primary ring-1 ring-primary" : "hover:border-primary/40"
-                      )}
-                    >
-                      <CardContent className="flex items-start justify-between gap-2 p-4">
-                        <div>
-                          <p className="text-sm font-medium text-foreground">{type.name}</p>
-                          <p className="mt-1 text-xs text-muted-foreground">
-                            {type.requireOrderingUnit
-                              ? t("wizard.step1.appliedHint")
-                              : t("wizard.step1.basicHint")}
-                          </p>
-                        </div>
-                        {isSelected && (
-                          <div className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                            <Check className="size-3" />
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                );
-              })}
-            </div>
-          )}
-        />
+        {selectedType ? (
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-sm font-medium text-foreground">{selectedType.name}</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {selectedType.requireOrderingUnit ? t("wizard.step1.appliedHint") : t("wizard.step1.basicHint")}
+              </p>
+              <p className="mt-2 text-xs text-muted-foreground">{t("wizard.step1.typeAuto")}</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <p className="rounded-lg border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground">
+            {t("wizard.step1.chooseCycleForType")}
+          </p>
+        )}
         {errors.researchType && <p className="mt-1 text-xs text-destructive">{errors.researchType.message}</p>}
-        {isTypesLoading && <p className="mt-1 text-xs text-muted-foreground">{t("wizard.step1.loadingTypes")}</p>}
       </div>
     </div>
   );

@@ -2,16 +2,17 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Filter, Gavel, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { PageLoader } from "@/components/shared/PageLoader";
+import { cn } from "@/lib/utils";
 import { useCyclesQuery } from "@/hooks/useCycles";
 import { useTracksByCycleQuery } from "@/hooks/useTracks";
 import { useReviewBoardQuery } from "@/hooks/useReviewBoard";
-import { RoundCard } from "@/features/staff/review-board/RoundCard";
+import { RoundCouncilsPanel } from "@/features/staff/review-board/RoundCouncilsPanel";
+import { RoundProposalsPanel } from "@/features/staff/review-board/RoundProposalsPanel";
 import { CreateRoundSheet } from "@/features/staff/review-board/CreateRoundSheet";
 
 export function ReviewBoardPage() {
@@ -19,19 +20,23 @@ export function ReviewBoardPage() {
   const { data: cycles } = useCyclesQuery();
   const [cycleId, setCycleId] = useState<number | undefined>();
   const [trackId, setTrackId] = useState<number | undefined>();
+  const [selectedRoundId, setSelectedRoundId] = useState<string | null>(null);
   const [createRoundOpen, setCreateRoundOpen] = useState(false);
 
   const { data: tracks } = useTracksByCycleQuery(cycleId);
   const { data: board, isLoading, isError, refetch, isRefetching } = useReviewBoardQuery(cycleId, trackId);
 
-  // Vòng sắp theo dimension (SCIENCE trước FINANCE) rồi số vòng.
-  const sortedRounds = useMemo(() => {
-    return [...(board?.rounds ?? [])].sort((a, b) => {
-      if (a.dimension !== b.dimension) return a.dimension === "SCIENCE" ? -1 : 1;
-      return a.roundNumber - b.roundNumber;
-    });
-  }, [board]);
+  const sortedRounds = useMemo(
+    () =>
+      [...(board?.rounds ?? [])].sort((a, b) => {
+        if (a.dimension !== b.dimension) return a.dimension === "SCIENCE" ? -1 : 1;
+        return a.roundNumber - b.roundNumber;
+      }),
+    [board]
+  );
 
+  // Vòng đang chọn: theo selectedRoundId nếu còn hợp lệ, không thì vòng đầu.
+  const selectedRound = sortedRounds.find((r) => r.id === selectedRoundId) ?? sortedRounds[0];
   const ready = Boolean(cycleId) && Boolean(trackId);
 
   return (
@@ -49,6 +54,7 @@ export function ReviewBoardPage() {
           onValueChange={(v) => {
             setCycleId(Number(v));
             setTrackId(undefined);
+            setSelectedRoundId(null);
           }}
         >
           <SelectTrigger className="w-56">
@@ -63,7 +69,14 @@ export function ReviewBoardPage() {
           </SelectContent>
         </Select>
 
-        <Select value={trackId?.toString()} onValueChange={(v) => setTrackId(Number(v))} disabled={!cycleId}>
+        <Select
+          value={trackId?.toString()}
+          onValueChange={(v) => {
+            setTrackId(Number(v));
+            setSelectedRoundId(null);
+          }}
+          disabled={!cycleId}
+        >
           <SelectTrigger className="w-56">
             <SelectValue placeholder={t("reviewBoard.selectTrack")} />
           </SelectTrigger>
@@ -75,13 +88,6 @@ export function ReviewBoardPage() {
             ))}
           </SelectContent>
         </Select>
-
-        {ready && (
-          <Button className="ml-auto" onClick={() => setCreateRoundOpen(true)}>
-            <Plus />
-            {t("reviewBoard.newRound")}
-          </Button>
-        )}
       </div>
 
       {!ready ? (
@@ -92,42 +98,56 @@ export function ReviewBoardPage() {
         <PageLoader label={t("reviewBoard.loading")} />
       ) : (
         <>
-          {/* Đề tài trong lĩnh vực */}
-          <Card>
-            <CardContent className="p-4">
-              <p className="mb-2 text-sm font-medium text-foreground">
-                {t("reviewBoard.projectsInTrack", { count: board?.projects.length ?? 0 })}
-              </p>
-              {(board?.projects.length ?? 0) === 0 ? (
-                <p className="text-xs text-muted-foreground">{t("reviewBoard.noTrackProjects")}</p>
-              ) : (
-                <ul className="flex flex-wrap gap-2">
-                  {board?.projects.map((p) => (
-                    <li key={p.projectId} className="flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1 text-sm">
-                      <span className="max-w-56 truncate text-foreground">{p.titleVi}</span>
-                      <StatusBadge status={p.projectStatus} />
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </CardContent>
-          </Card>
+          {/* Thanh vòng */}
+          <div className="flex flex-wrap items-center gap-2">
+            {sortedRounds.map((round) => (
+              <button
+                key={round.id}
+                type="button"
+                onClick={() => setSelectedRoundId(round.id)}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition-colors",
+                  selectedRound?.id === round.id
+                    ? "border-primary bg-primary/5 text-foreground"
+                    : "border-border text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <span className="font-medium">{t("staff.round", { num: round.roundNumber })}</span>
+                <span className="text-xs">{t(`reviewBoard.dim.${round.dimension}`)}</span>
+                {round.status && <StatusBadge status={round.status} />}
+              </button>
+            ))}
+            <Button size="sm" variant="outline" className="gap-1" onClick={() => setCreateRoundOpen(true)}>
+              <Plus className="size-3.5" />
+              {t("reviewBoard.newRound")}
+            </Button>
+          </div>
 
-          {/* Danh sách vòng */}
-          {sortedRounds.length === 0 ? (
+          {/* Vòng đang chọn: 2 cột */}
+          {!selectedRound ? (
             <EmptyState icon={Gavel} title={t("reviewBoard.noRounds")} description={t("reviewBoard.noRoundsDesc")} />
           ) : (
-            <div className="space-y-3">
-              {sortedRounds.map((round) => (
-                <RoundCard
-                  key={round.id}
-                  round={round}
+            <>
+              <div className="flex flex-wrap items-center gap-2 rounded-lg bg-muted/40 px-3 py-2">
+                <span className="text-sm font-semibold text-foreground">
+                  {t("staff.round", { num: selectedRound.roundNumber })}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {t(`reviewBoard.dim.${selectedRound.dimension}`)} · {t(`reviewBoard.type.${selectedRound.roundType}`)}
+                </span>
+                {selectedRound.status && <StatusBadge status={selectedRound.status} />}
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                <RoundCouncilsPanel round={selectedRound} cycleId={cycleId as number} trackId={trackId as number} />
+                <RoundProposalsPanel
+                  round={selectedRound}
                   cycleId={cycleId as number}
                   trackId={trackId as number}
                   trackProjects={board?.projects ?? []}
                 />
-              ))}
-            </div>
+              </div>
+            </>
           )}
         </>
       )}

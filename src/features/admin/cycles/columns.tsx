@@ -63,9 +63,10 @@ export function getCycleColumns({
         const cycle = row.original;
         const status = cycle.status?.toUpperCase();
         const extraActions: RowAction[] = [
-          { label: t("staff.addField"), icon: FolderPlus, onSelect: () => onAddField(cycle) },
+          { label: t("cycles.manageFields"), icon: FolderPlus, onSelect: () => onAddField(cycle) },
         ];
-        if (status !== CYCLE_STATUS.OPEN && status !== CYCLE_STATUS.CLOSED) {
+        // Cho MỞ đợt khi chưa mở (PENDING) hoặc đã đóng (CLOSED — mở lại nếu lỡ đóng nhầm).
+        if (status !== CYCLE_STATUS.OPEN) {
           extraActions.push({ label: t("cycles.openCycle"), icon: Unlock, onSelect: () => onOpen(cycle) });
         }
         if (status === CYCLE_STATUS.OPEN) {

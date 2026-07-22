@@ -4,59 +4,54 @@ import { Plus, X } from "lucide-react";
 import { toast } from "sonner";
 import { FormSheet } from "@/components/shared/FormSheet";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useUsersQuery } from "@/hooks/useUsers";
 import { useCreateCouncilPackageMutation } from "@/hooks/useReviewBoard";
 import type { CouncilPackageMember } from "@/types/review-board";
-import type { ReviewBoardRound } from "@/types/review-board";
 
-// Chuỗi role KHỚP CHÍNH XÁC với BE (CreateCouncilPackageAsync check "Chair"/"Secretary").
-// Lưu ý: KHÔNG dùng COUNCIL_MEMBER_ROLE (giá trị "Chairman") — BE sẽ 400.
+// Chuỗi role KHỚP CHÍNH XÁC với BE (check "Chair"/"Secretary") — KHÔNG dùng "Chairman".
 const ROLES = ["Chair", "Secretary", "Member", "Opponent"];
 
-interface CreateCouncilPackageSheetProps {
+interface CreateCouncilSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   cycleId: number;
   trackId: number;
-  round: ReviewBoardRound;
+  roundId: string;
+  roundNumber: number;
 }
 
-type MemberRow = CouncilPackageMember;
+const emptyRow = (): CouncilPackageMember => ({ userId: "", memberRole: "Member", isExternal: false });
 
-const emptyRow = (): MemberRow => ({ userId: "", memberRole: "Member", isExternal: false });
-
-export function CreateCouncilPackageSheet({ open, onOpenChange, cycleId, trackId, round }: CreateCouncilPackageSheetProps) {
+/**
+ * Tạo hội đồng CHỈ với thành viên (không gán đề tài). Đề tài gán sau qua dropdown ở cột đề tài.
+ * BE nhận projectIds rỗng (đã nới rule).
+ */
+export function CreateCouncilSheet({ open, onOpenChange, cycleId, trackId, roundId, roundNumber }: CreateCouncilSheetProps) {
   const { t } = useTranslation();
   const { data: users } = useUsersQuery();
   const createMutation = useCreateCouncilPackageMutation(cycleId, trackId);
 
-  const [projectIds, setProjectIds] = useState<string[]>(() => round.projects.map((p) => p.projectId));
-  const [rows, setRows] = useState<MemberRow[]>(() => [
+  const [rows, setRows] = useState<CouncilPackageMember[]>(() => [
     { userId: "", memberRole: "Chair", isExternal: false },
     { userId: "", memberRole: "Secretary", isExternal: false },
     { userId: "", memberRole: "Member", isExternal: false },
   ]);
 
-  const toggleProject = (id: string, checked: boolean) =>
-    setProjectIds((prev) => (checked ? [...prev, id] : prev.filter((p) => p !== id)));
-
-  const updateRow = (index: number, patch: Partial<MemberRow>) =>
+  const updateRow = (index: number, patch: Partial<CouncilPackageMember>) =>
     setRows((prev) => prev.map((r, i) => (i === index ? { ...r, ...patch } : r)));
 
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
     const members = rows.filter((r) => r.userId);
-    if (projectIds.length === 0) return toast.error(t("reviewBoard.needProject"));
     if (members.length === 0) return toast.error(t("reviewBoard.needMember"));
     const hasChair = members.some((m) => m.memberRole.toLowerCase() === "chair");
     const hasSecretary = members.some((m) => m.memberRole.toLowerCase() === "secretary");
     if (!hasChair || !hasSecretary) return toast.error(t("reviewBoard.needChairSecretary"));
 
     createMutation.mutate(
-      { roundId: round.id, payload: { projectIds, members } },
-      { onSuccess: () => onOpenChange(false) }
+      { roundId, payload: { projectIds: [], members } },
+      { onSuccess: () => { setRows([emptyRow()]); onOpenChange(false); } }
     );
   };
 
@@ -65,31 +60,12 @@ export function CreateCouncilPackageSheet({ open, onOpenChange, cycleId, trackId
       open={open}
       onOpenChange={onOpenChange}
       title={t("reviewBoard.createCouncilTitle")}
-      description={t("reviewBoard.createCouncilDesc", { num: round.roundNumber })}
-      formId="create-council-package-form"
+      description={t("reviewBoard.createCouncilDesc", { num: roundNumber })}
+      formId="create-council-form"
       onSubmit={handleSubmit}
       isSubmitting={createMutation.isPending}
       submitLabel={t("reviewBoard.createCouncil")}
     >
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("reviewBoard.councilProjects")}</label>
-        <div className="space-y-1.5 rounded-lg border border-border p-2.5">
-          {round.projects.length === 0 ? (
-            <p className="text-xs text-muted-foreground">{t("reviewBoard.noProjectsInRound")}</p>
-          ) : (
-            round.projects.map((p) => (
-              <label key={p.projectId} className="flex items-center gap-2 text-sm text-foreground">
-                <Checkbox
-                  checked={projectIds.includes(p.projectId)}
-                  onCheckedChange={(c) => toggleProject(p.projectId, Boolean(c))}
-                />
-                <span className="truncate">{p.titleVi}</span>
-              </label>
-            ))
-          )}
-        </div>
-      </div>
-
       <div>
         <div className="mb-1.5 flex items-center justify-between">
           <label className="block text-sm font-medium text-foreground">{t("reviewBoard.councilMembers")}</label>

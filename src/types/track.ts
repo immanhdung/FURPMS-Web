@@ -15,4 +15,5 @@ export interface CreateTrackPayload {
 export interface UpdateTrackPayload {
   name?: string;
   description?: string;
+  ownerId?: string | null;
 }

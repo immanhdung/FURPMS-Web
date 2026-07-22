@@ -96,3 +96,29 @@ export function useCreateCouncilPackageMutation(cycleId?: number, trackId?: numb
     onError: (error: ApiError) => toast.error(error.message || "Không tạo được hội đồng."),
   });
 }
+
+export function useAssignProjectToCouncilMutation(cycleId?: number, trackId?: number) {
+  const invalidate = useInvalidateBoard(cycleId, trackId);
+  return useMutation({
+    mutationFn: ({ councilId, projectId }: { councilId: string; projectId: string }) =>
+      reviewBoardService.assignProjectToCouncil(councilId, projectId),
+    onSuccess: () => {
+      toast.success("Đã gán đề tài vào hội đồng.");
+      invalidate();
+    },
+    onError: (error: ApiError) => toast.error(error.message || "Không gán được đề tài."),
+  });
+}
+
+export function useRemoveProjectFromCouncilMutation(cycleId?: number, trackId?: number) {
+  const invalidate = useInvalidateBoard(cycleId, trackId);
+  return useMutation({
+    mutationFn: ({ councilId, projectId }: { councilId: string; projectId: string }) =>
+      reviewBoardService.removeProjectFromCouncil(councilId, projectId),
+    onSuccess: () => {
+      toast.success("Đã gỡ đề tài khỏi hội đồng.");
+      invalidate();
+    },
+    onError: (error: ApiError) => toast.error(error.message || "Không gỡ được đề tài."),
+  });
+}
