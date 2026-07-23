@@ -796,6 +796,7 @@ export const vi = {
   },
   contract: {
     tabs: {
+      timeline: "Tiến trình",
       disbursements: "Giải ngân",
       deliverables: "Sản phẩm",
       progressReports: "Báo cáo tiến độ",
@@ -803,6 +804,13 @@ export const vi = {
       amendments: "Điều chỉnh",
       settlement: "Quyết toán",
     },
+    timelineSign: "Ký hợp đồng",
+    timelineDisb: "Giải ngân đợt {{n}}",
+    timelineEnd: "Kết thúc hợp đồng",
+    mReady: "Đủ điều kiện giải ngân",
+    mDisbursed: "Đã giải ngân",
+    mWaiting: "Chờ đủ điều kiện",
+    mNoDate: "Chưa có ngày",
     signContract: "Ký hợp đồng",
     createTitle: "Tạo hợp đồng",
     createHint: "Lập hợp đồng nghiên cứu cho đề tài đã duyệt.",

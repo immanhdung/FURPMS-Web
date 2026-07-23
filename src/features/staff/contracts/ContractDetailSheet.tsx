@@ -8,6 +8,7 @@ import { PageLoader } from "@/components/shared/PageLoader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useContractQuery, useSignContractMutation } from "@/hooks/useContracts";
 import { useProposalQuery } from "@/hooks/useProposals";
+import { ContractMilestoneTimeline } from "@/features/staff/contracts/ContractMilestoneTimeline";
 import { ProgressReportsPanel } from "@/features/staff/contracts/ProgressReportsPanel";
 import { DisbursementsPanel } from "@/features/staff/contracts/DisbursementsPanel";
 import { DeliverablesPanel } from "@/features/staff/contracts/DeliverablesPanel";
@@ -88,8 +89,9 @@ export function ContractDetailSheet({ open, onOpenChange, contractId }: Contract
               </Button>
 
               {/* Thứ tự tab theo đúng dòng đời hợp đồng: tiền → sản phẩm → báo cáo → tổng kết → điều chỉnh → chốt sổ */}
-              <Tabs defaultValue="disbursements">
+              <Tabs defaultValue="timeline">
                 <TabsList className="flex-wrap">
+                  <TabsTrigger value="timeline">{t("contract.tabs.timeline")}</TabsTrigger>
                   <TabsTrigger value="disbursements">{t("contract.tabs.disbursements")}</TabsTrigger>
                   <TabsTrigger value="deliverables">{t("contract.tabs.deliverables")}</TabsTrigger>
                   <TabsTrigger value="progress">{t("contract.tabs.progressReports")}</TabsTrigger>
@@ -97,6 +99,9 @@ export function ContractDetailSheet({ open, onOpenChange, contractId }: Contract
                   <TabsTrigger value="amendments">{t("contract.tabs.amendments")}</TabsTrigger>
                   <TabsTrigger value="settlement">{t("contract.tabs.settlement")}</TabsTrigger>
                 </TabsList>
+                <TabsContent value="timeline">
+                  <ContractMilestoneTimeline contract={contract} />
+                </TabsContent>
                 <TabsContent value="disbursements">
                   <DisbursementsPanel contractId={contract.id} canManage={canManage} />
                 </TabsContent>

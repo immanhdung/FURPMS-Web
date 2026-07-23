@@ -793,6 +793,7 @@ export const en = {
   },
   contract: {
     tabs: {
+      timeline: "Timeline",
       disbursements: "Disbursements",
       deliverables: "Deliverables",
       progressReports: "Progress Reports",
@@ -800,6 +801,13 @@ export const en = {
       amendments: "Amendments",
       settlement: "Settlement",
     },
+    timelineSign: "Contract signed",
+    timelineDisb: "Disbursement #{{n}}",
+    timelineEnd: "Contract end",
+    mReady: "Eligible for disbursement",
+    mDisbursed: "Disbursed",
+    mWaiting: "Awaiting eligibility",
+    mNoDate: "No date yet",
     signContract: "Sign contract",
     createTitle: "Create Contract",
     createHint: "Set up a research contract for an approved proposal.",
