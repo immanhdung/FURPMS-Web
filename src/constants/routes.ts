@@ -36,6 +36,10 @@ export const ROUTES = {
   ASSIGNED_REVIEWS: "/assigned-reviews",
   SCORING: "/scoring",
   COUNCIL_MEMBERSHIPS: "/council-memberships",
+
+  // New feature routes
+  CHANGE_REQUESTS: "/change-requests",
+  DOCUMENTS: "/documents",
 } as const;
 
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];

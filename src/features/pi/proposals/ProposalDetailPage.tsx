@@ -18,8 +18,11 @@ import { AiSummaryCard } from "@/features/pi/proposals/AiSummaryCard";
 import { AiFeedbackCard } from "@/features/pi/proposals/AiFeedbackCard";
 import { ExpectedProductsCard } from "@/features/pi/proposals/ExpectedProductsCard";
 import { ProposalDocumentsCard } from "@/features/pi/proposals/ProposalDocumentsCard";
+import { ChangeRequestsPanel } from "@/features/pi/proposals/ChangeRequestsPanel";
+import { ProposalExportMenu, makeSlug } from "@/features/pi/proposals/ProposalExportMenu";
 import { PROPOSAL_STATUS } from "@/constants/statuses";
 import { ROUTES } from "@/constants/routes";
+
 
 export function ProposalDetailPage() {
   const { proposalId } = useParams<{ proposalId: string }>();
@@ -82,6 +85,13 @@ export function ProposalDetailPage() {
               {t("proposal.withdraw")}
             </Button>
           )}
+          {/* Export — only useful after the proposal has content worth exporting */}
+          {!isDraft && (
+            <ProposalExportMenu
+              proposalId={proposal.id}
+              titleSlug={makeSlug(proposal.titleVI || proposal.titleEN || proposal.id)}
+            />
+          )}
         </div>
       </div>
 
@@ -105,6 +115,14 @@ export function ProposalDetailPage() {
         <AiSummaryCard proposalId={proposal.id} />
         <AiFeedbackCard proposalId={proposal.id} />
       </div>
+
+      {/* Yêu cầu thay đổi — chỉ hiển thị sau khi đã nộp đề xuất (không còn nháp). */}
+      {!isDraft && (
+        <ChangeRequestsPanel
+          proposalId={proposal.id}
+          editable={canWithdraw}
+        />
+      )}
 
       <SubmitProposalDialog open={submitOpen} onOpenChange={setSubmitOpen} proposalId={proposal.id} />
 

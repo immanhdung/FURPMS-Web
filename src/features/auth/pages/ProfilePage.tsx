@@ -6,10 +6,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import { PageLoader } from "@/components/shared/PageLoader";
 import { useAuthStore } from "@/store/auth.store";
 import { formatDateTime } from "@/utils/format";
 import { ROUTES } from "@/constants/routes";
+import { lazy, Suspense } from "react";
 
 function initials(name: string) {
   return name
@@ -19,6 +21,11 @@ function initials(name: string) {
     .join("")
     .toUpperCase();
 }
+
+// Lazy-loaded to keep form code out of the main bundle for users who never open Profile
+const AcademicProfileCard = lazy(() =>
+  import("@/features/auth/pages/AcademicProfileCard").then((m) => ({ default: m.AcademicProfileCard }))
+);
 
 export function ProfilePage() {
   const { t } = useTranslation();
@@ -90,6 +97,11 @@ export function ProfilePage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Academic Profile — all users can fill their scientific CV */}
+      <Suspense fallback={<Skeleton className="h-48 w-full rounded-xl" />}>
+        <AcademicProfileCard userId={user.id} />
+      </Suspense>
     </div>
   );
 }
