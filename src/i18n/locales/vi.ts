@@ -847,6 +847,12 @@ export const vi = {
       evidence: "Minh chứng (hợp đồng/chứng từ)",
       uploadEvidence: "Tải minh chứng",
       noEvidence: "Chưa có minh chứng.",
+      evidenceNote: "Hệ thống chỉ theo dõi mốc + minh chứng, không quản lý tiền.",
+      disbursedOn: "Đã giải ngân {{date}}",
+      markDisbursed: "Đánh dấu đã giải ngân",
+      markTitle: "Đánh dấu đã giải ngân — đợt {{n}}",
+      markDesc: "Kế toán chi tiền ngoài hệ thống. Ở đây chỉ ghi nhận trạng thái đã giải ngân.",
+      markEvidenceHint: "Đính kèm file chứng từ ở mục \"Minh chứng\" của đợt này.",
       paidOn: "Đã chi {{amount}} ngày {{date}}",
       ref: "Mã GD:",
       // dialog xac nhan chi

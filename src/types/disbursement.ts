@@ -21,10 +21,10 @@ export interface Disbursement {
   deliverableId?: number | null;
 }
 
-/** Rule #3: tiền KHÔNG bao giờ tự chuyển — Staff xác nhận tay sau khi đã chi thật. */
+/** Rule tuần 10: hệ thống không quản tiền — Staff chỉ "đánh dấu đã giải ngân" (kèm ghi chú/minh chứng). */
 export interface ConfirmDisbursementPayload {
-  actualAmount: number;
-  bankReference: string;
+  actualAmount?: number;
+  bankReference?: string;
   notes?: string;
 }
 

@@ -9,7 +9,7 @@ import { useDisbursementsQuery, useGenerateDisbursementsMutation } from "@/hooks
 import { ConfirmDisbursementDialog } from "@/features/staff/contracts/ConfirmDisbursementDialog";
 import { DisbursementEvidence } from "@/features/staff/contracts/DisbursementEvidence";
 import { DISBURSEMENT_STATUS, type Disbursement } from "@/types/disbursement";
-import { formatCurrency, formatDate } from "@/utils/format";
+import { formatDate } from "@/utils/format";
 
 /**
  * Lịch giải ngân của hợp đồng.
@@ -55,17 +55,11 @@ export function DisbursementsPanel({ contractId, canManage }: { contractId: stri
     );
   }
 
-  const totalPlanned = disbursements.reduce((sum, d) => sum + (d.plannedAmount ?? 0), 0);
-  const totalPaid = disbursements.reduce((sum, d) => sum + (d.actualAmount ?? 0), 0);
-
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2.5 text-sm">
-        <span className="text-muted-foreground">
-          {t("contract.disbursement.paid")} <span className="font-medium text-foreground">{formatCurrency(totalPaid)}</span> {t("contract.disbursement.of")}{" "}
-          <span className="font-medium text-foreground">{formatCurrency(totalPlanned)}</span>
-        </span>
-        <span className="text-xs text-muted-foreground">
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2.5 text-xs text-muted-foreground">
+        <span>{t("contract.disbursement.evidenceNote")}</span>
+        <span>
           {disbursements.filter((d) => d.status === DISBURSEMENT_STATUS.DISBURSED).length}/{disbursements.length} {t("contract.disbursement.tranches")}
         </span>
       </div>
@@ -79,8 +73,7 @@ export function DisbursementsPanel({ contractId, canManage }: { contractId: stri
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div>
                 <p className="text-sm font-medium text-foreground">
-                  {t("contract.disbursement.tranche")} {d.roundNumber} · {formatCurrency(d.plannedAmount)}{" "}
-                  <span className="text-muted-foreground">({d.percentage}%)</span>
+                  {t("contract.disbursement.tranche")} {d.roundNumber}
                 </p>
                 <p className="mt-0.5 text-xs text-muted-foreground">{d.conditionDescription}</p>
               </div>
@@ -91,7 +84,7 @@ export function DisbursementsPanel({ contractId, canManage }: { contractId: stri
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                 <span className="inline-flex items-center gap-1 text-success">
                   <CircleCheck className="size-3" />
-                  {t("contract.disbursement.paidOn", { amount: formatCurrency(d.actualAmount ?? 0), date: formatDate(d.disbursedAt) })}
+                  {t("contract.disbursement.disbursedOn", { date: formatDate(d.disbursedAt) })}
                 </span>
                 {d.bankReference && <span>{t("contract.disbursement.ref")} {d.bankReference}</span>}
                 {d.notes && <span className="w-full">{d.notes}</span>}
@@ -107,7 +100,7 @@ export function DisbursementsPanel({ contractId, canManage }: { contractId: stri
                 {canManage && (
                   <Button size="sm" variant={isReady ? "default" : "outline"} onClick={() => setConfirming(d)}>
                     <BanknoteArrowUp />
-                    {t("contract.disbursement.confirmPayment")}
+                    {t("contract.disbursement.markDisbursed")}
                   </Button>
                 )}
               </div>
