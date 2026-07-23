@@ -23,4 +23,11 @@ export const proposalDocumentService = {
 
   downloadUrl: (proposalId: string, documentId: string) =>
     `/api/proposals/${proposalId}/documents/${documentId}/download`,
+
+  // Fetched through axios (not a plain <a href>) so the Authorization header is actually sent —
+  // needed to preview/open a document inline (e.g. embedding a PDF for reviewers to read).
+  downloadBlob: (proposalId: string, documentId: string) =>
+    axiosClient
+      .get<Blob>(`/proposals/${proposalId}/documents/${documentId}/download`, { responseType: "blob" })
+      .then((res) => res.data),
 };

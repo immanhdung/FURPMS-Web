@@ -6,9 +6,10 @@ import type { ApiError } from "@/types/common";
 export const axiosClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 15000,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  // No hardcoded Content-Type here — axios already sets "application/json" automatically for
+  // plain object bodies. A fixed default header was overriding that and breaking multipart
+  // FormData uploads (confirmed live: file uploads got 415 Unsupported Media Type because the
+  // request still carried "application/json" instead of the correct multipart boundary).
 });
 
 axiosClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {

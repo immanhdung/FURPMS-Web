@@ -149,3 +149,15 @@
     @apply font-sans;
     }
 }
+
+/*
+ * docx-preview centers each rendered page inside .docx-wrapper. When the page is wider than its
+ * container, browsers split that overflow evenly on both sides — so scrolling all the way left
+ * still doesn't reach the page's true left edge, clipping the first character(s) of every line.
+ * Left-aligning instead means overflow only happens on the right, where it belongs.
+ * !important because docx-preview injects its own <style> tag at runtime, after this stylesheet.
+ */
+.docx-preview-container .docx-wrapper {
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+}

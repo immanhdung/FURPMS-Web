@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useQueryClient } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -13,7 +14,10 @@ import { useProposalQuery, useCreateProposalMutation, useUpdateProposalMutation 
 import { useCyclesQuery } from "@/hooks/useCycles";
 import { useResearchTypesQuery } from "@/hooks/useResearchTypes";
 import { trackService } from "@/services/api/track.service";
+import { proposalDocumentService } from "@/services/api/proposal-document.service";
+import { queryKeys } from "@/services/queryKeys";
 import { CYCLE_STATUS } from "@/constants/statuses";
+import { DOCUMENT_TYPES } from "@/types/proposal-document";
 import { WizardStepper } from "@/features/pi/proposals/wizard/WizardStepper";
 import { Step1CycleFieldType } from "@/features/pi/proposals/wizard/Step1CycleFieldType";
 import { Step2ResearchContent } from "@/features/pi/proposals/wizard/Step2ResearchContent";
@@ -94,11 +98,15 @@ export function ProposalWizardPage() {
   const { data: existingProposal, isLoading: isLoadingExisting } = useProposalQuery(routeProposalId ?? null);
   const createMutation = useCreateProposalMutation();
   const updateMutation = useUpdateProposalMutation();
+  const queryClient = useQueryClient();
 
   const [proposalId, setProposalId] = useState<string | null>(routeProposalId ?? null);
   const [currentStep, setCurrentStep] = useState(0);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
+  // Tracks which File object has already been attached, so re-saving the draft doesn't
+  // re-upload the same file as a duplicate document every time.
+  const attachedFileRef = useRef<File | null>(null);
 
   const form = useForm<ProposalWizardValues>({
     resolver: zodResolver(proposalWizardSchema),
@@ -135,16 +143,33 @@ export function ProposalWizardPage() {
   const saveDraft = async (): Promise<string | null> => {
     const payload: ProposalPayload = form.getValues();
 
+    let id: string;
     if (proposalId) {
       const result = await updateMutation.mutateAsync({ id: proposalId, payload });
-      toast.success(t("wizard.draftSaved"));
-      return result.id;
+      id = result.id;
+    } else {
+      const result = await createMutation.mutateAsync(payload);
+      id = result.id;
+      setProposalId(id);
+    }
+    toast.success(t("wizard.draftSaved"));
+
+    // The file picked in Step 2 (for AI extraction/similarity check) was only ever used
+    // transiently for those API calls — it was never actually attached to the proposal, so
+    // reviewers had nothing to open. Attach it here once a proposal id exists to fix that,
+    // without re-uploading on every subsequent draft save.
+    if (uploadedFile && uploadedFile !== attachedFileRef.current) {
+      attachedFileRef.current = uploadedFile;
+      try {
+        await proposalDocumentService.upload(id, uploadedFile, DOCUMENT_TYPES[0]);
+        queryClient.invalidateQueries({ queryKey: queryKeys.proposalDocuments.list(id) });
+      } catch {
+        attachedFileRef.current = null;
+        toast.error(t("wizard.attachFailed"));
+      }
     }
 
-    const result = await createMutation.mutateAsync(payload);
-    setProposalId(result.id);
-    toast.success(t("wizard.draftSaved"));
-    return result.id;
+    return id;
   };
 
   const handleNext = async () => {
