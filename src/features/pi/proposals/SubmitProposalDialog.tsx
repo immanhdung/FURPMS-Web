@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 import {
   Dialog,
@@ -20,6 +21,7 @@ interface SubmitProposalDialogProps {
 }
 
 export function SubmitProposalDialog({ open, onOpenChange, proposalId, onSubmitted }: SubmitProposalDialogProps) {
+  const { t } = useTranslation();
   const [confirmCv, setConfirmCv] = useState(false);
   const submitMutation = useSubmitProposalMutation();
 
@@ -27,20 +29,20 @@ export function SubmitProposalDialog({ open, onOpenChange, proposalId, onSubmitt
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Submit proposal</DialogTitle>
+          <DialogTitle>{t("proposal.submitTitle")}</DialogTitle>
           <DialogDescription>
-            Once submitted, this proposal will move to review and can no longer be edited unless withdrawn.
+            {t("proposal.submitDesc")}
           </DialogDescription>
         </DialogHeader>
 
         <label className="flex items-start gap-2 text-sm text-foreground">
           <Checkbox checked={confirmCv} onCheckedChange={(checked) => setConfirmCv(Boolean(checked))} className="mt-0.5" />
-          I confirm that my CV and profile information are up to date.
+          {t("proposal.cvConfirm")}
         </label>
 
         <DialogFooter>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={submitMutation.isPending}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button
             type="button"
@@ -60,7 +62,7 @@ export function SubmitProposalDialog({ open, onOpenChange, proposalId, onSubmitt
             }
           >
             {submitMutation.isPending && <Loader2 className="animate-spin" />}
-            Submit proposal
+            {t("proposal.submitBtn")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -20,6 +20,7 @@ const ChangePasswordPage = lazy(() =>
   import("@/features/auth/pages/ChangePasswordPage").then((m) => ({ default: m.ChangePasswordPage }))
 );
 const ProfilePage = lazy(() => import("@/features/auth/pages/ProfilePage").then((m) => ({ default: m.ProfilePage })));
+const SettingsPage = lazy(() => import("@/features/settings/SettingsPage").then((m) => ({ default: m.SettingsPage })));
 const DashboardPage = lazy(() =>
   import("@/features/dashboard/pages/DashboardPage").then((m) => ({ default: m.DashboardPage }))
 );
@@ -56,11 +57,17 @@ const ProposalReviewWorkspace = lazy(() =>
     default: m.ProposalReviewWorkspace,
   }))
 );
+const ReviewBoardPage = lazy(() =>
+  import("@/features/staff/review-board/ReviewBoardPage").then((m) => ({ default: m.ReviewBoardPage }))
+);
 const CouncilsPage = lazy(() => import("@/features/staff/councils/CouncilsPage").then((m) => ({ default: m.CouncilsPage })));
 const AssignmentsPage = lazy(() =>
   import("@/features/staff/assignments/AssignmentsPage").then((m) => ({ default: m.AssignmentsPage }))
 );
 const MeetingsPage = lazy(() => import("@/features/staff/meetings/MeetingsPage").then((m) => ({ default: m.MeetingsPage })));
+const ContractsPage = lazy(() =>
+  import("@/features/staff/contracts/ContractsPage").then((m) => ({ default: m.ContractsPage }))
+);
 const MyProposalsPage = lazy(() =>
   import("@/features/pi/proposals/MyProposalsPage").then((m) => ({ default: m.MyProposalsPage }))
 );
@@ -91,6 +98,18 @@ const AnalyticsPage = lazy(() => import("@/features/analytics/AnalyticsPage").th
 const SemanticSearchPage = lazy(() =>
   import("@/features/pi/ai-search/SemanticSearchPage").then((m) => ({ default: m.SemanticSearchPage }))
 );
+const PiProgressReportsPage = lazy(() =>
+  import("@/features/pi/progress-reports/ProgressReportsPage").then((m) => ({ default: m.ProgressReportsPage }))
+);
+const PiFinalReportsPage = lazy(() =>
+  import("@/features/pi/final-reports/FinalReportsPage").then((m) => ({ default: m.FinalReportsPage }))
+);
+const PendingChangeRequestsPage = lazy(() =>
+  import("@/features/staff/proposal-reviews/PendingChangeRequestsPanel").then((m) => ({ default: m.PendingChangeRequestsPanel }))
+);
+const DocumentRepositoryPage = lazy(() =>
+  import("@/features/staff/documents/DocumentRepositoryPage").then((m) => ({ default: m.DocumentRepositoryPage }))
+);
 
 const FEATURE_PAGES: Partial<Record<string, ComponentType>> = {
   [ROUTES.NOTIFICATIONS]: NotificationsPage,
@@ -103,9 +122,11 @@ const FEATURE_PAGES: Partial<Record<string, ComponentType>> = {
   [ROUTES.ORGANIZATIONAL_UNITS]: OrganizationalUnitsPage,
   [ROUTES.RUBRIC_CRITERIA]: RubricCriteriaPage,
   [ROUTES.PROPOSAL_REVIEWS]: ProposalReviewsPage,
+  [ROUTES.REVIEW_BOARD]: ReviewBoardPage,
   [ROUTES.COUNCILS]: CouncilsPage,
   [ROUTES.ASSIGNMENTS]: AssignmentsPage,
   [ROUTES.MEETINGS]: MeetingsPage,
+  [ROUTES.CONTRACTS]: ContractsPage,
   [ROUTES.MY_PROPOSALS]: MyProposalsPage,
   [ROUTES.SUBMIT_PROPOSAL]: ProposalWizardPage,
   [ROUTES.INVITATIONS]: InvitationsPage,
@@ -114,6 +135,11 @@ const FEATURE_PAGES: Partial<Record<string, ComponentType>> = {
   [ROUTES.COUNCIL_MEMBERSHIPS]: CouncilMembershipsPage,
   [ROUTES.ANALYTICS]: AnalyticsPage,
   [ROUTES.AI_SEARCH]: SemanticSearchPage,
+  [ROUTES.SETTINGS]: SettingsPage,
+  [ROUTES.PROGRESS_REPORTS]: PiProgressReportsPage,
+  [ROUTES.FINAL_REPORTS]: PiFinalReportsPage,
+  [ROUTES.CHANGE_REQUESTS]: PendingChangeRequestsPage,
+  [ROUTES.DOCUMENTS]: DocumentRepositoryPage,
 };
 
 const proposalReviewsRoles = NAV_ITEMS.find((item) => item.path === ROUTES.PROPOSAL_REVIEWS)?.roles ?? [];

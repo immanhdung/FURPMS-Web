@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Loader2, Sparkles } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGenerateFeedbackMutation } from "@/hooks/useProposalAi";
 
 export function AiFeedbackCard({ proposalId }: { proposalId: string }) {
+  const { t } = useTranslation();
   const feedbackMutation = useGenerateFeedbackMutation();
 
   return (
@@ -14,7 +16,7 @@ export function AiFeedbackCard({ proposalId }: { proposalId: string }) {
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <Sparkles className="size-4 text-primary" />
-            <CardTitle className="text-sm">AI Feedback</CardTitle>
+            <CardTitle className="text-sm">{t("proposal.aiFeedback")}</CardTitle>
           </div>
           <Button
             variant="outline"
@@ -23,13 +25,13 @@ export function AiFeedbackCard({ proposalId }: { proposalId: string }) {
             disabled={feedbackMutation.isPending}
           >
             {feedbackMutation.isPending ? <Loader2 className="animate-spin" /> : <Sparkles />}
-            {feedbackMutation.data ? "Regenerate" : "Get feedback"}
+            {feedbackMutation.data ? t("proposal.regenerate") : t("proposal.getFeedback")}
           </Button>
         </div>
       </CardHeader>
       <CardContent>
         {!feedbackMutation.data && !feedbackMutation.isPending && (
-          <p className="text-xs text-muted-foreground">Get AI suggestions to strengthen this proposal before submitting.</p>
+          <p className="text-xs text-muted-foreground">{t("proposal.aiFeedbackDesc")}</p>
         )}
         {feedbackMutation.isPending && (
           <div className="space-y-2">

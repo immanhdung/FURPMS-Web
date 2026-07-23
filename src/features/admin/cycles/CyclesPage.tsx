@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/tables/DataTable";
@@ -11,9 +12,12 @@ import { getCycleColumns } from "@/features/admin/cycles/columns";
 import { CycleFormSheet } from "@/features/admin/cycles/CycleFormSheet";
 import { CycleDetailSheet } from "@/features/admin/cycles/CycleDetailSheet";
 import { TracksTabContent } from "@/features/staff/tracks/TracksTabContent";
+import { ManageCycleFieldsDialog } from "@/features/admin/cycles/ManageCycleFieldsDialog";
+import { sortByIdDesc } from "@/utils/sort";
 import type { Cycle } from "@/types/cycle";
 
 export function CyclesPage() {
+  const { t } = useTranslation();
   const { data, isLoading, isError, refetch, isRefetching } = useCyclesQuery();
   const { data: researchTypes } = useResearchTypesQuery();
   const openMutation = useOpenCycleMutation();
@@ -23,15 +27,18 @@ export function CyclesPage() {
   const [editingCycle, setEditingCycle] = useState<Cycle | null>(null);
   const [detailCycleId, setDetailCycleId] = useState<number | null>(null);
   const [closingCycle, setClosingCycle] = useState<Cycle | null>(null);
+  const [addingFieldToCycle, setAddingFieldToCycle] = useState<Cycle | null>(null);
 
   const researchTypeNames = useMemo(
     () => Object.fromEntries((researchTypes ?? []).map((rt) => [rt.id, rt.name])),
     [researchTypes]
   );
+  const sortedData = useMemo(() => sortByIdDesc(data), [data]);
 
   const columns = useMemo(
     () =>
       getCycleColumns({
+        t,
         researchTypeNames,
         onView: (cycle) => setDetailCycleId(cycle.id),
         onEdit: (cycle) => {
@@ -40,23 +47,24 @@ export function CyclesPage() {
         },
         onOpen: (cycle) => openMutation.mutate(cycle.id),
         onClose: (cycle) => setClosingCycle(cycle),
+        onAddField: (cycle) => setAddingFieldToCycle(cycle),
       }),
-    [researchTypeNames, openMutation]
+    [t, researchTypeNames, openMutation]
   );
 
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Research Cycles</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("cycles.title")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Manage submission windows, open/close cycles, and the research fields within them.
+          {t("cycles.subtitle")}
         </p>
       </div>
 
       <Tabs defaultValue="cycles">
         <TabsList>
-          <TabsTrigger value="cycles">Cycles</TabsTrigger>
-          <TabsTrigger value="fields">Research Fields</TabsTrigger>
+          <TabsTrigger value="cycles">{t("cycles.tabCycles")}</TabsTrigger>
+          <TabsTrigger value="fields">{t("cycles.tabFields")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="cycles" className="space-y-4">
@@ -68,7 +76,7 @@ export function CyclesPage() {
               }}
             >
               <Plus />
-              New cycle
+              {t("cycles.newBtn")}
             </Button>
           </div>
 
@@ -77,12 +85,12 @@ export function CyclesPage() {
           ) : (
             <DataTable
               columns={columns}
-              data={data ?? []}
+              data={sortedData}
               isLoading={isLoading}
-              searchPlaceholder="Search cycles..."
+              searchPlaceholder={t("cycles.searchPlaceholder")}
               exportFileName="research-cycles"
-              emptyTitle="No research cycles found"
-              emptyDescription="Create a cycle to open submissions for a research type."
+              emptyTitle={t("cycles.emptyTitle")}
+              emptyDescription={t("cycles.emptyDesc")}
             />
           )}
         </TabsContent>
@@ -99,13 +107,19 @@ export function CyclesPage() {
         cycleId={detailCycleId}
       />
 
+      <ManageCycleFieldsDialog
+        open={Boolean(addingFieldToCycle)}
+        onOpenChange={(open) => !open && setAddingFieldToCycle(null)}
+        cycle={addingFieldToCycle}
+      />
+
       <ConfirmDialog
         open={Boolean(closingCycle)}
         onOpenChange={(open) => !open && setClosingCycle(null)}
-        title="Close cycle"
-        description={`Are you sure you want to close "${closingCycle?.name}"? PIs will no longer be able to submit proposals for this cycle.`}
+        title={t("cycles.closeTitle")}
+        description={t("cycles.closeDesc", { name: closingCycle?.name ?? "" })}
         variant="destructive"
-        confirmLabel="Close cycle"
+        confirmLabel={t("cycles.closeBtn")}
         isLoading={closeMutation.isPending}
         onConfirm={() =>
           closingCycle &&

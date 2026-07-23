@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { Table } from "@tanstack/react-table";
 import { Download, SlidersHorizontal, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -22,9 +23,10 @@ interface DataTableToolbarProps<TData> {
 
 export function DataTableToolbar<TData>({
   table,
-  searchPlaceholder = "Search...",
+  searchPlaceholder,
   exportFileName = "export",
 }: DataTableToolbarProps<TData>) {
+  const { t } = useTranslation();
   const [searchInput, setSearchInput] = useState((table.getState().globalFilter as string) ?? "");
   const debouncedSearch = useDebouncedValue(searchInput, 250);
 
@@ -41,13 +43,13 @@ export function DataTableToolbar<TData>({
     <div className="flex items-center justify-between gap-2 pb-3">
       <div className="flex flex-1 items-center gap-2">
         <Input
-          placeholder={searchPlaceholder}
+          placeholder={searchPlaceholder ?? t("common.searchPlaceholder")}
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           className="h-8 max-w-xs"
         />
         {searchInput.length > 0 && (
-          <Button variant="ghost" size="icon-sm" aria-label="Clear search" onClick={() => setSearchInput("")}>
+          <Button variant="ghost" size="icon-sm" aria-label={t("common.clearSearch")} onClick={() => setSearchInput("")}>
             <X />
           </Button>
         )}
@@ -56,18 +58,18 @@ export function DataTableToolbar<TData>({
       <div className="flex items-center gap-2">
         <Button variant="outline" size="sm" onClick={handleExport}>
           <Download />
-          Export
+          {t("common.export")}
         </Button>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm">
               <SlidersHorizontal />
-              Columns
+              {t("common.columns")}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+            <DropdownMenuLabel>{t("common.toggleColumns")}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             {table
               .getAllColumns()

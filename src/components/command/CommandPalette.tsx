@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { KeyRound, LayoutDashboard, LogOut, Moon, Sun, User as UserIcon } from "lucide-react";
 import {
   CommandDialog,
@@ -24,6 +25,7 @@ export function CommandPalette() {
   const user = useAuthStore((state) => state.user);
   const navigate = useNavigate();
   const logout = useLogout();
+  const { t } = useTranslation();
 
   const navItems = useMemo(() => (user ? getNavItemsForRoles(user.roles) : []), [user]);
 
@@ -45,41 +47,41 @@ export function CommandPalette() {
 
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
-      <CommandInput placeholder="Search pages, actions..." />
+      <CommandInput placeholder={t("command.placeholder")} />
       <CommandList>
-        <CommandEmpty>No results found.</CommandEmpty>
+        <CommandEmpty>{t("command.noResults")}</CommandEmpty>
 
-        <CommandGroup heading="Navigate">
+        <CommandGroup heading={t("command.navigate")}>
           {navItems.map((item) => (
             <CommandItem key={item.path} onSelect={() => runCommand(() => navigate(item.path))}>
               <item.icon />
-              {item.label}
+              {t(item.labelKey)}
             </CommandItem>
           ))}
         </CommandGroup>
 
         <CommandSeparator />
 
-        <CommandGroup heading="Actions">
+        <CommandGroup heading={t("command.actions")}>
           <CommandItem onSelect={() => runCommand(() => setTheme(theme === "dark" ? "light" : "dark"))}>
             {theme === "dark" ? <Sun /> : <Moon />}
-            Toggle theme
+            {t("command.toggleTheme")}
           </CommandItem>
           <CommandItem onSelect={() => runCommand(() => navigate(ROUTES.DASHBOARD))}>
             <LayoutDashboard />
-            Go to dashboard
+            {t("command.goDashboard")}
           </CommandItem>
           <CommandItem onSelect={() => runCommand(() => navigate(ROUTES.PROFILE))}>
             <UserIcon />
-            View profile
+            {t("command.viewProfile")}
           </CommandItem>
           <CommandItem onSelect={() => runCommand(() => navigate(ROUTES.CHANGE_PASSWORD))}>
             <KeyRound />
-            Change password
+            {t("auth.changePassword")}
           </CommandItem>
           <CommandItem onSelect={() => runCommand(logout)}>
             <LogOut />
-            Sign out
+            {t("header.logout")}
           </CommandItem>
         </CommandGroup>
       </CommandList>

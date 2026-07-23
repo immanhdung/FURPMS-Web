@@ -17,10 +17,11 @@ export const proposalWizardSchema = z.object({
   researchType: z.number().min(1, "Select a research type"),
   orderId: z.number().optional(),
 
-  titleVI: z.string().optional(),
-  titleEN: z.string().min(1, "English title is required"),
-  abstractEN: z.string().min(1, "Abstract is required"),
-  objectives: z.string().optional(),
+  // Backend requires titleVI + objectives (CreateProposalRequest); titleEN/abstract are optional there.
+  titleVI: z.string().min(1, "Vietnamese title is required"),
+  titleEN: z.string().optional(),
+  abstractEN: z.string().optional(),
+  objectives: z.string().min(1, "Objectives are required"),
   methodology: z.string().optional(),
   expectedOutput: z.string().optional(),
   urgency: z.string().optional(),
@@ -39,15 +40,16 @@ export type ProposalWizardValues = z.infer<typeof proposalWizardSchema>;
 export const WIZARD_STEP_FIELDS: Record<number, (keyof ProposalWizardValues)[]> = {
   0: ["cycleId", "trackId", "researchType"],
   1: [],
-  2: ["titleEN", "abstractEN", "durationMonths"],
+  2: ["titleVI", "objectives", "durationMonths"],
   3: [],
   4: [],
 };
 
+// Nhãn dịch lúc render (t(titleKey)) vì đây là const cấp module, không gọi được hook.
 export const WIZARD_STEPS = [
-  { title: "Cycle & Field", description: "Choose where to submit" },
-  { title: "Research Content", description: "Upload & analyze" },
-  { title: "Proposal Details", description: "Describe your research" },
-  { title: "Team Members", description: "Add collaborators" },
-  { title: "Preview & Submit", description: "Review everything" },
+  { titleKey: "wizard.steps.cycle.title", descKey: "wizard.steps.cycle.desc" },
+  { titleKey: "wizard.steps.content.title", descKey: "wizard.steps.content.desc" },
+  { titleKey: "wizard.steps.details.title", descKey: "wizard.steps.details.desc" },
+  { titleKey: "wizard.steps.team.title", descKey: "wizard.steps.team.desc" },
+  { titleKey: "wizard.steps.preview.title", descKey: "wizard.steps.preview.desc" },
 ];

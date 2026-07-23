@@ -1,14 +1,17 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { KeyRound, Mail, ShieldCheck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import { PageLoader } from "@/components/shared/PageLoader";
 import { useAuthStore } from "@/store/auth.store";
 import { formatDateTime } from "@/utils/format";
 import { ROUTES } from "@/constants/routes";
+import { lazy, Suspense } from "react";
 
 function initials(name: string) {
   return name
@@ -19,18 +22,24 @@ function initials(name: string) {
     .toUpperCase();
 }
 
+// Lazy-loaded to keep form code out of the main bundle for users who never open Profile
+const AcademicProfileCard = lazy(() =>
+  import("@/features/auth/pages/AcademicProfileCard").then((m) => ({ default: m.AcademicProfileCard }))
+);
+
 export function ProfilePage() {
+  const { t } = useTranslation();
   const user = useAuthStore((state) => state.user);
 
   if (!user) {
-    return <PageLoader label="Loading your profile..." />;
+    return <PageLoader label={t("profile.loading")} />;
   }
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Profile</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Your account information within FURPMS.</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("profile.title")}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t("profile.subtitle")}</p>
       </div>
 
       <Card>
@@ -58,7 +67,7 @@ export function ProfilePage() {
           <Button asChild variant="outline" size="sm" className="shrink-0">
             <Link to={ROUTES.CHANGE_PASSWORD}>
               <KeyRound />
-              Change password
+              {t("auth.changePassword")}
             </Link>
           </Button>
         </CardContent>
@@ -71,23 +80,28 @@ export function ProfilePage() {
               <ShieldCheck className="size-4.5" />
             </div>
             <div>
-              <CardTitle>Account details</CardTitle>
-              <CardDescription>Read-only information managed by your administrator.</CardDescription>
+              <CardTitle>{t("profile.accountDetails")}</CardTitle>
+              <CardDescription>{t("profile.accountDetailsDesc")}</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Status</span>
-            <span className="font-medium text-foreground">{user.status ?? "Active"}</span>
+            <span className="text-muted-foreground">{t("profile.status")}</span>
+            <span className="font-medium text-foreground">{user.status ?? t("common.active")}</span>
           </div>
           <Separator />
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Last login</span>
+            <span className="text-muted-foreground">{t("profile.lastLogin")}</span>
             <span className="font-medium text-foreground">{formatDateTime(user.lastLoginAt)}</span>
           </div>
         </CardContent>
       </Card>
+
+      {/* Academic Profile — all users can fill their scientific CV */}
+      <Suspense fallback={<Skeleton className="h-48 w-full rounded-xl" />}>
+        <AcademicProfileCard userId={user.id} />
+      </Suspense>
     </div>
   );
 }

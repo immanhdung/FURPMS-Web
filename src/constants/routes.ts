@@ -20,9 +20,11 @@ export const ROUTES = {
   CHANGE_PASSWORD: "/change-password",
 
   PROPOSAL_REVIEWS: "/proposal-reviews",
+  REVIEW_BOARD: "/review-board",
   COUNCILS: "/councils",
   MEETINGS: "/meetings",
   ASSIGNMENTS: "/assignments",
+  CONTRACTS: "/contracts",
 
   MY_PROPOSALS: "/my-proposals",
   SUBMIT_PROPOSAL: "/proposals/submit",
@@ -34,6 +36,10 @@ export const ROUTES = {
   ASSIGNED_REVIEWS: "/assigned-reviews",
   SCORING: "/scoring",
   COUNCIL_MEMBERSHIPS: "/council-memberships",
+
+  // New feature routes
+  CHANGE_REQUESTS: "/change-requests",
+  DOCUMENTS: "/documents",
 } as const;
 
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];

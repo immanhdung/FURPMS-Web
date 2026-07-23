@@ -21,6 +21,14 @@ export function useMyScoreQuery(councilId: string | null) {
   });
 }
 
+export function useAllScoresQuery(councilId: string | null) {
+  return useQuery({
+    queryKey: queryKeys.scores.all(councilId ?? ""),
+    queryFn: () => reviewScoringService.getAllScores(councilId as string),
+    enabled: Boolean(councilId),
+  });
+}
+
 export function useSubmitScoreMutation(councilId: string) {
   const queryClient = useQueryClient();
   return useMutation({

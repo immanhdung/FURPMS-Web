@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, Ban, Pencil, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -15,12 +16,18 @@ import { ProposalSummaryView } from "@/features/pi/proposals/ProposalSummaryView
 import { SubmitProposalDialog } from "@/features/pi/proposals/SubmitProposalDialog";
 import { AiSummaryCard } from "@/features/pi/proposals/AiSummaryCard";
 import { AiFeedbackCard } from "@/features/pi/proposals/AiFeedbackCard";
+import { ExpectedProductsCard } from "@/features/pi/proposals/ExpectedProductsCard";
+import { ProposalDocumentsCard } from "@/features/pi/proposals/ProposalDocumentsCard";
+import { ChangeRequestsPanel } from "@/features/pi/proposals/ChangeRequestsPanel";
+import { ProposalExportMenu, makeSlug } from "@/features/pi/proposals/ProposalExportMenu";
 import { PROPOSAL_STATUS } from "@/constants/statuses";
 import { ROUTES } from "@/constants/routes";
+
 
 export function ProposalDetailPage() {
   const { proposalId } = useParams<{ proposalId: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const { data: proposal, isLoading, isError, refetch, isRefetching } = useProposalQuery(proposalId ?? null);
   const { data: cycles } = useCyclesQuery();
@@ -46,14 +53,14 @@ export function ProposalDetailPage() {
     <div className="mx-auto max-w-3xl space-y-5">
       <Button variant="ghost" size="sm" className="-ml-2" onClick={() => navigate(ROUTES.MY_PROPOSALS)}>
         <ArrowLeft />
-        Back to my proposals
+        {t("proposal.backToList")}
       </Button>
 
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-              {proposal.titleEN || proposal.titleVI || "Untitled proposal"}
+              {proposal.titleVI || proposal.titleEN || t("proposal.untitled")}
             </h1>
             <StatusBadge status={status} />
           </div>
@@ -63,20 +70,27 @@ export function ProposalDetailPage() {
           {isDraft && (
             <Button variant="outline" onClick={() => navigate(`${ROUTES.SUBMIT_PROPOSAL}/${proposal.id}`)}>
               <Pencil />
-              Edit
+              {t("common.edit")}
             </Button>
           )}
           {isDraft && (
             <Button onClick={() => setSubmitOpen(true)}>
               <Send />
-              Submit
+              {t("common.submit")}
             </Button>
           )}
           {canWithdraw && (
             <Button variant="destructive" onClick={() => setWithdrawOpen(true)}>
               <Ban />
-              Withdraw
+              {t("proposal.withdraw")}
             </Button>
+          )}
+          {/* Export — only useful after the proposal has content worth exporting */}
+          {!isDraft && (
+            <ProposalExportMenu
+              proposalId={proposal.id}
+              titleSlug={makeSlug(proposal.titleVI || proposal.titleEN || proposal.id)}
+            />
           )}
         </div>
       </div>
@@ -87,20 +101,38 @@ export function ProposalDetailPage() {
 
       <ProposalSummaryView data={proposal} cycleName={cycleName} trackName={trackName} researchTypeName={researchTypeName} />
 
+      {/* Sản phẩm cam kết — chỉ sửa được khi còn nháp, vì nộp xong là khóa đề cương. */}
+      <ExpectedProductsCard
+        proposalId={proposal.id}
+        editable={isDraft}
+        fundingMethod={proposal.fundingMethod}
+      />
+
+      {/* Tài liệu đính kèm — gỡ/thêm được khi còn nháp; nộp xong chỉ tải về. */}
+      <ProposalDocumentsCard proposalId={proposal.id} editable={isDraft} />
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <AiSummaryCard proposalId={proposal.id} />
         <AiFeedbackCard proposalId={proposal.id} />
       </div>
+
+      {/* Yêu cầu thay đổi — chỉ hiển thị sau khi đã nộp đề xuất (không còn nháp). */}
+      {!isDraft && (
+        <ChangeRequestsPanel
+          proposalId={proposal.id}
+          editable={canWithdraw}
+        />
+      )}
 
       <SubmitProposalDialog open={submitOpen} onOpenChange={setSubmitOpen} proposalId={proposal.id} />
 
       <ConfirmDialog
         open={withdrawOpen}
         onOpenChange={setWithdrawOpen}
-        title="Withdraw proposal"
-        description="Are you sure you want to withdraw this proposal? This cannot be undone."
+        title={t("proposal.withdrawConfirmTitle")}
+        description={t("proposal.withdrawConfirmDesc")}
         variant="destructive"
-        confirmLabel="Withdraw"
+        confirmLabel={t("proposal.withdraw")}
         isLoading={withdrawMutation.isPending}
         onConfirm={() => withdrawMutation.mutate(proposal.id, { onSuccess: () => setWithdrawOpen(false) })}
       />

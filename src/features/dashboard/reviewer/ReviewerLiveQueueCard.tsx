@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Check, Mail, X } from "lucide-react";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { INVITATION_STATUS } from "@/constants/statuses";
 import { ROUTES } from "@/constants/routes";
 
 export function ReviewerLiveQueueCard() {
+  const { t } = useTranslation();
   const { data, isLoading } = useMyMembershipsQuery();
   const respondMutation = useRespondToInvitationMutation();
 
@@ -17,10 +19,10 @@ export function ReviewerLiveQueueCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-sm">Pending Invitations</CardTitle>
+        <CardTitle className="text-sm">{t("proposal.pendingInvitations")}</CardTitle>
         <CardAction>
           <Link to={ROUTES.INVITATIONS} className="text-xs font-medium text-primary hover:underline">
-            View all
+            {t("proposal.viewAll")}
           </Link>
         </CardAction>
       </CardHeader>
@@ -32,13 +34,13 @@ export function ReviewerLiveQueueCard() {
             ))}
           </div>
         ) : pending.length === 0 ? (
-          <EmptyState icon={Mail} title="No pending invitations" className="min-h-32 border-none p-0" />
+          <EmptyState icon={Mail} title={t("proposal.noPending")} className="min-h-32 border-none p-0" />
         ) : (
           <ul className="space-y-2">
             {pending.map((membership) => (
               <li key={membership.memberId} className="flex items-center justify-between gap-2 rounded-lg border border-border p-2.5">
                 <p className="min-w-0 truncate text-xs font-medium text-foreground">
-                  {membership.proposalTitleVI || "Untitled proposal"}
+                  {membership.proposalTitleVI || t("common.untitledProposal")}
                 </p>
                 <div className="flex shrink-0 gap-1">
                   <Button

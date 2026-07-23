@@ -21,6 +21,15 @@ export function useCouncilMeetingsQuery(councilId: string | null) {
   });
 }
 
+/** Cảnh báo giảng viên trùng lịch với hội đồng khác (rule tuần 10). */
+export function useScheduleConflictsQuery(councilId: string | null) {
+  return useQuery({
+    queryKey: [...queryKeys.meetings.byCouncil(councilId ?? ""), "conflicts"],
+    queryFn: () => meetingService.scheduleConflicts(councilId as string),
+    enabled: Boolean(councilId),
+  });
+}
+
 export function useScheduleMeetingMutation(councilId: string) {
   const queryClient = useQueryClient();
   return useMutation({

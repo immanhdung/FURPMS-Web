@@ -24,6 +24,10 @@ export const queryKeys = {
     all: () => ["review-rounds"] as const,
     list: (proposalId: string) => ["review-rounds", "list", proposalId] as const,
   },
+  reviewBoard: {
+    all: () => ["review-board"] as const,
+    board: (cycleId: number, trackId: number) => ["review-board", cycleId, trackId] as const,
+  },
   councilMembers: {
     all: () => ["council-members"] as const,
     list: (councilId: string) => ["council-members", "list", councilId] as const,
@@ -36,6 +40,7 @@ export const queryKeys = {
   tracks: {
     all: () => ["tracks"] as const,
     list: () => ["tracks", "list"] as const,
+    byCycle: (cycleId: number) => ["tracks", "byCycle", cycleId] as const,
   },
   notifications: {
     all: () => ["notifications"] as const,
@@ -53,7 +58,7 @@ export const queryKeys = {
   },
   researchOrders: {
     all: () => ["research-orders"] as const,
-    list: (params?: PaginationParams) => ["research-orders", "list", params] as const,
+    list: (params?: Record<string, unknown>) => ["research-orders", "list", params] as const,
     detail: (id: number) => ["research-orders", "detail", id] as const,
   },
   budgetCategories: {
@@ -63,6 +68,11 @@ export const queryKeys = {
   financialConfigs: {
     all: () => ["financial-configs"] as const,
     list: () => ["financial-configs", "list"] as const,
+  },
+  systemSettings: {
+    all: () => ["system-settings"] as const,
+    list: () => ["system-settings", "list"] as const,
+    uploadPolicy: () => ["system-settings", "upload-policy"] as const,
   },
   organizationalUnits: {
     all: () => ["organizational-units"] as const,
@@ -81,6 +91,7 @@ export const queryKeys = {
   },
   scores: {
     my: (councilId: string) => ["scores", "my", councilId] as const,
+    all: (councilId: string) => ["scores", "all", councilId] as const,
   },
   feedback: {
     list: (councilId: string) => ["feedback", "list", councilId] as const,
@@ -93,5 +104,43 @@ export const queryKeys = {
   },
   systemClock: {
     detail: () => ["system-clock"] as const,
+  },
+  contracts: {
+    all: () => ["contracts"] as const,
+    list: () => ["contracts", "list"] as const,
+    detail: (id: string) => ["contracts", "detail", id] as const,
+  },
+  progressReports: {
+    all: () => ["progress-reports"] as const,
+    list: (contractId: string) => ["progress-reports", "list", contractId] as const,
+    detail: (id: string) => ["progress-reports", "detail", id] as const,
+  },
+  disbursements: {
+    all: () => ["disbursements"] as const,
+    list: (contractId: string) => ["disbursements", "list", contractId] as const,
+  },
+  deliverables: {
+    all: () => ["deliverables"] as const,
+    list: (contractId: string) => ["deliverables", "list", contractId] as const,
+  },
+  finalReports: {
+    all: () => ["final-reports"] as const,
+    detail: (contractId: string) => ["final-reports", "detail", contractId] as const,
+  },
+  amendments: {
+    all: () => ["amendments"] as const,
+    list: (contractId: string) => ["amendments", "list", contractId] as const,
+  },
+  settlements: {
+    all: () => ["settlements"] as const,
+    detail: (contractId: string) => ["settlements", "detail", contractId] as const,
+  },
+  proposalDocuments: {
+    all: () => ["proposal-documents"] as const,
+    list: (proposalId: string) => ["proposal-documents", "list", proposalId] as const,
+  },
+  expectedProducts: {
+    all: () => ["expected-products"] as const,
+    list: (proposalId: string) => ["expected-products", "list", proposalId] as const,
   },
 } as const;

@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MembershipListPage } from "@/features/reviewer/shared/MembershipListPage";
@@ -7,19 +8,20 @@ import { ROUTES } from "@/constants/routes";
 
 export function ScoringPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <MembershipListPage
-      title="Scoring"
-      description="Reviews that are open now and awaiting your score."
+      title={t("reviewer.scoringTitle")}
+      description={t("reviewer.scoringSubtitle")}
       emptyIcon={Star}
-      emptyTitle="Nothing to score right now"
-      emptyDescription="Reviews open for scoring will appear here."
+      emptyTitle={t("reviewer.nothingToScore")}
+      emptyDescription={t("reviewer.nothingToScoreDesc")}
       filter={(m) => isAcceptedInvitation(m.status) && m.roundStatus?.toUpperCase() === "OPEN"}
       renderActions={(membership) => (
         <Button size="sm" onClick={() => navigate(`${ROUTES.ASSIGNED_REVIEWS}/${membership.councilId}`)}>
           <Star />
-          Score now
+          {t("reviewer.scoreNow")}
         </Button>
       )}
     />

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { FormSheet } from "@/components/shared/FormSheet";
@@ -15,6 +16,7 @@ interface CreateUserSheetProps {
 }
 
 export function CreateUserSheet({ open, onOpenChange }: CreateUserSheetProps) {
+  const { t } = useTranslation();
   const createUserMutation = useCreateUserMutation();
 
   const {
@@ -52,16 +54,16 @@ export function CreateUserSheet({ open, onOpenChange }: CreateUserSheetProps) {
     <FormSheet
       open={open}
       onOpenChange={onOpenChange}
-      title="Create User"
-      description="Add a new user account to FURPMS."
+      title={t("users.createTitle")}
+      description={t("users.createDesc")}
       formId="create-user-form"
       onSubmit={handleSubmit(onSubmit)}
       isSubmitting={createUserMutation.isPending}
-      submitLabel="Create user"
+      submitLabel={t("users.createBtn")}
     >
       <div>
         <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-foreground">
-          Email
+          {t("users.email")}
         </label>
         <Input id="email" type="email" aria-invalid={Boolean(errors.email)} {...register("email")} />
         {errors.email && <p className="mt-1 text-xs text-destructive">{errors.email.message}</p>}
@@ -69,7 +71,7 @@ export function CreateUserSheet({ open, onOpenChange }: CreateUserSheetProps) {
 
       <div>
         <label htmlFor="fullName" className="mb-1.5 block text-sm font-medium text-foreground">
-          Full name
+          {t("users.fullName")}
         </label>
         <Input id="fullName" aria-invalid={Boolean(errors.fullName)} {...register("fullName")} />
         {errors.fullName && <p className="mt-1 text-xs text-destructive">{errors.fullName.message}</p>}
@@ -77,27 +79,27 @@ export function CreateUserSheet({ open, onOpenChange }: CreateUserSheetProps) {
 
       <div>
         <label htmlFor="phoneNumber" className="mb-1.5 block text-sm font-medium text-foreground">
-          Phone number
+          {t("users.phoneNumber")}
         </label>
         <Input id="phoneNumber" {...register("phoneNumber")} />
       </div>
 
       <div>
         <label htmlFor="department" className="mb-1.5 block text-sm font-medium text-foreground">
-          Department
+          {t("users.department")}
         </label>
         <Input id="department" {...register("department")} />
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Academic degree</label>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("users.academicDegree")}</label>
         <Controller
           control={control}
           name="academicDegree"
           render={({ field }) => (
             <Select value={field.value?.toString()} onValueChange={(value) => field.onChange(Number(value))}>
               <SelectTrigger>
-                <SelectValue placeholder="Select degree" />
+                <SelectValue placeholder={t("users.selectDegree")} />
               </SelectTrigger>
               <SelectContent>
                 {ACADEMIC_DEGREES.map((degree) => (
@@ -112,7 +114,7 @@ export function CreateUserSheet({ open, onOpenChange }: CreateUserSheetProps) {
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Roles</label>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("users.roles")}</label>
         <Controller
           control={control}
           name="roles"
@@ -140,7 +142,7 @@ export function CreateUserSheet({ open, onOpenChange }: CreateUserSheetProps) {
 
       <div>
         <label htmlFor="temporaryPassword" className="mb-1.5 block text-sm font-medium text-foreground">
-          Temporary password
+          {t("users.temporaryPassword")}
         </label>
         <Input
           id="temporaryPassword"

@@ -1,4 +1,5 @@
 import type { UseFormReturn } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { useCyclesQuery } from "@/hooks/useCycles";
 import { useTracksQuery } from "@/hooks/useTracks";
 import { useResearchTypesQuery } from "@/hooks/useResearchTypes";
@@ -6,6 +7,7 @@ import { ProposalSummaryView } from "@/features/pi/proposals/ProposalSummaryView
 import type { ProposalWizardValues } from "@/features/pi/proposals/wizard/proposal-wizard.schema";
 
 export function Step5Preview({ form }: { form: UseFormReturn<ProposalWizardValues> }) {
+  const { t } = useTranslation();
   const values = form.watch();
   const { data: cycles } = useCyclesQuery();
   const { data: tracks } = useTracksQuery();
@@ -18,7 +20,7 @@ export function Step5Preview({ form }: { form: UseFormReturn<ProposalWizardValue
   return (
     <div className="space-y-3">
       <p className="text-sm text-muted-foreground">
-        Review your proposal before submitting. You can go back to any step to make changes.
+        {t("proposal.step5Review")}
       </p>
       <ProposalSummaryView data={values} cycleName={cycleName} trackName={trackName} researchTypeName={researchTypeName} />
     </div>

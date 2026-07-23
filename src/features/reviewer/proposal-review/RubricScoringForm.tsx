@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { ClipboardList, Loader2, Save } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -7,9 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
-import { useRubricCriteriaQuery } from "@/hooks/useRubricCriteria";
 import { useMyScoreQuery, useRubricTemplatesQuery, useSubmitScoreMutation } from "@/hooks/useReviewScoring";
-import { rubricRoundTypeToAppType } from "@/constants/statuses";
+import { ROUTES } from "@/constants/routes";
 import type { ScoreDetailPayload } from "@/types/review-scoring";
 
 interface RubricScoringFormProps {
@@ -18,34 +19,29 @@ interface RubricScoringFormProps {
 }
 
 export function RubricScoringForm({ councilId, roundType }: RubricScoringFormProps) {
-  /**
-   * Fetching unfiltered and matching client-side because the GET /rubric-criteria?roundType=
-   * query filter's expected value is unconfirmed (a round created as "REVIEW" produced zero
-   * results even for admin-created, active "Review"-labeled criteria) — the label mapping used
-   * to display the round type in the admin list is proven correct, so we reuse it here instead.
-   */
-  const { data: criteria, isLoading: isCriteriaLoading } = useRubricCriteriaQuery();
-  const { data: templates } = useRubricTemplatesQuery();
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { data: templates, isLoading: isTemplatesLoading } = useRubricTemplatesQuery();
   const { data: existingScore, isLoading: isScoreLoading } = useMyScoreQuery(councilId);
   const submitMutation = useSubmitScoreMutation(councilId);
 
-  const matchingTemplate = templates?.find((t) => t.roundType === roundType) ?? templates?.[0];
-
-  const normalizedRoundType = roundType?.toUpperCase();
-  const activeCriteria = useMemo(
-    () =>
-      (criteria ?? []).filter(
-        (c) => c.isActive && rubricRoundTypeToAppType(c.roundType) === normalizedRoundType
-      ),
-    [criteria, normalizedRoundType]
-  );
+  /**
+   * Confirmed live: `templateType` (not `roundType`, which doesn't exist on this response) uses
+   * this app's exact casing ("REVIEW", "PROGRESS_CHECK") — no name conversion needed. The list
+   * endpoint already returns each template's full `criteria` array, which is the sole source of
+   * truth for what the backend requires — don't cross-reference the standalone /rubric-criteria
+   * list or fall back to "all active criteria"; both produced wrong submissions in live testing.
+   */
+  const matchingTemplate = templates?.find((t) => t.templateType?.toUpperCase() === roundType?.toUpperCase());
+  const activeCriteria = useMemo(() => matchingTemplate?.criteria ?? [], [matchingTemplate]);
 
   const [scores, setScores] = useState<Record<number, { givenScore: number; comments: string }>>({});
   const [generalComments, setGeneralComments] = useState("");
   const [otherRecommendations, setOtherRecommendations] = useState("");
   const [seededFor, setSeededFor] = useState<string | null>(null);
 
-  const isReady = !isCriteriaLoading && !isScoreLoading && activeCriteria.length > 0;
+  const isLoading = isTemplatesLoading || isScoreLoading;
+  const isReady = !isLoading && activeCriteria.length > 0;
   const seedKey = isReady ? `${existingScore?.id ?? "none"}:${activeCriteria.length}` : null;
 
   if (seedKey !== null && seedKey !== seededFor) {
@@ -60,7 +56,7 @@ export function RubricScoringForm({ councilId, roundType }: RubricScoringFormPro
     setOtherRecommendations(existingScore?.otherRecommendations ?? "");
   }
 
-  if (isCriteriaLoading || isScoreLoading) {
+  if (isLoading) {
     return (
       <div className="space-y-3">
         {Array.from({ length: 3 }).map((_, index) => (
@@ -74,8 +70,8 @@ export function RubricScoringForm({ councilId, roundType }: RubricScoringFormPro
     return (
       <EmptyState
         icon={ClipboardList}
-        title="No rubric criteria configured"
-        description={`No active criteria found for ${roundType} rounds. Contact an administrator.`}
+        title={t("review.noRubric")}
+        description={t("review.noRubricDesc")}
       />
     );
   }
@@ -85,7 +81,7 @@ export function RubricScoringForm({ councilId, roundType }: RubricScoringFormPro
 
   const handleSubmit = () => {
     if (!matchingTemplate) {
-      toast.error("No rubric template is available for this round.");
+      toast.error(t("review.noRubricRound"));
       return;
     }
     const scoreDetails: ScoreDetailPayload[] = activeCriteria.map((criterion) => ({
@@ -93,18 +89,21 @@ export function RubricScoringForm({ councilId, roundType }: RubricScoringFormPro
       givenScore: scores[criterion.id]?.givenScore ?? 0,
       comments: scores[criterion.id]?.comments || undefined,
     }));
-    submitMutation.mutate({
-      templateId: matchingTemplate.id,
-      generalComments: generalComments || undefined,
-      otherRecommendations: otherRecommendations || undefined,
-      scoreDetails,
-    });
+    submitMutation.mutate(
+      {
+        templateId: matchingTemplate.id,
+        generalComments: generalComments || undefined,
+        otherRecommendations: otherRecommendations || undefined,
+        scoreDetails,
+      },
+      { onSuccess: () => navigate(ROUTES.ASSIGNED_REVIEWS) }
+    );
   };
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-3 py-2">
-        <p className="text-sm font-medium text-foreground">Total score</p>
+        <p className="text-sm font-medium text-foreground">{t("review.totalScore")}</p>
         <p className="text-sm font-semibold text-foreground">
           {totalScore.toFixed(1)} / {maxTotal}
         </p>
@@ -115,7 +114,7 @@ export function RubricScoringForm({ councilId, roundType }: RubricScoringFormPro
           <Card key={criterion.id}>
             <CardContent className="space-y-2.5 p-4">
               <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-medium text-foreground">{criterion.name}</p>
+                <p className="text-sm font-medium text-foreground">{criterion.criterionName}</p>
                 <div className="flex shrink-0 items-center gap-1.5">
                   <Input
                     type="number"
@@ -135,7 +134,7 @@ export function RubricScoringForm({ councilId, roundType }: RubricScoringFormPro
                 </div>
               </div>
               <Textarea
-                placeholder="Comments (optional)"
+                placeholder={t("review.commentsOptional")}
                 rows={2}
                 value={scores[criterion.id]?.comments ?? ""}
                 onChange={(e) =>
@@ -151,19 +150,19 @@ export function RubricScoringForm({ councilId, roundType }: RubricScoringFormPro
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">General comments</label>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("review.generalComments")}</label>
         <Textarea rows={3} value={generalComments} onChange={(e) => setGeneralComments(e.target.value)} />
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Other recommendations</label>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("review.otherRecommendations")}</label>
         <Textarea rows={3} value={otherRecommendations} onChange={(e) => setOtherRecommendations(e.target.value)} />
       </div>
 
       <div className="flex justify-end">
         <Button onClick={handleSubmit} disabled={submitMutation.isPending}>
           {submitMutation.isPending ? <Loader2 className="animate-spin" /> : <Save />}
-          {existingScore ? "Update score" : "Submit score"}
+          {existingScore ? t("review.updateScore") : t("review.submitScore")}
         </Button>
       </div>
     </div>

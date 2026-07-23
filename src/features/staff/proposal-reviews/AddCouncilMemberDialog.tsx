@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Loader2, Sparkles } from "lucide-react";
 import { motion } from "motion/react";
 import {
@@ -16,8 +17,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAddCouncilMemberMutation } from "@/hooks/useCouncilMembers";
 import { useUsersQuery } from "@/hooks/useUsers";
 import { useSuggestReviewersMutation } from "@/hooks/useProposalAi";
+import { COUNCIL_MEMBER_ROLE } from "@/constants/statuses";
 
-const COUNCIL_MEMBER_ROLES = ["Chairman", "Secretary", "Member"];
+const COUNCIL_MEMBER_ROLES = Object.values(COUNCIL_MEMBER_ROLE);
 
 interface AddCouncilMemberDialogProps {
   open: boolean;
@@ -27,6 +29,7 @@ interface AddCouncilMemberDialogProps {
 }
 
 export function AddCouncilMemberDialog({ open, onOpenChange, councilId, trackId }: AddCouncilMemberDialogProps) {
+  const { t } = useTranslation();
   const { data: users } = useUsersQuery();
   const addMutation = useAddCouncilMemberMutation(councilId);
   const suggestMutation = useSuggestReviewersMutation();
@@ -46,14 +49,14 @@ export function AddCouncilMemberDialog({ open, onOpenChange, councilId, trackId 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add council member</DialogTitle>
-          <DialogDescription>Invite a reviewer to this council (1 Chairman, 1 Secretary, 2 Members).</DialogDescription>
+          <DialogTitle>{t("staff.addMember")}</DialogTitle>
+          <DialogDescription>{t("staff.addMemberDesc")}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div>
             <div className="mb-1.5 flex items-center justify-between">
-              <label className="block text-sm font-medium text-foreground">Reviewer</label>
+              <label className="block text-sm font-medium text-foreground">{t("staff.reviewer")}</label>
               {trackId && (
                 <Button
                   type="button"
@@ -64,13 +67,13 @@ export function AddCouncilMemberDialog({ open, onOpenChange, councilId, trackId 
                   disabled={suggestMutation.isPending}
                 >
                   {suggestMutation.isPending ? <Loader2 className="animate-spin" /> : <Sparkles />}
-                  Suggest with AI
+                  {t("staff.suggestAi")}
                 </Button>
               )}
             </div>
             <Select value={userId} onValueChange={setUserId}>
               <SelectTrigger>
-                <SelectValue placeholder="Select reviewer" />
+                <SelectValue placeholder={t("staff.selectReviewer")} />
               </SelectTrigger>
               <SelectContent>
                 {users?.map((user) => (
@@ -82,14 +85,14 @@ export function AddCouncilMemberDialog({ open, onOpenChange, councilId, trackId 
             </Select>
             {suggestedName && !userId && (
               <p className="mt-1 text-xs text-muted-foreground">
-                Note: "{suggestedName}" is an AI suggestion outside the system — select a matching account above.
+                {t("staff.aiSuggestNote", { name: suggestedName })}
               </p>
             )}
           </div>
 
           {suggestMutation.data && (
             <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">AI suggested reviewers</p>
+              <p className="text-xs font-medium text-muted-foreground">{t("staff.aiSuggested")}</p>
               {suggestMutation.data.map((suggestion, index) => (
                 <motion.button
                   key={suggestion.userId}
@@ -102,7 +105,7 @@ export function AddCouncilMemberDialog({ open, onOpenChange, councilId, trackId 
                 >
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-xs font-medium text-foreground">{suggestion.fullName}</p>
-                    <Badge variant="secondary">{suggestion.matchScore}% match</Badge>
+                    <Badge variant="secondary">{t("staff.matchScore", { score: suggestion.matchScore })}</Badge>
                   </div>
                   <p className="mt-0.5 text-[11px] text-muted-foreground">{suggestion.reason}</p>
                 </motion.button>
@@ -111,7 +114,7 @@ export function AddCouncilMemberDialog({ open, onOpenChange, councilId, trackId 
           )}
 
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">Role</label>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">{t("staff.role")}</label>
             <Select value={memberRole} onValueChange={setMemberRole}>
               <SelectTrigger>
                 <SelectValue />
@@ -128,13 +131,13 @@ export function AddCouncilMemberDialog({ open, onOpenChange, councilId, trackId 
 
           <label className="flex items-center gap-2 text-sm text-foreground">
             <Checkbox checked={isExternal} onCheckedChange={(checked) => setIsExternal(Boolean(checked))} />
-            External reviewer
+            {t("staff.externalReviewer")}
           </label>
         </div>
 
         <DialogFooter>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={addMutation.isPending}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button
             type="button"
@@ -153,7 +156,7 @@ export function AddCouncilMemberDialog({ open, onOpenChange, councilId, trackId 
             }
           >
             {addMutation.isPending && <Loader2 className="animate-spin" />}
-            Add member
+            {t("staff.addMemberBtn")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { AnimatePresence, motion } from "motion/react";
 import { FileText, Lightbulb, Loader2, Search, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,7 @@ function relevanceColor(score: number) {
 }
 
 export function SemanticSearchPage() {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const searchMutation = useSemanticSearchMutation();
 
@@ -32,9 +34,9 @@ export function SemanticSearchPage() {
         <div className="mx-auto flex size-11 items-center justify-center rounded-full bg-primary/10 text-primary">
           <Sparkles className="size-5" />
         </div>
-        <h1 className="mt-3 text-2xl font-semibold tracking-tight text-foreground">AI Semantic Search</h1>
+        <h1 className="mt-3 text-2xl font-semibold tracking-tight text-foreground">{t("aiSearch.title")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Search across proposals and imported research topics by meaning, not just keywords.
+          {t("aiSearch.subtitle")}
         </p>
       </div>
 
@@ -50,13 +52,13 @@ export function SemanticSearchPage() {
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Describe what you're looking for..."
+            placeholder={t("aiSearch.placeholder")}
             className="h-11 pl-9"
           />
         </div>
         <Button type="submit" size="lg" disabled={!query.trim() || searchMutation.isPending}>
           {searchMutation.isPending ? <Loader2 className="animate-spin" /> : <Sparkles />}
-          Search
+          {t("aiSearch.search")}
         </Button>
       </form>
 
@@ -92,7 +94,7 @@ export function SemanticSearchPage() {
             className="space-y-3"
           >
             {searchMutation.data.length === 0 ? (
-              <EmptyState icon={Search} title="No matches found" description="Try a different search query." />
+              <EmptyState icon={Search} title={t("aiSearch.noMatches")} description={t("aiSearch.noMatchesDesc")} />
             ) : (
               searchMutation.data.map((result, index) => (
                 <motion.div
@@ -127,7 +129,7 @@ export function SemanticSearchPage() {
                             transition={{ duration: 0.4, delay: index * 0.05 }}
                           />
                         </div>
-                        <span className="text-xs font-medium text-muted-foreground">{result.relevance}% match</span>
+                        <span className="text-xs font-medium text-muted-foreground">{t("aiSearch.match", { score: result.relevance })}</span>
                       </div>
                     </CardContent>
                   </Card>

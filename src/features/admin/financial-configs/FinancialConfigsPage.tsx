@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/tables/DataTable";
@@ -7,11 +8,14 @@ import { ToggleActiveDialog } from "@/components/shared/ToggleActiveDialog";
 import { useFinancialConfigsQuery, useUpdateFinancialConfigMutation } from "@/hooks/useFinancialConfigs";
 import { getFinancialConfigColumns } from "@/features/admin/financial-configs/columns";
 import { FinancialConfigFormSheet } from "@/features/admin/financial-configs/FinancialConfigFormSheet";
+import { sortByDateDesc } from "@/utils/sort";
 import type { FinancialConfig } from "@/types/financial-config";
 
 export function FinancialConfigsPage() {
+  const { t } = useTranslation();
   const { data, isLoading, isError, refetch, isRefetching } = useFinancialConfigsQuery();
   const updateMutation = useUpdateFinancialConfigMutation();
+  const sortedData = useMemo(() => sortByDateDesc(data, (c) => c.effectiveDate), [data]);
 
   const [formOpen, setFormOpen] = useState(false);
   const [editingConfig, setEditingConfig] = useState<FinancialConfig | null>(null);
@@ -20,21 +24,22 @@ export function FinancialConfigsPage() {
   const columns = useMemo(
     () =>
       getFinancialConfigColumns({
+        t,
         onEdit: (config) => {
           setEditingConfig(config);
           setFormOpen(true);
         },
         onToggleActive: (config) => setTogglingConfig(config),
       }),
-    []
+    [t]
   );
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Financial Configurations</h1>
-          <p className="mt-1 text-sm text-muted-foreground">System-wide financial parameters and coefficients.</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("financialConfigs.title")}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t("financialConfigs.subtitle")}</p>
         </div>
         <Button
           onClick={() => {
@@ -43,7 +48,7 @@ export function FinancialConfigsPage() {
           }}
         >
           <Plus />
-          New configuration
+          {t("financialConfigs.newBtn")}
         </Button>
       </div>
 
@@ -52,12 +57,12 @@ export function FinancialConfigsPage() {
       ) : (
         <DataTable
           columns={columns}
-          data={data ?? []}
+          data={sortedData}
           isLoading={isLoading}
-          searchPlaceholder="Search configurations..."
+          searchPlaceholder={t("financialConfigs.searchPlaceholder")}
           exportFileName="financial-configs"
-          emptyTitle="No financial configurations found"
-          emptyDescription="Create a configuration to define system financial parameters."
+          emptyTitle={t("financialConfigs.emptyTitle")}
+          emptyDescription={t("financialConfigs.emptyDesc")}
         />
       )}
 
@@ -67,7 +72,7 @@ export function FinancialConfigsPage() {
         open={Boolean(togglingConfig)}
         onOpenChange={(open) => !open && setTogglingConfig(null)}
         isActive={Boolean(togglingConfig?.isActive)}
-        entityName="configuration"
+        entityName={t("financialConfigs.entity")}
         itemLabel={togglingConfig?.code ?? ""}
         isLoading={updateMutation.isPending}
         onConfirm={() =>

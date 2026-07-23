@@ -1,115 +1,171 @@
+import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import type { UseFormReturn } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { ProposalWizardValues } from "@/features/pi/proposals/wizard/proposal-wizard.schema";
 
+/** Small helpers so labels/sections stay consistent without repeating classes. */
+function FieldLabel({ htmlFor, required, children }: { htmlFor: string; required?: boolean; children: ReactNode }) {
+  return (
+    <label htmlFor={htmlFor} className="mb-1.5 block text-sm font-medium text-foreground">
+      {children}
+      {required && <span className="text-destructive"> *</span>}
+    </label>
+  );
+}
+
+function Section({ title, hint, children }: { title: string; hint?: string; children: ReactNode }) {
+  return (
+    <section className="space-y-4 border-t border-border pt-5 first:border-t-0 first:pt-0">
+      <div>
+        <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+        {hint && <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>}
+      </div>
+      {children}
+    </section>
+  );
+}
+
 export function Step3Details({ form }: { form: UseFormReturn<ProposalWizardValues> }) {
+  const { t } = useTranslation();
   const {
     register,
+    control,
     formState: { errors },
   } = form;
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div>
-          <label htmlFor="titleEN" className="mb-1.5 block text-sm font-medium text-foreground">
-            Title (English)
-          </label>
-          <Input id="titleEN" aria-invalid={Boolean(errors.titleEN)} {...register("titleEN")} />
-          {errors.titleEN && <p className="mt-1 text-xs text-destructive">{errors.titleEN.message}</p>}
+    <div className="space-y-6">
+      <Section title={t("wizard.step3.secTitleAbstract")} hint={t("wizard.step3.secTitleAbstractHint")}>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <FieldLabel htmlFor="titleVI" required>
+              {t("wizard.step3.titleVI")}
+            </FieldLabel>
+            <Input
+              id="titleVI"
+              placeholder={t("wizard.step3.titleVIPlaceholder")}
+              aria-invalid={Boolean(errors.titleVI)}
+              {...register("titleVI")}
+            />
+            {errors.titleVI && <p className="mt-1 text-xs text-destructive">{errors.titleVI.message}</p>}
+          </div>
+          <div>
+            <FieldLabel htmlFor="titleEN">{t("wizard.step3.titleEN")}</FieldLabel>
+            <Input id="titleEN" placeholder={t("wizard.step3.titleENPlaceholder")} {...register("titleEN")} />
+          </div>
         </div>
-        <div>
-          <label htmlFor="titleVI" className="mb-1.5 block text-sm font-medium text-foreground">
-            Title (Vietnamese)
-          </label>
-          <Input id="titleVI" {...register("titleVI")} />
-        </div>
-      </div>
 
-      <div>
-        <label htmlFor="abstractEN" className="mb-1.5 block text-sm font-medium text-foreground">
-          Abstract
-        </label>
-        <Textarea id="abstractEN" rows={4} aria-invalid={Boolean(errors.abstractEN)} {...register("abstractEN")} />
-        {errors.abstractEN && <p className="mt-1 text-xs text-destructive">{errors.abstractEN.message}</p>}
-      </div>
-
-      <div>
-        <label htmlFor="objectives" className="mb-1.5 block text-sm font-medium text-foreground">
-          Objectives
-        </label>
-        <Textarea id="objectives" rows={3} {...register("objectives")} />
-      </div>
-
-      <div>
-        <label htmlFor="methodology" className="mb-1.5 block text-sm font-medium text-foreground">
-          Methodology
-        </label>
-        <Textarea id="methodology" rows={3} {...register("methodology")} />
-      </div>
-
-      <div>
-        <label htmlFor="expectedOutput" className="mb-1.5 block text-sm font-medium text-foreground">
-          Expected Output
-        </label>
-        <Textarea id="expectedOutput" rows={3} {...register("expectedOutput")} />
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="urgency" className="mb-1.5 block text-sm font-medium text-foreground">
-            Urgency
-          </label>
-          <Textarea id="urgency" rows={2} {...register("urgency")} />
-        </div>
-        <div>
-          <label htmlFor="novelty" className="mb-1.5 block text-sm font-medium text-foreground">
-            Novelty
-          </label>
-          <Textarea id="novelty" rows={2} {...register("novelty")} />
-        </div>
-        <div>
-          <label htmlFor="applicationPotential" className="mb-1.5 block text-sm font-medium text-foreground">
-            Application Potential
-          </label>
-          <Textarea id="applicationPotential" rows={2} {...register("applicationPotential")} />
-        </div>
-        <div>
-          <label htmlFor="transferPotential" className="mb-1.5 block text-sm font-medium text-foreground">
-            Transfer Potential
-          </label>
-          <Textarea id="transferPotential" rows={2} {...register("transferPotential")} />
-        </div>
-      </div>
-
-      <div>
-        <label htmlFor="facilities" className="mb-1.5 block text-sm font-medium text-foreground">
-          Facilities &amp; Resources
-        </label>
-        <Textarea id="facilities" rows={2} {...register("facilities")} />
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div>
-          <label htmlFor="fundingMethod" className="mb-1.5 block text-sm font-medium text-foreground">
-            Funding Method
-          </label>
-          <Input id="fundingMethod" {...register("fundingMethod")} />
-        </div>
-        <div>
-          <label htmlFor="durationMonths" className="mb-1.5 block text-sm font-medium text-foreground">
-            Duration (months)
-          </label>
-          <Input
-            id="durationMonths"
-            type="number"
-            aria-invalid={Boolean(errors.durationMonths)}
-            {...register("durationMonths", { valueAsNumber: true })}
+          <FieldLabel htmlFor="abstractEN">{t("wizard.step3.abstract")}</FieldLabel>
+          <Textarea
+            id="abstractEN"
+            rows={4}
+            placeholder={t("wizard.step3.abstractPlaceholder")}
+            {...register("abstractEN")}
           />
-          {errors.durationMonths && <p className="mt-1 text-xs text-destructive">{errors.durationMonths.message}</p>}
         </div>
-      </div>
+      </Section>
+
+      <Section title={t("wizard.step3.secDescription")} hint={t("wizard.step3.secDescriptionHint")}>
+        <div>
+          <FieldLabel htmlFor="objectives" required>
+            {t("wizard.step3.objectives")}
+          </FieldLabel>
+          <Textarea
+            id="objectives"
+            rows={3}
+            placeholder={t("wizard.step3.objectivesPlaceholder")}
+            aria-invalid={Boolean(errors.objectives)}
+            {...register("objectives")}
+          />
+          {errors.objectives && <p className="mt-1 text-xs text-destructive">{errors.objectives.message}</p>}
+        </div>
+
+        <div>
+          <FieldLabel htmlFor="methodology">{t("wizard.step3.methodology")}</FieldLabel>
+          <Textarea id="methodology" rows={3} placeholder={t("wizard.step3.methodologyPlaceholder")} {...register("methodology")} />
+        </div>
+
+        <div>
+          <FieldLabel htmlFor="expectedOutput">{t("wizard.step3.expectedOutput")}</FieldLabel>
+          <Textarea
+            id="expectedOutput"
+            rows={3}
+            placeholder={t("wizard.step3.expectedOutputPlaceholder")}
+            {...register("expectedOutput")}
+          />
+        </div>
+      </Section>
+
+      <Section title={t("wizard.step3.secImpact")} hint={t("wizard.step3.secImpactHint")}>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <FieldLabel htmlFor="urgency">{t("wizard.step3.urgency")}</FieldLabel>
+            <Textarea id="urgency" rows={2} placeholder={t("wizard.step3.urgencyPlaceholder")} {...register("urgency")} />
+          </div>
+          <div>
+            <FieldLabel htmlFor="novelty">{t("wizard.step3.novelty")}</FieldLabel>
+            <Textarea id="novelty" rows={2} placeholder={t("wizard.step3.noveltyPlaceholder")} {...register("novelty")} />
+          </div>
+          <div>
+            <FieldLabel htmlFor="applicationPotential">{t("wizard.step3.applicationPotential")}</FieldLabel>
+            <Textarea id="applicationPotential" rows={2} {...register("applicationPotential")} />
+          </div>
+          <div>
+            <FieldLabel htmlFor="transferPotential">{t("wizard.step3.transferPotential")}</FieldLabel>
+            <Textarea id="transferPotential" rows={2} {...register("transferPotential")} />
+          </div>
+        </div>
+
+        <div>
+          <FieldLabel htmlFor="facilities">{t("wizard.step3.facilities")}</FieldLabel>
+          <Textarea
+            id="facilities"
+            rows={2}
+            placeholder={t("wizard.step3.facilitiesPlaceholder")}
+            {...register("facilities")}
+          />
+        </div>
+      </Section>
+
+      <Section title={t("wizard.step3.secPlan")}>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <FieldLabel htmlFor="fundingMethod">{t("wizard.step3.fundingMethod")}</FieldLabel>
+            <Controller
+              control={control}
+              name="fundingMethod"
+              render={({ field }) => (
+                <Select value={field.value || undefined} onValueChange={field.onChange}>
+                  <SelectTrigger id="fundingMethod" className="w-full">
+                    <SelectValue placeholder={t("wizard.step3.fundingPlaceholder")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="WHOLE">{t("wizard.step3.fundingWhole")}</SelectItem>
+                    <SelectItem value="PARTIAL">{t("wizard.step3.fundingPartial")}</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
+          <div>
+            <FieldLabel htmlFor="durationMonths" required>
+              {t("wizard.step3.duration")}
+            </FieldLabel>
+            <Input
+              id="durationMonths"
+              type="number"
+              aria-invalid={Boolean(errors.durationMonths)}
+              {...register("durationMonths", { valueAsNumber: true })}
+            />
+            {errors.durationMonths && <p className="mt-1 text-xs text-destructive">{errors.durationMonths.message}</p>}
+          </div>
+        </div>
+      </Section>
     </div>
   );
 }

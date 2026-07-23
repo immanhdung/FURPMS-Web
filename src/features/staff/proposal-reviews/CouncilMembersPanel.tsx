@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { CheckCircle2, Mail, UserPlus, UserX, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,6 +22,7 @@ interface CouncilMembersPanelProps {
 }
 
 export function CouncilMembersPanel({ councilId, trackId }: CouncilMembersPanelProps) {
+  const { t } = useTranslation();
   const { data: members, isLoading } = useCouncilMembersQuery(councilId);
   const sendInvitationsMutation = useSendInvitationsMutation(councilId);
   const respondMutation = useRespondMembershipMutation(councilId);
@@ -32,15 +34,15 @@ export function CouncilMembersPanel({ councilId, trackId }: CouncilMembersPanelP
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-sm font-medium text-foreground">Members</p>
+        <p className="text-sm font-medium text-foreground">{t("reviewBoard.members")}</p>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={() => sendInvitationsMutation.mutate({})} disabled={sendInvitationsMutation.isPending}>
             <Mail />
-            Send invitations
+            {t("reviewBoard.sendInvitations")}
           </Button>
           <Button size="sm" onClick={() => setAddOpen(true)}>
             <UserPlus />
-            Add member
+            {t("reviewBoard.addMemberBtn")}
           </Button>
         </div>
       </div>
@@ -52,7 +54,7 @@ export function CouncilMembersPanel({ councilId, trackId }: CouncilMembersPanelP
           ))}
         </div>
       ) : !members || members.length === 0 ? (
-        <EmptyState icon={UserX} title="No members yet" description="Add reviewers to this council." className="min-h-32 border-none p-4" />
+        <EmptyState icon={UserX} title={t("reviewBoard.noMembers")} description={t("reviewBoard.noMembersDesc")} className="min-h-32 border-none p-4" />
       ) : (
         <ul className="space-y-2">
           {members.map((member) => (
@@ -64,10 +66,10 @@ export function CouncilMembersPanel({ councilId, trackId }: CouncilMembersPanelP
                 </p>
                 <p className="truncate text-xs text-muted-foreground">{member.reviewerEmail}</p>
                 {member.confirmedAt && (
-                  <p className="text-[11px] text-muted-foreground">Confirmed {formatDateTime(member.confirmedAt)}</p>
+                  <p className="text-[11px] text-muted-foreground">{t("reviewBoard.confirmedAt", { at: formatDateTime(member.confirmedAt) })}</p>
                 )}
                 {member.declinedAt && (
-                  <p className="text-[11px] text-muted-foreground">Declined {formatDateTime(member.declinedAt)}</p>
+                  <p className="text-[11px] text-muted-foreground">{t("reviewBoard.declinedAt", { at: formatDateTime(member.declinedAt) })}</p>
                 )}
               </div>
 
@@ -78,8 +80,8 @@ export function CouncilMembersPanel({ councilId, trackId }: CouncilMembersPanelP
                     <Button
                       variant="ghost"
                       size="icon-sm"
-                      title="Mark accepted"
-                      aria-label="Mark accepted"
+                      title={t("reviewBoard.markAccepted")}
+                      aria-label={t("reviewBoard.markAccepted")}
                       onClick={() => respondMutation.mutate({ memberId: member.id, payload: { accept: true } })}
                     >
                       <CheckCircle2 className="text-success" />
@@ -87,15 +89,15 @@ export function CouncilMembersPanel({ councilId, trackId }: CouncilMembersPanelP
                     <Button
                       variant="ghost"
                       size="icon-sm"
-                      title="Mark declined"
-                      aria-label="Mark declined"
+                      title={t("reviewBoard.markDeclined")}
+                      aria-label={t("reviewBoard.markDeclined")}
                       onClick={() => respondMutation.mutate({ memberId: member.id, payload: { accept: false } })}
                     >
                       <XCircle className="text-danger" />
                     </Button>
                   </>
                 )}
-                <Button variant="ghost" size="icon-sm" title="Remove member" aria-label="Remove member" onClick={() => setRemovingMember(member)}>
+                <Button variant="ghost" size="icon-sm" title={t("reviewBoard.removeMember")} aria-label={t("reviewBoard.removeMember")} onClick={() => setRemovingMember(member)}>
                   <UserX />
                 </Button>
               </div>
@@ -109,10 +111,10 @@ export function CouncilMembersPanel({ councilId, trackId }: CouncilMembersPanelP
       <ConfirmDialog
         open={Boolean(removingMember)}
         onOpenChange={(open) => !open && setRemovingMember(null)}
-        title="Remove member"
-        description={`Remove ${removingMember?.reviewerName ?? "this member"} from the council?`}
+        title={t("reviewBoard.removeMember")}
+        description={t("reviewBoard.removeMemberDesc", { name: removingMember?.reviewerName ?? t("reviewBoard.thisMember") })}
         variant="destructive"
-        confirmLabel="Remove"
+        confirmLabel={t("reviewBoard.remove")}
         isLoading={removeMutation.isPending}
         onConfirm={() =>
           removingMember && removeMutation.mutate(removingMember.id, { onSuccess: () => setRemovingMember(null) })

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
 import { CheckCircle2, CircleDot, Circle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,6 +13,7 @@ interface RoundTimelineProps {
 }
 
 export function RoundTimeline({ rounds, onSelect }: RoundTimelineProps) {
+  const { t } = useTranslation();
   const sorted = [...rounds].sort((a, b) => a.sequence - b.sequence);
 
   return (
@@ -45,14 +47,14 @@ export function RoundTimeline({ rounds, onSelect }: RoundTimelineProps) {
             <Card role="button" tabIndex={0} onClick={() => onSelect(round)} className="flex-1 cursor-pointer transition-shadow hover:shadow-md">
               <CardContent className="space-y-1.5 p-3.5">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-sm font-medium text-foreground">{roundTitle(round)}</p>
+                  <p className="text-sm font-medium text-foreground">{roundTitle(round, t)}</p>
                   {round.status && <Badge variant="secondary">{round.status}</Badge>}
                 </div>
-                {round.dimension && <p className="text-xs text-muted-foreground">Dimension: {round.dimension}</p>}
+                {round.dimension && <p className="text-xs text-muted-foreground">{t("staff.dimension", { value: round.dimension })}</p>}
                 <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                  {round.openedAt && <span>Opened {formatDateTime(round.openedAt)}</span>}
-                  {round.closedAt && <span>Closed {formatDateTime(round.closedAt)}</span>}
-                  {round.result && <span>Result: {round.result}</span>}
+                  {round.openedAt && <span>{t("staff.opened", { at: formatDateTime(round.openedAt) })}</span>}
+                  {round.closedAt && <span>{t("staff.closed", { at: formatDateTime(round.closedAt) })}</span>}
+                  {round.result && <span>{t("staff.resultLabel", { value: round.result })}</span>}
                 </div>
               </CardContent>
             </Card>
@@ -62,7 +64,7 @@ export function RoundTimeline({ rounds, onSelect }: RoundTimelineProps) {
 
       {sorted.length === 0 && (
         <p className="rounded-lg border border-dashed border-border px-3 py-8 text-center text-sm text-muted-foreground">
-          No review rounds yet.
+          {t("staff.noRoundsYet")}
         </p>
       )}
     </div>

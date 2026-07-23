@@ -12,6 +12,15 @@ export function useTracksQuery() {
   });
 }
 
+/** Fields attached to a specific cycle. Disabled until a cycle is chosen. */
+export function useTracksByCycleQuery(cycleId: number | undefined) {
+  return useQuery({
+    queryKey: queryKeys.tracks.byCycle(cycleId ?? 0),
+    queryFn: () => trackService.listByCycle(cycleId as number),
+    enabled: Boolean(cycleId),
+  });
+}
+
 export function useCreateTrackMutation() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -45,6 +54,30 @@ export function useAssignTrackOwnerMutation() {
       queryClient.invalidateQueries({ queryKey: queryKeys.tracks.all() });
     },
     onError: (error: ApiError) => toast.error(error.message || "Unable to assign owner."),
+  });
+}
+
+export function useAttachTrackToCycleMutation(cycleId: number) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (trackId: number) => trackService.attachToCycle(cycleId, trackId),
+    onSuccess: () => {
+      toast.success("Đã gắn lĩnh vực vào đợt.");
+      queryClient.invalidateQueries({ queryKey: queryKeys.tracks.byCycle(cycleId) });
+    },
+    onError: (error: ApiError) => toast.error(error.message || "Không gắn được lĩnh vực."),
+  });
+}
+
+export function useDetachTrackFromCycleMutation(cycleId: number) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (trackId: number) => trackService.detachFromCycle(cycleId, trackId),
+    onSuccess: () => {
+      toast.success("Đã gỡ lĩnh vực khỏi đợt.");
+      queryClient.invalidateQueries({ queryKey: queryKeys.tracks.byCycle(cycleId) });
+    },
+    onError: (error: ApiError) => toast.error(error.message || "Không gỡ được lĩnh vực."),
   });
 }
 

@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { FormSheet } from "@/components/shared/FormSheet";
@@ -18,6 +19,7 @@ interface ResearchTypeFormSheetProps {
 }
 
 export function ResearchTypeFormSheet({ open, onOpenChange, researchType }: ResearchTypeFormSheetProps) {
+  const { t } = useTranslation();
   const isEdit = Boolean(researchType);
   const createMutation = useCreateResearchTypeMutation();
   const updateMutation = useUpdateResearchTypeMutation();
@@ -71,16 +73,16 @@ export function ResearchTypeFormSheet({ open, onOpenChange, researchType }: Rese
     <FormSheet
       open={open}
       onOpenChange={onOpenChange}
-      title={isEdit ? "Edit Research Type" : "Create Research Type"}
-      description="Configure a research type used when opening a cycle."
+      title={isEdit ? t("researchTypes.editTitle") : t("researchTypes.createTitle")}
+      description={t("researchTypes.formDesc")}
       formId="research-type-form"
       onSubmit={handleSubmit(onSubmit)}
       isSubmitting={isSubmitting}
-      submitLabel={isEdit ? "Save changes" : "Create"}
+      submitLabel={isEdit ? t("common.saveChanges") : t("common.create")}
     >
       <div>
         <label htmlFor="rt-code" className="mb-1.5 block text-sm font-medium text-foreground">
-          Code
+          {t("researchTypes.code")}
         </label>
         <Input id="rt-code" disabled={isEdit} aria-invalid={Boolean(errors.code)} {...register("code")} />
         {errors.code && <p className="mt-1 text-xs text-destructive">{errors.code.message}</p>}
@@ -88,7 +90,7 @@ export function ResearchTypeFormSheet({ open, onOpenChange, researchType }: Rese
 
       <div>
         <label htmlFor="rt-name" className="mb-1.5 block text-sm font-medium text-foreground">
-          Name
+          {t("researchTypes.name")}
         </label>
         <Input id="rt-name" aria-invalid={Boolean(errors.name)} {...register("name")} />
         {errors.name && <p className="mt-1 text-xs text-destructive">{errors.name.message}</p>}
@@ -96,7 +98,7 @@ export function ResearchTypeFormSheet({ open, onOpenChange, researchType }: Rese
 
       <div>
         <label htmlFor="rt-budget" className="mb-1.5 block text-sm font-medium text-foreground">
-          Max budget cap (VND)
+          {t("researchTypes.maxBudgetCap")}
         </label>
         <Input
           id="rt-budget"
@@ -114,7 +116,7 @@ export function ResearchTypeFormSheet({ open, onOpenChange, researchType }: Rese
         render={({ field }) => (
           <label className="flex items-center gap-2 text-sm text-foreground">
             <Checkbox checked={field.value} onCheckedChange={(checked) => field.onChange(Boolean(checked))} />
-            Requires an ordering unit (Applied Research)
+            {t("researchTypes.requiresOrderingUnitLabel")}
           </label>
         )}
       />

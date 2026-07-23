@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +13,7 @@ interface MembershipCardProps {
 }
 
 export function MembershipCard({ membership, actions, index = 0 }: MembershipCardProps) {
+  const { t } = useTranslation();
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -22,7 +24,7 @@ export function MembershipCard({ membership, actions, index = 0 }: MembershipCar
         <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             <p className="truncate text-sm font-medium text-foreground">
-              {membership.proposalTitleVI || "Untitled proposal"}
+              {membership.proposalTitleVI || t("common.untitledProposal")}
             </p>
             <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
               {membership.roundType && <Badge variant="secondary">{membership.roundType}</Badge>}

@@ -1,9 +1,11 @@
 import { Check } from "lucide-react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 import { WIZARD_STEPS } from "@/features/pi/proposals/wizard/proposal-wizard.schema";
 
 export function WizardStepper({ currentStep }: { currentStep: number }) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center">
       {WIZARD_STEPS.map((step, index) => {
@@ -11,7 +13,7 @@ export function WizardStepper({ currentStep }: { currentStep: number }) {
         const isCurrent = index === currentStep;
 
         return (
-          <div key={step.title} className="flex flex-1 items-center last:flex-none">
+          <div key={t(step.titleKey)} className="flex flex-1 items-center last:flex-none">
             <div className="flex flex-col items-center gap-1.5">
               <motion.div
                 initial={false}
@@ -29,7 +31,7 @@ export function WizardStepper({ currentStep }: { currentStep: number }) {
               </motion.div>
               <div className="hidden text-center sm:block">
                 <p className={cn("text-xs font-medium", isCurrent ? "text-foreground" : "text-muted-foreground")}>
-                  {step.title}
+                  {t(step.titleKey)}
                 </p>
               </div>
             </div>

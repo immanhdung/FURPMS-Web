@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { DetailSheet } from "@/components/shared/DetailSheet";
 import { Badge } from "@/components/ui/badge";
 import { useUserQuery } from "@/hooks/useUsers";
@@ -11,18 +12,19 @@ interface UserDetailSheetProps {
 }
 
 export function UserDetailSheet({ open, onOpenChange, userId }: UserDetailSheetProps) {
+  const { t } = useTranslation();
   const { data: user, isLoading } = useUserQuery(userId);
 
   return (
     <DetailSheet
       open={open}
       onOpenChange={onOpenChange}
-      title={user?.fullName ?? "User details"}
+      title={user?.fullName ?? t("users.detailsTitle")}
       description={user?.email}
       isLoading={isLoading}
       fields={[
         {
-          label: "Roles",
+          label: t("users.roles"),
           value: (
             <div className="flex flex-wrap gap-1">
               {user?.roles.map((role) => (
@@ -33,14 +35,14 @@ export function UserDetailSheet({ open, onOpenChange, userId }: UserDetailSheetP
             </div>
           ),
         },
-        { label: "Phone number", value: user?.phoneNumber },
-        { label: "Department", value: user?.department },
+        { label: t("users.phoneNumber"), value: user?.phoneNumber },
+        { label: t("users.department"), value: user?.department },
         {
-          label: "Academic degree",
+          label: t("users.academicDegree"),
           value: ACADEMIC_DEGREES.find((d) => d.value === user?.academicDegree)?.label,
         },
-        { label: "Status", value: user?.status },
-        { label: "Last login", value: user?.lastLoginAt ? formatDateTime(user.lastLoginAt) : undefined },
+        { label: t("common.status"), value: user?.status },
+        { label: t("users.lastLogin"), value: user?.lastLoginAt ? formatDateTime(user.lastLoginAt) : undefined },
       ]}
     />
   );

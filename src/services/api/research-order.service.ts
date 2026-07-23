@@ -2,8 +2,14 @@ import { axiosClient } from "@/services/api/axiosClient";
 import type { ApiResponse } from "@/types/common";
 import type { CreateResearchOrderPayload, ResearchOrder } from "@/types/research-order";
 
+export interface ResearchOrderListParams {
+  cycleId?: number;
+  status?: string;
+}
+
 export const researchOrderService = {
-  list: () => axiosClient.get<ApiResponse<ResearchOrder[]>>("/research-orders").then((res) => res.data.data),
+  list: (params?: ResearchOrderListParams) =>
+    axiosClient.get<ApiResponse<ResearchOrder[]>>("/research-orders", { params }).then((res) => res.data.data),
 
   getById: (id: number) =>
     axiosClient.get<ApiResponse<ResearchOrder>>(`/research-orders/${id}`).then((res) => res.data.data),

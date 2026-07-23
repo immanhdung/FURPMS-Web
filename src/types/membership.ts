@@ -7,6 +7,8 @@ export interface MyMembership {
   memberRole?: string | null;
   status?: string | null;
   proposalId: string;
+  /** Round-scoped project id — what SaveMinutes/FinalizeDecision require, distinct from proposalId. */
+  projectId: string;
   proposalTitleVI?: string | null;
   proposalStatus?: string | null;
 }
