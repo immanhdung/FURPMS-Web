@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { useDisbursementsQuery, useGenerateDisbursementsMutation } from "@/hooks/useDisbursements";
 import { ConfirmDisbursementDialog } from "@/features/staff/contracts/ConfirmDisbursementDialog";
+import { DisbursementEvidence } from "@/features/staff/contracts/DisbursementEvidence";
 import { DISBURSEMENT_STATUS, type Disbursement } from "@/types/disbursement";
 import { formatCurrency, formatDate } from "@/utils/format";
 
@@ -111,6 +112,8 @@ export function DisbursementsPanel({ contractId, canManage }: { contractId: stri
                 )}
               </div>
             )}
+
+            <DisbursementEvidence disbursementId={d.id} canManage={canManage} />
           </div>
         );
       })}

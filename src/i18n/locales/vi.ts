@@ -844,6 +844,9 @@ export const vi = {
       conditionMet: "Đủ điều kiện {{date}} — sẵn sàng chi",
       waiting: "Chờ đủ điều kiện",
       confirmPayment: "Xác nhận chi",
+      evidence: "Minh chứng (hợp đồng/chứng từ)",
+      uploadEvidence: "Tải minh chứng",
+      noEvidence: "Chưa có minh chứng.",
       paidOn: "Đã chi {{amount}} ngày {{date}}",
       ref: "Mã GD:",
       // dialog xac nhan chi
