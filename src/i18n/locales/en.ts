@@ -809,6 +809,8 @@ export const en = {
     mWaiting: "Awaiting eligibility",
     mNoDate: "No date yet",
     signContract: "Sign contract",
+    exportWord: "Export contract (Word)",
+    exportWordError: "Unable to export the contract file.",
     createTitle: "Create Contract",
     createHint: "Set up a research contract for an approved proposal.",
     createBtn: "Create contract",

@@ -1,5 +1,8 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FileSignature } from "lucide-react";
+import { toast } from "sonner";
+import { FileDown, FileSignature, Loader2 } from "lucide-react";
+import { contractService } from "@/services/api/contract.service";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -30,6 +33,25 @@ export function ContractDetailSheet({ open, onOpenChange, contractId }: Contract
   const { data: contract, isLoading } = useContractQuery(contractId);
   const { data: proposal } = useProposalQuery(contract?.proposalId ?? null);
   const signMutation = useSignContractMutation();
+  const [exporting, setExporting] = useState(false);
+
+  const handleExportWord = async () => {
+    if (!contract) return;
+    setExporting(true);
+    try {
+      const blob = await contractService.exportWord(contract.id);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `HopDong-${contract.contractNumber ?? contract.id}.docx`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      toast.error(t("contract.exportWordError"));
+    } finally {
+      setExporting(false);
+    }
+  };
   // Chỉ Admin/Staff được sinh lịch & xác nhận chi tiền; PI chỉ xem (BE cũng chặn 403).
   const canManage = useAuthStore((state) => {
     const roles = state.user?.roles ?? [];
@@ -83,10 +105,18 @@ export function ContractDetailSheet({ open, onOpenChange, contractId }: Contract
                 </div>
               </div>
 
-              <Button size="sm" onClick={() => contractId && signMutation.mutate(contractId)} disabled={signMutation.isPending}>
-                <FileSignature />
-                {t("contract.signContract")}
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                <Button size="sm" onClick={() => contractId && signMutation.mutate(contractId)} disabled={signMutation.isPending}>
+                  <FileSignature />
+                  {t("contract.signContract")}
+                </Button>
+                {canManage && (
+                  <Button size="sm" variant="outline" onClick={handleExportWord} disabled={exporting}>
+                    {exporting ? <Loader2 className="animate-spin" /> : <FileDown />}
+                    {t("contract.exportWord")}
+                  </Button>
+                )}
+              </div>
 
               {/* Thứ tự tab theo đúng dòng đời hợp đồng: tiền → sản phẩm → báo cáo → tổng kết → điều chỉnh → chốt sổ */}
               <Tabs defaultValue="timeline">

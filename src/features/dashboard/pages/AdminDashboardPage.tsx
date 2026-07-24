@@ -14,7 +14,6 @@ import { KpiCard, KpiCardSkeleton } from "@/components/shared/KpiCard";
 import { ChartCard, ChartCardSkeleton } from "@/components/charts/ChartCard";
 import { AreaChartCardBody } from "@/components/charts/AreaChartCard";
 import { BarChartCardBody } from "@/components/charts/BarChartCard";
-import { PieChartCardBody } from "@/components/charts/PieChartCard";
 import { LineChartCardBody } from "@/components/charts/LineChartCard";
 import { ActivityFeed } from "@/components/shared/ActivityFeed";
 import { RecentNotificationsCard } from "@/components/notifications/RecentNotificationsCard";
@@ -106,9 +105,7 @@ export function AdminDashboardPage() {
                 ]}
               />
             </ChartCard>
-            <ChartCard title={t("dashboard.admin.budgetDist")} description={t("dashboard.admin.budgetDistDesc")}>
-              <PieChartCardBody data={data?.budgetDistribution ?? []} nameKey="category" valueKey="amount" />
-            </ChartCard>
+            {/* Ẩn "Phân bổ kinh phí" (rule tuần 10 — hệ thống không quản tiền). */}
           </>
         )}
       </div>

@@ -812,6 +812,8 @@ export const vi = {
     mWaiting: "Chờ đủ điều kiện",
     mNoDate: "Chưa có ngày",
     signContract: "Ký hợp đồng",
+    exportWord: "Xuất hợp đồng (Word)",
+    exportWordError: "Không xuất được file hợp đồng.",
     createTitle: "Tạo hợp đồng",
     createHint: "Lập hợp đồng nghiên cứu cho đề tài đã duyệt.",
     createBtn: "Tạo hợp đồng",

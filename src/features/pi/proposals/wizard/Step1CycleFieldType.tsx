@@ -105,7 +105,7 @@ export function Step1CycleFieldType({ form }: { form: UseFormReturn<ProposalWiza
           )}
         />
         {errors.trackId && <p className="mt-1 text-xs text-destructive">{errors.trackId.message}</p>}
-        {selectedCycleId && !isTracksLoading && (tracks?.length ?? 0) === 0 && (
+        {Boolean(selectedCycleId) && !isTracksLoading && (tracks?.length ?? 0) === 0 && (
           <p className="mt-1 text-xs text-warning">{t("wizard.step1.noFields")}</p>
         )}
       </div>
