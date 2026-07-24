@@ -1,6 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import type { TFunction } from "i18next";
-import { FolderPlus, Lock, Unlock } from "lucide-react";
+import { CalendarClock, FolderPlus, Lock, Unlock } from "lucide-react";
 import { DataTableColumnHeader } from "@/components/tables/DataTableColumnHeader";
 import { DataTableRowActions, type RowAction } from "@/components/tables/DataTableRowActions";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -16,6 +16,7 @@ interface GetCycleColumnsOptions {
   onOpen: (cycle: Cycle) => void;
   onClose: (cycle: Cycle) => void;
   onAddField: (cycle: Cycle) => void;
+  onExtend: (cycle: Cycle) => void;
 }
 
 export function getCycleColumns({
@@ -26,6 +27,7 @@ export function getCycleColumns({
   onOpen,
   onClose,
   onAddField,
+  onExtend,
 }: GetCycleColumnsOptions): ColumnDef<Cycle>[] {
   return [
     {
@@ -64,6 +66,7 @@ export function getCycleColumns({
         const status = cycle.status?.toUpperCase();
         const extraActions: RowAction[] = [
           { label: t("cycles.manageFields"), icon: FolderPlus, onSelect: () => onAddField(cycle) },
+          { label: t("cycles.extendDeadline"), icon: CalendarClock, onSelect: () => onExtend(cycle) },
         ];
         // Cho MỞ đợt khi chưa mở (PENDING) hoặc đã đóng (CLOSED — mở lại nếu lỡ đóng nhầm).
         if (status !== CYCLE_STATUS.OPEN) {

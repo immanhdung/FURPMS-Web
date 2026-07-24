@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { cycleService } from "@/services/api/cycle.service";
 import { queryKeys } from "@/services/queryKeys";
 import type { ApiError } from "@/types/common";
-import type { CyclePayload } from "@/types/cycle";
+import type { CyclePayload, ExtendDeadlinePayload } from "@/types/cycle";
 
 export function useCyclesQuery() {
   return useQuery({
@@ -65,5 +65,25 @@ export function useCloseCycleMutation() {
       queryClient.invalidateQueries({ queryKey: queryKeys.cycles.all() });
     },
     onError: (error: ApiError) => toast.error(error.message || "Unable to close cycle."),
+  });
+}
+
+export function useDeadlineExtensionsQuery(cycleId: number | null) {
+  return useQuery({
+    queryKey: [...queryKeys.cycles.detail(String(cycleId ?? "")), "deadline-extensions"],
+    queryFn: () => cycleService.listDeadlineExtensions(cycleId as number),
+    enabled: Boolean(cycleId),
+  });
+}
+
+export function useExtendDeadlineMutation(cycleId: number) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: ExtendDeadlinePayload) => cycleService.extendDeadline(cycleId, payload),
+    onSuccess: () => {
+      toast.success("Đã gia hạn deadline đợt.");
+      queryClient.invalidateQueries({ queryKey: queryKeys.cycles.detail(String(cycleId)) });
+    },
+    onError: (error: ApiError) => toast.error(error.message || "Không gia hạn được."),
   });
 }
