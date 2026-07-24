@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useContractQuery, useSignContractMutation } from "@/hooks/useContracts";
 import { useProposalQuery } from "@/hooks/useProposals";
 import { ContractMilestoneTimeline } from "@/features/staff/contracts/ContractMilestoneTimeline";
+import { ContractSignedDocs } from "@/features/staff/contracts/ContractSignedDocs";
 import { ProgressReportsPanel } from "@/features/staff/contracts/ProgressReportsPanel";
 import { DisbursementsPanel } from "@/features/staff/contracts/DisbursementsPanel";
 import { DeliverablesPanel } from "@/features/staff/contracts/DeliverablesPanel";
@@ -117,6 +118,8 @@ export function ContractDetailSheet({ open, onOpenChange, contractId }: Contract
                   </Button>
                 )}
               </div>
+
+              {canManage && <ContractSignedDocs contractId={contract.id} />}
 
               {/* Thứ tự tab theo đúng dòng đời hợp đồng: tiền → sản phẩm → báo cáo → tổng kết → điều chỉnh → chốt sổ */}
               <Tabs defaultValue="timeline">
