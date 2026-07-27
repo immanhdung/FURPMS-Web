@@ -4,6 +4,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CouncilMembersPanel } from "@/features/staff/proposal-reviews/CouncilMembersPanel";
 import { MeetingsPanel } from "@/features/staff/proposal-reviews/MeetingsPanel";
+import { CouncilSlotsPanel } from "@/features/staff/review-board/CouncilSlotsPanel";
 
 interface CouncilDetailSheetProps {
   open: boolean;
@@ -34,12 +35,16 @@ export function CouncilDetailSheet({ open, onOpenChange, councilId, title }: Cou
                 <TabsList>
                   <TabsTrigger value="members">{t("reviewBoard.members")}</TabsTrigger>
                   <TabsTrigger value="meetings">{t("reviewBoard.meetings")}</TabsTrigger>
+                  <TabsTrigger value="slots">{t("reviewBoard.slots")}</TabsTrigger>
                 </TabsList>
                 <TabsContent value="members">
                   <CouncilMembersPanel councilId={councilId} />
                 </TabsContent>
                 <TabsContent value="meetings">
                   <MeetingsPanel councilId={councilId} />
+                </TabsContent>
+                <TabsContent value="slots">
+                  <CouncilSlotsPanel councilId={councilId} />
                 </TabsContent>
               </Tabs>
             )}
