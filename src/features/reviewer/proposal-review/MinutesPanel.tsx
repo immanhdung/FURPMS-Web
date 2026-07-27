@@ -13,6 +13,7 @@ import { StatusBadge } from "@/components/shared/StatusBadge";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { useApproveMinutesMutation, useDecisionQuery, useSaveMinutesMutation } from "@/hooks/useDecision";
 import { useCouncilMembersQuery } from "@/hooks/useCouncilMembers";
+import { useCouncilMeetingsQuery, useMeetingAttendanceQuery, useSaveAttendanceMutation } from "@/hooks/useMeetings";
 import { useAllScoresQuery } from "@/hooks/useReviewScoring";
 import { useFeedbackListQuery } from "@/hooks/useFeedback";
 import { REVIEW_DECISION } from "@/constants/statuses";
@@ -51,6 +52,12 @@ export function MinutesPanel({ councilId, memberRole }: { councilId: string; mem
   const isFeedbackForbidden = (feedbackError as ApiError | null)?.status === 403;
   const membersById = new Map((members ?? []).map((m) => [m.userId, m]));
 
+  // Điểm danh (rule tuần 10): gắn với buổi họp của hội đồng (thường 1 buổi cho vòng xét duyệt).
+  const { data: meetings } = useCouncilMeetingsQuery(councilId);
+  const meetingId = meetings?.[0]?.id ?? null;
+  const { data: attendanceData } = useMeetingAttendanceQuery(meetingId);
+  const saveAttendance = useSaveAttendanceMutation(meetingId ?? "");
+
   const [result, setResult] = useState("");
   const [councilComments, setCouncilComments] = useState("");
   const [recommendations, setRecommendations] = useState("");
@@ -58,6 +65,9 @@ export function MinutesPanel({ councilId, memberRole }: { councilId: string; mem
   const [minutesStyle, setMinutesStyle] = useState<"QA" | "FREEFORM">("FREEFORM");
   const [opinions, setOpinions] = useState<MemberOpinion[]>([]);
   const [loadedDraftId, setLoadedDraftId] = useState<string | null>(null);
+  // memberId (CouncilMember.Id) → { có mặt, lý do vắng }. Mặc định chưa đánh dấu = có mặt.
+  const [attendance, setAttendance] = useState<Record<string, { attended: boolean; reason: string }>>({});
+  const [loadedAttMeetingId, setLoadedAttMeetingId] = useState<string | null>(null);
 
   // Nạp bản nháp đang có vào form (chỉ khi chưa khóa). Set state trong lúc render (thay vì
   // trong effect) là cách React khuyến nghị để đồng bộ từ dữ liệu vừa tải xong.
@@ -88,6 +98,29 @@ export function MinutesPanel({ councilId, memberRole }: { councilId: string; mem
       (members ?? []).map((m, i) => ({ memberName: m.reviewerName ?? "—", academicComment: "", budgetComment: "", order: i }))
     );
 
+  // Nạp điểm danh đã lưu (nếu có) khi đổi buổi họp.
+  if (attendanceData && meetingId && loadedAttMeetingId !== meetingId) {
+    setLoadedAttMeetingId(meetingId);
+    const map: Record<string, { attended: boolean; reason: string }> = {};
+    attendanceData.forEach((a) => {
+      map[a.memberId] = { attended: a.attended ?? true, reason: a.absenceReason ?? "" };
+    });
+    setAttendance(map);
+  }
+  const att = (memberId: string) => attendance[memberId] ?? { attended: true, reason: "" };
+  const setAttended = (memberId: string, attended: boolean) =>
+    setAttendance((prev) => ({ ...prev, [memberId]: { attended, reason: attended ? "" : prev[memberId]?.reason ?? "" } }));
+  const setReason = (memberId: string, reason: string) =>
+    setAttendance((prev) => ({ ...prev, [memberId]: { attended: prev[memberId]?.attended ?? true, reason } }));
+  const saveAttendanceNow = () =>
+    saveAttendance.mutate(
+      (members ?? []).map((m) => ({
+        memberId: m.id,
+        attended: att(m.id).attended,
+        absenceReason: att(m.id).attended ? undefined : att(m.id).reason || undefined,
+      }))
+    );
+
   if (isLoading) return <Skeleton className="h-40 w-full rounded-xl" />;
 
   const locked = Boolean(decision?.finalizedAt);
@@ -106,8 +139,9 @@ export function MinutesPanel({ councilId, memberRole }: { councilId: string; mem
     if (m.status?.toUpperCase() === "INVITED") return t("minutes.mInvited");
     return t("minutes.mPending");
   };
-  const totalMembers = decision?.totalMembers ?? members?.length ?? 0;
-  const attending = decision?.attendingMembers ?? null;
+  const rosterCount = members?.length ?? 0;
+  const presentCount = (members ?? []).filter((m) => att(m.id).attended).length;
+  const canTakeAttendance = canDraft && Boolean(meetingId);
 
   return (
     <div className="space-y-4">
@@ -123,15 +157,40 @@ export function MinutesPanel({ councilId, memberRole }: { councilId: string; mem
                   <tr className="border-b border-border text-left text-xs text-muted-foreground">
                     <th className="pb-1.5 pr-3 font-medium">{t("minutes.mName")}</th>
                     <th className="pb-1.5 pr-3 font-medium">{t("minutes.mDuty")}</th>
-                    <th className="pb-1.5 font-medium">{t("minutes.mStatus")}</th>
+                    <th className="pb-1.5 pr-3 font-medium">{t("minutes.mStatus")}</th>
+                    <th className="pb-1.5 font-medium">{t("minutes.attendance")}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {members.map((m) => (
-                    <tr key={m.id} className="border-b border-border/50 last:border-0">
+                    <tr key={m.id} className="border-b border-border/50 align-top last:border-0">
                       <td className="py-1.5 pr-3 text-foreground">{m.reviewerName ?? "—"}</td>
                       <td className="py-1.5 pr-3 text-muted-foreground">{dutyLabel(m.memberRole)}</td>
-                      <td className="py-1.5 text-muted-foreground">{memberStatusLabel(m)}</td>
+                      <td className="py-1.5 pr-3 text-muted-foreground">{memberStatusLabel(m)}</td>
+                      <td className="py-1.5">
+                        {canTakeAttendance ? (
+                          <div className="space-y-1">
+                            <label className="inline-flex items-center gap-1.5 text-xs text-foreground">
+                              <input type="checkbox" checked={att(m.id).attended} onChange={(e) => setAttended(m.id, e.target.checked)} />
+                              {t("minutes.present")}
+                            </label>
+                            {!att(m.id).attended && (
+                              <Input
+                                className="h-7 text-xs"
+                                placeholder={t("minutes.absenceReason")}
+                                value={att(m.id).reason}
+                                onChange={(e) => setReason(m.id, e.target.value)}
+                              />
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">
+                            {att(m.id).attended
+                              ? t("minutes.present")
+                              : `${t("minutes.absentShort")}${att(m.id).reason ? ` (${att(m.id).reason})` : ""}`}
+                          </span>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -140,17 +199,21 @@ export function MinutesPanel({ councilId, memberRole }: { councilId: string; mem
           ) : (
             <p className="mt-2 text-sm text-muted-foreground">{t("minutes.noMembers")}</p>
           )}
-          <p className="mt-3 text-xs text-muted-foreground">
-            {t("minutes.total")}: <span className="font-medium text-foreground">{totalMembers}</span>
-            {attending != null && (
-              <>
-                {" · "}
-                {t("minutes.attending")}: <span className="font-medium text-foreground">{attending}</span>
-                {" · "}
-                {t("minutes.absent")}: <span className="font-medium text-foreground">{Math.max(totalMembers - attending, 0)}</span>
-              </>
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs text-muted-foreground">
+              {t("minutes.total")}: <span className="font-medium text-foreground">{rosterCount}</span>
+              {" · "}
+              {t("minutes.attending")}: <span className="font-medium text-foreground">{presentCount}</span>
+              {" · "}
+              {t("minutes.absent")}: <span className="font-medium text-foreground">{Math.max(rosterCount - presentCount, 0)}</span>
+            </p>
+            {canTakeAttendance && (
+              <Button type="button" size="sm" variant="outline" disabled={saveAttendance.isPending} onClick={saveAttendanceNow}>
+                {saveAttendance.isPending ? <Loader2 className="animate-spin" /> : <Save />}
+                {t("minutes.saveAttendance")}
+              </Button>
             )}
-          </p>
+          </div>
         </CardContent>
       </Card>
 

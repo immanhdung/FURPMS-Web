@@ -4,7 +4,7 @@ import { meetingService } from "@/services/api/meeting.service";
 import { googleMeetService } from "@/services/api/google-meet.service";
 import { queryKeys } from "@/services/queryKeys";
 import type { ApiError } from "@/types/common";
-import type { ScheduleMeetingPayload } from "@/types/meeting";
+import type { AttendanceEntry, ScheduleMeetingPayload } from "@/types/meeting";
 
 export function useMeetingsQuery() {
   return useQuery({
@@ -27,6 +27,29 @@ export function useScheduleConflictsQuery(councilId: string | null) {
     queryKey: [...queryKeys.meetings.byCouncil(councilId ?? ""), "conflicts"],
     queryFn: () => meetingService.scheduleConflicts(councilId as string),
     enabled: Boolean(councilId),
+  });
+}
+
+const attendanceKey = (meetingId: string) => ["meeting-attendance", meetingId] as const;
+
+/** Điểm danh buổi họp (rule tuần 10) — theo DS hội đồng. */
+export function useMeetingAttendanceQuery(meetingId: string | null) {
+  return useQuery({
+    queryKey: attendanceKey(meetingId ?? ""),
+    queryFn: () => meetingService.getAttendance(meetingId as string),
+    enabled: Boolean(meetingId),
+  });
+}
+
+export function useSaveAttendanceMutation(meetingId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (entries: AttendanceEntry[]) => meetingService.saveAttendance(meetingId, entries),
+    onSuccess: () => {
+      toast.success("Đã lưu điểm danh.");
+      queryClient.invalidateQueries({ queryKey: attendanceKey(meetingId) });
+    },
+    onError: (error: ApiError) => toast.error(error.message || "Không lưu được điểm danh."),
   });
 }
 

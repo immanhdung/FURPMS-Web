@@ -30,6 +30,15 @@ export const MEETING_MODES = [
 
 export const IN_PERSON = "IN_PERSON";
 
+/** Điểm danh 1 thành viên trong buổi họp (memberId = CouncilMember.Id). */
+export interface AttendanceEntry {
+  memberId: string;
+  memberName?: string | null;
+  memberRole?: string | null;
+  attended?: boolean | null;
+  absenceReason?: string | null;
+}
+
 /** Cảnh báo 1 giảng viên trùng lịch giữa hội đồng này và hội đồng khác. */
 export interface ScheduleConflict {
   memberUserId: string;
