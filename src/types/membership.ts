@@ -11,4 +11,8 @@ export interface MyMembership {
   projectId: string;
   proposalTitleVI?: string | null;
   proposalStatus?: string | null;
+  piName?: string | null;
+  trackName?: string | null;
+  createdAt?: string | null;
+  nextMeetingAt?: string | null;
 }

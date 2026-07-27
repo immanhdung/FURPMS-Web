@@ -9,6 +9,8 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMyMembershipsQuery } from "@/hooks/useMemberships";
 import { useCouncilMeetingsQuery } from "@/hooks/useMeetings";
+import { useProposalQuery } from "@/hooks/useProposals";
+import { ProposalSummaryView } from "@/features/pi/proposals/ProposalSummaryView";
 import { RubricScoringForm } from "@/features/reviewer/proposal-review/RubricScoringForm";
 import { AcceptanceEvaluationForm } from "@/features/reviewer/proposal-review/AcceptanceEvaluationForm";
 import { MinutesPanel } from "@/features/reviewer/proposal-review/MinutesPanel";
@@ -25,6 +27,8 @@ export function ProposalReviewWorkspace() {
   const { data: meetings } = useCouncilMeetingsQuery(councilId ?? null);
 
   const membership = memberships?.find((m) => m.councilId === councilId);
+  // Thông tin đề tài PI nhập (rule tuần 10 — reviewer cần đọc, không chỉ file đính kèm).
+  const { data: proposal } = useProposalQuery(membership?.proposalId ?? null);
 
   if (isLoading) return <PageLoader label="Loading review..." />;
 
@@ -100,12 +104,21 @@ export function ProposalReviewWorkspace() {
             </div>
           )}
 
-          <Tabs defaultValue={isSecretary ? "minutes" : "scoring"}>
+          <Tabs defaultValue="info">
             <TabsList>
+              <TabsTrigger value="info">{t("reviewWorkspace.tabInfo")}</TabsTrigger>
               {!isSecretary && <TabsTrigger value="scoring">{t("reviewWorkspace.tabScoring")}</TabsTrigger>}
               {isAcceptanceRound && <TabsTrigger value="acceptance">{t("reviewWorkspace.tabAcceptance")}</TabsTrigger>}
               <TabsTrigger value="minutes">{t("reviewWorkspace.tabMinutes")}</TabsTrigger>
             </TabsList>
+
+            <TabsContent value="info">
+              {proposal ? (
+                <ProposalSummaryView data={proposal} />
+              ) : (
+                <p className="text-sm text-muted-foreground">{t("reviewWorkspace.loadingInfo")}</p>
+              )}
+            </TabsContent>
 
             {!isSecretary && (
               <TabsContent value="scoring">
