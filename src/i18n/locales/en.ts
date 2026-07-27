@@ -359,7 +359,7 @@ export const en = {
     noRounds: "No review rounds",
     noRoundsDesc: "Click \"New round\" to open a review round for this field.",
     dim: { SCIENCE: "Science", FINANCE: "Finance" },
-    type: { SCREENING: "Screening", REVIEW: "Review", ACCEPTANCE: "Acceptance" },
+    type: { SCREENING: "Screening", REVIEW: "Proposal review", ACCEPTANCE: "Acceptance" },
     addProject: "Add proposal",
     addProjectTitle: "Add proposal to round",
     addProjectDesc: "Pick a proposal of this field to include in this round.",

@@ -362,7 +362,7 @@ export const vi = {
     noRounds: "Chưa có vòng chấm",
     noRoundsDesc: "Bấm \"Tạo vòng\" để mở vòng chấm cho lĩnh vực này.",
     dim: { SCIENCE: "Khoa học", FINANCE: "Tài chính" },
-    type: { SCREENING: "Sơ loại", REVIEW: "Chuyên sâu", ACCEPTANCE: "Nghiệm thu" },
+    type: { SCREENING: "Sơ loại", REVIEW: "Xét duyệt đề cương", ACCEPTANCE: "Nghiệm thu" },
     addProject: "Thêm đề tài",
     addProjectTitle: "Thêm đề tài vào vòng",
     addProjectDesc: "Chọn đề tài của lĩnh vực để đưa vào vòng chấm này.",

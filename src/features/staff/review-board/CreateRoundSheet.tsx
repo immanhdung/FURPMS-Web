@@ -4,8 +4,8 @@ import { FormSheet } from "@/components/shared/FormSheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCreateTrackRoundMutation } from "@/hooks/useReviewBoard";
 
-const DIMENSIONS = ["SCIENCE", "FINANCE"];
-const ROUND_TYPES = ["SCREENING", "REVIEW", "ACCEPTANCE"];
+// Rule tuần 10 (#16): bỏ dimension FINANCE (chỉ SCIENCE) + chỉ 2 loại vòng: Xét duyệt đề cương + Nghiệm thu.
+const ROUND_TYPES = ["REVIEW", "ACCEPTANCE"];
 
 interface CreateRoundSheetProps {
   open: boolean;
@@ -20,14 +20,13 @@ interface CreateRoundSheetProps {
  */
 export function CreateRoundSheet({ open, onOpenChange, cycleId, trackId }: CreateRoundSheetProps) {
   const { t } = useTranslation();
-  const [dimension, setDimension] = useState("SCIENCE");
   const [roundType, setRoundType] = useState("REVIEW");
   const createMutation = useCreateTrackRoundMutation(cycleId, trackId);
 
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
     createMutation.mutate(
-      { dimension, roundType },
+      { dimension: "SCIENCE", roundType }, // dimension luôn SCIENCE (bỏ FINANCE — rule #16)
       { onSuccess: () => onOpenChange(false) }
     );
   };
@@ -43,22 +42,6 @@ export function CreateRoundSheet({ open, onOpenChange, cycleId, trackId }: Creat
       isSubmitting={createMutation.isPending}
       submitLabel={t("reviewBoard.newRound")}
     >
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("reviewBoard.dimension")}</label>
-        <Select value={dimension} onValueChange={setDimension}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {DIMENSIONS.map((d) => (
-              <SelectItem key={d} value={d}>
-                {t(`reviewBoard.dim.${d}`)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
       <div>
         <label className="mb-1.5 block text-sm font-medium text-foreground">{t("reviewBoard.roundType")}</label>
         <Select value={roundType} onValueChange={setRoundType}>

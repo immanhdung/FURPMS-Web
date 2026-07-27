@@ -13,9 +13,7 @@ import type { ReviewRoundType } from "@/constants/statuses";
 const NONE_VALUE = "none";
 
 const schema = z.object({
-  dimension: z.enum([ROUND_DIMENSION.SCIENCE, ROUND_DIMENSION.FINANCE], {
-    message: "Select a dimension",
-  }),
+  dimension: z.enum([ROUND_DIMENSION.SCIENCE]), // rule #16: bỏ FINANCE, chỉ SCIENCE
   prerequisiteRoundId: z.string().optional(),
 });
 
@@ -73,7 +71,7 @@ export function CreateReviewRoundSheet({
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { dimension: undefined, prerequisiteRoundId: undefined },
+    defaultValues: { dimension: ROUND_DIMENSION.SCIENCE, prerequisiteRoundId: undefined },
   });
 
   const onSubmit = (values: FormValues) => {
@@ -118,28 +116,7 @@ export function CreateReviewRoundSheet({
             </p>
           </div>
 
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">{t("reviewBoard.dimension")}</label>
-            <Controller
-              control={control}
-              name="dimension"
-              render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger aria-invalid={Boolean(errors.dimension)}>
-                    <SelectValue placeholder={t("reviewBoard.selectDimension")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.values(ROUND_DIMENSION).map((dimension) => (
-                      <SelectItem key={dimension} value={dimension}>
-                        {dimension}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {errors.dimension && <p className="mt-1 text-xs text-destructive">{errors.dimension.message}</p>}
-          </div>
+          {/* Phương diện: luôn SCIENCE (bỏ FINANCE — rule #16), không cần chọn. */}
 
           {existingRounds.length > 0 && (
             <div>

@@ -1,4 +1,16 @@
-# React + Vite
+# FURPMS-Web (React + Vite)
+
+## Chạy local
+```bash
+npm install
+# (tùy chọn) cấu hình API: cp .env.example .env  — mặc định đã trỏ http://localhost:5068/api
+npm run dev   # http://localhost:5173
+```
+- Cần **BE** chạy ở `:5068` (repo `FURPMS_BE`: `dotnet run --project FURPMS.API`) + **SQL Server docker** (`localhost:1433`).
+- Thiếu `.env` vẫn chạy được (mặc định trỏ BE local, không mock — xem `src/constants/env.ts`). Sửa API URL / bật mock qua `.env`.
+- ⚠️ `.env` bị gitignore (đúng) — đừng commit; dùng `.env.example` làm mẫu.
+
+---
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
