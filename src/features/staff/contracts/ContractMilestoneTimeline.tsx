@@ -32,7 +32,8 @@ export function ContractMilestoneTimeline({ contract }: { contract: Contract }) 
       icon: FileSignature,
       title: t("contract.timelineSign"),
       date: contract.startDate,
-      href: contract.econtractUrl,
+      // Chỉ linkify khi là URL thật — tránh mốc bấm được nhưng nhảy tới giá trị rác (vd id "12") → không ra gì.
+      href: /^https?:\/\//i.test(contract.econtractUrl ?? "") ? contract.econtractUrl : null,
       badge: contract.status,
       done: Boolean(contract.startDate),
     },
