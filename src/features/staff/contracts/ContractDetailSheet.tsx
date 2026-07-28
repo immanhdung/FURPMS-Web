@@ -61,14 +61,14 @@ export function ContractDetailSheet({ open, onOpenChange, contractId }: Contract
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent resizable defaultWidth={640} className="flex w-full flex-col sm:max-w-2xl">
+      <SheetContent resizable defaultWidth={820} className="flex w-full flex-col sm:max-w-4xl">
         <SheetHeader>
-          <SheetTitle>{contract?.contractNumber || contract?.scopeTitle || "Contract"}</SheetTitle>
-          <SheetDescription>{proposal?.titleEN || proposal?.titleVI || "Loading proposal..."}</SheetDescription>
+          <SheetTitle>{contract?.contractNumber || contract?.scopeTitle || t("contract.detailTitle")}</SheetTitle>
+          <SheetDescription>{proposal?.titleEN || proposal?.titleVI || t("contract.loadingProposal")}</SheetDescription>
         </SheetHeader>
 
         {isLoading ? (
-          <PageLoader label="Loading contract..." />
+          <PageLoader label={t("contract.loadingContract")} />
         ) : !contract ? null : (
           <ScrollArea className="flex-1 px-4">
             <div className="space-y-5 pb-6">
@@ -79,29 +79,30 @@ export function ContractDetailSheet({ open, onOpenChange, contractId }: Contract
                 </span>
                 {contract.maxExtensionMonths != null && (
                   <span className="text-xs text-muted-foreground">
-                    Max extension: {contract.maxExtensionMonths}mo
+                    {t("contract.maxExtension", { n: contract.maxExtensionMonths })}
                   </span>
                 )}
               </div>
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground">Side A representative</p>
-                  <p className="mt-0.5 text-sm text-foreground">{contract.sideARepresentative ?? "-"}</p>
+                  <p className="text-xs font-medium text-muted-foreground">{t("contract.sideARep")}</p>
+                  <p className="mt-0.5 text-sm text-foreground">{contract.sideARepresentative || "—"}</p>
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground">E-contract</p>
-                  {contract.econtractUrl ? (
+                  <p className="text-xs font-medium text-muted-foreground">{t("contract.econtract")}</p>
+                  {/* Chỉ hiện link khi là URL thật — tránh render giá trị rác (vd id "12") thành link. */}
+                  {contract.econtractUrl && /^https?:\/\//i.test(contract.econtractUrl) ? (
                     <a
                       href={contract.econtractUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="mt-0.5 block text-sm text-primary hover:underline"
+                      className="mt-0.5 block truncate text-sm text-primary hover:underline"
                     >
-                      {contract.econtractUrl}
+                      {t("contract.openEcontract")}
                     </a>
                   ) : (
-                    <p className="mt-0.5 text-sm text-foreground">-</p>
+                    <p className="mt-0.5 text-sm text-foreground">{contract.econtractUrl || "—"}</p>
                   )}
                 </div>
               </div>
@@ -123,14 +124,15 @@ export function ContractDetailSheet({ open, onOpenChange, contractId }: Contract
 
               {/* Thứ tự tab theo đúng dòng đời hợp đồng: tiền → sản phẩm → báo cáo → tổng kết → điều chỉnh → chốt sổ */}
               <Tabs defaultValue="timeline">
-                <TabsList className="flex-wrap">
-                  <TabsTrigger value="timeline">{t("contract.tabs.timeline")}</TabsTrigger>
-                  <TabsTrigger value="disbursements">{t("contract.tabs.disbursements")}</TabsTrigger>
-                  <TabsTrigger value="deliverables">{t("contract.tabs.deliverables")}</TabsTrigger>
-                  <TabsTrigger value="progress">{t("contract.tabs.progressReports")}</TabsTrigger>
-                  <TabsTrigger value="final">{t("contract.tabs.finalReport")}</TabsTrigger>
-                  <TabsTrigger value="amendments">{t("contract.tabs.amendments")}</TabsTrigger>
-                  <TabsTrigger value="settlement">{t("contract.tabs.settlement")}</TabsTrigger>
+                {/* Lưới đều 7 tab — sheet rộng thì 4/hàng, hẹp thì 2/hàng. Mọi tab hiện hết, không cắt. */}
+                <TabsList className="grid h-auto w-full grid-cols-2 gap-1 sm:grid-cols-4">
+                  <TabsTrigger value="timeline" className="w-full text-xs">{t("contract.tabs.timeline")}</TabsTrigger>
+                  <TabsTrigger value="disbursements" className="w-full text-xs">{t("contract.tabs.disbursements")}</TabsTrigger>
+                  <TabsTrigger value="deliverables" className="w-full text-xs">{t("contract.tabs.deliverables")}</TabsTrigger>
+                  <TabsTrigger value="progress" className="w-full text-xs">{t("contract.tabs.progressReports")}</TabsTrigger>
+                  <TabsTrigger value="final" className="w-full text-xs">{t("contract.tabs.finalReport")}</TabsTrigger>
+                  <TabsTrigger value="amendments" className="w-full text-xs">{t("contract.tabs.amendments")}</TabsTrigger>
+                  <TabsTrigger value="settlement" className="w-full text-xs">{t("contract.tabs.settlement")}</TabsTrigger>
                 </TabsList>
                 <TabsContent value="timeline">
                   <ContractMilestoneTimeline contract={contract} />

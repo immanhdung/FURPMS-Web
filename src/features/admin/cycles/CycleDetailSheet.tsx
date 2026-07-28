@@ -28,7 +28,20 @@ export function CycleDetailSheet({ open, onOpenChange, cycleId }: CycleDetailShe
         { label: t("common.status"), value: cycle && <StatusBadge status={cycle.status} /> },
         { label: t("cycles.researchType"), value: researchTypeName ?? cycle?.researchTypeId },
         { label: t("cycles.submissionStart"), value: cycle ? formatDate(cycle.submissionStartDate) : undefined },
-        { label: t("cycles.submissionDeadline"), value: cycle ? formatDate(cycle.submissionDeadline) : undefined },
+        {
+          label: t("cycles.submissionDeadline"),
+          value: cycle ? (
+            <span>
+              {formatDate(cycle.submissionDeadline)}
+              {cycle.extensionCount ? (
+                <span className="ml-2 text-xs text-muted-foreground">
+                  ({t("cycles.extendedTimes", { n: cycle.extensionCount })} · {t("cycles.originalDeadline")}:{" "}
+                  {formatDate(cycle.originalDeadline)})
+                </span>
+              ) : null}
+            </span>
+          ) : undefined,
+        },
         { label: t("common.description"), value: cycle?.description },
       ]}
     />

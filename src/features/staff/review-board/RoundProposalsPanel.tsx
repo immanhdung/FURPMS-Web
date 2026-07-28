@@ -21,7 +21,11 @@ export function RoundProposalsPanel({ round, cycleId, trackId, trackProjects }: 
 
   const inRound = new Set(round.projects.map((p) => p.projectId));
   const available = trackProjects.filter((p) => !inRound.has(p.projectId));
-  const canAdd = round.status?.toUpperCase() === ROUND_STATUS.PENDING;
+  // Cho thêm đề tài khi vòng còn PENDING *hoặc* OPEN (đề tài nộp trễ sau khi mở vòng
+  // vẫn phải kéo vào được — rule #17 không đóng băng hội đồng). Chỉ chặn khi CLOSED.
+  // BE (AddProjectToRoundAsync) không gate theo status nên chỉ cần mở nút ở FE.
+  const status = round.status?.toUpperCase();
+  const canAdd = status === ROUND_STATUS.PENDING || status === ROUND_STATUS.OPEN;
 
   return (
     <div className="rounded-xl border border-border p-3">

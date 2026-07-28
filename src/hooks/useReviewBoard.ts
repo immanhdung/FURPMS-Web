@@ -97,6 +97,18 @@ export function useCreateCouncilPackageMutation(cycleId?: number, trackId?: numb
   });
 }
 
+export function useDeleteCouncilMutation(cycleId?: number, trackId?: number) {
+  const invalidate = useInvalidateBoard(cycleId, trackId);
+  return useMutation({
+    mutationFn: (councilId: string) => reviewBoardService.deleteCouncil(councilId),
+    onSuccess: () => {
+      toast.success("Đã xóa hội đồng.");
+      invalidate();
+    },
+    onError: (error: ApiError) => toast.error(error.message || "Không xóa được hội đồng."),
+  });
+}
+
 export function useAssignProjectToCouncilMutation(cycleId?: number, trackId?: number) {
   const invalidate = useInvalidateBoard(cycleId, trackId);
   return useMutation({

@@ -16,6 +16,12 @@ export const councilMemberService = {
       .patch<ApiResponse<CouncilMember>>(`/council-members/${memberId}/respond`, payload)
       .then((res) => res.data.data),
 
+  // Staff/Admin xác nhận thay (reviewer đồng ý ngoài hệ thống / tiện demo).
+  confirmOnBehalf: (memberId: string) =>
+    axiosClient
+      .post<ApiResponse<CouncilMember>>(`/council-members/${memberId}/confirm-on-behalf`)
+      .then((res) => res.data.data),
+
   remove: (memberId: string) =>
     axiosClient.delete<ApiResponse<null>>(`/council-members/${memberId}`).then((res) => res.data),
 };

@@ -42,6 +42,16 @@ export function ExtendDeadlineDialog({
   // Deadline hiệu lực hiện tại = bản gia hạn mới nhất, hoặc ngày gốc của đợt.
   const effective = history && history.length > 0 ? history[0].newDeadline : cycle?.submissionDeadline;
 
+  // Nút tua nhanh — native date picker chỉ nhích từng ngày, đây cho nhảy tuần/tháng/năm 1 phát.
+  // Mốc tính = ngày đang chọn, hoặc hạn hiệu lực, hoặc hôm nay.
+  const bump = (opts: { days?: number; months?: number; years?: number }) => {
+    const base = new Date(newDeadline || effective || new Date().toISOString().slice(0, 10));
+    if (opts.days) base.setDate(base.getDate() + opts.days);
+    if (opts.months) base.setMonth(base.getMonth() + opts.months);
+    if (opts.years) base.setFullYear(base.getFullYear() + opts.years);
+    setNewDeadline(base.toISOString().slice(0, 10));
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -56,6 +66,20 @@ export function ExtendDeadlineDialog({
               {t("cycles.newDeadline")} <span className="text-destructive">*</span>
             </label>
             <Input id="new-deadline" type="date" value={newDeadline} onChange={(e) => setNewDeadline(e.target.value)} />
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
+              <Button type="button" size="sm" variant="outline" className="h-7 text-xs" onClick={() => bump({ days: 7 })}>
+                +1 {t("cycles.week")}
+              </Button>
+              <Button type="button" size="sm" variant="outline" className="h-7 text-xs" onClick={() => bump({ months: 1 })}>
+                +1 {t("cycles.month")}
+              </Button>
+              <Button type="button" size="sm" variant="outline" className="h-7 text-xs" onClick={() => bump({ months: 3 })}>
+                +3 {t("cycles.month")}
+              </Button>
+              <Button type="button" size="sm" variant="outline" className="h-7 text-xs" onClick={() => bump({ years: 1 })}>
+                +1 {t("cycles.year")}
+              </Button>
+            </div>
           </div>
           <div>
             <label htmlFor="extend-reason" className="mb-1.5 block text-sm font-medium text-foreground">

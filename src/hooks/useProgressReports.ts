@@ -29,6 +29,30 @@ export function useCreateProgressReportMutation(contractId: string) {
   });
 }
 
+export function useGenerateProgressRoundsMutation(contractId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => progressReportService.generate(contractId),
+    onSuccess: () => {
+      toast.success("Đã tạo các kỳ báo cáo định kỳ.");
+      queryClient.invalidateQueries({ queryKey: queryKeys.progressReports.list(contractId) });
+    },
+    onError: (error: ApiError) => toast.error(error.message || "Không tạo được kỳ báo cáo."),
+  });
+}
+
+export function useUpdateProgressReportMutation(contractId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: CreateProgressReportPayload }) =>
+      progressReportService.update(id, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.progressReports.list(contractId) });
+    },
+    onError: (error: ApiError) => toast.error(error.message || "Không lưu được báo cáo."),
+  });
+}
+
 export function useScheduleProgressReportMutation(contractId: string) {
   const queryClient = useQueryClient();
   return useMutation({

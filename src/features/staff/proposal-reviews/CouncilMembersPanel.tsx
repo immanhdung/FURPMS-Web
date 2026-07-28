@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import {
+  useConfirmOnBehalfMutation,
   useCouncilMembersQuery,
   useRemoveCouncilMemberMutation,
   useRespondMembershipMutation,
@@ -26,6 +27,7 @@ export function CouncilMembersPanel({ councilId, trackId }: CouncilMembersPanelP
   const { data: members, isLoading } = useCouncilMembersQuery(councilId);
   const sendInvitationsMutation = useSendInvitationsMutation(councilId);
   const respondMutation = useRespondMembershipMutation(councilId);
+  const confirmOnBehalfMutation = useConfirmOnBehalfMutation(councilId);
   const removeMutation = useRemoveCouncilMemberMutation(councilId);
 
   const [addOpen, setAddOpen] = useState(false);
@@ -75,27 +77,31 @@ export function CouncilMembersPanel({ councilId, trackId }: CouncilMembersPanelP
 
               <div className="flex shrink-0 items-center gap-1.5">
                 {member.status && <StatusBadge status={member.status} />}
+                {/* "Xác nhận thay": Staff bấm hộ (reviewer đồng ý ngoài hệ thống / tiện demo).
+                    Trước đây nút này gọi /respond → BE chặn 403 vì Staff không phải chính reviewer;
+                    giờ dùng endpoint confirm-on-behalf. Hiện cả khi ASSIGNED lẫn INVITED. */}
+                {["assigned", "invited"].includes(member.status?.toLowerCase() ?? "") && (
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    title={t("reviewBoard.confirmOnBehalf")}
+                    aria-label={t("reviewBoard.confirmOnBehalf")}
+                    disabled={confirmOnBehalfMutation.isPending}
+                    onClick={() => confirmOnBehalfMutation.mutate(member.id)}
+                  >
+                    <CheckCircle2 className="text-success" />
+                  </Button>
+                )}
                 {member.status?.toLowerCase() === "invited" && (
-                  <>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      title={t("reviewBoard.markAccepted")}
-                      aria-label={t("reviewBoard.markAccepted")}
-                      onClick={() => respondMutation.mutate({ memberId: member.id, payload: { accept: true } })}
-                    >
-                      <CheckCircle2 className="text-success" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      title={t("reviewBoard.markDeclined")}
-                      aria-label={t("reviewBoard.markDeclined")}
-                      onClick={() => respondMutation.mutate({ memberId: member.id, payload: { accept: false } })}
-                    >
-                      <XCircle className="text-danger" />
-                    </Button>
-                  </>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    title={t("reviewBoard.markDeclined")}
+                    aria-label={t("reviewBoard.markDeclined")}
+                    onClick={() => respondMutation.mutate({ memberId: member.id, payload: { accept: false } })}
+                  >
+                    <XCircle className="text-danger" />
+                  </Button>
                 )}
                 <Button variant="ghost" size="icon-sm" title={t("reviewBoard.removeMember")} aria-label={t("reviewBoard.removeMember")} onClick={() => setRemovingMember(member)}>
                   <UserX />

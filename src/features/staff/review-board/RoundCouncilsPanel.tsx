@@ -6,9 +6,9 @@ import { StatusBadge } from "@/components/shared/StatusBadge";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { CouncilDetailSheet } from "@/features/staff/review-board/CouncilDetailSheet";
 import { CreateCouncilSheet } from "@/features/staff/review-board/CreateCouncilSheet";
-import { useDeleteRoundMutation, useOpenBoardRoundMutation } from "@/hooks/useReviewBoard";
+import { useDeleteCouncilMutation, useDeleteRoundMutation, useOpenBoardRoundMutation } from "@/hooks/useReviewBoard";
 import { ROUND_STATUS } from "@/constants/statuses";
-import type { ReviewBoardRound } from "@/types/review-board";
+import type { ReviewBoardCouncil, ReviewBoardRound } from "@/types/review-board";
 
 interface RoundCouncilsPanelProps {
   round: ReviewBoardRound;
@@ -20,10 +20,12 @@ export function RoundCouncilsPanel({ round, cycleId, trackId }: RoundCouncilsPan
   const { t } = useTranslation();
   const openMutation = useOpenBoardRoundMutation(cycleId, trackId);
   const deleteMutation = useDeleteRoundMutation(cycleId, trackId);
+  const deleteCouncilMutation = useDeleteCouncilMutation(cycleId, trackId);
 
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [manageCouncilId, setManageCouncilId] = useState<string | null>(null);
+  const [councilToDelete, setCouncilToDelete] = useState<{ council: ReviewBoardCouncil; index: number } | null>(null);
 
   const canOpen = round.status?.toUpperCase() === ROUND_STATUS.PENDING;
   const manageIndex = round.councils.findIndex((c) => c.id === manageCouncilId);
@@ -64,10 +66,22 @@ export function RoundCouncilsPanel({ round, cycleId, trackId }: RoundCouncilsPan
                   {t("reviewBoard.councilProjectCount", { count: council.projectIds.length })}
                 </span>
               </div>
-              <Button size="sm" variant="ghost" className="h-7 shrink-0 gap-1 text-xs" onClick={() => setManageCouncilId(council.id)}>
-                {t("reviewBoard.manage")}
-                <ChevronRight className="size-3.5" />
-              </Button>
+              <div className="flex shrink-0 items-center gap-1">
+                <Button size="sm" variant="ghost" className="h-7 gap-1 text-xs" onClick={() => setManageCouncilId(council.id)}>
+                  {t("reviewBoard.manage")}
+                  <ChevronRight className="size-3.5" />
+                </Button>
+                <Button
+                  size="icon-sm"
+                  variant="ghost"
+                  className="text-danger"
+                  aria-label={t("reviewBoard.deleteCouncil")}
+                  title={t("reviewBoard.deleteCouncil")}
+                  onClick={() => setCouncilToDelete({ council, index })}
+                >
+                  <Trash2 />
+                </Button>
+              </div>
             </li>
           ))}
         </ul>
@@ -87,6 +101,20 @@ export function RoundCouncilsPanel({ round, cycleId, trackId }: RoundCouncilsPan
         confirmLabel={t("common.delete")}
         isLoading={deleteMutation.isPending}
         onConfirm={() => deleteMutation.mutate(round.id, { onSuccess: () => setConfirmDelete(false) })}
+      />
+
+      <ConfirmDialog
+        open={Boolean(councilToDelete)}
+        onOpenChange={(o) => !o && setCouncilToDelete(null)}
+        title={t("reviewBoard.deleteCouncil")}
+        description={t("reviewBoard.deleteCouncilConfirm", { n: (councilToDelete?.index ?? 0) + 1 })}
+        variant="destructive"
+        confirmLabel={t("common.delete")}
+        isLoading={deleteCouncilMutation.isPending}
+        onConfirm={() =>
+          councilToDelete &&
+          deleteCouncilMutation.mutate(councilToDelete.council.id, { onSuccess: () => setCouncilToDelete(null) })
+        }
       />
 
       <CreateCouncilSheet

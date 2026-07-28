@@ -84,6 +84,15 @@ export function RubricScoringForm({ councilId, roundType }: RubricScoringFormPro
       toast.error(t("review.noRubricRound"));
       return;
     }
+    // Validate rõ criterion nào vượt thang điểm — trước đây để BE trả 400 chung, reviewer phải tự mò.
+    const invalid = activeCriteria.find((c) => {
+      const v = scores[c.id]?.givenScore ?? 0;
+      return v < 0 || v > c.maxScore;
+    });
+    if (invalid) {
+      toast.error(t("review.scoreRange", { name: invalid.criterionName, max: invalid.maxScore }));
+      return;
+    }
     const scoreDetails: ScoreDetailPayload[] = activeCriteria.map((criterion) => ({
       criterionId: criterion.id,
       givenScore: scores[criterion.id]?.givenScore ?? 0,
@@ -122,11 +131,15 @@ export function RubricScoringForm({ councilId, roundType }: RubricScoringFormPro
                     max={criterion.maxScore}
                     step="0.5"
                     className="w-20"
-                    value={scores[criterion.id]?.givenScore ?? 0}
+                    // Hiện rỗng khi 0 (thay vì "0" dính đầu gây "05" khó chịu khi gõ tay); rỗng = 0 lúc nộp.
+                    value={scores[criterion.id]?.givenScore || ""}
                     onChange={(e) =>
                       setScores((prev) => ({
                         ...prev,
-                        [criterion.id]: { ...prev[criterion.id], givenScore: Number(e.target.value) },
+                        [criterion.id]: {
+                          ...prev[criterion.id],
+                          givenScore: e.target.value === "" ? 0 : Number(e.target.value),
+                        },
                       }))
                     }
                   />

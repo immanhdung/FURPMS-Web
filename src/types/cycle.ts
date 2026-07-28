@@ -6,7 +6,9 @@ export interface Cycle {
   academicYear: string;
   researchTypeId: number;
   submissionStartDate: string;
-  submissionDeadline: string;
+  submissionDeadline: string;      // hạn HIỆU LỰC (sau gia hạn nếu có)
+  originalDeadline?: string | null; // hạn gốc — chỉ có khi đã gia hạn
+  extensionCount?: number;          // số lần gia hạn (0/undefined = chưa gia hạn)
   description?: string | null;
   status: CycleStatus;
 }

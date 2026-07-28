@@ -1,6 +1,7 @@
 export interface ProgressReport {
   id: string;
   contractId: string;
+  reportRound?: number | null;
   reportingPeriodStart?: string | null;
   reportingPeriodEnd?: string | null;
   completedContent?: string | null;

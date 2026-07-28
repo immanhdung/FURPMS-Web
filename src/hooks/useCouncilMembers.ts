@@ -38,6 +38,18 @@ export function useRespondMembershipMutation(councilId: string) {
   });
 }
 
+export function useConfirmOnBehalfMutation(councilId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (memberId: string) => councilMemberService.confirmOnBehalf(memberId),
+    onSuccess: () => {
+      toast.success("Đã xác nhận thay thành viên.");
+      queryClient.invalidateQueries({ queryKey: queryKeys.councilMembers.list(councilId) });
+    },
+    onError: (error: ApiError) => toast.error(error.message || "Không thể xác nhận thay."),
+  });
+}
+
 export function useRemoveCouncilMemberMutation(councilId: string) {
   const queryClient = useQueryClient();
   return useMutation({

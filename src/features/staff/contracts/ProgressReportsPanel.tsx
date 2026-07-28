@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { CalendarClock, ClipboardCheck, ExternalLink, FileBarChart } from "lucide-react";
+import { CalendarClock, ClipboardCheck, ExternalLink, FileBarChart, CalendarPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { useProgressReportsQuery } from "@/hooks/useProgressReports";
+import { useGenerateProgressRoundsMutation, useProgressReportsQuery } from "@/hooks/useProgressReports";
 import { ScheduleProgressReportDialog } from "@/features/staff/contracts/ScheduleProgressReportDialog";
 import { EvaluateProgressReportDialog } from "@/features/staff/contracts/EvaluateProgressReportDialog";
 import { formatDate, formatDateTime } from "@/utils/format";
@@ -13,12 +13,21 @@ import { formatDate, formatDateTime } from "@/utils/format";
 export function ProgressReportsPanel({ contractId }: { contractId: string }) {
   const { t } = useTranslation();
   const { data: reports, isLoading } = useProgressReportsQuery(contractId);
+  const generateMutation = useGenerateProgressRoundsMutation(contractId);
 
   const [schedulingReportId, setSchedulingReportId] = useState<string | null>(null);
   const [evaluatingReportId, setEvaluatingReportId] = useState<string | null>(null);
 
   return (
     <div className="space-y-3">
+      {/* QĐ543 Điều 10: số kỳ báo cáo cố định theo loại (Ứng dụng 2 / Cơ bản 1). Staff mở kỳ, PI điền. */}
+      <div className="flex justify-end">
+        <Button variant="outline" size="sm" onClick={() => generateMutation.mutate()} disabled={generateMutation.isPending}>
+          <CalendarPlus />
+          {t("reports.generateRounds")}
+        </Button>
+      </div>
+
       {isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 2 }).map((_, index) => (

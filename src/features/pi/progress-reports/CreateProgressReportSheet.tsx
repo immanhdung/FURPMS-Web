@@ -1,31 +1,31 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FormSheet } from "@/components/shared/FormSheet";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useCreateProgressReportMutation, useSubmitProgressReportMutation } from "@/hooks/useProgressReports";
+import { useSubmitProgressReportMutation, useUpdateProgressReportMutation } from "@/hooks/useProgressReports";
+import { formatDate } from "@/utils/format";
+import type { ProgressReport } from "@/types/progress-report";
 
 interface CreateProgressReportSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   contractId: string;
+  /** Kỳ báo cáo (do Staff sinh sẵn theo QĐ543) mà PI đang điền — kỳ/thời gian đã cố định. */
+  report: ProgressReport | null;
 }
 
 /**
- * The backend has no endpoint to edit a progress report's content after creation (only create,
- * schedule, evaluate, submit) — so this form does create + submit as one action instead of
- * leaving an uneditable "draft" sitting around. All editing happens here, client-side, before
- * anything is sent; once submitted there's no way to fix a typo without asking staff to help
- * (a real backend gap — flagged for a PATCH content endpoint).
+ * PI ĐIỀN nội dung 1 kỳ báo cáo đã được Staff mở sẵn (QĐ543 Điều 10: số kỳ cố định theo loại).
+ * Kỳ báo cáo (thời gian) do Staff đặt — ở đây chỉ hiển thị, PI không tự đổi. Lưu nội dung (PUT) rồi
+ * nộp (POST /submit) trong 1 thao tác.
  */
-export function CreateProgressReportSheet({ open, onOpenChange, contractId }: CreateProgressReportSheetProps) {
+export function CreateProgressReportSheet({ open, onOpenChange, contractId, report }: CreateProgressReportSheetProps) {
   const { t } = useTranslation();
-  const createMutation = useCreateProgressReportMutation(contractId);
+  const updateMutation = useUpdateProgressReportMutation(contractId);
   const submitMutation = useSubmitProgressReportMutation(contractId);
-  const isSubmitting = createMutation.isPending || submitMutation.isPending;
+  const isSubmitting = updateMutation.isPending || submitMutation.isPending;
 
-  const [reportingPeriodStart, setReportingPeriodStart] = useState("");
-  const [reportingPeriodEnd, setReportingPeriodEnd] = useState("");
   const [completedContent, setCompletedContent] = useState("");
   const [pendingContent, setPendingContent] = useState("");
   const [overallCompletionPct, setOverallCompletionPct] = useState("");
@@ -33,37 +33,35 @@ export function CreateProgressReportSheet({ open, onOpenChange, contractId }: Cr
   const [nextPeriodPlan, setNextPeriodPlan] = useState("");
   const [piRecommendations, setPiRecommendations] = useState("");
 
-  const reset = () => {
-    setReportingPeriodStart("");
-    setReportingPeriodEnd("");
-    setCompletedContent("");
-    setPendingContent("");
-    setOverallCompletionPct("");
-    setExpenditureToDate("");
-    setNextPeriodPlan("");
-    setPiRecommendations("");
-  };
+  // Prefill khi mở kỳ khác nhau.
+  useEffect(() => {
+    if (open && report) {
+      setCompletedContent(report.completedContent ?? "");
+      setPendingContent(report.pendingContent ?? "");
+      setOverallCompletionPct(report.overallCompletionPct != null ? String(report.overallCompletionPct) : "");
+      setExpenditureToDate(report.expenditureToDate != null ? String(report.expenditureToDate) : "");
+      setNextPeriodPlan(report.nextPeriodPlan ?? "");
+      setPiRecommendations(report.piRecommendations ?? "");
+    }
+  }, [open, report]);
 
-  const onSubmit = () => {
-    createMutation.mutate(
+  const onSubmit = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!report) return;
+    const payload = {
+      completedContent: completedContent || undefined,
+      pendingContent: pendingContent || undefined,
+      overallCompletionPct: overallCompletionPct ? Number(overallCompletionPct) : undefined,
+      expenditureToDate: expenditureToDate ? Number(expenditureToDate) : undefined,
+      nextPeriodPlan: nextPeriodPlan || undefined,
+      piRecommendations: piRecommendations || undefined,
+    };
+    // Lưu nội dung trước, rồi nộp (khóa) — nộp xong không sửa được nữa.
+    updateMutation.mutate(
+      { id: report.id, payload },
       {
-        reportingPeriodStart: reportingPeriodStart || undefined,
-        reportingPeriodEnd: reportingPeriodEnd || undefined,
-        completedContent: completedContent || undefined,
-        pendingContent: pendingContent || undefined,
-        overallCompletionPct: overallCompletionPct ? Number(overallCompletionPct) : undefined,
-        expenditureToDate: expenditureToDate ? Number(expenditureToDate) : undefined,
-        nextPeriodPlan: nextPeriodPlan || undefined,
-        piRecommendations: piRecommendations || undefined,
-      },
-      {
-        onSuccess: (report) => {
-          submitMutation.mutate(report.id, {
-            onSuccess: () => {
-              reset();
-              onOpenChange(false);
-            },
-          });
+        onSuccess: () => {
+          submitMutation.mutate(report.id, { onSuccess: () => onOpenChange(false) });
         },
       }
     );
@@ -73,24 +71,17 @@ export function CreateProgressReportSheet({ open, onOpenChange, contractId }: Cr
     <FormSheet
       open={open}
       onOpenChange={onOpenChange}
-      title={t("reports.newProgress")}
-      description={t("reports.newProgressHint")}
+      title={t("reports.fillProgress")}
+      description={
+        report
+          ? `${formatDate(report.reportingPeriodStart)} – ${formatDate(report.reportingPeriodEnd)}`
+          : t("reports.newProgressHint")
+      }
       formId="progress-report-form"
       onSubmit={onSubmit}
       isSubmitting={isSubmitting}
       submitLabel={t("reports.submitReport")}
     >
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-foreground">{t("reports.periodStart")}</label>
-          <Input type="date" value={reportingPeriodStart} onChange={(e) => setReportingPeriodStart(e.target.value)} />
-        </div>
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-foreground">{t("reports.periodEnd")}</label>
-          <Input type="date" value={reportingPeriodEnd} onChange={(e) => setReportingPeriodEnd(e.target.value)} />
-        </div>
-      </div>
-
       <div>
         <label className="mb-1.5 block text-sm font-medium text-foreground">{t("reports.completedWork")}</label>
         <Textarea rows={3} value={completedContent} onChange={(e) => setCompletedContent(e.target.value)} />

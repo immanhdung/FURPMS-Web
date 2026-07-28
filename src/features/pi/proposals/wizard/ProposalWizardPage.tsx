@@ -102,6 +102,8 @@ export function ProposalWizardPage() {
 
   const [proposalId, setProposalId] = useState<string | null>(routeProposalId ?? null);
   const [currentStep, setCurrentStep] = useState(0);
+  // Bước xa nhất đã tới → cho bấm nhảy lại (edit: mở hết vì dữ liệu đã có sẵn).
+  const [maxStepReached, setMaxStepReached] = useState(routeProposalId ? WIZARD_STEPS.length - 1 : 0);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
   // Tracks which File object has already been attached, so re-saving the draft doesn't
@@ -176,10 +178,17 @@ export function ProposalWizardPage() {
     const fieldsToValidate = WIZARD_STEP_FIELDS[currentStep] ?? [];
     const isValid = fieldsToValidate.length === 0 || (await form.trigger(fieldsToValidate));
     if (!isValid) return;
-    setCurrentStep((step) => Math.min(step + 1, WIZARD_STEPS.length - 1));
+    const next = Math.min(currentStep + 1, WIZARD_STEPS.length - 1);
+    setCurrentStep(next);
+    setMaxStepReached((m) => Math.max(m, next));
   };
 
   const handleBack = () => setCurrentStep((step) => Math.max(step - 1, 0));
+
+  // Bấm số bước để nhảy — chỉ tới bước đã qua (validation các bước trước đã chạy khi bấm Tiếp tục).
+  const handleStepClick = (index: number) => {
+    if (index <= maxStepReached) setCurrentStep(index);
+  };
 
   const handleFillSample = async () => {
     // Test helper: fill EVERYTHING (including cycle/field/type) and jump to the preview so the
@@ -220,6 +229,7 @@ export function ProposalWizardPage() {
 
     if (openCycle && trackId && cycleType) {
       setCurrentStep(WIZARD_STEPS.length - 1); // jump to Preview & Submit
+      setMaxStepReached(WIZARD_STEPS.length - 1);
       toast.success(t("wizard.sampleReady"));
     } else {
       toast.success(t("wizard.samplePicked"));
@@ -277,7 +287,7 @@ export function ProposalWizardPage() {
         </div>
       </div>
 
-      <WizardStepper currentStep={currentStep} />
+      <WizardStepper currentStep={currentStep} maxStep={maxStepReached} onStepClick={handleStepClick} />
 
       <Card>
         <CardContent className="p-5">

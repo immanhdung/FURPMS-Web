@@ -32,6 +32,11 @@ export function getProposalColumns({ t, cycleNames, trackNames, onOpen }: GetPro
       header: ({ column }) => <DataTableColumnHeader column={column} title={t("staff.researchField")} />,
     },
     {
+      id: "pi",
+      accessorFn: (row) => row.principalInvestigatorName || "-",
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t("staff.pi")} />,
+    },
+    {
       accessorKey: "status",
       header: ({ column }) => <DataTableColumnHeader column={column} title={t("common.status")} />,
       cell: ({ row }) => (row.original.status ? <StatusBadge status={row.original.status} /> : "-"),

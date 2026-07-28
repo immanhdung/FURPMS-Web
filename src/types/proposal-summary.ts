@@ -6,6 +6,7 @@ export interface ProposalSummary {
   cycleName?: string | null;
   trackId?: string | null;
   trackName?: string | null;
+  principalInvestigatorName?: string | null;
   status?: string | null;
   researchType?: number | null;
   createdAt?: string | null;
