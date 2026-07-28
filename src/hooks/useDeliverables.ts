@@ -13,6 +13,19 @@ export function useDeliverablesQuery(contractId: string | null) {
   });
 }
 
+export function useCreateDeliverableMutation(contractId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: { productName: string; dueDate?: string; description?: string }) =>
+      deliverableService.create(contractId, payload),
+    onSuccess: () => {
+      toast.success("Đã thêm sản phẩm.");
+      queryClient.invalidateQueries({ queryKey: queryKeys.deliverables.list(contractId) });
+    },
+    onError: (error: ApiError) => toast.error(error.message || "Không thêm được sản phẩm."),
+  });
+}
+
 export function useSubmitDeliverableMutation(contractId: string) {
   const queryClient = useQueryClient();
   return useMutation({

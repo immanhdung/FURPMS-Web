@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { CircleCheck, CircleX, ClipboardCheck, ExternalLink, Package, Upload } from "lucide-react";
+import { CircleCheck, CircleX, ClipboardCheck, ExternalLink, Package, Plus, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { useDeliverablesQuery } from "@/hooks/useDeliverables";
+import { useCreateDeliverableMutation, useDeliverablesQuery } from "@/hooks/useDeliverables";
 import { SubmitDeliverableDialog } from "@/features/staff/contracts/SubmitDeliverableDialog";
 import { EvaluateDeliverableDialog } from "@/features/staff/contracts/EvaluateDeliverableDialog";
 import { ACCEPTANCE_STATUS, type Deliverable } from "@/types/deliverable";
@@ -20,36 +21,73 @@ export function DeliverablesPanel({ contractId, canManage }: { contractId: strin
   const { data: deliverables, isLoading } = useDeliverablesQuery(contractId);
   const [submitting, setSubmitting] = useState<Deliverable | null>(null);
   const [evaluating, setEvaluating] = useState<Deliverable | null>(null);
+  const createMutation = useCreateDeliverableMutation(contractId);
+  const [showForm, setShowForm] = useState(false);
+  const [productName, setProductName] = useState("");
+  const [dueDate, setDueDate] = useState("");
 
-  if (isLoading) {
-    return (
-      <div className="space-y-2">
-        {Array.from({ length: 2 }).map((_, index) => (
-          <Skeleton key={index} className="h-24 w-full rounded-lg" />
-        ))}
-      </div>
+  const submitAdd = () => {
+    if (!productName.trim()) return;
+    createMutation.mutate(
+      { productName: productName.trim(), dueDate: dueDate || undefined },
+      { onSuccess: () => { setProductName(""); setDueDate(""); setShowForm(false); } }
     );
-  }
+  };
 
-  if (!deliverables || deliverables.length === 0) {
-    return (
-      <EmptyState
-        icon={Package}
-        title={t("contract.deliverable.none")}
-        description={t("contract.deliverable.noneDesc")}
-        className="min-h-32 border-none p-4"
-      />
-    );
-  }
-
-  const passedCount = deliverables.filter((d) => d.acceptanceStatus === ACCEPTANCE_STATUS.PASSED).length;
+  const passedCount = (deliverables ?? []).filter((d) => d.acceptanceStatus === ACCEPTANCE_STATUS.PASSED).length;
 
   return (
     <div className="space-y-3">
-      <div className="rounded-lg border border-border bg-muted/40 px-3 py-2.5 text-sm text-muted-foreground">
-        <span className="font-medium text-foreground">{passedCount}</span> {t("contract.disbursement.of")}{" "}
-        <span className="font-medium text-foreground">{deliverables.length}</span> {t("contract.deliverable.accepted")}
-      </div>
+      {/* Staff định nghĩa sản phẩm phải nộp — đề cương không có trường sản phẩm cấu trúc nên nhập tay. */}
+      {canManage &&
+        (!showForm ? (
+          <div className="flex justify-end">
+            <Button size="sm" variant="outline" onClick={() => setShowForm(true)}>
+              <Plus />
+              {t("contract.deliverable.add")}
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-2 rounded-lg border border-border p-3">
+            <Input
+              placeholder={t("contract.deliverable.productName")}
+              value={productName}
+              onChange={(e) => setProductName(e.target.value)}
+            />
+            <div className="flex items-center gap-2">
+              <Input type="date" className="w-44" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+              <span className="text-xs text-muted-foreground">{t("contract.deliverable.dueOptional")}</span>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button size="sm" variant="ghost" onClick={() => setShowForm(false)}>
+                {t("common.cancel")}
+              </Button>
+              <Button size="sm" disabled={!productName.trim() || createMutation.isPending} onClick={submitAdd}>
+                {t("contract.deliverable.add")}
+              </Button>
+            </div>
+          </div>
+        ))}
+
+      {isLoading ? (
+        <div className="space-y-2">
+          {Array.from({ length: 2 }).map((_, index) => (
+            <Skeleton key={index} className="h-24 w-full rounded-lg" />
+          ))}
+        </div>
+      ) : !deliverables || deliverables.length === 0 ? (
+        <EmptyState
+          icon={Package}
+          title={t("contract.deliverable.none")}
+          description={t("contract.deliverable.noneDesc")}
+          className="min-h-32 border-none p-4"
+        />
+      ) : (
+        <>
+          <div className="rounded-lg border border-border bg-muted/40 px-3 py-2.5 text-sm text-muted-foreground">
+            <span className="font-medium text-foreground">{passedCount}</span> {t("contract.disbursement.of")}{" "}
+            <span className="font-medium text-foreground">{deliverables.length}</span> {t("contract.deliverable.accepted")}
+          </div>
 
       {deliverables.map((d) => {
         const isSubmitted = Boolean(d.submittedAt);
@@ -116,6 +154,8 @@ export function DeliverablesPanel({ contractId, canManage }: { contractId: strin
           </div>
         );
       })}
+        </>
+      )}
 
       <SubmitDeliverableDialog
         open={Boolean(submitting)}

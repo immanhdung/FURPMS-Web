@@ -913,8 +913,10 @@ export const en = {
     },
     deliverable: {
       none: "No deliverables on this contract",
-      noneDesc: "Products come from what the PI declared in the proposal. They're attached to the contract when it's created.",
+      noneDesc: "Staff clicks \"Add product\" to define the deliverables the PI must submit for this contract.",
       accepted: "products accepted",
+      add: "Add product",
+      dueOptional: "Due date (optional)",
       noDueDate: "No due date",
       due: "Due {{date}}",
       submitted: "Submitted {{date}}",

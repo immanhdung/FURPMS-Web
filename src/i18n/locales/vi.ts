@@ -917,8 +917,10 @@ export const vi = {
     },
     deliverable: {
       none: "Hợp đồng chưa có sản phẩm nào",
-      noneDesc: "Sản phẩm lấy từ những gì PI khai trong đề cương, được gắn vào hợp đồng khi tạo.",
+      noneDesc: "Staff bấm \"Thêm sản phẩm\" để định nghĩa các sản phẩm PI phải nộp cho hợp đồng này.",
       accepted: "sản phẩm đã nghiệm thu",
+      add: "Thêm sản phẩm",
+      dueOptional: "Hạn nộp (tùy chọn)",
       noDueDate: "Không có hạn",
       due: "Hạn {{date}}",
       submitted: "Nộp {{date}}",
