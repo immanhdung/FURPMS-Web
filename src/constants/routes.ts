@@ -29,6 +29,7 @@ export const ROUTES = {
   MY_PROPOSALS: "/my-proposals",
   SUBMIT_PROPOSAL: "/proposals/submit",
   PROGRESS_REPORTS: "/progress-reports",
+  DELIVERABLES: "/deliverables",
   FINAL_REPORTS: "/final-reports",
   AI_SEARCH: "/ai-search",
 

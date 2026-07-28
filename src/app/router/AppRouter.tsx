@@ -104,6 +104,9 @@ const PiProgressReportsPage = lazy(() =>
 const PiFinalReportsPage = lazy(() =>
   import("@/features/pi/final-reports/FinalReportsPage").then((m) => ({ default: m.FinalReportsPage }))
 );
+const PiDeliverablesPage = lazy(() =>
+  import("@/features/pi/deliverables/DeliverablesPage").then((m) => ({ default: m.DeliverablesPage }))
+);
 
 const FEATURE_PAGES: Partial<Record<string, ComponentType>> = {
   [ROUTES.NOTIFICATIONS]: NotificationsPage,
@@ -131,6 +134,7 @@ const FEATURE_PAGES: Partial<Record<string, ComponentType>> = {
   [ROUTES.AI_SEARCH]: SemanticSearchPage,
   [ROUTES.SETTINGS]: SettingsPage,
   [ROUTES.PROGRESS_REPORTS]: PiProgressReportsPage,
+  [ROUTES.DELIVERABLES]: PiDeliverablesPage,
   [ROUTES.FINAL_REPORTS]: PiFinalReportsPage,
 };
 
