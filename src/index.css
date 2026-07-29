@@ -32,6 +32,8 @@
     --color-success: var(--success);
     --color-success-foreground: var(--success-foreground);
     --color-brand-accent: var(--brand-accent);
+    --color-brand-secondary: var(--brand-secondary);
+    --color-brand-accent-2: var(--brand-accent-2);
     --color-accent-foreground: var(--accent-foreground);
     --color-accent: var(--accent);
     --color-muted-foreground: var(--muted-foreground);
@@ -53,6 +55,12 @@
     --radius-2xl: calc(var(--radius) * 1.8);
     --radius-3xl: calc(var(--radius) * 2.2);
     --radius-4xl: calc(var(--radius) * 2.6);
+    --shadow-soft-xs: var(--shadow-soft-xs-value);
+    --shadow-soft-sm: var(--shadow-soft-sm-value);
+    --shadow-soft-md: var(--shadow-soft-md-value);
+    --shadow-soft-lg: var(--shadow-soft-lg-value);
+    --shadow-soft-xl: var(--shadow-soft-xl-value);
+    --shadow-glass: var(--shadow-glass-value);
 }
 
 :root {
@@ -71,6 +79,8 @@
     --accent: oklch(0.97 0 0);
     --accent-foreground: #0F172A;
     --brand-accent: #14B8A6;
+    --brand-secondary: #7C3AED;
+    --brand-accent-2: #06B6D4;
     --destructive: #EF4444;
     --danger: #EF4444;
     --danger-foreground: #FFFFFF;
@@ -86,7 +96,13 @@
     --chart-3: oklch(0.439 0 0);
     --chart-4: oklch(0.371 0 0);
     --chart-5: oklch(0.269 0 0);
-    --radius: 0.625rem;
+    --radius: 0.875rem;
+    --shadow-soft-xs-value: 0 1px 2px 0 rgb(15 23 42 / 0.04);
+    --shadow-soft-sm-value: 0 2px 8px -2px rgb(15 23 42 / 0.08), 0 1px 2px -1px rgb(15 23 42 / 0.04);
+    --shadow-soft-md-value: 0 8px 24px -4px rgb(15 23 42 / 0.10), 0 2px 6px -2px rgb(15 23 42 / 0.06);
+    --shadow-soft-lg-value: 0 20px 48px -12px rgb(15 23 42 / 0.16), 0 8px 20px -6px rgb(15 23 42 / 0.08);
+    --shadow-soft-xl-value: 0 28px 64px -16px rgb(15 23 42 / 0.20), 0 12px 28px -8px rgb(15 23 42 / 0.10);
+    --shadow-glass-value: 0 8px 32px 0 rgb(15 23 42 / 0.12);
     --sidebar: oklch(0.985 0 0);
     --sidebar-foreground: oklch(0.145 0 0);
     --sidebar-primary: oklch(0.205 0 0);
@@ -113,6 +129,8 @@
     --accent: oklch(0.269 0 0);
     --accent-foreground: #F1F5F9;
     --brand-accent: #2DD4BF;
+    --brand-secondary: #A78BFA;
+    --brand-accent-2: #22D3EE;
     --destructive: #F87171;
     --danger: #F87171;
     --danger-foreground: #0B1220;
@@ -123,6 +141,12 @@
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
     --ring: #3B82F6;
+    --shadow-soft-xs-value: 0 1px 2px 0 rgb(0 0 0 / 0.24);
+    --shadow-soft-sm-value: 0 2px 8px -2px rgb(0 0 0 / 0.32), 0 1px 2px -1px rgb(0 0 0 / 0.2);
+    --shadow-soft-md-value: 0 8px 24px -4px rgb(0 0 0 / 0.4), 0 2px 6px -2px rgb(0 0 0 / 0.24);
+    --shadow-soft-lg-value: 0 20px 48px -12px rgb(0 0 0 / 0.5), 0 8px 20px -6px rgb(0 0 0 / 0.3);
+    --shadow-soft-xl-value: 0 28px 64px -16px rgb(0 0 0 / 0.55), 0 12px 28px -8px rgb(0 0 0 / 0.32);
+    --shadow-glass-value: 0 8px 32px 0 rgb(0 0 0 / 0.4);
     --chart-1: oklch(0.87 0 0);
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
@@ -148,4 +172,43 @@
   html {
     @apply font-sans;
     }
+}
+
+@layer components {
+  .glass-panel {
+    background-color: color-mix(in oklch, var(--card) 72%, transparent);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid color-mix(in oklch, var(--foreground) 8%, transparent);
+  }
+  .dark .glass-panel {
+    background-color: color-mix(in oklch, var(--card) 55%, transparent);
+    border-color: color-mix(in oklch, white 10%, transparent);
+  }
+
+  .glass-card {
+    background-color: color-mix(in oklch, var(--card) 82%, transparent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid color-mix(in oklch, var(--foreground) 6%, transparent);
+    box-shadow: var(--shadow-soft-md);
+  }
+  .dark .glass-card {
+    background-color: color-mix(in oklch, var(--card) 60%, transparent);
+    border-color: color-mix(in oklch, white 8%, transparent);
+  }
+
+  .aurora-orb {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(64px);
+    pointer-events: none;
+  }
+
+  .text-gradient-brand {
+    background-image: linear-gradient(135deg, var(--primary), var(--brand-secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
 }

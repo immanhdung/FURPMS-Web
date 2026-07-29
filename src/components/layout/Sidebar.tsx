@@ -14,7 +14,7 @@ import type { NavItem } from "@/types/nav";
 function Brand({ collapsed }: { collapsed: boolean }) {
   return (
     <div className="flex h-14 shrink-0 items-center gap-2 border-b border-sidebar-border px-4">
-      <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+      <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-primary to-brand-secondary text-primary-foreground shadow-soft-sm">
         <GraduationCap className="size-4.5" />
       </div>
       {!collapsed && (
@@ -34,14 +34,27 @@ function NavLinkItem({ item, collapsed }: { item: NavItem; collapsed: boolean })
       end={item.path === ROUTES.DASHBOARD}
       className={({ isActive }) =>
         cn(
-          "group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-          isActive && "bg-sidebar-accent text-sidebar-accent-foreground",
+          "group relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium text-sidebar-foreground/70 transition-colors hover:text-sidebar-accent-foreground",
+          isActive && "text-sidebar-accent-foreground",
           collapsed && "justify-center px-0"
         )
       }
     >
-      <item.icon className="size-4 shrink-0" />
-      {!collapsed && <span className="truncate">{item.label}</span>}
+      {({ isActive }) => (
+        <>
+          {isActive ? (
+            <motion.span
+              layoutId="sidebar-active-pill"
+              className="absolute inset-0 rounded-lg bg-sidebar-accent shadow-soft-xs"
+              transition={{ type: "spring", stiffness: 420, damping: 32 }}
+            />
+          ) : (
+            <span className="absolute inset-0 rounded-lg bg-transparent transition-colors group-hover:bg-sidebar-accent/60" />
+          )}
+          <item.icon className="relative z-10 size-4 shrink-0" />
+          {!collapsed && <span className="relative z-10 truncate">{item.label}</span>}
+        </>
+      )}
     </NavLink>
   );
 
@@ -78,7 +91,7 @@ export function Sidebar() {
     <motion.aside
       animate={{ width: collapsed ? 68 : 248 }}
       transition={{ duration: 0.2, ease: "easeInOut" }}
-      className="sticky top-0 hidden h-screen shrink-0 flex-col border-r border-sidebar-border bg-sidebar md:flex"
+      className="sticky top-0 hidden h-screen shrink-0 flex-col border-r border-sidebar-border bg-sidebar/95 shadow-soft-xs backdrop-blur-sm md:flex"
     >
       <Brand collapsed={collapsed} />
       <SidebarNav collapsed={collapsed} />

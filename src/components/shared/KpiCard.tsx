@@ -31,7 +31,7 @@ export function KpiCard({ datum, icon: Icon, index = 0 }: KpiCardProps) {
       transition={{ duration: 0.2, delay: index * 0.04 }}
       whileHover={{ y: -2 }}
     >
-      <Card className="transition-shadow hover:shadow-md">
+      <Card className="transition-shadow duration-200 hover:shadow-soft-lg">
         <CardContent className="flex items-start justify-between gap-3 p-4">
           <div className="min-w-0">
             <p className="text-xs font-medium text-muted-foreground">{datum.label}</p>
@@ -40,7 +40,7 @@ export function KpiCard({ datum, icon: Icon, index = 0 }: KpiCardProps) {
             </p>
             {datum.deltaLabel && <p className="mt-1 truncate text-xs text-muted-foreground">{datum.deltaLabel}</p>}
           </div>
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-primary/15 to-brand-secondary/10 text-primary">
             <Icon className="size-4.5" />
           </div>
         </CardContent>
