@@ -1,6 +1,7 @@
 export interface Contract {
   id: string;
   proposalId: string;
+  piName?: string | null;
   contractNumber?: string | null;
   scopeTitle?: string | null;
   startDate?: string | null;

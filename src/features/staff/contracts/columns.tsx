@@ -25,6 +25,11 @@ export function getContractColumns({ t, proposalTitles, onView }: GetContractCol
       header: ({ column }) => <DataTableColumnHeader column={column} title={t("staff.proposal")} />,
     },
     {
+      id: "pi",
+      accessorFn: (row) => row.piName || "-",
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t("staff.pi")} />,
+    },
+    {
       accessorKey: "startDate",
       header: ({ column }) => <DataTableColumnHeader column={column} title={t("staff.start")} />,
       cell: ({ row }) => formatDate(row.original.startDate),
