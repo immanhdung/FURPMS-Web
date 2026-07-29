@@ -51,10 +51,23 @@ export function ProposalSummaryView({ data, cycleName, trackName, researchTypeNa
             {data.durationMonths ? <Badge variant="outline">{data.durationMonths} months</Badge> : null}
           </div>
 
-          <div>
-            {/* Đề tài có thể chỉ có tên tiếng Việt — ưu tiên tên chính, đừng để "Untitled" khi vẫn có titleVI. */}
-            <p className="text-lg font-semibold text-foreground">{data.titleVI || data.titleEN || t("proposal.untitled")}</p>
-            {data.titleEN && data.titleVI && <p className="text-sm text-muted-foreground">{data.titleEN}</p>}
+          {/* Ghi rõ nhãn Tên tiếng Việt / tiếng Anh (như các mục Mục tiêu, Tóm tắt) để khỏi nhầm. */}
+          <div className="space-y-2">
+            {data.titleVI && (
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">{t("wizard.step3.titleVI")}</p>
+                <p className="mt-0.5 text-base font-semibold text-foreground">{data.titleVI}</p>
+              </div>
+            )}
+            {data.titleEN && (
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">{t("wizard.step3.titleEN")}</p>
+                <p className="mt-0.5 text-sm text-foreground">{data.titleEN}</p>
+              </div>
+            )}
+            {!data.titleVI && !data.titleEN && (
+              <p className="text-lg font-semibold text-foreground">{t("proposal.untitled")}</p>
+            )}
           </div>
 
           {data.abstractEN && (

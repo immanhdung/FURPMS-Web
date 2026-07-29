@@ -5,10 +5,10 @@ import { queryKeys } from "@/services/queryKeys";
 import type { ApiError } from "@/types/common";
 import type { CreateContractPayload } from "@/types/contract";
 
-export function useContractsQuery() {
+export function useContractsQuery(mine = false) {
   return useQuery({
-    queryKey: queryKeys.contracts.list(),
-    queryFn: contractService.list,
+    queryKey: [...queryKeys.contracts.list(), mine ? "mine" : "all"],
+    queryFn: () => contractService.list(mine),
   });
 }
 

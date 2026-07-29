@@ -3,7 +3,9 @@ import type { ApiResponse } from "@/types/common";
 import type { Contract, CreateContractPayload } from "@/types/contract";
 
 export const contractService = {
-  list: () => axiosClient.get<ApiResponse<Contract[]>>("/contracts").then((res) => res.data.data),
+  // mine=true → chỉ HĐ mình là PI (dùng cho trang PI: báo cáo tiến độ/sản phẩm/tổng kết).
+  list: (mine = false) =>
+    axiosClient.get<ApiResponse<Contract[]>>("/contracts", { params: mine ? { mine: true } : undefined }).then((res) => res.data.data),
 
   getById: (id: string) => axiosClient.get<ApiResponse<Contract>>(`/contracts/${id}`).then((res) => res.data.data),
 

@@ -3,13 +3,13 @@ import { useContractsQuery } from "@/hooks/useContracts";
 import { useMyProposalsQuery } from "@/hooks/useProposals";
 
 /**
- * GET /contracts is already scoped server-side (PI sees only their own contracts, Staff/Admin see
- * all — confirmed live), so no client-side filtering is needed here. This hook just pairs the
- * (already-scoped) contract list with a proposalId -> title lookup for display.
+ * Trang PI (báo cáo tiến độ/sản phẩm/tổng kết) → `mine=true` ép BE **chỉ trả HĐ mình là PI**,
+ * kể cả tài khoản đa vai (Staff/Admin đang "làm PI"). Trước đây gọi list không lọc → thấy cả HĐ
+ * người khác rồi submit bị 403 "Only the PI may edit".
  */
 export function useMyContractsQuery() {
   const { data: myProposals, isLoading: isProposalsLoading } = useMyProposalsQuery();
-  const { data: contracts, isLoading: isContractsLoading } = useContractsQuery();
+  const { data: contracts, isLoading: isContractsLoading } = useContractsQuery(true);
 
   const proposalTitleById = useMemo(
     () => new Map((myProposals ?? []).map((p) => [p.id, p.titleEN || p.titleVI || p.id])),
