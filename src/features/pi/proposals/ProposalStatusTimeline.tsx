@@ -44,11 +44,14 @@ export function ProposalStatusTimeline({ status: rawStatus }: { status: string }
                   initial={false}
                   animate={{ scale: isCurrent ? 1.08 : 1 }}
                   className={cn(
-                    "flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-medium",
-                    isNegativeTerminal && "bg-danger/10 text-danger ring-2 ring-danger",
-                    isPositiveTerminal && "bg-success/10 text-success ring-2 ring-success",
-                    !isNegativeTerminal && !isPositiveTerminal && isCompleted && "bg-primary text-primary-foreground",
-                    !isNegativeTerminal && !isPositiveTerminal && isCurrent && "bg-primary/10 text-primary ring-2 ring-primary",
+                    "flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-medium transition-shadow duration-200",
+                    isNegativeTerminal && "bg-danger/10 text-danger shadow-soft-xs ring-2 ring-danger",
+                    isPositiveTerminal && "bg-success/10 text-success shadow-soft-xs ring-2 ring-success",
+                    !isNegativeTerminal && !isPositiveTerminal && isCompleted && "bg-primary text-primary-foreground shadow-soft-xs",
+                    !isNegativeTerminal &&
+                      !isPositiveTerminal &&
+                      isCurrent &&
+                      "bg-primary/10 text-primary shadow-soft-sm ring-2 ring-primary",
                     !isCompleted && !isCurrent && "bg-muted text-muted-foreground"
                   )}
                 >

@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { FormSheet } from "@/components/shared/FormSheet";
+import { FormField } from "@/components/shared/FormField";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -53,77 +54,61 @@ export function CreateResearchOrderSheet({ open, onOpenChange }: CreateResearchO
       isSubmitting={createMutation.isPending}
       submitLabel="Create order"
     >
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Research cycle</label>
-        <Controller
-          control={control}
-          name="cycleId"
-          render={({ field }) => (
-            <Select value={field.value ? field.value.toString() : undefined} onValueChange={(value) => field.onChange(Number(value))}>
-              <SelectTrigger aria-invalid={Boolean(errors.cycleId)}>
-                <SelectValue placeholder="Select cycle" />
-              </SelectTrigger>
-              <SelectContent>
-                {cycles?.map((cycle) => (
-                  <SelectItem key={cycle.id} value={cycle.id.toString()}>
-                    {cycle.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        />
-        {errors.cycleId && <p className="mt-1 text-xs text-destructive">{errors.cycleId.message}</p>}
+      <div className="grid grid-cols-2 gap-3">
+        <FormField label="Research cycle" required error={errors.cycleId?.message}>
+          <Controller
+            control={control}
+            name="cycleId"
+            render={({ field }) => (
+              <Select value={field.value ? field.value.toString() : undefined} onValueChange={(value) => field.onChange(Number(value))}>
+                <SelectTrigger aria-invalid={Boolean(errors.cycleId)} className="w-full">
+                  <SelectValue placeholder="Select cycle" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cycles?.map((cycle) => (
+                    <SelectItem key={cycle.id} value={cycle.id.toString()}>
+                      {cycle.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
+        </FormField>
+
+        <FormField label="Ordering unit" required error={errors.orderingUnitId?.message}>
+          <Controller
+            control={control}
+            name="orderingUnitId"
+            render={({ field }) => (
+              <Select value={field.value ? field.value.toString() : undefined} onValueChange={(value) => field.onChange(Number(value))}>
+                <SelectTrigger aria-invalid={Boolean(errors.orderingUnitId)} className="w-full">
+                  <SelectValue placeholder="Select unit" />
+                </SelectTrigger>
+                <SelectContent>
+                  {units?.map((unit) => (
+                    <SelectItem key={unit.id} value={unit.id.toString()}>
+                      {unit.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
+        </FormField>
       </div>
 
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Ordering unit</label>
-        <Controller
-          control={control}
-          name="orderingUnitId"
-          render={({ field }) => (
-            <Select value={field.value ? field.value.toString() : undefined} onValueChange={(value) => field.onChange(Number(value))}>
-              <SelectTrigger aria-invalid={Boolean(errors.orderingUnitId)}>
-                <SelectValue placeholder="Select unit" />
-              </SelectTrigger>
-              <SelectContent>
-                {units?.map((unit) => (
-                  <SelectItem key={unit.id} value={unit.id.toString()}>
-                    {unit.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        />
-        {errors.orderingUnitId && <p className="mt-1 text-xs text-destructive">{errors.orderingUnitId.message}</p>}
-      </div>
-
-      <div>
-        <label htmlFor="ro-area" className="mb-1.5 block text-sm font-medium text-foreground">
-          Research area
-        </label>
+      <FormField label="Research area" htmlFor="ro-area" required error={errors.researchArea?.message}>
         <Input id="ro-area" aria-invalid={Boolean(errors.researchArea)} {...register("researchArea")} />
-        {errors.researchArea && <p className="mt-1 text-xs text-destructive">{errors.researchArea.message}</p>}
-      </div>
+      </FormField>
 
-      <div>
-        <label htmlFor="ro-problem" className="mb-1.5 block text-sm font-medium text-foreground">
-          Problem description
-        </label>
+      <FormField label="Problem description" htmlFor="ro-problem" required error={errors.problemDescription?.message}>
         <Textarea id="ro-problem" rows={4} aria-invalid={Boolean(errors.problemDescription)} {...register("problemDescription")} />
-        {errors.problemDescription && (
-          <p className="mt-1 text-xs text-destructive">{errors.problemDescription.message}</p>
-        )}
-      </div>
+      </FormField>
 
-      <div>
-        <label htmlFor="ro-products" className="mb-1.5 block text-sm font-medium text-foreground">
-          Expected products
-        </label>
+      <FormField label="Expected products" htmlFor="ro-products" required error={errors.expectedProducts?.message}>
         <Textarea id="ro-products" rows={3} aria-invalid={Boolean(errors.expectedProducts)} {...register("expectedProducts")} />
-        {errors.expectedProducts && <p className="mt-1 text-xs text-destructive">{errors.expectedProducts.message}</p>}
-      </div>
+      </FormField>
     </FormSheet>
   );
 }

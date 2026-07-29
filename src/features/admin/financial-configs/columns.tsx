@@ -19,15 +19,27 @@ export function getFinancialConfigColumns({
     {
       accessorKey: "code",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Code" />,
+      cell: ({ row }) => (
+        <span className="rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs font-medium text-foreground">
+          {row.original.code}
+        </span>
+      ),
     },
     {
       accessorKey: "value",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Value" />,
+      header: ({ column }) => (
+        <div className="flex justify-end">
+          <DataTableColumnHeader column={column} title="Value" className="ml-0" />
+        </div>
+      ),
+      cell: ({ row }) => (
+        <div className="text-right text-sm tabular-nums text-foreground">{row.original.value}</div>
+      ),
     },
     {
       accessorKey: "effectiveDate",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Effective Date" />,
-      cell: ({ row }) => formatDate(row.original.effectiveDate),
+      cell: ({ row }) => <span className="text-sm text-muted-foreground">{formatDate(row.original.effectiveDate)}</span>,
     },
     {
       accessorKey: "isActive",

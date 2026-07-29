@@ -37,44 +37,46 @@ export function ContractDetailSheet({ open, onOpenChange, contractId }: Contract
         ) : !contract ? null : (
           <ScrollArea className="flex-1 px-4">
             <div className="space-y-5 pb-6">
-              <div className="flex flex-wrap items-center gap-2">
-                {contract.status && <StatusBadge status={contract.status} />}
-                <span className="text-xs text-muted-foreground">
-                  {formatDate(contract.startDate)} – {formatDate(contract.endDate)}
-                </span>
-                {contract.maxExtensionMonths != null && (
+              <div className="space-y-3.5 rounded-xl border border-border bg-muted/30 p-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  {contract.status && <StatusBadge status={contract.status} />}
                   <span className="text-xs text-muted-foreground">
-                    Max extension: {contract.maxExtensionMonths}mo
+                    {formatDate(contract.startDate)} – {formatDate(contract.endDate)}
                   </span>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground">Side A representative</p>
-                  <p className="mt-0.5 text-sm text-foreground">{contract.sideARepresentative ?? "-"}</p>
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground">E-contract</p>
-                  {contract.econtractUrl ? (
-                    <a
-                      href={contract.econtractUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-0.5 block text-sm text-primary hover:underline"
-                    >
-                      {contract.econtractUrl}
-                    </a>
-                  ) : (
-                    <p className="mt-0.5 text-sm text-foreground">-</p>
+                  {contract.maxExtensionMonths != null && (
+                    <span className="text-xs text-muted-foreground">
+                      Max extension: {contract.maxExtensionMonths}mo
+                    </span>
                   )}
                 </div>
-              </div>
 
-              <Button size="sm" onClick={() => contractId && signMutation.mutate(contractId)} disabled={signMutation.isPending}>
-                <FileSignature />
-                Sign contract
-              </Button>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground">Side A representative</p>
+                    <p className="mt-0.5 text-sm text-foreground">{contract.sideARepresentative ?? "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground">E-contract</p>
+                    {contract.econtractUrl ? (
+                      <a
+                        href={contract.econtractUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-0.5 block truncate text-sm text-primary hover:underline"
+                      >
+                        {contract.econtractUrl}
+                      </a>
+                    ) : (
+                      <p className="mt-0.5 text-sm text-foreground">-</p>
+                    )}
+                  </div>
+                </div>
+
+                <Button size="sm" onClick={() => contractId && signMutation.mutate(contractId)} disabled={signMutation.isPending}>
+                  <FileSignature />
+                  Sign contract
+                </Button>
+              </div>
 
               <Tabs defaultValue="progress">
                 <TabsList>

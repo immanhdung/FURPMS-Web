@@ -18,7 +18,7 @@ function FieldLabel({ htmlFor, required, children }: { htmlFor: string; required
 
 function Section({ title, hint, children }: { title: string; hint?: string; children: ReactNode }) {
   return (
-    <section className="space-y-4 border-t border-border pt-5 first:border-t-0 first:pt-0">
+    <section className="space-y-4 border-t border-border pt-6 first:border-t-0 first:pt-0">
       <div>
         <h3 className="text-sm font-semibold text-foreground">{title}</h3>
         {hint && <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>}
@@ -36,7 +36,7 @@ export function Step3Details({ form }: { form: UseFormReturn<ProposalWizardValue
   } = form;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-7">
       <Section title="Title & abstract" hint="The Vietnamese title is what appears on official documents.">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>

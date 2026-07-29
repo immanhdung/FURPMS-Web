@@ -29,10 +29,10 @@ export function SemanticSearchPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="text-center">
-        <div className="mx-auto flex size-11 items-center justify-center rounded-full bg-primary/10 text-primary">
+        <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-linear-to-br from-primary to-brand-secondary text-primary-foreground shadow-soft-md">
           <Sparkles className="size-5" />
         </div>
-        <h1 className="mt-3 text-2xl font-semibold tracking-tight text-foreground">AI Semantic Search</h1>
+        <h1 className="mt-3 text-2xl font-semibold tracking-tight text-gradient-brand">AI Semantic Search</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Search across proposals and imported research topics by meaning, not just keywords.
         </p>
@@ -43,7 +43,7 @@ export function SemanticSearchPage() {
           e.preventDefault();
           runSearch(query);
         }}
-        className="flex gap-2"
+        className="flex gap-2 rounded-xl bg-linear-to-r from-primary/15 via-brand-secondary/15 to-brand-accent-2/15 p-1 shadow-soft-xs"
       >
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -51,10 +51,10 @@ export function SemanticSearchPage() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Describe what you're looking for..."
-            className="h-11 pl-9"
+            className="h-11 border-none bg-card pl-9"
           />
         </div>
-        <Button type="submit" size="lg" disabled={!query.trim() || searchMutation.isPending}>
+        <Button type="submit" variant="gradient" size="lg" disabled={!query.trim() || searchMutation.isPending}>
           {searchMutation.isPending ? <Loader2 className="animate-spin" /> : <Sparkles />}
           Search
         </Button>
@@ -101,11 +101,11 @@ export function SemanticSearchPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.2, delay: index * 0.05 }}
                 >
-                  <Card className="transition-shadow hover:shadow-md">
+                  <Card className="transition-shadow duration-200 hover:shadow-soft-md">
                     <CardContent className="space-y-2 p-4">
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-start gap-2.5">
-                          <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                          <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-primary/15 to-brand-secondary/15 text-primary">
                             {result.type === "topic" ? <Lightbulb className="size-4" /> : <FileText className="size-4" />}
                           </div>
                           <div>

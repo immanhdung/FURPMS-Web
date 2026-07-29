@@ -43,20 +43,23 @@ export function ProposalDetailPage() {
   const researchTypeName = researchTypes?.find((rt) => rt.id === proposal.researchType)?.name;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-5">
+    <div className="mx-auto max-w-5xl space-y-6">
       <Button variant="ghost" size="sm" className="-ml-2" onClick={() => navigate(ROUTES.MY_PROPOSALS)}>
         <ArrowLeft />
         Back to my proposals
       </Button>
 
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-border pb-6">
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-2.5">
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">
               {proposal.titleEN || proposal.titleVI || "Untitled proposal"}
             </h1>
             <StatusBadge status={status} />
           </div>
+          {proposal.titleVI && proposal.titleEN && (
+            <p className="text-sm text-muted-foreground">{proposal.titleVI}</p>
+          )}
         </div>
 
         <div className="flex gap-2">
@@ -81,15 +84,19 @@ export function ProposalDetailPage() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-border bg-card p-4">
+      <div className="rounded-xl border border-border bg-card p-5 shadow-soft-xs">
         <ProposalStatusTimeline status={status} />
       </div>
 
-      <ProposalSummaryView data={proposal} cycleName={cycleName} trackName={trackName} researchTypeName={researchTypeName} />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <ProposalSummaryView data={proposal} cycleName={cycleName} trackName={trackName} researchTypeName={researchTypeName} />
+        </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <AiSummaryCard proposalId={proposal.id} />
-        <AiFeedbackCard proposalId={proposal.id} />
+        <div className="space-y-4 lg:col-span-1">
+          <AiSummaryCard proposalId={proposal.id} />
+          <AiFeedbackCard proposalId={proposal.id} />
+        </div>
       </div>
 
       <SubmitProposalDialog open={submitOpen} onOpenChange={setSubmitOpen} proposalId={proposal.id} />

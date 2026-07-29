@@ -32,13 +32,13 @@ export function ProposalReviewWorkspace() {
   if (!proposalId) return null;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <Button variant="ghost" size="sm" className="-ml-2" onClick={() => navigate(ROUTES.PROPOSAL_REVIEWS)}>
         <ArrowLeft />
         Back to proposals
       </Button>
 
-      <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="flex flex-wrap items-start justify-between gap-3 rounded-xl border border-border bg-card p-4 shadow-soft-xs">
         <div className="min-w-0">
           {isProposalLoading ? (
             <PageLoader label="Loading proposal..." />
@@ -65,8 +65,8 @@ export function ProposalReviewWorkspace() {
         <button
           onClick={() => setView("kanban")}
           className={cn(
-            "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-            view === "kanban" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+            "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors duration-150",
+            view === "kanban" ? "bg-background text-foreground shadow-soft-xs" : "text-muted-foreground hover:text-foreground"
           )}
         >
           <LayoutGrid className="size-3.5" />
@@ -75,8 +75,8 @@ export function ProposalReviewWorkspace() {
         <button
           onClick={() => setView("timeline")}
           className={cn(
-            "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-            view === "timeline" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+            "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors duration-150",
+            view === "timeline" ? "bg-background text-foreground shadow-soft-xs" : "text-muted-foreground hover:text-foreground"
           )}
         >
           <ListTree className="size-3.5" />

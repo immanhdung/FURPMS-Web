@@ -3,6 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import dayjs from "dayjs";
 import { FormSheet } from "@/components/shared/FormSheet";
+import { FormField } from "@/components/shared/FormField";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -86,30 +87,21 @@ export function CycleFormSheet({ open, onOpenChange, cycle }: CycleFormSheetProp
       isSubmitting={isSubmitting}
       submitLabel={isEdit ? "Save changes" : "Create"}
     >
-      <div>
-        <label htmlFor="cycle-name" className="mb-1.5 block text-sm font-medium text-foreground">
-          Name
-        </label>
-        <Input id="cycle-name" aria-invalid={Boolean(errors.name)} {...register("name")} />
-        {errors.name && <p className="mt-1 text-xs text-destructive">{errors.name.message}</p>}
-      </div>
+      <FormField label="Name" htmlFor="cycle-name" required error={errors.name?.message}>
+        <Input id="cycle-name" placeholder="e.g. Spring 2026 Research Cycle" aria-invalid={Boolean(errors.name)} {...register("name")} />
+      </FormField>
 
-      <div>
-        <label htmlFor="cycle-year" className="mb-1.5 block text-sm font-medium text-foreground">
-          Academic year
-        </label>
+      <FormField label="Academic year" htmlFor="cycle-year" required error={errors.academicYear?.message}>
         <Input id="cycle-year" placeholder="2025-2026" aria-invalid={Boolean(errors.academicYear)} {...register("academicYear")} />
-        {errors.academicYear && <p className="mt-1 text-xs text-destructive">{errors.academicYear.message}</p>}
-      </div>
+      </FormField>
 
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Research type</label>
+      <FormField label="Research type" required error={errors.researchTypeId?.message}>
         <Controller
           control={control}
           name="researchTypeId"
           render={({ field }) => (
             <Select value={field.value ? field.value.toString() : undefined} onValueChange={(value) => field.onChange(Number(value))}>
-              <SelectTrigger aria-invalid={Boolean(errors.researchTypeId)}>
+              <SelectTrigger className="w-full" aria-invalid={Boolean(errors.researchTypeId)}>
                 <SelectValue placeholder="Select research type" />
               </SelectTrigger>
               <SelectContent>
@@ -122,36 +114,30 @@ export function CycleFormSheet({ open, onOpenChange, cycle }: CycleFormSheetProp
             </Select>
           )}
         />
-        {errors.researchTypeId && <p className="mt-1 text-xs text-destructive">{errors.researchTypeId.message}</p>}
+      </FormField>
+
+      <div className="grid grid-cols-2 gap-3 rounded-xl border border-border bg-muted/30 p-3">
+        <FormField label="Submission start" htmlFor="cycle-start" required error={errors.submissionStartDate?.message}>
+          <Input
+            id="cycle-start"
+            type="date"
+            aria-invalid={Boolean(errors.submissionStartDate)}
+            {...register("submissionStartDate")}
+          />
+        </FormField>
+        <FormField label="Submission deadline" htmlFor="cycle-deadline" required error={errors.submissionDeadline?.message}>
+          <Input
+            id="cycle-deadline"
+            type="date"
+            aria-invalid={Boolean(errors.submissionDeadline)}
+            {...register("submissionDeadline")}
+          />
+        </FormField>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label htmlFor="cycle-start" className="mb-1.5 block text-sm font-medium text-foreground">
-            Submission start
-          </label>
-          <Input id="cycle-start" type="date" aria-invalid={Boolean(errors.submissionStartDate)} {...register("submissionStartDate")} />
-          {errors.submissionStartDate && (
-            <p className="mt-1 text-xs text-destructive">{errors.submissionStartDate.message}</p>
-          )}
-        </div>
-        <div>
-          <label htmlFor="cycle-deadline" className="mb-1.5 block text-sm font-medium text-foreground">
-            Submission deadline
-          </label>
-          <Input id="cycle-deadline" type="date" aria-invalid={Boolean(errors.submissionDeadline)} {...register("submissionDeadline")} />
-          {errors.submissionDeadline && (
-            <p className="mt-1 text-xs text-destructive">{errors.submissionDeadline.message}</p>
-          )}
-        </div>
-      </div>
-
-      <div>
-        <label htmlFor="cycle-description" className="mb-1.5 block text-sm font-medium text-foreground">
-          Description
-        </label>
-        <Textarea id="cycle-description" rows={4} {...register("description")} />
-      </div>
+      <FormField label="Description" htmlFor="cycle-description" helperText="Optional context shown to PIs and reviewers.">
+        <Textarea id="cycle-description" rows={4} placeholder="Add notes about this cycle's focus or requirements..." {...register("description")} />
+      </FormField>
     </FormSheet>
   );
 }

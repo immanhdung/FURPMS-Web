@@ -1,6 +1,5 @@
 import { useEffect, type ReactNode } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "sonner";
 import { queryClient } from "@/app/providers/queryClient";
 import { ThemeProvider } from "@/app/providers/ThemeProvider";
@@ -24,7 +23,6 @@ export function AppProviders({ children }: { children: ReactNode }) {
       <ThemeProvider>
         {children}
         <Toaster richColors position="top-right" closeButton />
-        {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
       </ThemeProvider>
     </QueryClientProvider>
   );

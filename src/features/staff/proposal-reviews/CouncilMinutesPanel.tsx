@@ -111,10 +111,12 @@ export function CouncilMinutesPanel({ councilId, proposalId, projectId }: Counci
 
   return (
     <div className="space-y-5">
-      <div className="space-y-3 rounded-xl border border-border p-4">
-        <div className="flex items-center gap-2">
-          <FileText className="size-4 text-muted-foreground" />
-          <p className="text-sm font-medium text-foreground">Meeting minutes (draft)</p>
+      <div className="space-y-3 rounded-xl border border-border bg-card p-4 shadow-soft-xs">
+        <div className="flex items-center gap-2 border-b border-border pb-3">
+          <div className="flex size-7 items-center justify-center rounded-lg bg-linear-to-br from-primary/15 to-brand-secondary/10">
+            <FileText className="size-3.5 text-primary" />
+          </div>
+          <p className="text-sm font-semibold text-foreground">Meeting minutes (draft)</p>
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

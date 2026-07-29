@@ -36,9 +36,14 @@ export function FinalReportPanel({ contractId }: { contractId: string }) {
   }
 
   return (
-    <div className="space-y-3 rounded-lg border border-border p-3">
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-sm font-medium text-foreground">Final report</p>
+    <div className="space-y-3 rounded-xl border border-border bg-card p-4 shadow-soft-xs">
+      <div className="flex items-center justify-between gap-2 border-b border-border pb-3">
+        <div className="flex items-center gap-2">
+          <div className="flex size-7 items-center justify-center rounded-lg bg-linear-to-br from-primary/15 to-brand-secondary/10">
+            <FileCheck2 className="size-3.5 text-primary" />
+          </div>
+          <p className="text-sm font-semibold text-foreground">Final report</p>
+        </div>
         {finalReport.status && <StatusBadge status={finalReport.status} />}
       </div>
 

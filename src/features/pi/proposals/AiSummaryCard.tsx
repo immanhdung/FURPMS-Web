@@ -8,11 +8,13 @@ export function AiSummaryCard({ proposalId }: { proposalId: string }) {
   const summarizeMutation = useSummarizeProposalMutation();
 
   return (
-    <Card>
+    <Card variant="glass">
       <CardHeader>
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <Sparkles className="size-4 text-primary" />
+            <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-primary to-brand-secondary text-primary-foreground">
+              <Sparkles className="size-3.5" />
+            </div>
             <CardTitle className="text-sm">AI Summary</CardTitle>
           </div>
           <Button

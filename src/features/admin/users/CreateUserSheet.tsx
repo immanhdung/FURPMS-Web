@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { FormSheet } from "@/components/shared/FormSheet";
+import { FormField } from "@/components/shared/FormField";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -59,44 +60,31 @@ export function CreateUserSheet({ open, onOpenChange }: CreateUserSheetProps) {
       isSubmitting={createUserMutation.isPending}
       submitLabel="Create user"
     >
-      <div>
-        <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-foreground">
-          Email
-        </label>
+      <FormField label="Email" htmlFor="email" required error={errors.email?.message}>
         <Input id="email" type="email" aria-invalid={Boolean(errors.email)} {...register("email")} />
-        {errors.email && <p className="mt-1 text-xs text-destructive">{errors.email.message}</p>}
-      </div>
+      </FormField>
 
-      <div>
-        <label htmlFor="fullName" className="mb-1.5 block text-sm font-medium text-foreground">
-          Full name
-        </label>
+      <FormField label="Full name" htmlFor="fullName" required error={errors.fullName?.message}>
         <Input id="fullName" aria-invalid={Boolean(errors.fullName)} {...register("fullName")} />
-        {errors.fullName && <p className="mt-1 text-xs text-destructive">{errors.fullName.message}</p>}
+      </FormField>
+
+      <div className="grid grid-cols-2 gap-3">
+        <FormField label="Phone number" htmlFor="phoneNumber">
+          <Input id="phoneNumber" {...register("phoneNumber")} />
+        </FormField>
+
+        <FormField label="Department" htmlFor="department">
+          <Input id="department" {...register("department")} />
+        </FormField>
       </div>
 
-      <div>
-        <label htmlFor="phoneNumber" className="mb-1.5 block text-sm font-medium text-foreground">
-          Phone number
-        </label>
-        <Input id="phoneNumber" {...register("phoneNumber")} />
-      </div>
-
-      <div>
-        <label htmlFor="department" className="mb-1.5 block text-sm font-medium text-foreground">
-          Department
-        </label>
-        <Input id="department" {...register("department")} />
-      </div>
-
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Academic degree</label>
+      <FormField label="Academic degree" htmlFor="academicDegree">
         <Controller
           control={control}
           name="academicDegree"
           render={({ field }) => (
             <Select value={field.value?.toString()} onValueChange={(value) => field.onChange(Number(value))}>
-              <SelectTrigger>
+              <SelectTrigger id="academicDegree" className="w-full">
                 <SelectValue placeholder="Select degree" />
               </SelectTrigger>
               <SelectContent>
@@ -109,15 +97,14 @@ export function CreateUserSheet({ open, onOpenChange }: CreateUserSheetProps) {
             </Select>
           )}
         />
-      </div>
+      </FormField>
 
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Roles</label>
+      <FormField label="Roles" required error={errors.roles?.message}>
         <Controller
           control={control}
           name="roles"
           render={({ field }) => (
-            <div className="space-y-2">
+            <div className="grid grid-cols-1 gap-1.5 rounded-lg border border-border bg-muted/30 p-3 sm:grid-cols-2">
               {ALL_ROLES.map((role) => (
                 <label key={role} className="flex items-center gap-2 text-sm text-foreground">
                   <Checkbox
@@ -135,23 +122,22 @@ export function CreateUserSheet({ open, onOpenChange }: CreateUserSheetProps) {
             </div>
           )}
         />
-        {errors.roles && <p className="mt-1 text-xs text-destructive">{errors.roles.message}</p>}
-      </div>
+      </FormField>
 
-      <div>
-        <label htmlFor="temporaryPassword" className="mb-1.5 block text-sm font-medium text-foreground">
-          Temporary password
-        </label>
+      <FormField
+        label="Temporary password"
+        htmlFor="temporaryPassword"
+        required
+        error={errors.temporaryPassword?.message}
+        helperText="The user will be asked to change this on first login."
+      >
         <Input
           id="temporaryPassword"
           type="password"
           aria-invalid={Boolean(errors.temporaryPassword)}
           {...register("temporaryPassword")}
         />
-        {errors.temporaryPassword && (
-          <p className="mt-1 text-xs text-destructive">{errors.temporaryPassword.message}</p>
-        )}
-      </div>
+      </FormField>
     </FormSheet>
   );
 }

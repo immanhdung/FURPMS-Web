@@ -48,19 +48,39 @@ export function HomePage() {
             <img src={fptLogo} alt="FPT University" className="h-8 w-auto object-contain" />
             <span className="hidden text-sm font-semibold tracking-wide text-white/90 sm:inline">FURPMS</span>
           </div>
-          <Button onClick={() => navigate(ROUTES.LOGIN)} className="bg-linear-to-r from-blue-500 to-purple-600 text-white hover:opacity-90">
+          <Button
+            variant="outline"
+            onClick={() => navigate(ROUTES.LOGIN)}
+            className="border-white/20 bg-white/5 text-white hover:bg-white/15"
+          >
             Đăng nhập
             <ArrowRight />
           </Button>
         </div>
       </header>
 
-      <section className="relative flex min-h-screen items-center overflow-hidden">
+      <section className="relative flex min-h-screen items-center overflow-hidden bg-slate-950">
         <div className="absolute inset-0">
           <img src={campusHero} alt="FPT University campus" className="size-full object-cover" />
           <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/80 to-slate-950/40" />
           <div className="absolute inset-0 bg-linear-to-r from-slate-950/70 via-slate-950/20 to-transparent" />
         </div>
+
+        <motion.div
+          className="aurora-orb -top-32 left-1/4 h-96 w-96 bg-primary/25"
+          animate={{ x: [0, 24, 0], y: [0, 16, 0] }}
+          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="aurora-orb top-1/3 right-0 h-80 w-80 bg-brand-secondary/25"
+          animate={{ x: [0, -20, 0], y: [0, 20, 0] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="aurora-orb bottom-0 left-0 h-72 w-72 bg-brand-accent/20"
+          animate={{ scale: [1, 1.15, 1] }}
+          transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+        />
 
         <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pt-16 sm:px-6">
           <motion.div
@@ -70,14 +90,14 @@ export function HomePage() {
             className="max-w-2xl"
           >
             <div className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white/90 backdrop-blur-sm">
-              <Sparkles className="size-3.5 text-teal-400" />
+              <Sparkles className="size-3.5 text-brand-accent" />
               Trường Đại học FPT
             </div>
 
             <h1 className="mt-5 text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
               Hệ thống Quản lý
               <br />
-              <span className="bg-linear-to-r from-blue-400 via-teal-300 to-blue-400 bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-primary via-brand-accent to-primary bg-clip-text text-transparent">
                 Đề tài Nghiên cứu Khoa học
               </span>
             </h1>
@@ -88,11 +108,7 @@ export function HomePage() {
             </p>
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <Button
-                size="lg"
-                onClick={() => navigate(ROUTES.LOGIN)}
-                className="bg-linear-to-r from-blue-500 to-purple-600 text-white hover:opacity-90"
-              >
+              <Button size="lg" variant="gradient" onClick={() => navigate(ROUTES.LOGIN)}>
                 Đăng nhập hệ thống
                 <ArrowRight />
               </Button>
@@ -127,9 +143,9 @@ export function HomePage() {
                 viewport={{ once: true, margin: "-60px" }}
                 transition={{ duration: 0.35, delay: index * 0.06 }}
               >
-                <Card className="h-full transition-shadow hover:shadow-md">
+                <Card className="h-full transition-all duration-200 hover:-translate-y-0.5 hover:shadow-soft-lg">
                   <CardContent className="p-5">
-                    <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <div className="flex size-10 items-center justify-center rounded-lg bg-linear-to-br from-primary/15 to-brand-secondary/10 text-primary">
                       <feature.icon className="size-5" />
                     </div>
                     <p className="mt-4 text-sm font-semibold text-foreground">{feature.title}</p>

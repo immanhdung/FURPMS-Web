@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { FormSheet } from "@/components/shared/FormSheet";
+import { FormField } from "@/components/shared/FormField";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useCreateBudgetCategoryMutation, useUpdateBudgetCategoryMutation } from "@/hooks/useBudgetCategories";
@@ -59,37 +60,37 @@ export function BudgetCategoryFormSheet({ open, onOpenChange, category }: Budget
       isSubmitting={isSubmitting}
       submitLabel={isEdit ? "Save changes" : "Create"}
     >
-      <div>
-        <label htmlFor="bc-code" className="mb-1.5 block text-sm font-medium text-foreground">
-          Code
-        </label>
+      <FormField label="Code" htmlFor="bc-code" required error={errors.code?.message}>
         <Input id="bc-code" aria-invalid={Boolean(errors.code)} {...register("code")} />
-        {errors.code && <p className="mt-1 text-xs text-destructive">{errors.code.message}</p>}
-      </div>
+      </FormField>
 
-      <div>
-        <label htmlFor="bc-name" className="mb-1.5 block text-sm font-medium text-foreground">
-          Name
-        </label>
+      <FormField label="Name" htmlFor="bc-name" required error={errors.name?.message}>
         <Input id="bc-name" aria-invalid={Boolean(errors.name)} {...register("name")} />
-        {errors.name && <p className="mt-1 text-xs text-destructive">{errors.name.message}</p>}
-      </div>
+      </FormField>
 
-      <div>
-        <label htmlFor="bc-sequence" className="mb-1.5 block text-sm font-medium text-foreground">
-          Sequence
-        </label>
-        <Input id="bc-sequence" type="number" aria-invalid={Boolean(errors.sequence)} {...register("sequence", { valueAsNumber: true })} />
-        {errors.sequence && <p className="mt-1 text-xs text-destructive">{errors.sequence.message}</p>}
-      </div>
+      <FormField label="Sequence" htmlFor="bc-sequence" required error={errors.sequence?.message}>
+        <Input
+          id="bc-sequence"
+          type="number"
+          aria-invalid={Boolean(errors.sequence)}
+          {...register("sequence", { valueAsNumber: true })}
+        />
+      </FormField>
 
       <Controller
         control={control}
         name="isActive"
         render={({ field }) => (
-          <label className="flex items-center gap-2 text-sm text-foreground">
-            <Checkbox checked={field.value} onCheckedChange={(checked) => field.onChange(Boolean(checked))} />
-            Active
+          <label
+            htmlFor="bc-is-active"
+            className="flex items-center justify-between gap-3 rounded-lg border border-border p-3 text-sm text-foreground"
+          >
+            <span className="font-medium">Active</span>
+            <Checkbox
+              id="bc-is-active"
+              checked={field.value}
+              onCheckedChange={(checked) => field.onChange(Boolean(checked))}
+            />
           </label>
         )}
       />

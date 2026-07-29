@@ -42,7 +42,10 @@ export function DisbursementsPanel({ contractId }: { contractId: string }) {
           {disbursements.map((disbursement, index) => {
             const isConfirmed = disbursement.status?.toUpperCase() === DISBURSEMENT_STATUS.CONFIRMED;
             return (
-              <li key={disbursement.id} className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
+              <li
+                key={disbursement.id}
+                className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card p-3 shadow-soft-xs transition-shadow duration-150 hover:shadow-soft-sm"
+              >
                 <div>
                   <p className="text-sm font-medium text-foreground">
                     Installment {disbursement.installmentNumber ?? index + 1}

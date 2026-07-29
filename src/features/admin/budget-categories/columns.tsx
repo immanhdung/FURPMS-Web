@@ -25,7 +25,12 @@ export function getBudgetCategoryColumns({
     },
     {
       accessorKey: "sequence",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Sequence" />,
+      header: ({ column }) => (
+        <div className="text-right">
+          <DataTableColumnHeader column={column} title="Sequence" className="ml-0" />
+        </div>
+      ),
+      cell: ({ row }) => <div className="text-right tabular-nums">{row.original.sequence}</div>,
     },
     {
       accessorKey: "isActive",

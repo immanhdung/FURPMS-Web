@@ -9,11 +9,13 @@ export function AiFeedbackCard({ proposalId }: { proposalId: string }) {
   const feedbackMutation = useGenerateFeedbackMutation();
 
   return (
-    <Card>
+    <Card variant="glass">
       <CardHeader>
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <Sparkles className="size-4 text-primary" />
+            <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-primary to-brand-secondary text-primary-foreground">
+              <Sparkles className="size-3.5" />
+            </div>
             <CardTitle className="text-sm">AI Feedback</CardTitle>
           </div>
           <Button
@@ -46,7 +48,7 @@ export function AiFeedbackCard({ proposalId }: { proposalId: string }) {
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.15, delay: index * 0.05 }}
-                className="rounded-lg bg-primary/4 p-2.5"
+                className="rounded-lg bg-primary/5 p-2.5 ring-1 ring-primary/10"
               >
                 <Badge variant="secondary" className="mb-1">
                   {item.category}

@@ -48,38 +48,44 @@ export function FeedbackForm({ councilId }: { councilId: string }) {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {SCORE_FIELDS.map(({ key, label }) => (
-          <div key={key}>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">{label}</label>
-            <Input
-              type="number"
-              min={1}
-              max={10}
-              value={(form[key] as number | undefined) ?? ""}
-              onChange={(e) => setForm((prev) => ({ ...prev, [key]: e.target.value ? Number(e.target.value) : undefined }))}
-            />
-          </div>
-        ))}
+    <div className="space-y-5">
+      <div className="rounded-xl border border-border bg-card p-4 shadow-soft-xs">
+        <p className="mb-3 text-sm font-medium text-foreground">Scores</p>
+        <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+          {SCORE_FIELDS.map(({ key, label }) => (
+            <div key={key}>
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">{label}</label>
+              <Input
+                type="number"
+                min={1}
+                max={10}
+                className="font-medium"
+                value={(form[key] as number | undefined) ?? ""}
+                onChange={(e) => setForm((prev) => ({ ...prev, [key]: e.target.value ? Number(e.target.value) : undefined }))}
+              />
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Overall assessment</label>
-        <Textarea
-          rows={3}
-          value={form.overallAssessment ?? ""}
-          onChange={(e) => setForm((prev) => ({ ...prev, overallAssessment: e.target.value }))}
-        />
-      </div>
+      <div className="space-y-4 rounded-xl border border-border bg-card p-4 shadow-soft-xs">
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-foreground">Overall assessment</label>
+          <Textarea
+            rows={3}
+            value={form.overallAssessment ?? ""}
+            onChange={(e) => setForm((prev) => ({ ...prev, overallAssessment: e.target.value }))}
+          />
+        </div>
 
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Other comments</label>
-        <Textarea
-          rows={3}
-          value={form.otherComments ?? ""}
-          onChange={(e) => setForm((prev) => ({ ...prev, otherComments: e.target.value }))}
-        />
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-foreground">Other comments</label>
+          <Textarea
+            rows={3}
+            value={form.otherComments ?? ""}
+            onChange={(e) => setForm((prev) => ({ ...prev, otherComments: e.target.value }))}
+          />
+        </div>
       </div>
 
       <div className="flex justify-end">

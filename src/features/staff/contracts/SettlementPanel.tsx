@@ -34,8 +34,13 @@ export function SettlementPanel({ contractId }: { contractId: string }) {
 
   if (!settlement) {
     return (
-      <div className="space-y-3 rounded-lg border border-dashed border-border p-3">
-        <p className="text-sm font-medium text-foreground">Create settlement</p>
+      <div className="space-y-3 rounded-xl border border-dashed border-border bg-muted/20 p-4">
+        <div className="flex items-center gap-2">
+          <div className="flex size-7 items-center justify-center rounded-lg bg-linear-to-br from-primary/15 to-brand-secondary/10">
+            <Landmark className="size-3.5 text-primary" />
+          </div>
+          <p className="text-sm font-semibold text-foreground">Create settlement</p>
+        </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div>
             <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Total contracted</label>
@@ -90,9 +95,14 @@ export function SettlementPanel({ contractId }: { contractId: string }) {
   const isAssetsCleared = Boolean(settlement.assetsClearedAt);
 
   return (
-    <div className="space-y-3 rounded-lg border border-border p-3">
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-sm font-medium text-foreground">Settlement</p>
+    <div className="space-y-3 rounded-xl border border-border bg-card p-4 shadow-soft-xs">
+      <div className="flex items-center justify-between gap-2 border-b border-border pb-3">
+        <div className="flex items-center gap-2">
+          <div className="flex size-7 items-center justify-center rounded-lg bg-linear-to-br from-primary/15 to-brand-secondary/10">
+            <Landmark className="size-3.5 text-primary" />
+          </div>
+          <p className="text-sm font-semibold text-foreground">Settlement</p>
+        </div>
         {settlement.status && <StatusBadge status={settlement.status} />}
       </div>
 

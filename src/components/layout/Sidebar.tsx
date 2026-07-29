@@ -20,7 +20,7 @@ function Brand({ collapsed }: { collapsed: boolean }) {
       {!collapsed && (
         <div className="min-w-0 leading-tight">
           <p className="truncate text-sm font-semibold text-sidebar-foreground">FURPMS</p>
-          <p className="truncate text-[11px] text-muted-foreground">Research Management</p>
+          <p className="truncate text-[11px] text-sidebar-foreground/50">Research Management</p>
         </div>
       )}
     </div>
@@ -34,8 +34,8 @@ function NavLinkItem({ item, collapsed }: { item: NavItem; collapsed: boolean })
       end={item.path === ROUTES.DASHBOARD}
       className={({ isActive }) =>
         cn(
-          "group relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium text-sidebar-foreground/70 transition-colors hover:text-sidebar-accent-foreground",
-          isActive && "text-sidebar-accent-foreground",
+          "group relative flex items-center gap-2.5 rounded-full px-3 py-2 text-sm font-medium text-sidebar-foreground/60 transition-colors hover:text-sidebar-accent-foreground",
+          isActive && "text-white",
           collapsed && "justify-center px-0"
         )
       }
@@ -45,14 +45,17 @@ function NavLinkItem({ item, collapsed }: { item: NavItem; collapsed: boolean })
           {isActive ? (
             <motion.span
               layoutId="sidebar-active-pill"
-              className="absolute inset-0 rounded-lg bg-sidebar-accent shadow-soft-xs"
+              className="absolute inset-0 rounded-full bg-linear-to-r from-primary to-brand-secondary shadow-soft-md"
               transition={{ type: "spring", stiffness: 420, damping: 32 }}
             />
           ) : (
-            <span className="absolute inset-0 rounded-lg bg-transparent transition-colors group-hover:bg-sidebar-accent/60" />
+            <span className="absolute inset-0 rounded-full bg-transparent transition-colors group-hover:bg-sidebar-accent/70" />
           )}
           <item.icon className="relative z-10 size-4 shrink-0" />
           {!collapsed && <span className="relative z-10 truncate">{item.label}</span>}
+          {isActive && !collapsed && (
+            <span className="absolute right-3 z-10 size-1.5 rounded-full bg-white shadow-[0_0_8px_2px_rgba(255,255,255,0.55)]" />
+          )}
         </>
       )}
     </NavLink>
@@ -89,14 +92,19 @@ export function Sidebar() {
 
   return (
     <motion.aside
-      animate={{ width: collapsed ? 68 : 248 }}
+      animate={{ width: collapsed ? 76 : 256 }}
       transition={{ duration: 0.2, ease: "easeInOut" }}
-      className="sticky top-0 hidden h-screen shrink-0 flex-col border-r border-sidebar-border bg-sidebar/95 shadow-soft-xs backdrop-blur-sm md:flex"
+      className="liquid-glass sticky top-3 z-10 m-3 hidden h-[calc(100vh-1.5rem)] shrink-0 flex-col overflow-hidden rounded-2xl border border-sidebar-border md:flex"
     >
       <Brand collapsed={collapsed} />
       <SidebarNav collapsed={collapsed} />
       <div className="border-t border-sidebar-border p-2">
-        <Button variant="ghost" size="sm" className="w-full justify-center gap-2" onClick={toggleSidebar}>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-center gap-2 rounded-full text-sidebar-foreground/70 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground"
+          onClick={toggleSidebar}
+        >
           <ChevronsLeft className={cn("size-4 transition-transform", collapsed && "rotate-180")} />
           {!collapsed && "Collapse"}
         </Button>

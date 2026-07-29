@@ -29,11 +29,18 @@ export function MembershipListPage({
   const { data, isLoading, isError, refetch, isRefetching } = useMyMembershipsQuery();
   const items = (data ?? []).filter(filter);
 
+  const EmptyIcon = emptyIcon;
+
   return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+    <div className="space-y-5">
+      <div className="flex items-center gap-3">
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-primary/10 to-brand-secondary/10 text-primary">
+          <EmptyIcon className="size-5" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h1>
+          <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
+        </div>
       </div>
 
       {isError ? (

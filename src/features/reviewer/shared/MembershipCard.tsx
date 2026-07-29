@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { FileText } from "lucide-react";
 import { motion } from "motion/react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,20 +19,25 @@ export function MembershipCard({ membership, actions, index = 0 }: MembershipCar
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, delay: index * 0.04 }}
     >
-      <Card>
-        <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-foreground">
-              {membership.proposalTitleVI || "Untitled proposal"}
-            </p>
-            <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-              {membership.roundType && <Badge variant="secondary">{membership.roundType}</Badge>}
-              {membership.memberRole && <Badge variant="outline">{membership.memberRole}</Badge>}
-              {membership.status && <StatusBadge status={membership.status} />}
-              {membership.roundStatus && <StatusBadge status={membership.roundStatus} />}
+      <Card className="transition-shadow duration-200 hover:shadow-soft-md">
+        <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-start gap-3">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-primary/10 to-brand-secondary/10 text-primary">
+              <FileText className="size-4" />
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium text-foreground">
+                {membership.proposalTitleVI || "Untitled proposal"}
+              </p>
+              <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                {membership.roundType && <Badge variant="secondary">{membership.roundType}</Badge>}
+                {membership.memberRole && <Badge variant="outline">{membership.memberRole}</Badge>}
+                {membership.status && <StatusBadge status={membership.status} />}
+                {membership.roundStatus && <StatusBadge status={membership.roundStatus} />}
+              </div>
             </div>
           </div>
-          {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
+          {actions && <div className="flex shrink-0 items-center gap-2 pl-12 sm:pl-3">{actions}</div>}
         </CardContent>
       </Card>
     </motion.div>

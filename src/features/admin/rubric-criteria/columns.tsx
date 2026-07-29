@@ -27,15 +27,26 @@ export function getRubricCriterionColumns({
     },
     {
       accessorKey: "orderIndex",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Order" />,
+      header: ({ column }) => (
+        <div className="text-right">
+          <DataTableColumnHeader column={column} title="Order" className="ml-0" />
+        </div>
+      ),
+      cell: ({ row }) => <div className="text-right tabular-nums text-muted-foreground">{row.original.orderIndex}</div>,
     },
     {
       accessorKey: "name",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
+      cell: ({ row }) => <span className="font-medium text-foreground">{row.original.name}</span>,
     },
     {
       accessorKey: "maxScore",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Max Score" />,
+      header: ({ column }) => (
+        <div className="text-right">
+          <DataTableColumnHeader column={column} title="Max Score" className="ml-0" />
+        </div>
+      ),
+      cell: ({ row }) => <div className="text-right tabular-nums font-medium text-foreground">{row.original.maxScore}</div>,
     },
     {
       accessorKey: "isActive",

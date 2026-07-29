@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { FormSheet } from "@/components/shared/FormSheet";
+import { FormField } from "@/components/shared/FormField";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -71,36 +72,27 @@ export function EditUserSheet({ open, onOpenChange, user }: EditUserSheetProps) 
       isSubmitting={updateUserMutation.isPending}
       submitLabel="Save changes"
     >
-      <div>
-        <label htmlFor="edit-fullName" className="mb-1.5 block text-sm font-medium text-foreground">
-          Full name
-        </label>
+      <FormField label="Full name" htmlFor="edit-fullName" required error={errors.fullName?.message}>
         <Input id="edit-fullName" aria-invalid={Boolean(errors.fullName)} {...register("fullName")} />
-        {errors.fullName && <p className="mt-1 text-xs text-destructive">{errors.fullName.message}</p>}
+      </FormField>
+
+      <div className="grid grid-cols-2 gap-3">
+        <FormField label="Phone number" htmlFor="edit-phoneNumber">
+          <Input id="edit-phoneNumber" {...register("phoneNumber")} />
+        </FormField>
+
+        <FormField label="Department" htmlFor="edit-department">
+          <Input id="edit-department" {...register("department")} />
+        </FormField>
       </div>
 
-      <div>
-        <label htmlFor="edit-phoneNumber" className="mb-1.5 block text-sm font-medium text-foreground">
-          Phone number
-        </label>
-        <Input id="edit-phoneNumber" {...register("phoneNumber")} />
-      </div>
-
-      <div>
-        <label htmlFor="edit-department" className="mb-1.5 block text-sm font-medium text-foreground">
-          Department
-        </label>
-        <Input id="edit-department" {...register("department")} />
-      </div>
-
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Academic degree</label>
+      <FormField label="Academic degree" htmlFor="edit-academicDegree">
         <Controller
           control={control}
           name="academicDegree"
           render={({ field }) => (
             <Select value={field.value?.toString()} onValueChange={(value) => field.onChange(Number(value))}>
-              <SelectTrigger>
+              <SelectTrigger id="edit-academicDegree" className="w-full">
                 <SelectValue placeholder="Select degree" />
               </SelectTrigger>
               <SelectContent>
@@ -113,15 +105,14 @@ export function EditUserSheet({ open, onOpenChange, user }: EditUserSheetProps) 
             </Select>
           )}
         />
-      </div>
+      </FormField>
 
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Roles</label>
+      <FormField label="Roles" required error={errors.roles?.message}>
         <Controller
           control={control}
           name="roles"
           render={({ field }) => (
-            <div className="space-y-2">
+            <div className="grid grid-cols-1 gap-1.5 rounded-lg border border-border bg-muted/30 p-3 sm:grid-cols-2">
               {ALL_ROLES.map((role) => (
                 <label key={role} className="flex items-center gap-2 text-sm text-foreground">
                   <Checkbox
@@ -139,8 +130,7 @@ export function EditUserSheet({ open, onOpenChange, user }: EditUserSheetProps) 
             </div>
           )}
         />
-        {errors.roles && <p className="mt-1 text-xs text-destructive">{errors.roles.message}</p>}
-      </div>
+      </FormField>
     </FormSheet>
   );
 }

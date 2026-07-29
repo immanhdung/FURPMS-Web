@@ -56,19 +56,27 @@ export function CouncilMembersPanel({ councilId, trackId }: CouncilMembersPanelP
       ) : (
         <ul className="space-y-2">
           {members.map((member) => (
-            <li key={member.id} className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-foreground">
-                  {member.reviewerName ?? member.userId}
-                  {member.memberRole && <span className="ml-1.5 text-xs text-muted-foreground">· {member.memberRole}</span>}
-                </p>
-                <p className="truncate text-xs text-muted-foreground">{member.reviewerEmail}</p>
-                {member.confirmedAt && (
-                  <p className="text-[11px] text-muted-foreground">Confirmed {formatDateTime(member.confirmedAt)}</p>
-                )}
-                {member.declinedAt && (
-                  <p className="text-[11px] text-muted-foreground">Declined {formatDateTime(member.declinedAt)}</p>
-                )}
+            <li
+              key={member.id}
+              className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card p-3 shadow-soft-xs transition-shadow duration-150 hover:shadow-soft-sm"
+            >
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-primary/15 to-brand-secondary/10 text-xs font-semibold text-primary">
+                  {(member.reviewerName ?? member.userId).slice(0, 2).toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-foreground">
+                    {member.reviewerName ?? member.userId}
+                    {member.memberRole && <span className="ml-1.5 text-xs text-muted-foreground">· {member.memberRole}</span>}
+                  </p>
+                  <p className="truncate text-xs text-muted-foreground">{member.reviewerEmail}</p>
+                  {member.confirmedAt && (
+                    <p className="text-[11px] text-muted-foreground">Confirmed {formatDateTime(member.confirmedAt)}</p>
+                  )}
+                  {member.declinedAt && (
+                    <p className="text-[11px] text-muted-foreground">Declined {formatDateTime(member.declinedAt)}</p>
+                  )}
+                </div>
               </div>
 
               <div className="flex shrink-0 items-center gap-1.5">

@@ -1,5 +1,6 @@
 import { DetailSheet } from "@/components/shared/DetailSheet";
 import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/shared/StatusBadge";
 import { useUserQuery } from "@/hooks/useUsers";
 import { ACADEMIC_DEGREES } from "@/types/user";
 import { formatDateTime } from "@/utils/format";
@@ -39,7 +40,7 @@ export function UserDetailSheet({ open, onOpenChange, userId }: UserDetailSheetP
           label: "Academic degree",
           value: ACADEMIC_DEGREES.find((d) => d.value === user?.academicDegree)?.label,
         },
-        { label: "Status", value: user?.status },
+        { label: "Status", value: user?.status ? <StatusBadge status={user.status} /> : undefined },
         { label: "Last login", value: user?.lastLoginAt ? formatDateTime(user.lastLoginAt) : undefined },
       ]}
     />

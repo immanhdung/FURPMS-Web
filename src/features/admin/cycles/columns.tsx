@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import { Lock, Unlock } from "lucide-react";
+import { CalendarDays, Lock, Unlock } from "lucide-react";
 import { DataTableColumnHeader } from "@/components/tables/DataTableColumnHeader";
 import { DataTableRowActions } from "@/components/tables/DataTableRowActions";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -26,25 +26,50 @@ export function getCycleColumns({
     {
       accessorKey: "name",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
+      cell: ({ row }) => (
+        <span className="block max-w-64 truncate text-sm font-medium text-foreground">{row.original.name}</span>
+      ),
     },
     {
       accessorKey: "academicYear",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Academic Year" />,
+      cell: ({ row }) => <span className="text-sm text-muted-foreground">{row.original.academicYear}</span>,
     },
     {
       id: "researchType",
       accessorFn: (row) => researchTypeNames[row.researchTypeId] ?? row.researchTypeId,
       header: ({ column }) => <DataTableColumnHeader column={column} title="Research Type" />,
+      cell: ({ row }) => (
+        <span className="text-sm text-muted-foreground">{row.getValue("researchType") as string}</span>
+      ),
     },
     {
       accessorKey: "submissionStartDate",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Start" />,
-      cell: ({ row }) => formatDate(row.original.submissionStartDate),
+      header: ({ column }) => (
+        <div className="flex justify-end">
+          <DataTableColumnHeader column={column} title="Start" />
+        </div>
+      ),
+      cell: ({ row }) => (
+        <div className="flex items-center justify-end gap-1.5 text-sm text-muted-foreground">
+          <CalendarDays className="size-3.5 text-muted-foreground/60" />
+          {formatDate(row.original.submissionStartDate)}
+        </div>
+      ),
     },
     {
       accessorKey: "submissionDeadline",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Deadline" />,
-      cell: ({ row }) => formatDate(row.original.submissionDeadline),
+      header: ({ column }) => (
+        <div className="flex justify-end">
+          <DataTableColumnHeader column={column} title="Deadline" />
+        </div>
+      ),
+      cell: ({ row }) => (
+        <div className="flex items-center justify-end gap-1.5 text-sm text-muted-foreground">
+          <CalendarDays className="size-3.5 text-muted-foreground/60" />
+          {formatDate(row.original.submissionDeadline)}
+        </div>
+      ),
     },
     {
       accessorKey: "status",

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Check, Mail, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,10 +18,20 @@ export function InvitationsPage() {
   const pending = (data ?? []).filter((m) => m.status?.toUpperCase() === INVITATION_STATUS.PENDING);
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Invitations</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Council invitations awaiting your response.</p>
+    <div className="space-y-5">
+      <div className="flex items-center gap-3">
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-primary/10 to-brand-secondary/10 text-primary">
+          <Mail className="size-5" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Invitations</h1>
+          <p className="mt-0.5 text-sm text-muted-foreground">Council invitations awaiting your response.</p>
+        </div>
+        {pending.length > 0 && (
+          <Badge variant="secondary" className="ml-auto">
+            {pending.length} pending
+          </Badge>
+        )}
       </div>
 
       {isError ? (

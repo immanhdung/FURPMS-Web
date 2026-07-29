@@ -16,10 +16,14 @@ export function AssignmentsPage() {
         </p>
       </div>
 
-      <div className="flex items-start gap-2.5 rounded-lg border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
-        <Mail className="mt-0.5 size-4 shrink-0" />
-        Pick a proposal below, open a review round's council, then manage members and invitation responses from
-        there.
+      <div className="flex items-start gap-3 rounded-xl border border-border bg-muted/30 p-3.5 text-xs text-muted-foreground">
+        <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-primary/15 to-brand-secondary/10">
+          <Mail className="size-3.5 text-primary" />
+        </div>
+        <p className="pt-1">
+          Pick a proposal below, open a review round's council, then manage members and invitation responses from
+          there.
+        </p>
       </div>
 
       <ProposalsTable onOpen={(proposal: ProposalSummary) => navigate(`${ROUTES.PROPOSAL_REVIEWS}/${proposal.id}`)} />

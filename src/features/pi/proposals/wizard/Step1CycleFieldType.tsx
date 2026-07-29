@@ -113,8 +113,10 @@ export function Step1CycleFieldType({ form }: { form: UseFormReturn<ProposalWiza
                       onClick={() => field.onChange(type.id)}
                       onKeyDown={(e) => e.key === "Enter" && field.onChange(type.id)}
                       className={cn(
-                        "cursor-pointer transition-colors",
-                        isSelected ? "border-primary ring-1 ring-primary" : "hover:border-primary/40"
+                        "cursor-pointer transition-all duration-200",
+                        isSelected
+                          ? "border-primary bg-primary/[0.03] shadow-soft-sm ring-1 ring-primary"
+                          : "hover:border-primary/40 hover:shadow-soft-xs"
                       )}
                     >
                       <CardContent className="flex items-start justify-between gap-2 p-4">

@@ -47,11 +47,11 @@ export function ProposalReviewWorkspace() {
         Back to assigned reviews
       </Button>
 
-      <div>
+      <div className="rounded-xl border border-border bg-card p-4 shadow-soft-xs sm:p-5">
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">
           {membership.proposalTitleVI || "Untitled proposal"}
         </h1>
-        <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+        <div className="mt-2 flex flex-wrap items-center gap-1.5">
           {membership.roundType && <Badge variant="secondary">{membership.roundType}</Badge>}
           {membership.memberRole && <Badge variant="outline">{membership.memberRole}</Badge>}
           {membership.roundStatus && <StatusBadge status={membership.roundStatus} />}
@@ -64,17 +64,21 @@ export function ProposalReviewWorkspace() {
           {meetings.map((meeting) => (
             <div
               key={meeting.id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2.5"
+              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-3.5 shadow-soft-xs sm:p-4"
             >
-              <div className="flex items-center gap-1.5 text-sm text-foreground">
-                <CalendarClock className="size-4 shrink-0 text-muted-foreground" />
-                <span className="font-medium">{meeting.title ?? "Council meeting"}</span>
-                <span className="text-muted-foreground">
-                  · {formatDateTime(meeting.scheduledAt)} · {meeting.durationMinutes}min
-                  {meeting.platform && ` · ${meeting.platform}`}
-                </span>
+              <div className="flex items-start gap-3">
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand-accent-2/10 text-brand-accent-2">
+                  <CalendarClock className="size-4" />
+                </div>
+                <div className="text-sm">
+                  <p className="font-medium text-foreground">{meeting.title ?? "Council meeting"}</p>
+                  <p className="mt-0.5 text-muted-foreground">
+                    {formatDateTime(meeting.scheduledAt)} · {meeting.durationMinutes}min
+                    {meeting.platform && ` · ${meeting.platform}`}
+                  </p>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 pl-12 sm:pl-0">
                 {meeting.status && <StatusBadge status={meeting.status} />}
                 {meeting.meetingLink && (
                   <Button size="sm" variant="outline" asChild>

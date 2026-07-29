@@ -30,12 +30,15 @@ export function DeclineInvitationDialog({ open, onOpenChange, memberId }: Declin
           <DialogDescription>Let the staff know why you can't join this council (optional).</DialogDescription>
         </DialogHeader>
 
-        <Textarea
-          placeholder="Reason for declining..."
-          rows={3}
-          value={reason}
-          onChange={(e) => setReason(e.target.value)}
-        />
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-foreground">Reason</label>
+          <Textarea
+            placeholder="Reason for declining..."
+            rows={3}
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+          />
+        </div>
 
         <DialogFooter>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={respondMutation.isPending}>

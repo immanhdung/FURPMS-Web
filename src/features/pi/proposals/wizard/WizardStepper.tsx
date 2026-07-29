@@ -19,16 +19,16 @@ export function WizardStepper({ currentStep }: { currentStep: number }) {
                   scale: isCurrent ? 1.08 : 1,
                 }}
                 className={cn(
-                  "flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-medium transition-colors",
-                  isCompleted && "bg-primary text-primary-foreground",
-                  isCurrent && !isCompleted && "bg-primary/10 text-primary ring-2 ring-primary",
+                  "flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold transition-all duration-200",
+                  isCompleted && "bg-primary text-primary-foreground shadow-soft-xs",
+                  isCurrent && !isCompleted && "bg-primary/10 text-primary shadow-soft-sm ring-2 ring-primary",
                   !isCompleted && !isCurrent && "bg-muted text-muted-foreground"
                 )}
               >
                 {isCompleted ? <Check className="size-4" /> : index + 1}
               </motion.div>
               <div className="hidden text-center sm:block">
-                <p className={cn("text-xs font-medium", isCurrent ? "text-foreground" : "text-muted-foreground")}>
+                <p className={cn("text-xs font-medium transition-colors", isCurrent ? "text-foreground" : "text-muted-foreground")}>
                   {step.title}
                 </p>
               </div>

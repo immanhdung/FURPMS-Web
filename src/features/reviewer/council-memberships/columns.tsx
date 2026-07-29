@@ -11,26 +11,47 @@ export function getMembershipColumns(onView: (membership: MyMembership) => void)
       id: "proposal",
       accessorFn: (row) => row.proposalTitleVI ?? "Untitled proposal",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Proposal" />,
+      cell: ({ row }) => (
+        <span className="max-w-64 truncate text-sm font-medium text-foreground">
+          {row.original.proposalTitleVI ?? "Untitled proposal"}
+        </span>
+      ),
     },
     {
       accessorKey: "roundType",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Round Type" />,
-      cell: ({ row }) => row.original.roundType ?? "-",
+      cell: ({ row }) =>
+        row.original.roundType ? (
+          <span className="text-sm text-foreground">{row.original.roundType}</span>
+        ) : (
+          <span className="text-sm text-muted-foreground">-</span>
+        ),
     },
     {
       accessorKey: "memberRole",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Role" />,
-      cell: ({ row }) => row.original.memberRole ?? "-",
+      cell: ({ row }) =>
+        row.original.memberRole ? (
+          <span className="text-sm text-foreground">{row.original.memberRole}</span>
+        ) : (
+          <span className="text-sm text-muted-foreground">-</span>
+        ),
     },
     {
       accessorKey: "status",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Invitation Status" />,
-      cell: ({ row }) => (row.original.status ? <StatusBadge status={row.original.status} /> : "-"),
+      cell: ({ row }) =>
+        row.original.status ? <StatusBadge status={row.original.status} /> : <span className="text-sm text-muted-foreground">-</span>,
     },
     {
       accessorKey: "roundStatus",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Round Status" />,
-      cell: ({ row }) => (row.original.roundStatus ? <StatusBadge status={row.original.roundStatus} /> : "-"),
+      cell: ({ row }) =>
+        row.original.roundStatus ? (
+          <StatusBadge status={row.original.roundStatus} />
+        ) : (
+          <span className="text-sm text-muted-foreground">-</span>
+        ),
     },
     {
       id: "actions",

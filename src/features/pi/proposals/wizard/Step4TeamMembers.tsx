@@ -52,8 +52,20 @@ export function Step4TeamMembers({ form }: { form: UseFormReturn<ProposalWizardV
               <Card>
                 <CardContent className="space-y-3 p-4">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium text-foreground">Member {index + 1}</p>
-                    <Button type="button" variant="ghost" size="icon-sm" aria-label={`Remove member ${index + 1}`} onClick={() => remove(index)}>
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                        {index + 1}
+                      </div>
+                      <p className="text-sm font-medium text-foreground">Member {index + 1}</p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label={`Remove member ${index + 1}`}
+                      onClick={() => remove(index)}
+                      className="text-muted-foreground hover:text-destructive"
+                    >
                       <Trash2 />
                     </Button>
                   </div>

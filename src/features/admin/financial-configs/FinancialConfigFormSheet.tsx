@@ -3,6 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import dayjs from "dayjs";
 import { FormSheet } from "@/components/shared/FormSheet";
+import { FormField } from "@/components/shared/FormField";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -72,42 +73,36 @@ export function FinancialConfigFormSheet({ open, onOpenChange, config }: Financi
       isSubmitting={isSubmitting}
       submitLabel={isEdit ? "Save changes" : "Create"}
     >
-      <div>
-        <label htmlFor="fc-code" className="mb-1.5 block text-sm font-medium text-foreground">
-          Code
-        </label>
+      <FormField label="Code" htmlFor="fc-code" required error={errors.code?.message}>
         <Input id="fc-code" aria-invalid={Boolean(errors.code)} {...register("code")} />
-        {errors.code && <p className="mt-1 text-xs text-destructive">{errors.code.message}</p>}
+      </FormField>
+
+      <div className="grid grid-cols-2 gap-3">
+        <FormField label="Value" htmlFor="fc-value" required error={errors.value?.message}>
+          <Input
+            id="fc-value"
+            type="number"
+            step="any"
+            className="tabular-nums"
+            aria-invalid={Boolean(errors.value)}
+            {...register("value", { valueAsNumber: true })}
+          />
+        </FormField>
+
+        <FormField label="Effective date" htmlFor="fc-effective" required error={errors.effectiveDate?.message}>
+          <Input id="fc-effective" type="date" aria-invalid={Boolean(errors.effectiveDate)} {...register("effectiveDate")} />
+        </FormField>
       </div>
 
-      <div>
-        <label htmlFor="fc-value" className="mb-1.5 block text-sm font-medium text-foreground">
-          Value
-        </label>
-        <Input id="fc-value" type="number" step="any" aria-invalid={Boolean(errors.value)} {...register("value", { valueAsNumber: true })} />
-        {errors.value && <p className="mt-1 text-xs text-destructive">{errors.value.message}</p>}
-      </div>
-
-      <div>
-        <label htmlFor="fc-effective" className="mb-1.5 block text-sm font-medium text-foreground">
-          Effective date
-        </label>
-        <Input id="fc-effective" type="date" aria-invalid={Boolean(errors.effectiveDate)} {...register("effectiveDate")} />
-        {errors.effectiveDate && <p className="mt-1 text-xs text-destructive">{errors.effectiveDate.message}</p>}
-      </div>
-
-      <div>
-        <label htmlFor="fc-description" className="mb-1.5 block text-sm font-medium text-foreground">
-          Description
-        </label>
+      <FormField label="Description" htmlFor="fc-description" helperText="Optional context for this configuration.">
         <Textarea id="fc-description" rows={3} {...register("description")} />
-      </div>
+      </FormField>
 
       <Controller
         control={control}
         name="isActive"
         render={({ field }) => (
-          <label className="flex items-center gap-2 text-sm text-foreground">
+          <label className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2.5 text-sm text-foreground">
             <Checkbox checked={field.value} onCheckedChange={(checked) => field.onChange(Boolean(checked))} />
             Active
           </label>

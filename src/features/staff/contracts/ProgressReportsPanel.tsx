@@ -33,7 +33,10 @@ export function ProgressReportsPanel({ contractId }: { contractId: string }) {
       ) : (
         <ul className="space-y-2">
           {reports.map((report) => (
-            <li key={report.id} className="space-y-2 rounded-lg border border-border p-3">
+            <li
+              key={report.id}
+              className="space-y-2 rounded-lg border border-border bg-card p-3 shadow-soft-xs transition-shadow duration-150 hover:shadow-soft-sm"
+            >
               <div className="flex items-center justify-between gap-2">
                 <p className="text-sm font-medium text-foreground">
                   {formatDate(report.reportingPeriodStart)} – {formatDate(report.reportingPeriodEnd)}

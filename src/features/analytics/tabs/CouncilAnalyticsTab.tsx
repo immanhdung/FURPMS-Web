@@ -12,7 +12,7 @@ export function CouncilAnalyticsTab() {
   if (isError) return <ErrorState onRetry={() => refetch()} isRetrying={isRefetching} />;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {isLoading ? (
           <KpiCardSkeleton />

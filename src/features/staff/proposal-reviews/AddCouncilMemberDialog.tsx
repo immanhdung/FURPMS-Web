@@ -99,11 +99,13 @@ export function AddCouncilMemberDialog({ open, onOpenChange, councilId, trackId 
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.15, delay: index * 0.05 }}
                   onClick={() => setSuggestedName(suggestion.fullName)}
-                  className="w-full rounded-lg border border-border p-2.5 text-left transition-colors hover:border-primary/40"
+                  className="w-full rounded-lg border border-border bg-card p-2.5 text-left shadow-soft-xs transition-all duration-150 hover:border-primary/40 hover:shadow-soft-sm"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-xs font-medium text-foreground">{suggestion.fullName}</p>
-                    <Badge variant="secondary">{suggestion.matchScore}% match</Badge>
+                    <Badge variant="secondary" className="bg-brand-secondary/10 text-brand-secondary">
+                      {suggestion.matchScore}% match
+                    </Badge>
                   </div>
                   <p className="mt-0.5 text-[11px] text-muted-foreground">{suggestion.reason}</p>
                 </motion.button>

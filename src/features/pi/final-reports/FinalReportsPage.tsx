@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ExternalLink, FileCheck2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -26,7 +27,7 @@ export function FinalReportsPage() {
   const canEdit = !finalReport || Boolean(finalReport.revisionNotes);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">Final Report</h1>
         <p className="mt-1 text-sm text-muted-foreground">Submit the summary report to close out your contract.</p>
@@ -56,66 +57,72 @@ export function FinalReportsPage() {
           </Select>
 
           {isReportLoading ? (
-            <Skeleton className="h-40 w-full rounded-lg" />
+            <Skeleton className="h-40 w-full rounded-xl" />
           ) : (
-            <div className="space-y-4 rounded-xl border border-border p-4">
+            <div className="space-y-4">
               {finalReport && (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-medium text-foreground">Current submission</p>
-                    {finalReport.status && <StatusBadge status={finalReport.status} />}
-                  </div>
-                  {finalReport.submittedAt && (
-                    <p className="text-xs text-muted-foreground">Submitted {formatDateTime(finalReport.submittedAt)}</p>
-                  )}
-                  {finalReport.reportFileUrl && (
-                    <a
-                      href={finalReport.reportFileUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-                    >
-                      <ExternalLink className="size-3.5" />
-                      Report file
-                    </a>
-                  )}
-                  {finalReport.revisionNotes && (
-                    <p className="text-xs text-warning">Revision requested: {finalReport.revisionNotes}</p>
-                  )}
-                </div>
+                <Card>
+                  <CardContent className="space-y-2 p-4">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-sm font-medium text-foreground">Current submission</p>
+                      {finalReport.status && <StatusBadge status={finalReport.status} />}
+                    </div>
+                    {finalReport.submittedAt && (
+                      <p className="text-xs text-muted-foreground">Submitted {formatDateTime(finalReport.submittedAt)}</p>
+                    )}
+                    {finalReport.reportFileUrl && (
+                      <a
+                        href={finalReport.reportFileUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                      >
+                        <ExternalLink className="size-3.5" />
+                        Report file
+                      </a>
+                    )}
+                    {finalReport.revisionNotes && (
+                      <p className="rounded-lg bg-warning/10 px-2.5 py-1.5 text-xs text-warning">
+                        Revision requested: {finalReport.revisionNotes}
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
               )}
 
               {canEdit && (
-                <div className="space-y-3">
-                  <p className="text-sm font-medium text-foreground">
-                    {finalReport ? "Resubmit report" : "Submit report"}
-                  </p>
-                  <div>
-                    <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Report file URL</label>
-                    <Input value={reportFileUrl} onChange={(e) => setReportFileUrl(e.target.value)} placeholder="https://..." />
-                  </div>
-                  <div>
-                    <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Summary file URL</label>
-                    <Input value={summaryFileUrl} onChange={(e) => setSummaryFileUrl(e.target.value)} placeholder="https://..." />
-                  </div>
-                  <div>
-                    <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Language</label>
-                    <Input value={language} onChange={(e) => setLanguage(e.target.value)} placeholder="Vietnamese / English" />
-                  </div>
-                  <Button
-                    disabled={submitMutation.isPending || !reportFileUrl}
-                    onClick={() =>
-                      submitMutation.mutate({
-                        reportFileUrl: reportFileUrl || undefined,
-                        summaryFileUrl: summaryFileUrl || undefined,
-                        language: language || undefined,
-                      })
-                    }
-                  >
-                    <Send />
-                    Submit final report
-                  </Button>
-                </div>
+                <Card>
+                  <CardContent className="space-y-3 p-4">
+                    <p className="text-sm font-medium text-foreground">
+                      {finalReport ? "Resubmit report" : "Submit report"}
+                    </p>
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Report file URL</label>
+                      <Input value={reportFileUrl} onChange={(e) => setReportFileUrl(e.target.value)} placeholder="https://..." />
+                    </div>
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Summary file URL</label>
+                      <Input value={summaryFileUrl} onChange={(e) => setSummaryFileUrl(e.target.value)} placeholder="https://..." />
+                    </div>
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Language</label>
+                      <Input value={language} onChange={(e) => setLanguage(e.target.value)} placeholder="Vietnamese / English" />
+                    </div>
+                    <Button
+                      disabled={submitMutation.isPending || !reportFileUrl}
+                      onClick={() =>
+                        submitMutation.mutate({
+                          reportFileUrl: reportFileUrl || undefined,
+                          summaryFileUrl: summaryFileUrl || undefined,
+                          language: language || undefined,
+                        })
+                      }
+                    >
+                      <Send />
+                      Submit final report
+                    </Button>
+                  </CardContent>
+                </Card>
               )}
             </div>
           )}

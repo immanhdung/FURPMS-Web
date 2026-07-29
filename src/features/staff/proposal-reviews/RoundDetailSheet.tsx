@@ -47,7 +47,7 @@ export function RoundDetailSheet({ open, onOpenChange, proposalId, trackId, roun
 
         <ScrollArea className="flex-1 px-4">
           <div className="space-y-5 pb-6">
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2.5">
               {round.status && <StatusBadge status={round.status} />}
               {round.openedAt && <span className="text-xs text-muted-foreground">Opened {formatDateTime(round.openedAt)}</span>}
               {round.closedAt && <span className="text-xs text-muted-foreground">Closed {formatDateTime(round.closedAt)}</span>}
@@ -87,9 +87,9 @@ export function RoundDetailSheet({ open, onOpenChange, proposalId, trackId, roun
                 </TabsContent>
               </Tabs>
             ) : (
-              <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border px-4 py-8 text-center">
-                <div className="flex size-10 items-center justify-center rounded-full bg-muted">
-                  <Gavel className="size-5 text-muted-foreground" />
+              <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border bg-muted/20 px-4 py-8 text-center">
+                <div className="flex size-11 items-center justify-center rounded-full bg-linear-to-br from-primary/15 to-brand-secondary/10">
+                  <Gavel className="size-5 text-primary" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-foreground">No council established</p>

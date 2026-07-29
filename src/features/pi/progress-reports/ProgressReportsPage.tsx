@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { CalendarClock, ExternalLink, FileBarChart, Plus, Send } from "lucide-react";
+import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -21,7 +23,7 @@ export function ProgressReportsPage() {
   const submitMutation = useSubmitProgressReportMutation(contractId ?? "");
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">Progress Reports</h1>
@@ -74,67 +76,76 @@ export function ProgressReportsPage() {
               className="min-h-40"
             />
           ) : (
-            <ul className="space-y-2">
-              {reports.map((report) => {
+            <div className="space-y-3">
+              {reports.map((report, index) => {
                 const isSubmitted = Boolean(report.submittedAt);
                 return (
-                  <li key={report.id} className="space-y-2 rounded-lg border border-border p-4">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-sm font-medium text-foreground">
-                        {formatDate(report.reportingPeriodStart)} – {formatDate(report.reportingPeriodEnd)}
-                      </p>
-                      {report.status ? (
-                        <StatusBadge status={report.status} />
-                      ) : (
-                        <span className="text-xs text-muted-foreground">{isSubmitted ? "Submitted" : "Draft"}</span>
-                      )}
-                    </div>
+                  <motion.div
+                    key={report.id}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.15, delay: index * 0.04 }}
+                  >
+                    <Card>
+                      <CardContent className="space-y-2.5 p-4">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-sm font-medium text-foreground">
+                            {formatDate(report.reportingPeriodStart)} – {formatDate(report.reportingPeriodEnd)}
+                          </p>
+                          {report.status ? (
+                            <StatusBadge status={report.status} />
+                          ) : (
+                            <span className="text-xs text-muted-foreground">{isSubmitted ? "Submitted" : "Draft"}</span>
+                          )}
+                        </div>
 
-                    {report.overallCompletionPct != null && (
-                      <p className="text-xs text-muted-foreground">Completion: {report.overallCompletionPct}%</p>
-                    )}
+                        {report.overallCompletionPct != null && (
+                          <p className="text-xs text-muted-foreground">Completion: {report.overallCompletionPct}%</p>
+                        )}
 
-                    {report.dueDate && (
-                      <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <CalendarClock className="size-3.5" />
-                        Due {formatDate(report.dueDate)}
-                        {report.scheduledMeetingAt && ` · Meeting ${formatDateTime(report.scheduledMeetingAt)}`}
-                      </p>
-                    )}
+                        {report.dueDate && (
+                          <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <CalendarClock className="size-3.5" />
+                            Due {formatDate(report.dueDate)}
+                            {report.scheduledMeetingAt && ` · Meeting ${formatDateTime(report.scheduledMeetingAt)}`}
+                          </p>
+                        )}
 
-                    {report.meetingLink && (
-                      <a
-                        href={report.meetingLink}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-                      >
-                        <ExternalLink className="size-3.5" />
-                        Join link
-                      </a>
-                    )}
+                        {report.meetingLink && (
+                          <a
+                            href={report.meetingLink}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                          >
+                            <ExternalLink className="size-3.5" />
+                            Join link
+                          </a>
+                        )}
 
-                    {report.evaluationResult && (
-                      <p className="text-xs text-muted-foreground">
-                        Evaluation: <StatusBadge status={report.evaluationResult} />
-                        {report.evaluationComments && ` — ${report.evaluationComments}`}
-                      </p>
-                    )}
+                        {report.evaluationResult && (
+                          <p className="text-xs text-muted-foreground">
+                            Evaluation: <StatusBadge status={report.evaluationResult} />
+                            {report.evaluationComments && ` — ${report.evaluationComments}`}
+                          </p>
+                        )}
 
-                    {!isSubmitted && (
-                      <Button
-                        size="sm"
-                        disabled={submitMutation.isPending}
-                        onClick={() => submitMutation.mutate(report.id)}
-                      >
-                        <Send />
-                        Submit
-                      </Button>
-                    )}
-                  </li>
+                        {!isSubmitted && (
+                          <Button
+                            size="sm"
+                            disabled={submitMutation.isPending}
+                            onClick={() => submitMutation.mutate(report.id)}
+                          >
+                            <Send />
+                            Submit
+                          </Button>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </motion.div>
                 );
               })}
-            </ul>
+            </div>
           )}
         </>
       )}

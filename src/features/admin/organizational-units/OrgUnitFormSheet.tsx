@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { FormSheet } from "@/components/shared/FormSheet";
+import { FormField } from "@/components/shared/FormField";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
@@ -78,85 +79,77 @@ export function OrgUnitFormSheet({ open, onOpenChange, orgUnit }: OrgUnitFormShe
       isSubmitting={isSubmitting}
       submitLabel={isEdit ? "Save changes" : "Create"}
     >
-      <div>
-        <label htmlFor="ou-code" className="mb-1.5 block text-sm font-medium text-foreground">
-          Code
-        </label>
-        <Input id="ou-code" aria-invalid={Boolean(errors.code)} {...register("code")} />
-        {errors.code && <p className="mt-1 text-xs text-destructive">{errors.code.message}</p>}
+      <div className="grid grid-cols-2 gap-3">
+        <FormField label="Code" htmlFor="ou-code" required error={errors.code?.message}>
+          <Input id="ou-code" aria-invalid={Boolean(errors.code)} {...register("code")} />
+        </FormField>
+
+        <FormField label="Unit type" htmlFor="ou-type" required error={errors.unitType?.message}>
+          <Input
+            id="ou-type"
+            placeholder="Faculty, Department..."
+            aria-invalid={Boolean(errors.unitType)}
+            {...register("unitType")}
+          />
+        </FormField>
       </div>
 
-      <div>
-        <label htmlFor="ou-name" className="mb-1.5 block text-sm font-medium text-foreground">
-          Name
-        </label>
+      <FormField label="Name" htmlFor="ou-name" required error={errors.name?.message}>
         <Input id="ou-name" aria-invalid={Boolean(errors.name)} {...register("name")} />
-        {errors.name && <p className="mt-1 text-xs text-destructive">{errors.name.message}</p>}
+      </FormField>
+
+      <div className="grid grid-cols-2 gap-3">
+        <FormField label="Parent unit">
+          <Controller
+            control={control}
+            name="parentId"
+            render={({ field }) => (
+              <Select
+                value={field.value ? field.value.toString() : NONE_VALUE}
+                onValueChange={(value) => field.onChange(value === NONE_VALUE ? undefined : Number(value))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="No parent" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE_VALUE}>No parent</SelectItem>
+                  {availableParents.map((unit) => (
+                    <SelectItem key={unit.id} value={unit.id.toString()}>
+                      {unit.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
+        </FormField>
+
+        <FormField label="Head of unit">
+          <Controller
+            control={control}
+            name="headUserId"
+            render={({ field }) => (
+              <Select value={field.value ?? NONE_VALUE} onValueChange={(value) => field.onChange(value === NONE_VALUE ? undefined : value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Unassigned" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE_VALUE}>Unassigned</SelectItem>
+                  {users?.map((user) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.fullName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
+        </FormField>
       </div>
 
-      <div>
-        <label htmlFor="ou-type" className="mb-1.5 block text-sm font-medium text-foreground">
-          Unit type
-        </label>
-        <Input id="ou-type" placeholder="Faculty, Department, Office..." aria-invalid={Boolean(errors.unitType)} {...register("unitType")} />
-        {errors.unitType && <p className="mt-1 text-xs text-destructive">{errors.unitType.message}</p>}
-      </div>
-
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Parent unit</label>
-        <Controller
-          control={control}
-          name="parentId"
-          render={({ field }) => (
-            <Select
-              value={field.value ? field.value.toString() : NONE_VALUE}
-              onValueChange={(value) => field.onChange(value === NONE_VALUE ? undefined : Number(value))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="No parent" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={NONE_VALUE}>No parent</SelectItem>
-                {availableParents.map((unit) => (
-                  <SelectItem key={unit.id} value={unit.id.toString()}>
-                    {unit.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        />
-      </div>
-
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Head of unit</label>
-        <Controller
-          control={control}
-          name="headUserId"
-          render={({ field }) => (
-            <Select value={field.value ?? NONE_VALUE} onValueChange={(value) => field.onChange(value === NONE_VALUE ? undefined : value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Unassigned" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={NONE_VALUE}>Unassigned</SelectItem>
-                {users?.map((user) => (
-                  <SelectItem key={user.id} value={user.id}>
-                    {user.fullName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        />
-      </div>
-
-      <div>
-        <label htmlFor="ou-sort" className="mb-1.5 block text-sm font-medium text-foreground">
-          Sort order
-        </label>
+      <FormField label="Sort order" htmlFor="ou-sort" helperText="Controls display order among sibling units.">
         <Input id="ou-sort" type="number" {...register("sortOrder", { valueAsNumber: true })} />
-      </div>
+      </FormField>
     </FormSheet>
   );
 }

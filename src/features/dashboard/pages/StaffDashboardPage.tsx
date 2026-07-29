@@ -1,4 +1,5 @@
 import { CalendarClock, Gavel, Mail, TrendingUp, UserPlus, type LucideIcon } from "lucide-react";
+import { motion } from "motion/react";
 import { KpiCard, KpiCardSkeleton } from "@/components/shared/KpiCard";
 import { ChartCard, ChartCardSkeleton } from "@/components/charts/ChartCard";
 import { AreaChartCardBody } from "@/components/charts/AreaChartCard";
@@ -32,11 +33,21 @@ export function StaffDashboardPage() {
   }
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Staff Dashboard</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Review workflow, councils, and meetings at a glance.</p>
-      </div>
+    <div className="space-y-6">
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
+        className="flex flex-wrap items-center gap-3"
+      >
+        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-brand-secondary/15 to-brand-accent-2/10 text-brand-secondary shadow-soft-xs">
+          <Gavel className="size-5" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Staff Dashboard</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Review workflow, councils, and meetings at a glance.</p>
+        </div>
+      </motion.div>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {isLoading

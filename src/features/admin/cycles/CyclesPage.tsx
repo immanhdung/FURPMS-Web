@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Plus } from "lucide-react";
+import { CalendarRange, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/tables/DataTable";
 import { ErrorState } from "@/components/shared/ErrorState";
@@ -46,11 +46,16 @@ export function CyclesPage() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Research Cycles</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Manage submission windows, open/close cycles, and the research fields within them.
-        </p>
+      <div className="flex items-center gap-3">
+        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-primary/15 to-brand-secondary/10 text-primary shadow-soft-xs">
+          <CalendarRange className="size-5" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Research Cycles</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Manage submission windows, open/close cycles, and the research fields within them.
+          </p>
+        </div>
       </div>
 
       <Tabs defaultValue="cycles">

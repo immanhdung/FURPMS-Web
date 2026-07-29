@@ -35,13 +35,16 @@ export function MeetingsPanel({ councilId }: { councilId: string }) {
       ) : (
         <ul className="space-y-2">
           {meetings.map((meeting) => (
-            <li key={meeting.id} className="space-y-2 rounded-lg border border-border p-3">
+            <li
+              key={meeting.id}
+              className="space-y-2 rounded-lg border border-border bg-card p-3 shadow-soft-xs transition-shadow duration-150 hover:shadow-soft-sm"
+            >
               <div className="flex items-center justify-between gap-2">
                 <p className="text-sm font-medium text-foreground">{meeting.title ?? "Council meeting"}</p>
                 {meeting.status && <StatusBadge status={meeting.status} />}
               </div>
               <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <CalendarClock className="size-3.5" />
+                <CalendarClock className="size-3.5 text-brand-accent-2" />
                 {formatDateTime(meeting.scheduledAt)} · {meeting.durationMinutes}min · {meeting.platform}
               </p>
               {meeting.meetingLink && (

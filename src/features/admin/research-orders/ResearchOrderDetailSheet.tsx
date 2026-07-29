@@ -28,8 +28,18 @@ export function ResearchOrderDetailSheet({ open, onOpenChange, orderId }: Resear
         { label: "Status", value: order?.status ? <StatusBadge status={order.status} /> : "-" },
         { label: "Cycle", value: cycleName ?? order?.cycleId },
         { label: "Ordering unit", value: unitName ?? order?.orderingUnitId },
-        { label: "Problem description", value: order?.problemDescription },
-        { label: "Expected products", value: order?.expectedProducts },
+        {
+          label: "Problem description",
+          value: order?.problemDescription ? (
+            <p className="whitespace-pre-wrap leading-relaxed">{order.problemDescription}</p>
+          ) : undefined,
+        },
+        {
+          label: "Expected products",
+          value: order?.expectedProducts ? (
+            <p className="whitespace-pre-wrap leading-relaxed">{order.expectedProducts}</p>
+          ) : undefined,
+        },
       ]}
     />
   );

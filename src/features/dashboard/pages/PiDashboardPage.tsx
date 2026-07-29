@@ -1,4 +1,5 @@
 import { CalendarClock, CheckCircle2, Clock, FileBarChart, FilePlus2, FileText, Sparkles, type LucideIcon } from "lucide-react";
+import { motion } from "motion/react";
 import { KpiCard, KpiCardSkeleton } from "@/components/shared/KpiCard";
 import { ChartCard, ChartCardSkeleton } from "@/components/charts/ChartCard";
 import { PieChartCardBody } from "@/components/charts/PieChartCard";
@@ -34,11 +35,21 @@ export function PiDashboardPage() {
   }
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">My Dashboard</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Track your proposals, deadlines, and feedback.</p>
-      </div>
+    <div className="space-y-6">
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
+        className="flex flex-wrap items-center gap-3"
+      >
+        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-brand-accent/15 to-primary/10 text-brand-accent shadow-soft-xs">
+          <FileText className="size-5" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">My Dashboard</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Track your proposals, deadlines, and feedback.</p>
+        </div>
+      </motion.div>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {isLoading
@@ -69,10 +80,12 @@ export function PiDashboardPage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <ActivityFeed items={data?.activity ?? []} isLoading={isLoading} />
         <RecentNotificationsCard />
-        <Card>
+        <Card className="border-primary/15 bg-linear-to-br from-primary/4 via-card to-brand-secondary/4">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Sparkles className="size-4 text-primary" />
+              <div className="flex size-6 items-center justify-center rounded-md bg-linear-to-br from-primary to-brand-secondary text-primary-foreground">
+                <Sparkles className="size-3.5" />
+              </div>
               <CardTitle className="text-sm">AI Suggestions</CardTitle>
             </div>
           </CardHeader>
@@ -84,11 +97,17 @@ export function PiDashboardPage() {
                 ))}
               </div>
             ) : (
-              <ul className="space-y-3">
+              <ul className="space-y-2.5">
                 {data?.aiSuggestions.map((suggestion, index) => (
-                  <li key={index} className="rounded-lg bg-primary/4 p-2.5 text-xs text-foreground">
+                  <motion.li
+                    key={index}
+                    initial={{ opacity: 0, x: -6 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.2, delay: index * 0.04 }}
+                    className="rounded-lg border border-primary/10 bg-card/60 p-2.5 text-xs text-foreground"
+                  >
                     {suggestion}
-                  </li>
+                  </motion.li>
                 ))}
               </ul>
             )}

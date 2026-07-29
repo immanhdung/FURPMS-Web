@@ -78,53 +78,62 @@ export function CreateProgressReportSheet({ open, onOpenChange, contractId }: Cr
       isSubmitting={isSubmitting}
       submitLabel="Submit report"
     >
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-foreground">Period start</label>
-          <Input type="date" value={reportingPeriodStart} onChange={(e) => setReportingPeriodStart(e.target.value)} />
+      <section className="space-y-3">
+        <h3 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">Reporting period</h3>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">Period start</label>
+            <Input type="date" value={reportingPeriodStart} onChange={(e) => setReportingPeriodStart(e.target.value)} />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">Period end</label>
+            <Input type="date" value={reportingPeriodEnd} onChange={(e) => setReportingPeriodEnd(e.target.value)} />
+          </div>
         </div>
+      </section>
+
+      <section className="space-y-3 border-t border-border pt-4">
+        <h3 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">Progress</h3>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-foreground">Period end</label>
-          <Input type="date" value={reportingPeriodEnd} onChange={(e) => setReportingPeriodEnd(e.target.value)} />
+          <label className="mb-1.5 block text-sm font-medium text-foreground">Completed work</label>
+          <Textarea rows={3} value={completedContent} onChange={(e) => setCompletedContent(e.target.value)} />
         </div>
-      </div>
 
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Completed work</label>
-        <Textarea rows={3} value={completedContent} onChange={(e) => setCompletedContent(e.target.value)} />
-      </div>
-
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Pending work</label>
-        <Textarea rows={3} value={pendingContent} onChange={(e) => setPendingContent(e.target.value)} />
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-foreground">Overall completion (%)</label>
-          <Input
-            type="number"
-            min={0}
-            max={100}
-            value={overallCompletionPct}
-            onChange={(e) => setOverallCompletionPct(e.target.value)}
-          />
+          <label className="mb-1.5 block text-sm font-medium text-foreground">Pending work</label>
+          <Textarea rows={3} value={pendingContent} onChange={(e) => setPendingContent(e.target.value)} />
         </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">Overall completion (%)</label>
+            <Input
+              type="number"
+              min={0}
+              max={100}
+              value={overallCompletionPct}
+              onChange={(e) => setOverallCompletionPct(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">Expenditure to date</label>
+            <Input type="number" min={0} value={expenditureToDate} onChange={(e) => setExpenditureToDate(e.target.value)} />
+          </div>
+        </div>
+      </section>
+
+      <section className="space-y-3 border-t border-border pt-4">
+        <h3 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">Looking ahead</h3>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-foreground">Expenditure to date</label>
-          <Input type="number" min={0} value={expenditureToDate} onChange={(e) => setExpenditureToDate(e.target.value)} />
+          <label className="mb-1.5 block text-sm font-medium text-foreground">Next period plan</label>
+          <Textarea rows={3} value={nextPeriodPlan} onChange={(e) => setNextPeriodPlan(e.target.value)} />
         </div>
-      </div>
 
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Next period plan</label>
-        <Textarea rows={3} value={nextPeriodPlan} onChange={(e) => setNextPeriodPlan(e.target.value)} />
-      </div>
-
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Recommendations</label>
-        <Textarea rows={2} value={piRecommendations} onChange={(e) => setPiRecommendations(e.target.value)} />
-      </div>
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-foreground">Recommendations</label>
+          <Textarea rows={2} value={piRecommendations} onChange={(e) => setPiRecommendations(e.target.value)} />
+        </div>
+      </section>
     </FormSheet>
   );
 }

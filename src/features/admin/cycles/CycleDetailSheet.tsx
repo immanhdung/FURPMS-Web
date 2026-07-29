@@ -25,8 +25,16 @@ export function CycleDetailSheet({ open, onOpenChange, cycleId }: CycleDetailShe
       fields={[
         { label: "Status", value: cycle && <StatusBadge status={cycle.status} /> },
         { label: "Research type", value: researchTypeName ?? cycle?.researchTypeId },
-        { label: "Submission start", value: cycle ? formatDate(cycle.submissionStartDate) : undefined },
-        { label: "Submission deadline", value: cycle ? formatDate(cycle.submissionDeadline) : undefined },
+        {
+          label: "Submission window",
+          value: cycle && (
+            <span className="inline-flex items-center gap-1.5">
+              {formatDate(cycle.submissionStartDate)}
+              <span className="text-muted-foreground">&rarr;</span>
+              {formatDate(cycle.submissionDeadline)}
+            </span>
+          ),
+        },
         { label: "Description", value: cycle?.description },
       ]}
     />

@@ -98,63 +98,90 @@ export function RubricScoringForm({ councilId, roundType }: RubricScoringFormPro
     );
   };
 
+  const totalPercent = maxTotal > 0 ? Math.min(100, (totalScore / maxTotal) * 100) : 0;
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-3 py-2">
-        <p className="text-sm font-medium text-foreground">Total score</p>
-        <p className="text-sm font-semibold text-foreground">
-          {totalScore.toFixed(1)} / {maxTotal}
-        </p>
+    <div className="space-y-5">
+      <div className="rounded-xl border border-border bg-linear-to-br from-primary/5 to-brand-secondary/5 p-4">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm font-medium text-foreground">Total score</p>
+          <p className="text-lg font-semibold tracking-tight text-foreground">
+            {totalScore.toFixed(1)} <span className="text-sm font-normal text-muted-foreground">/ {maxTotal}</span>
+          </p>
+        </div>
+        <div className="mt-2.5 h-2 w-full overflow-hidden rounded-full bg-muted">
+          <div
+            className="h-full rounded-full bg-linear-to-r from-primary to-brand-secondary transition-[width] duration-300"
+            style={{ width: `${totalPercent}%` }}
+          />
+        </div>
       </div>
 
       <div className="space-y-3">
-        {activeCriteria.map((criterion) => (
-          <Card key={criterion.id}>
-            <CardContent className="space-y-2.5 p-4">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-medium text-foreground">{criterion.criterionName}</p>
-                <div className="flex shrink-0 items-center gap-1.5">
-                  <Input
-                    type="number"
-                    min={0}
-                    max={criterion.maxScore}
-                    step="0.5"
-                    className="w-20"
-                    value={scores[criterion.id]?.givenScore ?? 0}
-                    onChange={(e) =>
-                      setScores((prev) => ({
-                        ...prev,
-                        [criterion.id]: { ...prev[criterion.id], givenScore: Number(e.target.value) },
-                      }))
-                    }
-                  />
-                  <span className="text-xs text-muted-foreground">/ {criterion.maxScore}</span>
+        {activeCriteria.map((criterion, index) => {
+          const given = scores[criterion.id]?.givenScore ?? 0;
+          const percent = criterion.maxScore > 0 ? Math.min(100, (given / criterion.maxScore) * 100) : 0;
+          return (
+            <Card key={criterion.id}>
+              <CardContent className="space-y-3 p-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-start gap-2.5">
+                    <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground">
+                      {index + 1}
+                    </span>
+                    <p className="text-sm font-medium text-foreground">{criterion.criterionName}</p>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-1.5">
+                    <Input
+                      type="number"
+                      min={0}
+                      max={criterion.maxScore}
+                      step="0.5"
+                      className="w-20 text-right font-medium"
+                      value={scores[criterion.id]?.givenScore ?? 0}
+                      onChange={(e) =>
+                        setScores((prev) => ({
+                          ...prev,
+                          [criterion.id]: { ...prev[criterion.id], givenScore: Number(e.target.value) },
+                        }))
+                      }
+                    />
+                    <span className="text-xs text-muted-foreground">/ {criterion.maxScore}</span>
+                  </div>
                 </div>
-              </div>
-              <Textarea
-                placeholder="Comments (optional)"
-                rows={2}
-                value={scores[criterion.id]?.comments ?? ""}
-                onChange={(e) =>
-                  setScores((prev) => ({
-                    ...prev,
-                    [criterion.id]: { ...prev[criterion.id], comments: e.target.value },
-                  }))
-                }
-              />
-            </CardContent>
-          </Card>
-        ))}
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full bg-primary transition-[width] duration-300"
+                    style={{ width: `${percent}%` }}
+                  />
+                </div>
+                <Textarea
+                  placeholder="Comments (optional)"
+                  rows={2}
+                  value={scores[criterion.id]?.comments ?? ""}
+                  onChange={(e) =>
+                    setScores((prev) => ({
+                      ...prev,
+                      [criterion.id]: { ...prev[criterion.id], comments: e.target.value },
+                    }))
+                  }
+                />
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">General comments</label>
-        <Textarea rows={3} value={generalComments} onChange={(e) => setGeneralComments(e.target.value)} />
-      </div>
+      <div className="space-y-4 rounded-xl border border-border bg-card p-4 shadow-soft-xs">
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-foreground">General comments</label>
+          <Textarea rows={3} value={generalComments} onChange={(e) => setGeneralComments(e.target.value)} />
+        </div>
 
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Other recommendations</label>
-        <Textarea rows={3} value={otherRecommendations} onChange={(e) => setOtherRecommendations(e.target.value)} />
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-foreground">Other recommendations</label>
+          <Textarea rows={3} value={otherRecommendations} onChange={(e) => setOtherRecommendations(e.target.value)} />
+        </div>
       </div>
 
       <div className="flex justify-end">

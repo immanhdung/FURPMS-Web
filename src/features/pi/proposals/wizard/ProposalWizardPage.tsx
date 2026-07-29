@@ -242,10 +242,12 @@ export function ProposalWizardPage() {
         </div>
       </div>
 
-      <WizardStepper currentStep={currentStep} />
+      <div className="rounded-xl border border-border bg-card p-5 shadow-soft-xs">
+        <WizardStepper currentStep={currentStep} />
+      </div>
 
       <Card>
-        <CardContent className="p-5">
+        <CardContent className="p-5 sm:p-6">
           {currentStep === 0 && <Step1CycleFieldType form={form} />}
           {currentStep === 1 && <Step2ResearchContent form={form} file={uploadedFile} onFileChange={setUploadedFile} />}
           {currentStep === 2 && <Step3Details form={form} />}

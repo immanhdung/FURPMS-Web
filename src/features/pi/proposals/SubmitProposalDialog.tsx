@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Send } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -27,13 +27,18 @@ export function SubmitProposalDialog({ open, onOpenChange, proposalId, onSubmitt
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Submit proposal</DialogTitle>
+          <div className="flex items-center gap-2.5">
+            <div className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <Send className="size-4.5" />
+            </div>
+            <DialogTitle>Submit proposal</DialogTitle>
+          </div>
           <DialogDescription>
             Once submitted, this proposal will move to review and can no longer be edited unless withdrawn.
           </DialogDescription>
         </DialogHeader>
 
-        <label className="flex items-start gap-2 text-sm text-foreground">
+        <label className="flex items-start gap-2.5 rounded-lg border border-border bg-muted/40 p-3 text-sm text-foreground">
           <Checkbox checked={confirmCv} onCheckedChange={(checked) => setConfirmCv(Boolean(checked))} className="mt-0.5" />
           I confirm that my CV and profile information are up to date.
         </label>

@@ -29,6 +29,7 @@ export function getMyProposalColumns({
       id: "title",
       accessorFn: (row) => row.titleEN || row.titleVI || "Untitled proposal",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Title" />,
+      cell: ({ getValue }) => <span className="font-medium text-foreground">{getValue<string>()}</span>,
     },
     {
       id: "cycle",

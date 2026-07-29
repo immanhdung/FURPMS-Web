@@ -28,13 +28,17 @@ export function MeetingsPage() {
         <p className="mt-1 text-sm text-muted-foreground">All council meetings you have access to.</p>
       </div>
 
-      <div className="flex items-start gap-2.5 rounded-lg border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
-        <CalendarClock className="mt-0.5 size-4 shrink-0" />
-        To schedule a new meeting, open a proposal's{" "}
-        <Link to={ROUTES.PROPOSAL_REVIEWS} className="font-medium text-primary hover:underline">
-          review round
-        </Link>{" "}
-        and use its council's Meetings tab.
+      <div className="flex items-start gap-3 rounded-xl border border-border bg-muted/30 p-3.5 text-xs text-muted-foreground">
+        <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-primary/15 to-brand-secondary/10">
+          <CalendarClock className="size-3.5 text-primary" />
+        </div>
+        <p className="pt-1">
+          To schedule a new meeting, open a proposal's{" "}
+          <Link to={ROUTES.PROPOSAL_REVIEWS} className="font-medium text-primary hover:underline">
+            review round
+          </Link>{" "}
+          and use its council's Meetings tab.
+        </p>
       </div>
 
       {isError ? (

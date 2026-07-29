@@ -16,7 +16,7 @@ export function RoundTimeline({ rounds, onSelect }: RoundTimelineProps) {
 
   return (
     <div className="relative space-y-4 pl-2">
-      <div className="absolute top-2 bottom-2 left-[15px] w-px bg-border" />
+      <div className="absolute top-2 bottom-2 left-[15px] w-px bg-linear-to-b from-primary/40 via-border to-transparent" />
 
       {sorted.map((round, index) => {
         const bucket = getRoundBucket(round);
@@ -30,19 +30,32 @@ export function RoundTimeline({ rounds, onSelect }: RoundTimelineProps) {
             transition={{ duration: 0.2, delay: index * 0.05 }}
             className="relative flex gap-3 pl-0.5"
           >
-            <div className="z-10 flex size-8 shrink-0 items-center justify-center rounded-full bg-background">
+            <div
+              className={
+                bucket === "completed"
+                  ? "z-10 flex size-8 shrink-0 items-center justify-center rounded-full bg-success/10 ring-4 ring-background"
+                  : bucket === "in_progress"
+                    ? "z-10 flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 ring-4 ring-background"
+                    : "z-10 flex size-8 shrink-0 items-center justify-center rounded-full bg-muted ring-4 ring-background"
+              }
+            >
               <Icon
                 className={
                   bucket === "completed"
-                    ? "size-5 text-success"
+                    ? "size-4.5 text-success"
                     : bucket === "in_progress"
-                      ? "size-5 text-primary"
-                      : "size-5 text-muted-foreground"
+                      ? "size-4.5 text-primary"
+                      : "size-4.5 text-muted-foreground"
                 }
               />
             </div>
 
-            <Card role="button" tabIndex={0} onClick={() => onSelect(round)} className="flex-1 cursor-pointer transition-shadow hover:shadow-md">
+            <Card
+              role="button"
+              tabIndex={0}
+              onClick={() => onSelect(round)}
+              className="flex-1 cursor-pointer py-0 shadow-soft-xs transition-shadow duration-200 hover:shadow-soft-md"
+            >
               <CardContent className="space-y-1.5 p-3.5">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-sm font-medium text-foreground">{roundTitle(round)}</p>

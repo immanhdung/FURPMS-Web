@@ -72,7 +72,8 @@ export function Step2ResearchContent({ form, file, onFileChange }: Step2Props) {
 
   return (
     <div className="space-y-5">
-      <p className="rounded-lg border border-border bg-muted/40 p-3 text-sm text-muted-foreground">
+      <p className="flex items-start gap-2 rounded-lg border border-border bg-muted/40 p-3 text-sm text-muted-foreground">
+        <Sparkles className="mt-0.5 size-4 shrink-0 text-brand-secondary" />
         This step is optional. Upload your draft to prefill the form with AI, or press{" "}
         <span className="font-medium text-foreground">Next</span> and enter everything manually.
       </p>
@@ -126,7 +127,7 @@ export function Step2ResearchContent({ form, file, onFileChange }: Step2Props) {
         <div className="space-y-3">
           <Button
             type="button"
-            variant="outline"
+            variant="gradient"
             disabled={!file || !watch("orderId") || similarityMutation.isPending}
             onClick={runSimilarityCheck}
           >
@@ -140,7 +141,7 @@ export function Step2ResearchContent({ form, file, onFileChange }: Step2Props) {
             <motion.div
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-2 rounded-lg border border-border p-3 text-sm"
+              className="flex items-center gap-2 rounded-lg border border-border bg-card p-3 text-sm shadow-soft-xs"
             >
               <Badge variant={similarity.passed ? "secondary" : "destructive"}>{similarity.score}% match</Badge>
               <span className="text-muted-foreground">
@@ -158,7 +159,7 @@ export function Step2ResearchContent({ form, file, onFileChange }: Step2Props) {
         </div>
       ) : (
         <div className="space-y-3">
-          <Button type="button" variant="outline" disabled={!file || extractMutation.isPending} onClick={runExtraction}>
+          <Button type="button" variant="gradient" disabled={!file || extractMutation.isPending} onClick={runExtraction}>
             {extractMutation.isPending ? <Loader2 className="animate-spin" /> : <Sparkles />}
             Analyze with AI
           </Button>
@@ -169,7 +170,7 @@ export function Step2ResearchContent({ form, file, onFileChange }: Step2Props) {
             <motion.div
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
-              className="space-y-2 rounded-lg border border-border p-3 text-sm"
+              className="space-y-2 rounded-lg border border-primary/15 bg-primary/[0.03] p-3 text-sm shadow-soft-xs"
             >
               <p className="text-xs font-medium text-muted-foreground">AI suggested research area</p>
               <Badge variant="secondary">{extraction.researchArea}</Badge>
