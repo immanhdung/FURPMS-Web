@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
-import { CheckCircle2, Clock, ExternalLink, FileSignature, Flag, Milestone } from "lucide-react";
+import { CheckCircle2, Clock, ExternalLink, FileBarChart, FileSignature, Flag, Milestone } from "lucide-react";
 import { useDisbursementsQuery } from "@/hooks/useDisbursements";
+import { useProgressReportsQuery } from "@/hooks/useProgressReports";
 import { formatDate } from "@/utils/format";
 import { cn } from "@/lib/utils";
 import type { Contract } from "@/types/contract";
@@ -13,18 +14,44 @@ import type { Contract } from "@/types/contract";
 export function ContractMilestoneTimeline({ contract }: { contract: Contract }) {
   const { t } = useTranslation();
   const { data: disbursements } = useDisbursementsQuery(contract.id);
-  const sorted = [...(disbursements ?? [])].sort((a, b) => a.roundNumber - b.roundNumber);
+  const { data: reports } = useProgressReportsQuery(contract.id);
 
   interface Node {
     key: string;
     icon: typeof Milestone;
     title: string;
     date?: string | null;
-    stage?: string; // dòng phụ (đủ điều kiện / đã chi)
+    stage?: string; // dòng phụ (đủ điều kiện / đã chi / đã nộp)
     badge?: string | null;
     href?: string | null;
     done: boolean;
   }
+
+  // Các mốc GIỮA (giải ngân + báo cáo tiến độ) trộn lại, sắp theo THỜI GIAN để đọc đúng dòng chảy;
+  // mốc chưa có ngày (đang chờ) đẩy về cuối nhóm giữa. Ký HĐ luôn đầu, Kết thúc luôn cuối.
+  const ts = (d?: string | null) => (d ? new Date(d).getTime() : Number.POSITIVE_INFINITY);
+
+  const disbNodes: Node[] = [...(disbursements ?? [])].map((d) => ({
+    key: `d${d.id}`,
+    icon: Milestone,
+    title: `${t("contract.timelineDisb", { n: d.roundNumber })}${d.conditionDescription ? ` — ${d.conditionDescription}` : ""}`,
+    date: d.disbursedAt ?? d.conditionMetAt,
+    stage: d.disbursedAt ? t("contract.mDisbursed") : d.conditionMetAt ? t("contract.mReady") : t("contract.mWaiting"),
+    badge: d.status,
+    done: Boolean(d.disbursedAt),
+  }));
+
+  const reportNodes: Node[] = [...(reports ?? [])].map((r) => ({
+    key: `p${r.id}`,
+    icon: FileBarChart,
+    title: t("contract.timelineReport", { n: r.reportRound ?? "" }),
+    date: r.submittedAt ?? r.dueDate,
+    stage: r.submittedAt ? t("contract.mReportSubmitted") : t("contract.mReportPending"),
+    badge: r.evaluationResult ?? r.status,
+    done: Boolean(r.submittedAt),
+  }));
+
+  const middle = [...disbNodes, ...reportNodes].sort((a, b) => ts(a.date) - ts(b.date));
 
   const nodes: Node[] = [
     {
@@ -37,15 +64,7 @@ export function ContractMilestoneTimeline({ contract }: { contract: Contract }) 
       badge: contract.status,
       done: Boolean(contract.startDate),
     },
-    ...sorted.map<Node>((d) => ({
-      key: `d${d.id}`,
-      icon: Milestone,
-      title: `${t("contract.timelineDisb", { n: d.roundNumber })}${d.conditionDescription ? ` — ${d.conditionDescription}` : ""}`,
-      date: d.disbursedAt ?? d.conditionMetAt,
-      stage: d.disbursedAt ? t("contract.mDisbursed") : d.conditionMetAt ? t("contract.mReady") : t("contract.mWaiting"),
-      badge: d.status,
-      done: Boolean(d.disbursedAt),
-    })),
+    ...middle,
     {
       key: "end",
       icon: Flag,
