@@ -387,6 +387,8 @@ export const vi = {
     noAvailableProjects: "Mọi đề tài của lĩnh vực đều đã ở trong vòng này.",
     projectsInRound: "Đề tài trong vòng",
     noProjectsInRound: "Chưa có đề tài nào trong vòng.",
+    availableProjects: "Đã nộp, chưa vào vòng ({{n}})",
+    roundClosedHint: "vòng đã đóng — thêm vào vòng đang mở",
     removeProjectTitle: "Gỡ đề tài khỏi vòng",
     removeProjectConfirm: 'Gỡ "{{name}}" khỏi vòng này?',
     deleteRound: "Xóa vòng",

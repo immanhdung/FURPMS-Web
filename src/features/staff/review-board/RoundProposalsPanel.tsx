@@ -1,10 +1,9 @@
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { CouncilAssignSelect } from "@/features/staff/review-board/CouncilAssignSelect";
-import { AddProjectToRoundDialog } from "@/features/staff/review-board/AddProjectToRoundDialog";
+import { useAddProjectToRoundMutation } from "@/hooks/useReviewBoard";
 import { ROUND_STATUS } from "@/constants/statuses";
 import type { ReviewBoardProject, ReviewBoardRound } from "@/types/review-board";
 
@@ -17,27 +16,18 @@ interface RoundProposalsPanelProps {
 
 export function RoundProposalsPanel({ round, cycleId, trackId, trackProjects }: RoundProposalsPanelProps) {
   const { t } = useTranslation();
-  const [addOpen, setAddOpen] = useState(false);
+  const addMutation = useAddProjectToRoundMutation(cycleId, trackId);
 
   const inRound = new Set(round.projects.map((p) => p.projectId));
+  // Đề tài ĐÃ NỘP trong lĩnh vực nhưng chưa vào vòng này (kể cả nộp trễ sau khi vòng chạy).
   const available = trackProjects.filter((p) => !inRound.has(p.projectId));
-  // Cho thêm đề tài khi vòng còn PENDING *hoặc* OPEN (đề tài nộp trễ sau khi mở vòng
-  // vẫn phải kéo vào được — rule #17 không đóng băng hội đồng). Chỉ chặn khi CLOSED.
-  // BE (AddProjectToRoundAsync) không gate theo status nên chỉ cần mở nút ở FE.
+  // Chỉ thêm được vào vòng còn PENDING/OPEN (rule #17). Vòng đã PASSED/CLOSED → chỉ hiện để biết.
   const status = round.status?.toUpperCase();
   const canAdd = status === ROUND_STATUS.PENDING || status === ROUND_STATUS.OPEN;
 
   return (
     <div className="rounded-xl border border-border p-3">
-      <div className="mb-2 flex items-center justify-between">
-        <p className="text-sm font-medium text-foreground">{t("reviewBoard.projectsInRound")}</p>
-        {canAdd && available.length > 0 && (
-          <Button size="sm" variant="ghost" className="h-7 gap-1 text-xs" onClick={() => setAddOpen(true)}>
-            <Plus className="size-3.5" />
-            {t("reviewBoard.addProject")}
-          </Button>
-        )}
-      </div>
+      <p className="mb-2 text-sm font-medium text-foreground">{t("reviewBoard.projectsInRound")}</p>
 
       {round.projects.length === 0 ? (
         <p className="text-xs text-muted-foreground">{t("reviewBoard.noProjectsInRound")}</p>
@@ -55,14 +45,39 @@ export function RoundProposalsPanel({ round, cycleId, trackId, trackProjects }: 
         </ul>
       )}
 
-      <AddProjectToRoundDialog
-        open={addOpen}
-        onOpenChange={setAddOpen}
-        cycleId={cycleId}
-        trackId={trackId}
-        roundId={round.id}
-        available={available}
-      />
+      {/* Đề tài đã nộp trong lĩnh vực nhưng CHƯA vào vòng — LUÔN hiện để thấy hết, không phải tự mò. */}
+      {available.length > 0 && (
+        <div className="mt-3 border-t border-border pt-2.5">
+          <p className="mb-1.5 text-xs font-medium text-muted-foreground">
+            {t("reviewBoard.availableProjects", { n: available.length })}
+            {!canAdd && ` · ${t("reviewBoard.roundClosedHint")}`}
+          </p>
+          <ul className="space-y-1.5">
+            {available.map((p) => (
+              <li
+                key={p.projectId}
+                className="flex items-center gap-2 rounded-lg border border-dashed border-border px-2.5 py-1.5"
+              >
+                <span className="min-w-0 flex-1 truncate text-sm text-foreground" title={p.titleVi}>
+                  {p.titleVi}
+                </span>
+                {p.projectStatus && <StatusBadge status={p.projectStatus} />}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 shrink-0 gap-1 text-xs"
+                  disabled={!canAdd || addMutation.isPending}
+                  title={canAdd ? t("reviewBoard.addProject") : t("reviewBoard.roundClosedHint")}
+                  onClick={() => addMutation.mutate({ roundId: round.id, projectId: p.projectId })}
+                >
+                  <Plus className="size-3.5" />
+                  {t("reviewBoard.addProject")}
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }

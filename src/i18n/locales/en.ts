@@ -384,6 +384,8 @@ export const en = {
     noAvailableProjects: "Every proposal of the field is already in this round.",
     projectsInRound: "Proposals in round",
     noProjectsInRound: "No proposals in this round yet.",
+    availableProjects: "Submitted, not in a round ({{n}})",
+    roundClosedHint: "round closed — add to an open round",
     removeProjectTitle: "Remove proposal from round",
     removeProjectConfirm: 'Remove "{{name}}" from this round?',
     deleteRound: "Delete round",
