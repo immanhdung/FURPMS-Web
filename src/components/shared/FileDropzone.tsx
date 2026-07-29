@@ -67,7 +67,7 @@ export function FileDropzone({
         initial={{ opacity: 0, y: 4 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.15 }}
-        className="flex items-center gap-3 rounded-xl border border-border bg-card p-3.5"
+        className="flex items-center gap-3 rounded-xl border border-border bg-card p-3.5 shadow-soft-xs"
       >
         <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
           <FileText className="size-5" />
@@ -99,8 +99,8 @@ export function FileDropzone({
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
         className={cn(
-          "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-6 py-10 text-center transition-colors",
-          isDragging ? "border-primary bg-primary/4" : "border-border hover:border-primary/40",
+          "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-6 py-10 text-center transition-all",
+          isDragging ? "border-primary bg-primary/4 shadow-soft-sm" : "border-border hover:border-primary/40 hover:shadow-soft-xs",
           disabled && "cursor-not-allowed opacity-50"
         )}
       >

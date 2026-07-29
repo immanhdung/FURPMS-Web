@@ -57,7 +57,7 @@ export function DataTable<TData, TValue>({
     <div className="w-full">
       <DataTableToolbar table={table} searchPlaceholder={searchPlaceholder} exportFileName={exportFileName} />
 
-      <div className="overflow-hidden rounded-xl border border-border">
+      <div className="overflow-hidden rounded-xl border border-border shadow-soft-sm">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

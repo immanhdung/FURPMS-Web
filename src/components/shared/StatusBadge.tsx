@@ -16,11 +16,29 @@ const STATUS_STYLES: Record<string, string> = {
   declined: "bg-danger/10 text-danger",
 };
 
+const DOT_STYLES: Record<string, string> = {
+  active: "bg-success",
+  open: "bg-success",
+  approved: "bg-success",
+  accepted: "bg-success",
+  confirmed: "bg-success",
+  planning: "bg-warning",
+  pending: "bg-warning",
+  invited: "bg-warning",
+  inactive: "bg-muted-foreground",
+  closed: "bg-muted-foreground",
+  rejected: "bg-danger",
+  declined: "bg-danger",
+};
+
 export function StatusBadge({ status }: { status: string }) {
-  const style = STATUS_STYLES[status.toLowerCase()] ?? "bg-muted text-muted-foreground";
+  const key = status.toLowerCase();
+  const style = STATUS_STYLES[key] ?? "bg-muted text-muted-foreground";
+  const dot = DOT_STYLES[key] ?? "bg-muted-foreground";
 
   return (
-    <Badge variant="secondary" className={cn("font-medium", style)}>
+    <Badge variant="secondary" className={cn("gap-1.5 font-medium", style)}>
+      <span className={cn("size-1.5 shrink-0 rounded-full", dot)} />
       {status}
     </Badge>
   );

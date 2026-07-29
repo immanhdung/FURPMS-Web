@@ -25,7 +25,7 @@ export function QuickActions({ actions, title = "Quick Actions" }: { actions: Qu
           >
             <Link
               to={action.path}
-              className="group flex flex-col items-start gap-2 rounded-lg border border-border p-3 transition-colors hover:border-primary/40 hover:bg-primary/3"
+              className="group flex flex-col items-start gap-2 rounded-lg border border-border p-3 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/3 hover:shadow-soft-sm"
             >
               <div className="flex size-8 items-center justify-center rounded-md bg-primary/10 text-primary transition-colors group-hover:bg-primary/15">
                 <action.icon className="size-4" />
