@@ -23,12 +23,14 @@ export function getProposalColumns({ t, cycleNames, trackNames, onOpen }: GetPro
     },
     {
       id: "cycle",
-      accessorFn: (row) => (row.cycleId ? (cycleNames[row.cycleId] ?? row.cycleId) : "-"),
+      // BE trả sẵn cycleName/trackName (semester code + tên lĩnh vực); summary KHÔNG có cycleId/trackId
+      // nên cột cũ luôn ra "-". Ưu tiên tên trực tiếp, giữ lookup theo id làm fallback.
+      accessorFn: (row) => row.cycleName ?? (row.cycleId ? cycleNames[row.cycleId] : undefined) ?? "-",
       header: ({ column }) => <DataTableColumnHeader column={column} title={t("staff.cycle")} />,
     },
     {
       id: "track",
-      accessorFn: (row) => (row.trackId ? (trackNames[row.trackId] ?? row.trackId) : "-"),
+      accessorFn: (row) => row.trackName ?? (row.trackId ? trackNames[row.trackId] : undefined) ?? "-",
       header: ({ column }) => <DataTableColumnHeader column={column} title={t("staff.researchField")} />,
     },
     {
