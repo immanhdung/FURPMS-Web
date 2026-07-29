@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Filter, Gavel, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,10 +19,26 @@ import { CreateRoundSheet } from "@/features/staff/review-board/CreateRoundSheet
 export function ReviewBoardPage() {
   const { t } = useTranslation();
   const { data: cycles } = useCyclesQuery();
-  const [cycleId, setCycleId] = useState<number | undefined>();
-  const [trackId, setTrackId] = useState<number | undefined>();
+  // Giữ đợt + lĩnh vực trên URL (?cycle=&track=) → reload/back không mất lựa chọn (trước đây dùng
+  // useState cục bộ nên tải lại trang là về màn trống).
+  const [searchParams, setSearchParams] = useSearchParams();
+  const cycleId = searchParams.get("cycle") ? Number(searchParams.get("cycle")) : undefined;
+  const trackId = searchParams.get("track") ? Number(searchParams.get("track")) : undefined;
   const [selectedRoundId, setSelectedRoundId] = useState<string | null>(null);
   const [createRoundOpen, setCreateRoundOpen] = useState(false);
+
+  const selectCycle = (v: string) => {
+    setSearchParams({ cycle: v }); // đổi đợt → bỏ lĩnh vực cũ
+    setSelectedRoundId(null);
+  };
+  const selectTrack = (v: string) => {
+    setSearchParams((prev) => {
+      const p = new URLSearchParams(prev);
+      p.set("track", v);
+      return p;
+    });
+    setSelectedRoundId(null);
+  };
 
   const { data: tracks } = useTracksByCycleQuery(cycleId);
   const { data: board, isLoading, isError, refetch, isRefetching } = useReviewBoardQuery(cycleId, trackId);
@@ -49,14 +66,7 @@ export function ReviewBoardPage() {
       {/* Bộ chọn Đợt + Lĩnh vực */}
       <div className="flex flex-wrap items-center gap-2">
         <Filter className="size-4 text-muted-foreground" />
-        <Select
-          value={cycleId?.toString()}
-          onValueChange={(v) => {
-            setCycleId(Number(v));
-            setTrackId(undefined);
-            setSelectedRoundId(null);
-          }}
-        >
+        <Select value={cycleId?.toString()} onValueChange={selectCycle}>
           <SelectTrigger className="w-56">
             <SelectValue placeholder={t("reviewBoard.selectCycle")} />
           </SelectTrigger>
@@ -70,11 +80,9 @@ export function ReviewBoardPage() {
         </Select>
 
         <Select
+          key={cycleId ?? "none"}
           value={trackId?.toString()}
-          onValueChange={(v) => {
-            setTrackId(Number(v));
-            setSelectedRoundId(null);
-          }}
+          onValueChange={selectTrack}
           disabled={!cycleId}
         >
           <SelectTrigger className="w-56">
