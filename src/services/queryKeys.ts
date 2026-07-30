@@ -114,6 +114,7 @@ export const queryKeys = {
     all: () => ["progress-reports"] as const,
     list: (contractId: string) => ["progress-reports", "list", contractId] as const,
     detail: (id: string) => ["progress-reports", "detail", id] as const,
+    documents: (reportId: string) => ["progress-reports", "documents", reportId] as const,
   },
   disbursements: {
     all: () => ["disbursements"] as const,

@@ -1,9 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { FileText, Loader2, Upload } from "lucide-react";
 import { FormSheet } from "@/components/shared/FormSheet";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useSubmitProgressReportMutation, useUpdateProgressReportMutation } from "@/hooks/useProgressReports";
+import {
+  useProgressReportDocumentsQuery,
+  useSubmitProgressReportMutation,
+  useUpdateProgressReportMutation,
+  useUploadProgressReportDocMutation,
+} from "@/hooks/useProgressReports";
 import { formatDate } from "@/utils/format";
 import type { ProgressReport } from "@/types/progress-report";
 
@@ -25,6 +32,11 @@ export function CreateProgressReportSheet({ open, onOpenChange, contractId, repo
   const updateMutation = useUpdateProgressReportMutation(contractId);
   const submitMutation = useSubmitProgressReportMutation(contractId);
   const isSubmitting = updateMutation.isPending || submitMutation.isPending;
+
+  // File báo cáo (BM06) — Staff cần mở xem file này rồi mới đánh giá Đạt/Không đạt.
+  const { data: docs } = useProgressReportDocumentsQuery(report?.id ?? null);
+  const uploadMutation = useUploadProgressReportDocMutation(report?.id ?? "");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [completedContent, setCompletedContent] = useState("");
   const [pendingContent, setPendingContent] = useState("");
@@ -82,6 +94,45 @@ export function CreateProgressReportSheet({ open, onOpenChange, contractId, repo
       isSubmitting={isSubmitting}
       submitLabel={t("reports.submitReport")}
     >
+      {/* Đính kèm file báo cáo (BM06) — thầy 29/07: Staff phải xem được file rồi mới đánh giá. */}
+      <div className="rounded-lg border border-border p-3">
+        <div className="flex items-center justify-between gap-2">
+          <label className="text-sm font-medium text-foreground">{t("reports.attachFile")}</label>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={!report || uploadMutation.isPending}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {uploadMutation.isPending ? <Loader2 className="animate-spin" /> : <Upload />}
+            {t("reports.chooseFile")}
+          </Button>
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">{t("reports.attachFileHint")}</p>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".pdf,.doc,.docx"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) uploadMutation.mutate(f);
+            e.target.value = "";
+          }}
+        />
+        {docs && docs.length > 0 && (
+          <ul className="mt-2 space-y-1">
+            {docs.map((d) => (
+              <li key={d.id} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <FileText className="size-3.5 shrink-0" />
+                <span className="truncate">{d.originalFileName}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
       <div>
         <label className="mb-1.5 block text-sm font-medium text-foreground">{t("reports.completedWork")}</label>
         <Textarea rows={3} value={completedContent} onChange={(e) => setCompletedContent(e.target.value)} />

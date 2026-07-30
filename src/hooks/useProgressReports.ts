@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { progressReportService } from "@/services/api/progress-report.service";
+import { progressReportDocumentService } from "@/services/api/progress-report-document.service";
 import { queryKeys } from "@/services/queryKeys";
 import type { ApiError } from "@/types/common";
 import type {
@@ -26,6 +27,27 @@ export function useCreateProgressReportMutation(contractId: string) {
       queryClient.invalidateQueries({ queryKey: queryKeys.progressReports.list(contractId) });
     },
     onError: (error: ApiError) => toast.error(error.message || "Unable to save progress report."),
+  });
+}
+
+/** File báo cáo (BM06) — Staff cần xem file này rồi mới đánh giá Đạt/Không đạt. */
+export function useProgressReportDocumentsQuery(reportId: string | null) {
+  return useQuery({
+    queryKey: queryKeys.progressReports.documents(reportId ?? ""),
+    queryFn: () => progressReportDocumentService.list(reportId as string),
+    enabled: Boolean(reportId),
+  });
+}
+
+export function useUploadProgressReportDocMutation(reportId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (file: File) => progressReportDocumentService.upload(reportId, file),
+    onSuccess: () => {
+      toast.success("Đã tải file báo cáo lên.");
+      queryClient.invalidateQueries({ queryKey: queryKeys.progressReports.documents(reportId) });
+    },
+    onError: (error: ApiError) => toast.error(error.message || "Không tải được file lên."),
   });
 }
 
