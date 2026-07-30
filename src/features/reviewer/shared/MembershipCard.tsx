@@ -22,7 +22,7 @@ export function MembershipCard({ membership, actions, index = 0 }: MembershipCar
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, delay: index * 0.04 }}
     >
-      <Card>
+      <Card className="transition-shadow duration-200 hover:shadow-soft-md">
         <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             <p className="truncate text-sm font-medium text-foreground">

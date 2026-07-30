@@ -1,5 +1,6 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import { motion } from "motion/react";
 import { Search } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { ErrorState } from "@/components/shared/ErrorState";
@@ -23,7 +24,7 @@ interface MembershipListPageProps {
 export function MembershipListPage({
   title,
   description,
-  emptyIcon,
+  emptyIcon: EmptyIcon,
   emptyTitle,
   emptyDescription,
   filter,
@@ -48,11 +49,16 @@ export function MembershipListPage({
   }, [data, filter, search]);
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-      </div>
+    <div className="space-y-6">
+      <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }} className="flex items-center gap-3">
+        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-brand-accent-2/15 to-primary/10 text-brand-accent-2">
+          <EmptyIcon className="size-5" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+        </div>
+      </motion.div>
 
       <div className="relative max-w-sm">
         <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -73,7 +79,7 @@ export function MembershipListPage({
           ))}
         </div>
       ) : items.length === 0 ? (
-        <EmptyState icon={emptyIcon} title={emptyTitle} description={emptyDescription} />
+        <EmptyState icon={EmptyIcon} title={emptyTitle} description={emptyDescription} />
       ) : (
         <div className="space-y-3">
           {items.map((membership, index) => (

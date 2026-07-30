@@ -109,21 +109,36 @@ export function RubricScoringForm({ councilId, roundType }: RubricScoringFormPro
     );
   };
 
+  const scorePct = maxTotal > 0 ? Math.min(100, (totalScore / maxTotal) * 100) : 0;
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-3 py-2">
-        <p className="text-sm font-medium text-foreground">{t("review.totalScore")}</p>
-        <p className="text-sm font-semibold text-foreground">
-          {totalScore.toFixed(1)} / {maxTotal}
-        </p>
+      <div className="space-y-2 rounded-xl border border-primary/15 bg-linear-to-r from-primary/8 to-brand-secondary/8 px-4 py-3">
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-medium text-foreground">{t("review.totalScore")}</p>
+          <p className="text-base font-semibold text-foreground">
+            {totalScore.toFixed(1)} <span className="text-sm font-normal text-muted-foreground">/ {maxTotal}</span>
+          </p>
+        </div>
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+          <div
+            className="h-full rounded-full bg-linear-to-r from-primary to-brand-secondary transition-all duration-300"
+            style={{ width: `${scorePct}%` }}
+          />
+        </div>
       </div>
 
       <div className="space-y-3">
-        {activeCriteria.map((criterion) => (
+        {activeCriteria.map((criterion, index) => (
           <Card key={criterion.id}>
             <CardContent className="space-y-2.5 p-4">
               <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-medium text-foreground">{criterion.criterionName}</p>
+                <p className="flex items-center gap-2 text-sm font-medium text-foreground">
+                  <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-semibold text-primary">
+                    {index + 1}
+                  </span>
+                  {criterion.criterionName}
+                </p>
                 <div className="flex shrink-0 items-center gap-1.5">
                   <Input
                     type="number"
