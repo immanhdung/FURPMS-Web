@@ -211,6 +211,10 @@
     border-radius: 9999px;
     filter: blur(64px);
     pointer-events: none;
+    /* Tách layer riêng để blur chỉ raster 1 lần rồi cache (không dùng translateZ vì sẽ đè
+       -translate-x-1/2 của orb căn giữa); contain: paint chặn ảnh hưởng layout ra ngoài. */
+    will-change: transform;
+    contain: paint;
   }
 
   .liquid-glass {
