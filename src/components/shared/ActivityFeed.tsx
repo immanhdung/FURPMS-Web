@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { formatRelativeTime } from "@/utils/format";
+import { cn } from "@/lib/utils";
 import type { ActivityItem, ActivityType } from "@/types/dashboard";
 
 const ACTIVITY_ICONS: Record<ActivityType, LucideIcon> = {
@@ -17,6 +18,15 @@ const ACTIVITY_ICONS: Record<ActivityType, LucideIcon> = {
   system: Info,
 };
 
+const ACTIVITY_COLORS: Record<ActivityType, string> = {
+  proposal: "bg-primary/10 text-primary",
+  review: "bg-brand-secondary/10 text-brand-secondary",
+  council: "bg-warning/10 text-warning",
+  meeting: "bg-brand-accent-2/10 text-brand-accent-2",
+  contract: "bg-brand-accent/10 text-brand-accent",
+  system: "bg-muted text-muted-foreground",
+};
+
 interface ActivityFeedProps {
   items: ActivityItem[];
   isLoading?: boolean;
@@ -26,7 +36,7 @@ interface ActivityFeedProps {
 export function ActivityFeed({ items, isLoading = false, title }: ActivityFeedProps) {
   const { t } = useTranslation();
   return (
-    <Card>
+    <Card variant="glass">
       <CardHeader>
         <CardTitle className="text-sm">{title ?? t("activity.recent")}</CardTitle>
       </CardHeader>
@@ -47,7 +57,12 @@ export function ActivityFeed({ items, isLoading = false, title }: ActivityFeedPr
                   transition={{ duration: 0.2, delay: index * 0.04 }}
                   className="flex items-start gap-3"
                 >
-                  <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                  <div
+                    className={cn(
+                      "flex size-8 shrink-0 items-center justify-center rounded-full",
+                      ACTIVITY_COLORS[item.type]
+                    )}
+                  >
                     <Icon className="size-4" />
                   </div>
                   <div className="min-w-0 flex-1">

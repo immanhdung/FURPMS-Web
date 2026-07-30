@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { Table } from "@tanstack/react-table";
-import { Download, SlidersHorizontal, X } from "lucide-react";
+import { Download, Search, SlidersHorizontal, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,12 +42,15 @@ export function DataTableToolbar<TData>({
   return (
     <div className="flex items-center justify-between gap-2 pb-3">
       <div className="flex flex-1 items-center gap-2">
-        <Input
-          placeholder={searchPlaceholder ?? t("common.searchPlaceholder")}
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          className="h-8 max-w-xs"
-        />
+        <div className="relative max-w-xs flex-1">
+          <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder={searchPlaceholder ?? t("common.searchPlaceholder")}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="h-8 pl-8"
+          />
+        </div>
         {searchInput.length > 0 && (
           <Button variant="ghost" size="icon-sm" aria-label={t("common.clearSearch")} onClick={() => setSearchInput("")}>
             <X />
