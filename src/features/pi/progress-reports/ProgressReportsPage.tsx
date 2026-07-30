@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { motion } from "motion/react";
 import { CalendarClock, ExternalLink, FileBarChart, PencilLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,11 +23,16 @@ export function ProgressReportsPage() {
   const { data: reports, isLoading: isReportsLoading } = useProgressReportsQuery(contractId);
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("reports.progressTitle")}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{t("reports.progressSubtitle")}</p>
-      </div>
+    <div className="space-y-6">
+      <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }} className="flex items-center gap-3">
+        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-brand-accent/15 to-primary/10 text-brand-accent">
+          <FileBarChart className="size-5" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("reports.progressTitle")}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t("reports.progressSubtitle")}</p>
+        </div>
+      </motion.div>
 
       {isContractsLoading ? (
         <Skeleton className="h-10 w-64 rounded-lg" />
@@ -70,7 +76,7 @@ export function ProgressReportsPage() {
               {reports.map((report) => {
                 const isSubmitted = Boolean(report.submittedAt);
                 return (
-                  <li key={report.id} className="space-y-2 rounded-lg border border-border p-4">
+                  <li key={report.id} className="space-y-2 rounded-lg border border-border bg-card/95 p-4 shadow-soft-xs transition-shadow hover:shadow-soft-sm">
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-sm font-medium text-foreground">
                         {t("reports.roundN", { n: report.reportRound ?? "" })} · {formatDate(report.reportingPeriodStart)} –{" "}

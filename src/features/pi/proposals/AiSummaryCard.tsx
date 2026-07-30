@@ -10,11 +10,13 @@ export function AiSummaryCard({ proposalId }: { proposalId: string }) {
   const summarizeMutation = useSummarizeProposalMutation();
 
   return (
-    <Card>
+    <Card variant="glass" className="border-primary/15">
       <CardHeader>
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <Sparkles className="size-4 text-primary" />
+            <div className="flex size-6 items-center justify-center rounded-md bg-linear-to-br from-primary to-brand-secondary text-white">
+              <Sparkles className="size-3.5" />
+            </div>
             <CardTitle className="text-sm">{t("proposal.aiSummary")}</CardTitle>
           </div>
           <Button

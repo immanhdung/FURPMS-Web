@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { motion } from "motion/react";
 import { ExternalLink, FileCheck2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,11 +29,16 @@ export function FinalReportsPage() {
   const canEdit = !finalReport || Boolean(finalReport.revisionNotes);
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("reports.finalTitle")}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{t("reports.finalSubtitle")}</p>
-      </div>
+    <div className="space-y-6">
+      <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }} className="flex items-center gap-3">
+        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-brand-accent/15 to-primary/10 text-brand-accent">
+          <FileCheck2 className="size-5" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("reports.finalTitle")}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t("reports.finalSubtitle")}</p>
+        </div>
+      </motion.div>
 
       {isContractsLoading ? (
         <Skeleton className="h-10 w-64 rounded-lg" />
@@ -60,7 +66,7 @@ export function FinalReportsPage() {
           {isReportLoading ? (
             <Skeleton className="h-40 w-full rounded-lg" />
           ) : (
-            <div className="space-y-4 rounded-xl border border-border p-4">
+            <div className="space-y-4 rounded-xl border border-border bg-card/95 p-4 shadow-soft-xs">
               {finalReport && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between gap-2">
