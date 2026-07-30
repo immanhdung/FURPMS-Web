@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Plus } from "lucide-react";
+import { motion } from "motion/react";
+import { Plus, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/tables/DataTable";
 import { ErrorState } from "@/components/shared/ErrorState";
@@ -33,11 +34,21 @@ export function BudgetCategoriesPage() {
   );
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("budgetCategories.title")}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{t("budgetCategories.subtitle")}</p>
+    <div className="space-y-6">
+      <motion.div
+        initial={{ opacity: 0, y: -4 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2 }}
+        className="flex items-center justify-between gap-3"
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-primary/15 to-brand-secondary/10 text-primary">
+            <Wallet className="size-5" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("budgetCategories.title")}</h1>
+            <p className="mt-1 text-sm text-muted-foreground">{t("budgetCategories.subtitle")}</p>
+          </div>
         </div>
         <Button
           onClick={() => {
@@ -48,7 +59,7 @@ export function BudgetCategoriesPage() {
           <Plus />
           {t("budgetCategories.newBtn")}
         </Button>
-      </div>
+      </motion.div>
 
       {isError ? (
         <ErrorState onRetry={() => refetch()} isRetrying={isRefetching} />
