@@ -112,9 +112,9 @@ export function HomePage() {
                 viewport={{ once: true, margin: "-60px" }}
                 transition={{ duration: 0.35, delay: index * 0.06 }}
               >
-                <Card className="h-full transition-shadow hover:shadow-md">
+                <Card className="h-full transition-all duration-200 hover:-translate-y-0.5 hover:shadow-soft-lg">
                   <CardContent className="p-5">
-                    <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <div className="flex size-10 items-center justify-center rounded-lg bg-linear-to-br from-primary/15 to-brand-secondary/10 text-primary">
                       <feature.icon className="size-5" />
                     </div>
                     <p className="mt-4 text-sm font-semibold text-foreground">{t(feature.titleKey)}</p>

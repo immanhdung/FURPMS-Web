@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { motion } from "motion/react";
 import { KeyRound, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -37,10 +38,10 @@ export function ChangePasswordPage() {
 
   return (
     <div className="mx-auto max-w-lg space-y-4">
-      <div>
+      <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("auth.changePassword")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">{t("auth.changePasswordSubtitle")}</p>
-      </div>
+      </motion.div>
 
       <Card>
         <CardHeader>

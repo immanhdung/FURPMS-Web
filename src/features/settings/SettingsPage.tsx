@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { Monitor, Moon, Sun } from "lucide-react";
+import { motion } from "motion/react";
+import { Monitor, Moon, Settings2, Sun } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -34,13 +35,23 @@ export function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("settings.title")}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {t("settings.subtitleBase")}
-          {isAdmin && t("settings.subtitleAdmin")}
-        </p>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: -4 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2 }}
+        className="flex items-center gap-3"
+      >
+        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-primary/15 to-brand-secondary/10 text-primary">
+          <Settings2 className="size-5" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("settings.title")}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {t("settings.subtitleBase")}
+            {isAdmin && t("settings.subtitleAdmin")}
+          </p>
+        </div>
+      </motion.div>
 
       <Card>
         <CardHeader>
@@ -72,7 +83,7 @@ export function SettingsPage() {
           <CardDescription>{t("settings.demoToolsDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
-          <label className="flex items-start justify-between gap-4">
+          <label className="flex items-start justify-between gap-4 rounded-lg border border-border bg-muted/30 p-3">
             <span>
               <span className="block text-sm font-medium text-foreground">{t("settings.sampleFill")}</span>
               <span className="mt-0.5 block text-xs text-muted-foreground">
