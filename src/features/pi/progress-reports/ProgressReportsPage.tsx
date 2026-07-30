@@ -79,8 +79,9 @@ export function ProgressReportsPage() {
                   <li key={report.id} className="space-y-2 rounded-lg border border-border bg-card/95 p-4 shadow-soft-xs transition-shadow hover:shadow-soft-sm">
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-sm font-medium text-foreground">
-                        {t("reports.roundN", { n: report.reportRound ?? "" })} · {formatDate(report.reportingPeriodStart)} –{" "}
-                        {formatDate(report.reportingPeriodEnd)}
+                        {/* Tên đợt Staff đặt; chưa đặt → "Kỳ {số}". */}
+                        {report.roundName || t("reports.roundN", { n: report.reportRound ?? "" })} ·{" "}
+                        {formatDate(report.reportingPeriodStart)} – {formatDate(report.reportingPeriodEnd)}
                       </p>
                       {report.status ? (
                         <StatusBadge status={report.status} />

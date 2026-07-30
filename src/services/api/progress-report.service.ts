@@ -21,10 +21,13 @@ export const progressReportService = {
       .post<ApiResponse<ProgressReport>>("/progress-reports", payload, { params: { contractId } })
       .then((res) => res.data.data),
 
-  // Staff sinh sẵn các kỳ báo cáo định kỳ (QĐ543 Điều 10: Ứng dụng 2 / Cơ bản 1).
-  generate: (contractId: string) =>
+  // Staff sinh sẵn các kỳ báo cáo. roundCount bỏ trống → mặc định theo loại (Ứng dụng 2 / Cơ bản 1),
+  // nhưng Staff chỉnh được số kỳ (thầy 29/07: không fix cứng).
+  generate: (contractId: string, roundCount?: number) =>
     axiosClient
-      .post<ApiResponse<ProgressReport[]>>("/progress-reports/generate", null, { params: { contractId } })
+      .post<ApiResponse<ProgressReport[]>>("/progress-reports/generate", null, {
+        params: roundCount ? { contractId, roundCount } : { contractId },
+      })
       .then((res) => res.data.data),
 
   // PI điền nội dung kỳ đã có sẵn khi còn DRAFT.

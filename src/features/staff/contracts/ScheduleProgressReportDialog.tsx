@@ -31,11 +31,13 @@ export function ScheduleProgressReportDialog({
   const [dueDate, setDueDate] = useState("");
   const [scheduledMeetingAt, setScheduledMeetingAt] = useState("");
   const [meetingLink, setMeetingLink] = useState("");
+  const [roundName, setRoundName] = useState("");
 
   const reset = () => {
     setDueDate("");
     setScheduledMeetingAt("");
     setMeetingLink("");
+    setRoundName("");
   };
 
   return (
@@ -48,8 +50,18 @@ export function ScheduleProgressReportDialog({
 
         <div className="space-y-3">
           <div>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">{t("contract.roundName")}</label>
+            <Input
+              value={roundName}
+              onChange={(e) => setRoundName(e.target.value)}
+              placeholder={t("contract.roundNamePlaceholder")}
+            />
+          </div>
+          <div>
             <label className="mb-1.5 block text-sm font-medium text-foreground">{t("contract.dueDate")}</label>
             <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+            {/* Đặt lại ngày ở đây = GIA HẠN hạn nộp (thầy 29/07: đánh giá trúng ngày cuối thì gia hạn được). */}
+            <p className="mt-1 text-xs text-muted-foreground">{t("contract.dueDateExtendHint")}</p>
           </div>
           <div>
             <label className="mb-1.5 block text-sm font-medium text-foreground">{t("contract.meetingDateTime")}</label>
@@ -77,6 +89,7 @@ export function ScheduleProgressReportDialog({
                     dueDate: dueDate || undefined,
                     scheduledMeetingAt: scheduledMeetingAt || undefined,
                     meetingLink: meetingLink || undefined,
+                    roundName: roundName.trim() || undefined,
                   },
                 },
                 {

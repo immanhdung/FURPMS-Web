@@ -2,6 +2,8 @@ export interface ProgressReport {
   id: string;
   contractId: string;
   reportRound?: number | null;
+  /** Tên đợt Staff đặt (vd "Giữa kỳ"); null → hiện "Kỳ {số}". */
+  roundName?: string | null;
   reportingPeriodStart?: string | null;
   reportingPeriodEnd?: string | null;
   completedContent?: string | null;
@@ -39,6 +41,8 @@ export interface ScheduleProgressReportPayload {
   dueDate?: string;
   scheduledMeetingAt?: string;
   meetingLink?: string;
+  /** Staff đặt/sửa tên đợt. */
+  roundName?: string;
 }
 
 export interface EvaluateProgressReportPayload {

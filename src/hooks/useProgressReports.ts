@@ -54,7 +54,7 @@ export function useUploadProgressReportDocMutation(reportId: string) {
 export function useGenerateProgressRoundsMutation(contractId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => progressReportService.generate(contractId),
+    mutationFn: (roundCount?: number) => progressReportService.generate(contractId, roundCount),
     onSuccess: () => {
       toast.success("Đã tạo các kỳ báo cáo định kỳ.");
       queryClient.invalidateQueries({ queryKey: queryKeys.progressReports.list(contractId) });

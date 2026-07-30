@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CalendarClock, ClipboardCheck, ExternalLink, FileBarChart, CalendarPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -17,12 +18,32 @@ export function ProgressReportsPanel({ contractId }: { contractId: string }) {
 
   const [schedulingReportId, setSchedulingReportId] = useState<string | null>(null);
   const [evaluatingReportId, setEvaluatingReportId] = useState<string | null>(null);
+  const [roundCount, setRoundCount] = useState("");
 
   return (
     <div className="space-y-3">
-      {/* QĐ543 Điều 10: số kỳ báo cáo cố định theo loại (Ứng dụng 2 / Cơ bản 1). Staff mở kỳ, PI điền. */}
-      <div className="flex justify-end">
-        <Button variant="outline" size="sm" onClick={() => generateMutation.mutate()} disabled={generateMutation.isPending}>
+      {/* QĐ543 Điều 10 gợi ý Ứng dụng 2 / Cơ bản 1 kỳ, nhưng KHÔNG fix cứng — Staff tự chọn số kỳ
+          (thầy 29/07). Bỏ trống → dùng mặc định theo loại đề tài. */}
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        <label htmlFor="round-count" className="text-xs text-muted-foreground">
+          {t("reports.roundCount")}
+        </label>
+        <Input
+          id="round-count"
+          type="number"
+          min={1}
+          max={12}
+          className="w-20"
+          placeholder={t("reports.auto")}
+          value={roundCount}
+          onChange={(e) => setRoundCount(e.target.value)}
+        />
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => generateMutation.mutate(roundCount ? Number(roundCount) : undefined)}
+          disabled={generateMutation.isPending}
+        >
           <CalendarPlus />
           {t("reports.generateRounds")}
         </Button>
@@ -47,7 +68,11 @@ export function ProgressReportsPanel({ contractId }: { contractId: string }) {
             <li key={report.id} className="space-y-2 rounded-lg border border-border p-3">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-sm font-medium text-foreground">
-                  {formatDate(report.reportingPeriodStart)} – {formatDate(report.reportingPeriodEnd)}
+                  {/* Tên đợt Staff đặt; chưa đặt thì hiện "Kỳ {số}". */}
+                  {report.roundName || t("reports.roundN", { n: report.reportRound ?? "" })}
+                  <span className="ml-2 text-xs font-normal text-muted-foreground">
+                    {formatDate(report.reportingPeriodStart)} – {formatDate(report.reportingPeriodEnd)}
+                  </span>
                 </p>
                 {report.status ? (
                   <StatusBadge status={report.status} />
