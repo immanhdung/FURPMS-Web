@@ -4,9 +4,21 @@ import { motion } from "motion/react";
 export function AuthLayout() {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-950">
-      <div className="absolute -top-40 left-0 h-96 w-96 rounded-full bg-blue-500/30 blur-3xl" />
-      <div className="absolute right-0 bottom-0 h-96 w-96 rounded-full bg-purple-500/30 blur-3xl" />
-      <div className="absolute top-1/2 left-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-500/20 blur-3xl" />
+      <motion.div
+        className="aurora-orb -top-40 left-0 h-96 w-96 bg-primary/30"
+        animate={{ x: [0, 24, 0], y: [0, 16, 0] }}
+        transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div
+        className="aurora-orb right-0 bottom-0 h-96 w-96 bg-brand-secondary/30"
+        animate={{ x: [0, -24, 0], y: [0, -16, 0] }}
+        transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div
+        className="aurora-orb top-1/2 left-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 bg-brand-accent-2/20"
+        animate={{ scale: [1, 1.12, 1] }}
+        transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+      />
 
       <motion.div
         initial={{ opacity: 0, y: 8 }}

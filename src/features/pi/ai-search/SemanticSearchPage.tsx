@@ -31,7 +31,7 @@ export function SemanticSearchPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="text-center">
-        <div className="mx-auto flex size-11 items-center justify-center rounded-full bg-primary/10 text-primary">
+        <div className="mx-auto flex size-11 items-center justify-center rounded-full bg-linear-to-br from-primary to-brand-secondary text-white shadow-soft-md">
           <Sparkles className="size-5" />
         </div>
         <h1 className="mt-3 text-2xl font-semibold tracking-tight text-foreground">{t("aiSearch.title")}</h1>
@@ -103,7 +103,7 @@ export function SemanticSearchPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.2, delay: index * 0.05 }}
                 >
-                  <Card className="transition-shadow hover:shadow-md">
+                  <Card className="transition-shadow duration-200 hover:shadow-soft-lg">
                     <CardContent className="space-y-2 p-4">
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-start gap-2.5">

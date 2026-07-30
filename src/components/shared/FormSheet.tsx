@@ -48,7 +48,7 @@ export function FormSheet({
           </form>
         </ScrollArea>
 
-        <SheetFooter>
+        <SheetFooter className="border-t border-border">
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
               Cancel

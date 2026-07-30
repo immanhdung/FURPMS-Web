@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { motion } from "motion/react";
 import { ArrowLeft, Ban, Pencil, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -53,7 +54,12 @@ export function ProposalDetailPage() {
         {t("proposal.backToList")}
       </Button>
 
-      <div className="flex flex-wrap items-start justify-between gap-3">
+      <motion.div
+        initial={{ opacity: 0, y: -4 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2 }}
+        className="flex flex-wrap items-start justify-between gap-3"
+      >
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">
@@ -83,9 +89,9 @@ export function ProposalDetailPage() {
             </Button>
           )}
         </div>
-      </div>
+      </motion.div>
 
-      <div className="rounded-xl border border-border bg-card p-4">
+      <div className="rounded-xl border border-border bg-card/95 p-4 shadow-soft-xs">
         <ProposalStatusTimeline status={status} />
       </div>
 

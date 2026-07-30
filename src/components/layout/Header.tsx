@@ -17,12 +17,12 @@ export function Header() {
   const { t } = useTranslation();
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur-sm">
+    <header className="liquid-glass sticky top-3 z-30 mx-3 mt-3 flex h-14 shrink-0 items-center gap-3 rounded-2xl border border-border px-4 md:mr-3 sm:px-6">
       <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
         <Button variant="ghost" size="icon-sm" className="md:hidden" aria-label="Open navigation menu" onClick={() => setMobileNavOpen(true)}>
           <Menu />
         </Button>
-        <SheetContent side="left" className="w-64 p-0">
+        <SheetContent side="left" className="w-64 border-sidebar-border bg-sidebar p-0">
           <SheetTitle className="sr-only">Navigation</SheetTitle>
           <div className="flex h-full flex-col">
             <SidebarNav />
@@ -36,14 +36,20 @@ export function Header() {
         <Button
           variant="outline"
           size="sm"
-          className="hidden gap-2 text-muted-foreground sm:flex"
+          className="hidden w-56 justify-start gap-2 rounded-full bg-card/60 text-muted-foreground sm:flex"
           onClick={() => setCommandPaletteOpen(true)}
         >
           <Search className="size-3.5" />
           {t("common.search")}
-          <kbd className="ml-2 rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium">⌘K</kbd>
+          <kbd className="ml-auto rounded-full border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium">⌘K</kbd>
         </Button>
-        <Button variant="ghost" size="icon-sm" className="sm:hidden" aria-label={t("common.search")} onClick={() => setCommandPaletteOpen(true)}>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="rounded-full sm:hidden"
+          aria-label={t("common.search")}
+          onClick={() => setCommandPaletteOpen(true)}
+        >
           <Search />
         </Button>
 

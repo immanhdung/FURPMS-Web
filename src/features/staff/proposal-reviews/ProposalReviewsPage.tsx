@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { motion } from "motion/react";
+import { FileCheck2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ProposalsTable } from "@/features/staff/proposal-reviews/ProposalsTable";
 import { PROPOSAL_STATUS } from "@/constants/statuses";
@@ -19,13 +21,23 @@ export function ProposalReviewsPage() {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("staff.reviewsTitle")}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {t("staff.reviewsSubtitle")}
-          </p>
+    <div className="space-y-6">
+      <motion.div
+        initial={{ opacity: 0, y: -4 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2 }}
+        className="flex flex-wrap items-center justify-between gap-3"
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-primary/15 to-brand-secondary/10 text-primary">
+            <FileCheck2 className="size-5" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("staff.reviewsTitle")}</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {t("staff.reviewsSubtitle")}
+            </p>
+          </div>
         </div>
 
         <Select value={status} onValueChange={setStatus}>
@@ -41,7 +53,7 @@ export function ProposalReviewsPage() {
             ))}
           </SelectContent>
         </Select>
-      </div>
+      </motion.div>
 
       <ProposalsTable params={status === ALL_VALUE ? undefined : { status }} onOpen={handleOpen} />
     </div>

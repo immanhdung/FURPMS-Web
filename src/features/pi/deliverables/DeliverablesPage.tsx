@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { motion } from "motion/react";
 import { CalendarClock, ExternalLink, Package, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -23,11 +24,16 @@ export function DeliverablesPage() {
   const { data: deliverables, isLoading: isLoadingList } = useDeliverablesQuery(contractId);
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("deliverablesPage.title")}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{t("deliverablesPage.subtitle")}</p>
-      </div>
+    <div className="space-y-6">
+      <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }} className="flex items-center gap-3">
+        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-brand-accent/15 to-primary/10 text-brand-accent">
+          <Package className="size-5" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("deliverablesPage.title")}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t("deliverablesPage.subtitle")}</p>
+        </div>
+      </motion.div>
 
       {isContractsLoading ? (
         <Skeleton className="h-10 w-64 rounded-lg" />
@@ -67,7 +73,7 @@ export function DeliverablesPage() {
                 const isSubmitted = Boolean(d.submittedAt);
                 const isPassed = d.acceptanceStatus === ACCEPTANCE_STATUS.PASSED;
                 return (
-                  <li key={d.id} className="space-y-2 rounded-lg border border-border p-4">
+                  <li key={d.id} className="space-y-2 rounded-lg border border-border bg-card/95 p-4 shadow-soft-xs transition-shadow hover:shadow-soft-sm">
                     <div className="flex flex-wrap items-start justify-between gap-2">
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-foreground">{d.productName}</p>

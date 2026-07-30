@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { motion } from "motion/react";
 import { Filter, Gavel, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -57,11 +58,16 @@ export function ReviewBoardPage() {
   const ready = Boolean(cycleId) && Boolean(trackId);
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("reviewBoard.pageTitle")}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{t("reviewBoard.pageSubtitle")}</p>
-      </div>
+    <div className="space-y-6">
+      <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }} className="flex items-center gap-3">
+        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-primary/15 to-brand-secondary/10 text-primary">
+          <Gavel className="size-5" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("reviewBoard.pageTitle")}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t("reviewBoard.pageSubtitle")}</p>
+        </div>
+      </motion.div>
 
       {/* Bộ chọn Đợt + Lĩnh vực */}
       <div className="flex flex-wrap items-center gap-2">
@@ -114,10 +120,10 @@ export function ReviewBoardPage() {
                 type="button"
                 onClick={() => setSelectedRoundId(round.id)}
                 className={cn(
-                  "flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition-colors",
+                  "flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm transition-all",
                   selectedRound?.id === round.id
-                    ? "border-primary bg-primary/5 text-foreground"
-                    : "border-border text-muted-foreground hover:text-foreground"
+                    ? "border-transparent bg-linear-to-r from-primary to-brand-secondary text-white shadow-soft-sm"
+                    : "border-border text-muted-foreground hover:border-primary/30 hover:text-foreground"
                 )}
               >
                 <span className="font-medium">{t("staff.round", { num: round.roundNumber })}</span>

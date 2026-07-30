@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { motion } from "motion/react";
 import { KeyRound, Mail, ShieldCheck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -30,14 +31,15 @@ export function ProfilePage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">
-      <div>
+      <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("profile.title")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">{t("profile.subtitle")}</p>
-      </div>
+      </motion.div>
 
-      <Card>
-        <CardContent className="flex flex-col items-center gap-4 p-6 text-center sm:flex-row sm:text-left">
-          <Avatar size="lg" className="size-16">
+      <Card className="overflow-hidden pt-0">
+        <div className="h-16 bg-linear-to-r from-primary via-brand-secondary to-brand-accent-2" />
+        <CardContent className="-mt-8 flex flex-col items-center gap-4 p-6 pt-0 text-center sm:flex-row sm:text-left">
+          <Avatar size="lg" className="size-16 border-4 border-card shadow-soft-md">
             <AvatarImage src={user.avatarUrl ?? undefined} alt={user.fullName} />
             <AvatarFallback className="text-base">{initials(user.fullName)}</AvatarFallback>
           </Avatar>
