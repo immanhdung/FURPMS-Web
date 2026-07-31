@@ -8,6 +8,7 @@ import { BarChartCardBody } from "@/components/charts/BarChartCard";
 import { ActivityFeed } from "@/components/shared/ActivityFeed";
 import { RecentNotificationsCard } from "@/components/notifications/RecentNotificationsCard";
 import { QuickActions, type QuickAction } from "@/components/shared/QuickActions";
+import { OpenCyclesCard } from "@/features/dashboard/components/OpenCyclesCard";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -78,6 +79,9 @@ export function PiDashboardPage() {
           </>
         )}
       </div>
+
+      {/* Đợt đang mở — thầy 29/07: PI phải thấy ngay "đợt nào / loại nào đang mở". */}
+      <OpenCyclesCard />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <ActivityFeed items={data?.activity ?? []} isLoading={isLoading} />

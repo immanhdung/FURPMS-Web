@@ -172,6 +172,10 @@ export const en = {
       upcomingDeadlines: "Upcoming Deadlines",
       byDeliverableType: "By deliverable type",
       aiSuggestions: "AI Suggestions",
+      openCycles: "Cycles open for submission",
+      noOpenCycles: "No cycle is currently open for proposal submission.",
+      daysLeft: "{{n}} days left",
+      closedDeadline: "Deadline passed",
     },
     staff: {
       title: "Staff Dashboard",

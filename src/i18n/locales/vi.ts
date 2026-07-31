@@ -173,6 +173,10 @@ export const vi = {
       upcomingDeadlines: "Hạn sắp tới",
       byDeliverableType: "Theo loại sản phẩm",
       aiSuggestions: "Gợi ý AI",
+      openCycles: "Đợt đang mở nhận đề cương",
+      noOpenCycles: "Hiện chưa có đợt nào đang mở nhận đề cương.",
+      daysLeft: "Còn {{n}} ngày",
+      closedDeadline: "Đã quá hạn nộp",
     },
     staff: {
       title: "Bảng điều khiển Chuyên viên",
