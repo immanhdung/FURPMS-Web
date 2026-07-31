@@ -139,12 +139,11 @@ export function CreateContractSheet({ open, onOpenChange }: CreateContractSheetP
         <Input id="contract-representative" {...register("sideARepresentative")} />
       </div>
 
-      <div>
-        <label htmlFor="contract-url" className="mb-1.5 block text-sm font-medium text-foreground">
-          E-contract URL
-        </label>
-        <Input id="contract-url" {...register("econtractUrl")} />
-      </div>
+      {/* Thầy 29/07: bỏ ô dán URL hợp đồng — file thật upload sau khi tạo, ở tab "Hồ sơ hợp đồng
+          đã ký" trong chi tiết hợp đồng (đã có sẵn luồng upload + xem file). */}
+      <p className="rounded-lg border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
+        {t("contract.uploadAfterCreateHint")}
+      </p>
     </FormSheet>
   );
 }

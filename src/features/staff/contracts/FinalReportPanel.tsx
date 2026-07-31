@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { Archive, CircleCheck, ExternalLink, FileCheck2, Loader2, RotateCcw, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ import {
   useRequestFinalReportRevisionMutation,
   useSubmitFinalReportMutation,
 } from "@/hooks/useFinalReports";
+import { finalReportDocumentService } from "@/services/api/final-report-document.service";
 import { FINAL_REPORT_STATUS } from "@/types/final-report";
 import { formatDateTime } from "@/utils/format";
 
@@ -34,6 +36,33 @@ export function FinalReportPanel({ contractId, canManage }: { contractId: string
   const [summaryFileUrl, setSummaryFileUrl] = useState("");
   const [language, setLanguage] = useState("VI");
   const [revisionNotes, setRevisionNotes] = useState("");
+
+  // Upload file thật (BM09) — lấy downloadUrl của hệ thống làm reportFileUrl/summaryFileUrl.
+  const [uploading, setUploading] = useState<"report" | "summary" | null>(null);
+  const [reportFileName, setReportFileName] = useState("");
+  const [summaryFileName, setSummaryFileName] = useState("");
+  const reportInputRef = useRef<HTMLInputElement>(null);
+  const summaryInputRef = useRef<HTMLInputElement>(null);
+
+  const uploadFile = async (file: File, kind: "report" | "summary") => {
+    setUploading(kind);
+    try {
+      const doc = await finalReportDocumentService.upload(contractId, file);
+      const url = doc.downloadUrl ?? "";
+      if (kind === "report") {
+        setReportFileUrl(url);
+        setReportFileName(doc.fileName);
+      } else {
+        setSummaryFileUrl(url);
+        setSummaryFileName(doc.fileName);
+      }
+      toast.success(t("contract.finalReport.uploaded"));
+    } catch {
+      toast.error(t("contract.finalReport.uploadFailed"));
+    } finally {
+      setUploading(null);
+    }
+  };
 
   useEffect(() => {
     if (report) {
@@ -110,27 +139,35 @@ export function FinalReportPanel({ contractId, canManage }: { contractId: string
             <p className="text-sm font-medium text-foreground">
               {needsRevision ? t("contract.finalReport.submitRevised") : t("contract.finalReport.submitTitle")}
             </p>
+            {/* Thầy 29/07: upload file PDF thay vì dán URL. Upload xong lấy downloadUrl của hệ
+                thống làm reportFileUrl → PI không phải tự đi host file ở đâu khác. */}
             <div>
-              <label htmlFor="final-report-url" className="mb-1.5 block text-sm font-medium text-foreground">
+              <label className="mb-1.5 block text-sm font-medium text-foreground">
                 {t("contract.finalReport.reportFile")} <span className="text-destructive">*</span>
               </label>
-              <Input
-                id="final-report-url"
-                placeholder="https://…"
-                value={reportFileUrl}
-                onChange={(e) => setReportFileUrl(e.target.value)}
-              />
+              <div className="flex flex-wrap items-center gap-2">
+                <Button type="button" variant="outline" size="sm" disabled={uploading !== null} onClick={() => reportInputRef.current?.click()}>
+                  {uploading === "report" ? <Loader2 className="animate-spin" /> : <Upload />}
+                  {t("reports.chooseFile")}
+                </Button>
+                {reportFileUrl && <span className="truncate text-xs text-muted-foreground">{reportFileName || reportFileUrl}</span>}
+              </div>
+              <input ref={reportInputRef} type="file" accept=".pdf,.doc,.docx" className="hidden"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadFile(f, "report"); e.target.value = ""; }} />
             </div>
             <div>
-              <label htmlFor="final-summary-url" className="mb-1.5 block text-sm font-medium text-foreground">
+              <label className="mb-1.5 block text-sm font-medium text-foreground">
                 {t("contract.finalReport.summaryFile")}
               </label>
-              <Input
-                id="final-summary-url"
-                placeholder="https://…"
-                value={summaryFileUrl}
-                onChange={(e) => setSummaryFileUrl(e.target.value)}
-              />
+              <div className="flex flex-wrap items-center gap-2">
+                <Button type="button" variant="outline" size="sm" disabled={uploading !== null} onClick={() => summaryInputRef.current?.click()}>
+                  {uploading === "summary" ? <Loader2 className="animate-spin" /> : <Upload />}
+                  {t("reports.chooseFile")}
+                </Button>
+                {summaryFileUrl && <span className="truncate text-xs text-muted-foreground">{summaryFileName || summaryFileUrl}</span>}
+              </div>
+              <input ref={summaryInputRef} type="file" accept=".pdf,.doc,.docx" className="hidden"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadFile(f, "summary"); e.target.value = ""; }} />
             </div>
             <div>
               <label className="mb-1.5 block text-sm font-medium text-foreground">{t("contract.finalReport.language")}</label>
