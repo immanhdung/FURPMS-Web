@@ -142,6 +142,7 @@ export function ProgressReportsPage() {
           open={Boolean(fillingReport)}
           onOpenChange={(open) => !open && setFillingReport(null)}
           contractId={contractId}
+          proposalId={contracts?.find((c) => c.id === contractId)?.proposalId ?? null}
           report={fillingReport}
         />
       )}

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
   useProgressReportDocumentsQuery,
+  useProposalActivitiesQuery,
   useSubmitProgressReportMutation,
   useUpdateProgressReportMutation,
   useUploadProgressReportDocMutation,
@@ -18,6 +19,8 @@ interface CreateProgressReportSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   contractId: string;
+  /** Để lấy danh sách hoạt động đã cam kết → bảng tiến độ theo hoạt động (BM06). */
+  proposalId?: string | null;
   /** Kỳ báo cáo (do Staff sinh sẵn theo QĐ543) mà PI đang điền — kỳ/thời gian đã cố định. */
   report: ProgressReport | null;
 }
@@ -27,7 +30,7 @@ interface CreateProgressReportSheetProps {
  * Kỳ báo cáo (thời gian) do Staff đặt — ở đây chỉ hiển thị, PI không tự đổi. Lưu nội dung (PUT) rồi
  * nộp (POST /submit) trong 1 thao tác.
  */
-export function CreateProgressReportSheet({ open, onOpenChange, contractId, report }: CreateProgressReportSheetProps) {
+export function CreateProgressReportSheet({ open, onOpenChange, contractId, proposalId, report }: CreateProgressReportSheetProps) {
   const { t } = useTranslation();
   const updateMutation = useUpdateProgressReportMutation(contractId);
   const submitMutation = useSubmitProgressReportMutation(contractId);
@@ -37,6 +40,11 @@ export function CreateProgressReportSheet({ open, onOpenChange, contractId, repo
   const { data: docs } = useProgressReportDocumentsQuery(report?.id ?? null);
   const uploadMutation = useUploadProgressReportDocMutation(report?.id ?? "");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // BM06 — bảng tiến độ theo từng hoạt động đã cam kết trong đề cương.
+  const { data: activities } = useProposalActivitiesQuery(proposalId ?? null);
+  const [itemRates, setItemRates] = useState<Record<number, string>>({});
+  const [itemNotes, setItemNotes] = useState<Record<number, string>>({});
 
   const [completedContent, setCompletedContent] = useState("");
   const [pendingContent, setPendingContent] = useState("");
@@ -67,6 +75,15 @@ export function CreateProgressReportSheet({ open, onOpenChange, contractId, repo
       expenditureToDate: expenditureToDate ? Number(expenditureToDate) : undefined,
       nextPeriodPlan: nextPeriodPlan || undefined,
       piRecommendations: piRecommendations || undefined,
+      // Bảng BM06: chỉ gửi hoạt động PI đã nhập % (bỏ dòng để trống).
+      items: (activities ?? [])
+        .filter((a) => itemRates[a.id] !== undefined && itemRates[a.id] !== "")
+        .map((a) => ({
+          activityId: a.id,
+          completionRate: Number(itemRates[a.id]),
+          completionStatus: Number(itemRates[a.id]) >= 100 ? "COMPLETED" : "IN_PROGRESS",
+          notes: itemNotes[a.id] || undefined,
+        })),
     };
     // Lưu nội dung trước, rồi nộp (khóa) — nộp xong không sửa được nữa.
     updateMutation.mutate(
@@ -132,6 +149,38 @@ export function CreateProgressReportSheet({ open, onOpenChange, contractId, repo
           </ul>
         )}
       </div>
+
+      {/* BM06 — bảng tiến độ THEO TỪNG HOẠT ĐỘNG đã cam kết (trước đây PI chỉ viết văn xuôi). */}
+      {activities && activities.length > 0 && (
+        <div className="rounded-lg border border-border p-3">
+          <p className="text-sm font-medium text-foreground">{t("reports.activityTable")}</p>
+          <p className="mt-0.5 mb-2 text-xs text-muted-foreground">{t("reports.activityTableHint")}</p>
+          <ul className="space-y-2">
+            {activities.map((a) => (
+              <li key={a.id} className="rounded-md border border-border/60 p-2">
+                <p className="text-xs font-medium text-foreground">{a.activityName}</p>
+                <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                  <Input
+                    type="number"
+                    min={0}
+                    max={100}
+                    className="w-20"
+                    placeholder="%"
+                    value={itemRates[a.id] ?? ""}
+                    onChange={(e) => setItemRates((p) => ({ ...p, [a.id]: e.target.value }))}
+                  />
+                  <Input
+                    className="min-w-0 flex-1"
+                    placeholder={t("reports.activityNote")}
+                    value={itemNotes[a.id] ?? ""}
+                    onChange={(e) => setItemNotes((p) => ({ ...p, [a.id]: e.target.value }))}
+                  />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div>
         <label className="mb-1.5 block text-sm font-medium text-foreground">{t("reports.completedWork")}</label>

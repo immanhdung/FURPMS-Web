@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import i18n from "@/i18n";
 import { progressReportService } from "@/services/api/progress-report.service";
 import { progressReportDocumentService } from "@/services/api/progress-report-document.service";
+import { researchContentService } from "@/services/api/research-content.service";
 import { queryKeys } from "@/services/queryKeys";
 import type { ApiError } from "@/types/common";
 import type {
@@ -111,5 +112,18 @@ export function useSubmitProgressReportMutation(contractId: string) {
       queryClient.invalidateQueries({ queryKey: queryKeys.progressReports.list(contractId) });
     },
     onError: (error: ApiError) => toast.error(error.message || "Unable to submit progress report."),
+  });
+}
+
+/**
+ * Hoạt động đã cam kết trong đề cương — nguồn cho BẢNG TIẾN ĐỘ THEO HOẠT ĐỘNG của BM06.
+ * PI báo % hoàn thành từng hoạt động thay vì chỉ viết văn xuôi.
+ */
+export function useProposalActivitiesQuery(proposalId: string | null) {
+  return useQuery({
+    queryKey: ["research-contents", proposalId ?? ""],
+    queryFn: () => researchContentService.listByProposal(proposalId as string),
+    enabled: Boolean(proposalId),
+    select: (contents) => contents.flatMap((c) => c.activities ?? []),
   });
 }

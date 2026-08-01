@@ -35,6 +35,14 @@ export interface CreateProgressReportPayload {
   expenditureToDate?: number;
   nextPeriodPlan?: string;
   piRecommendations?: string;
+  /** Bảng tiến độ theo từng hoạt động (BM06) — gửi lên là thay toàn bộ bảng cũ. */
+  items?: {
+    activityId: number;
+    completionRate: number;
+    completionStatus: string;
+    evidenceDescription?: string;
+    notes?: string;
+  }[];
 }
 
 export interface ScheduleProgressReportPayload {
