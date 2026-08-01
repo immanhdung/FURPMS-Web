@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import i18n from "@/i18n";
 import { progressReportService } from "@/services/api/progress-report.service";
 import { progressReportDocumentService } from "@/services/api/progress-report-document.service";
 import { queryKeys } from "@/services/queryKeys";
@@ -44,10 +45,10 @@ export function useUploadProgressReportDocMutation(reportId: string) {
   return useMutation({
     mutationFn: (file: File) => progressReportDocumentService.upload(reportId, file),
     onSuccess: () => {
-      toast.success("Đã tải file báo cáo lên.");
+      toast.success(i18n.t("toast.reportFileUploaded"));
       queryClient.invalidateQueries({ queryKey: queryKeys.progressReports.documents(reportId) });
     },
-    onError: (error: ApiError) => toast.error(error.message || "Không tải được file lên."),
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.uploadFailed")),
   });
 }
 
@@ -56,10 +57,10 @@ export function useGenerateProgressRoundsMutation(contractId: string) {
   return useMutation({
     mutationFn: (roundCount?: number) => progressReportService.generate(contractId, roundCount),
     onSuccess: () => {
-      toast.success("Đã tạo các kỳ báo cáo định kỳ.");
+      toast.success(i18n.t("toast.roundsGenerated"));
       queryClient.invalidateQueries({ queryKey: queryKeys.progressReports.list(contractId) });
     },
-    onError: (error: ApiError) => toast.error(error.message || "Không tạo được kỳ báo cáo."),
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.roundsGenerateFailed")),
   });
 }
 
@@ -71,7 +72,7 @@ export function useUpdateProgressReportMutation(contractId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.progressReports.list(contractId) });
     },
-    onError: (error: ApiError) => toast.error(error.message || "Không lưu được báo cáo."),
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.reportSaveFailed")),
   });
 }
 

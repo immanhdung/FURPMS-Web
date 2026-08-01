@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import i18n from "@/i18n";
 import { deliverableService } from "@/services/api/deliverable.service";
 import { queryKeys } from "@/services/queryKeys";
 import type { ApiError } from "@/types/common";
@@ -19,10 +20,10 @@ export function useCreateDeliverableMutation(contractId: string) {
     mutationFn: (payload: { productName: string; dueDate?: string; description?: string }) =>
       deliverableService.create(contractId, payload),
     onSuccess: () => {
-      toast.success("Đã thêm sản phẩm.");
+      toast.success(i18n.t("toast.deliverableAdded"));
       queryClient.invalidateQueries({ queryKey: queryKeys.deliverables.list(contractId) });
     },
-    onError: (error: ApiError) => toast.error(error.message || "Không thêm được sản phẩm."),
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.deliverableAddFailed")),
   });
 }
 

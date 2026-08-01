@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import i18n from "@/i18n";
 import { trackService } from "@/services/api/track.service";
 import { queryKeys } from "@/services/queryKeys";
 import type { ApiError } from "@/types/common";
@@ -62,10 +63,10 @@ export function useAttachTrackToCycleMutation(cycleId: number) {
   return useMutation({
     mutationFn: (trackId: number) => trackService.attachToCycle(cycleId, trackId),
     onSuccess: () => {
-      toast.success("Đã gắn lĩnh vực vào đợt.");
+      toast.success(i18n.t("toast.trackAttached"));
       queryClient.invalidateQueries({ queryKey: queryKeys.tracks.byCycle(cycleId) });
     },
-    onError: (error: ApiError) => toast.error(error.message || "Không gắn được lĩnh vực."),
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.trackAttachFailed")),
   });
 }
 
@@ -74,10 +75,10 @@ export function useDetachTrackFromCycleMutation(cycleId: number) {
   return useMutation({
     mutationFn: (trackId: number) => trackService.detachFromCycle(cycleId, trackId),
     onSuccess: () => {
-      toast.success("Đã gỡ lĩnh vực khỏi đợt.");
+      toast.success(i18n.t("toast.trackDetached"));
       queryClient.invalidateQueries({ queryKey: queryKeys.tracks.byCycle(cycleId) });
     },
-    onError: (error: ApiError) => toast.error(error.message || "Không gỡ được lĩnh vực."),
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.trackDetachFailed")),
   });
 }
 

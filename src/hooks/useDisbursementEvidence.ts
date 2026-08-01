@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import i18n from "@/i18n";
 import { disbursementEvidenceService } from "@/services/api/disbursement-evidence.service";
 import type { ApiError } from "@/types/common";
 
@@ -17,10 +18,10 @@ export function useUploadDisbursementEvidenceMutation(disbursementId: number) {
   return useMutation({
     mutationFn: (file: File) => disbursementEvidenceService.upload(disbursementId, file),
     onSuccess: () => {
-      toast.success("Đã lưu minh chứng.");
+      toast.success(i18n.t("toast.evidenceSaved"));
       queryClient.invalidateQueries({ queryKey: key(disbursementId) });
     },
-    onError: (error: ApiError) => toast.error(error.message || "Không tải được minh chứng."),
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.uploadFailed")),
   });
 }
 

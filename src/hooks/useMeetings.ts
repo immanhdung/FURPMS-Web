@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import i18n from "@/i18n";
 import { meetingService } from "@/services/api/meeting.service";
 import { googleMeetService } from "@/services/api/google-meet.service";
 import { queryKeys } from "@/services/queryKeys";
@@ -46,10 +47,10 @@ export function useSaveAttendanceMutation(meetingId: string) {
   return useMutation({
     mutationFn: (entries: AttendanceEntry[]) => meetingService.saveAttendance(meetingId, entries),
     onSuccess: () => {
-      toast.success("Đã lưu điểm danh.");
+      toast.success(i18n.t("toast.attendanceSaved"));
       queryClient.invalidateQueries({ queryKey: attendanceKey(meetingId) });
     },
-    onError: (error: ApiError) => toast.error(error.message || "Không lưu được điểm danh."),
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.attendanceFailed")),
   });
 }
 

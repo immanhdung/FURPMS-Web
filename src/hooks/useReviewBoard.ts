@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import i18n from "@/i18n";
 import { reviewBoardService } from "@/services/api/review-board.service";
 import { reviewRoundService } from "@/services/api/review-round.service";
 import { queryKeys } from "@/services/queryKeys";
@@ -27,10 +28,10 @@ export function useCreateTrackRoundMutation(cycleId?: number, trackId?: number) 
     mutationFn: (payload: CreateTrackRoundPayload) =>
       reviewBoardService.createRound(cycleId as number, trackId as number, payload),
     onSuccess: () => {
-      toast.success("Đã tạo vòng chấm.");
+      toast.success(i18n.t("toast.roundCreated"));
       invalidate();
     },
-    onError: (error: ApiError) => toast.error(error.message || "Không tạo được vòng chấm."),
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.roundCreateFailed")),
   });
 }
 
@@ -39,10 +40,10 @@ export function useOpenBoardRoundMutation(cycleId?: number, trackId?: number) {
   return useMutation({
     mutationFn: (roundId: string) => reviewRoundService.open(roundId),
     onSuccess: () => {
-      toast.success("Đã mở vòng.");
+      toast.success(i18n.t("toast.roundOpened"));
       invalidate();
     },
-    onError: (error: ApiError) => toast.error(error.message || "Không mở được vòng."),
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.roundOpenFailed")),
   });
 }
 
@@ -51,10 +52,10 @@ export function useDeleteRoundMutation(cycleId?: number, trackId?: number) {
   return useMutation({
     mutationFn: (roundId: string) => reviewBoardService.deleteRound(roundId),
     onSuccess: () => {
-      toast.success("Đã xóa vòng.");
+      toast.success(i18n.t("toast.roundDeleted"));
       invalidate();
     },
-    onError: (error: ApiError) => toast.error(error.message || "Không xóa được vòng."),
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.roundDeleteFailed")),
   });
 }
 
@@ -64,10 +65,10 @@ export function useAddProjectToRoundMutation(cycleId?: number, trackId?: number)
     mutationFn: ({ roundId, projectId }: { roundId: string; projectId: string }) =>
       reviewBoardService.addProject(roundId, projectId),
     onSuccess: () => {
-      toast.success("Đã thêm đề tài vào vòng.");
+      toast.success(i18n.t("toast.projectAddedToRound"));
       invalidate();
     },
-    onError: (error: ApiError) => toast.error(error.message || "Không thêm được đề tài."),
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.projectAddFailed")),
   });
 }
 
@@ -77,10 +78,10 @@ export function useRemoveProjectFromRoundMutation(cycleId?: number, trackId?: nu
     mutationFn: ({ roundId, projectId }: { roundId: string; projectId: string }) =>
       reviewBoardService.removeProject(roundId, projectId),
     onSuccess: () => {
-      toast.success("Đã gỡ đề tài khỏi vòng.");
+      toast.success(i18n.t("toast.projectRemovedFromRound"));
       invalidate();
     },
-    onError: (error: ApiError) => toast.error(error.message || "Không gỡ được đề tài."),
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.projectRemoveFailed")),
   });
 }
 
@@ -90,10 +91,10 @@ export function useCreateCouncilPackageMutation(cycleId?: number, trackId?: numb
     mutationFn: ({ roundId, payload }: { roundId: string; payload: CreateCouncilPackagePayload }) =>
       reviewBoardService.createCouncilPackage(roundId, payload),
     onSuccess: () => {
-      toast.success("Đã tạo hội đồng.");
+      toast.success(i18n.t("toast.councilCreated"));
       invalidate();
     },
-    onError: (error: ApiError) => toast.error(error.message || "Không tạo được hội đồng."),
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.councilCreateFailed")),
   });
 }
 
@@ -102,10 +103,10 @@ export function useDeleteCouncilMutation(cycleId?: number, trackId?: number) {
   return useMutation({
     mutationFn: (councilId: string) => reviewBoardService.deleteCouncil(councilId),
     onSuccess: () => {
-      toast.success("Đã xóa hội đồng.");
+      toast.success(i18n.t("toast.councilDeleted"));
       invalidate();
     },
-    onError: (error: ApiError) => toast.error(error.message || "Không xóa được hội đồng."),
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.councilDeleteFailed")),
   });
 }
 
@@ -115,10 +116,10 @@ export function useAssignProjectToCouncilMutation(cycleId?: number, trackId?: nu
     mutationFn: ({ councilId, projectId }: { councilId: string; projectId: string }) =>
       reviewBoardService.assignProjectToCouncil(councilId, projectId),
     onSuccess: () => {
-      toast.success("Đã gán đề tài vào hội đồng.");
+      toast.success(i18n.t("toast.projectAssigned"));
       invalidate();
     },
-    onError: (error: ApiError) => toast.error(error.message || "Không gán được đề tài."),
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.projectAssignFailed")),
   });
 }
 
@@ -128,9 +129,9 @@ export function useRemoveProjectFromCouncilMutation(cycleId?: number, trackId?: 
     mutationFn: ({ councilId, projectId }: { councilId: string; projectId: string }) =>
       reviewBoardService.removeProjectFromCouncil(councilId, projectId),
     onSuccess: () => {
-      toast.success("Đã gỡ đề tài khỏi hội đồng.");
+      toast.success(i18n.t("toast.projectUnassigned"));
       invalidate();
     },
-    onError: (error: ApiError) => toast.error(error.message || "Không gỡ được đề tài."),
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.projectRemoveFailed")),
   });
 }

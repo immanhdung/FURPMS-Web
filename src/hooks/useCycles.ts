@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import i18n from "@/i18n";
 import { cycleService } from "@/services/api/cycle.service";
 import { queryKeys } from "@/services/queryKeys";
 import type { ApiError } from "@/types/common";
@@ -81,9 +82,9 @@ export function useExtendDeadlineMutation(cycleId: number) {
   return useMutation({
     mutationFn: (payload: ExtendDeadlinePayload) => cycleService.extendDeadline(cycleId, payload),
     onSuccess: () => {
-      toast.success("Đã gia hạn deadline đợt.");
+      toast.success(i18n.t("toast.deadlineExtended"));
       queryClient.invalidateQueries({ queryKey: queryKeys.cycles.detail(String(cycleId)) });
     },
-    onError: (error: ApiError) => toast.error(error.message || "Không gia hạn được."),
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.extendFailed")),
   });
 }

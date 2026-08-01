@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import i18n from "@/i18n";
 import { contractDocumentService } from "@/services/api/contract-document.service";
 import type { ApiError } from "@/types/common";
 
@@ -18,10 +19,10 @@ export function useUploadContractDocMutation(contractId: string) {
   return useMutation({
     mutationFn: (file: File) => contractDocumentService.upload(contractId, file),
     onSuccess: () => {
-      toast.success("Đã lưu bản hợp đồng đã ký.");
+      toast.success(i18n.t("toast.contractDocSaved"));
       queryClient.invalidateQueries({ queryKey: key(contractId) });
     },
-    onError: (error: ApiError) => toast.error(error.message || "Không tải được file."),
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.uploadFailed")),
   });
 }
 

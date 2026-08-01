@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import i18n from "@/i18n";
 import { councilMemberService } from "@/services/api/council-member.service";
 import { queryKeys } from "@/services/queryKeys";
 import type { ApiError } from "@/types/common";
@@ -43,10 +44,10 @@ export function useConfirmOnBehalfMutation(councilId: string) {
   return useMutation({
     mutationFn: (memberId: string) => councilMemberService.confirmOnBehalf(memberId),
     onSuccess: () => {
-      toast.success("Đã xác nhận thay thành viên.");
+      toast.success(i18n.t("toast.memberConfirmedOnBehalf"));
       queryClient.invalidateQueries({ queryKey: queryKeys.councilMembers.list(councilId) });
     },
-    onError: (error: ApiError) => toast.error(error.message || "Không thể xác nhận thay."),
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.confirmOnBehalfFailed")),
   });
 }
 

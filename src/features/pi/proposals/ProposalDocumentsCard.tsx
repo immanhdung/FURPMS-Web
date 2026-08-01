@@ -46,11 +46,11 @@ export function ProposalDocumentsCard({ proposalId, editable }: { proposalId: st
 
     const ext = file.name.includes(".") ? file.name.slice(file.name.lastIndexOf(".")).toLowerCase() : "";
     if (allowed.length > 0 && !allowed.includes(ext)) {
-      setLocalError(`Định dạng ${ext || "này"} không được phép. Chỉ nhận: ${allowed.join(", ")}.`);
+      setLocalError(t("common.unsupportedType", { accept: allowed.join(", ") }));
       return;
     }
     if (file.size > maxMb * 1024 * 1024) {
-      setLocalError(`File ${formatSize(file.size)} vượt giới hạn ${maxMb} MB.`);
+      setLocalError(t("common.fileTooLarge", { max: maxMb }));
       return;
     }
 
