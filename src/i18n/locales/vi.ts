@@ -1,6 +1,21 @@
 // Bản dịch tiếng Việt. Cấu trúc key theo nhóm chức năng để dễ tra.
 // Quy ước: dùng key mô tả (nav.dashboard) chứ không dùng nguyên câu tiếng Anh làm key.
 export const vi = {
+  rubricSet: {
+    title: "Bộ tiêu chí chấm",
+    allCriteria: "Tất cả tiêu chí",
+    none: "Chưa có bộ tiêu chí nào",
+    noneDesc: "Tạo tiêu chí trước, hệ thống sẽ gom theo bộ.",
+    criteriaCount: "{{n}} tiêu chí",
+    scopeCount: "{{n}} phạm vi",
+    duplicate: "Sao chép",
+    configure: "Cấu hình",
+    appliesTo: "Áp dụng cho loại:",
+    basic: "Cơ bản",
+    applied: "Ứng dụng",
+    scopeHint: "Tick lĩnh vực trong từng đợt để bộ này khả dụng ở đó. Mỗi lĩnh vực (cùng loại vòng) chỉ dùng 1 bộ.",
+    noEligibleCycle: "Chưa có đợt nào khớp loại đề tài đã tick ở trên.",
+  },
   // Thông báo toast (dùng qua i18n.t trong hooks — trước đây hardcode nên bật EN vẫn ra tiếng Việt).
   toast: {
     attendanceSaved: "Đã lưu điểm danh.",
@@ -41,6 +56,12 @@ export const vi = {
     trackAttachFailed: "Không gắn được lĩnh vực.",
     trackDetached: "Đã gỡ lĩnh vực khỏi đợt.",
     trackDetachFailed: "Không gỡ được lĩnh vực.",
+    rubricSaved: "Đã lưu bộ tiêu chí.",
+    rubricSaveFailed: "Không lưu được bộ tiêu chí.",
+    rubricScopesSaved: "Đã lưu phạm vi áp dụng.",
+    rubricScopesFailed: "Không lưu được phạm vi.",
+    rubricDuplicated: "Đã sao chép bộ tiêu chí.",
+    rubricDuplicateFailed: "Không sao chép được.",
   },
   common: {
     save: "Lưu",

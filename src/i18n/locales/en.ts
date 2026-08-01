@@ -1,5 +1,20 @@
 // English translations. Keys must stay in sync with vi.ts.
 export const en = {
+  rubricSet: {
+    title: "Scoring criteria sets",
+    allCriteria: "All criteria",
+    none: "No criteria set yet",
+    noneDesc: "Create criteria first; the system groups them into sets.",
+    criteriaCount: "{{n}} criteria",
+    scopeCount: "{{n}} scopes",
+    duplicate: "Duplicate",
+    configure: "Configure",
+    appliesTo: "Applies to:",
+    basic: "Basic",
+    applied: "Applied",
+    scopeHint: "Tick the fields in each cycle where this set applies. Each field (per round type) uses only one set.",
+    noEligibleCycle: "No cycle matches the research types ticked above.",
+  },
   // Toast messages (called via i18n.t inside hooks).
   toast: {
     attendanceSaved: "Attendance saved.",
@@ -40,6 +55,12 @@ export const en = {
     trackAttachFailed: "Could not attach the field.",
     trackDetached: "Field detached from the cycle.",
     trackDetachFailed: "Could not detach the field.",
+    rubricSaved: "Criteria set saved.",
+    rubricSaveFailed: "Could not save the criteria set.",
+    rubricScopesSaved: "Scope saved.",
+    rubricScopesFailed: "Could not save the scope.",
+    rubricDuplicated: "Criteria set duplicated.",
+    rubricDuplicateFailed: "Could not duplicate the set.",
   },
   common: {
     save: "Save",

@@ -8,6 +8,7 @@ import { ErrorState } from "@/components/shared/ErrorState";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { useDeleteRubricCriterionMutation, useRubricCriteriaQuery } from "@/hooks/useRubricCriteria";
 import { getRubricCriterionColumns } from "@/features/admin/rubric-criteria/columns";
+import { RubricTemplatesPanel } from "@/features/admin/rubric-criteria/RubricTemplatesPanel";
 import { RubricCriterionFormSheet } from "@/features/admin/rubric-criteria/RubricCriterionFormSheet";
 import type { RubricCriterion } from "@/types/rubric-criterion";
 
@@ -60,6 +61,16 @@ export function RubricCriteriaPage() {
           {t("rubricCriteria.newBtn")}
         </Button>
       </motion.div>
+
+      {/* Bộ tiêu chí: gắn loại đề tài + (đợt, lĩnh vực) — thầy 29/07 muốn tiêu chí chia theo group. */}
+      <div>
+        <h2 className="mb-2 text-sm font-semibold text-foreground">{t("rubricSet.title")}</h2>
+        <RubricTemplatesPanel />
+      </div>
+
+      <div>
+        <h2 className="mb-2 text-sm font-semibold text-foreground">{t("rubricSet.allCriteria")}</h2>
+      </div>
 
       {isError ? (
         <ErrorState onRetry={() => refetch()} isRetrying={isRefetching} />

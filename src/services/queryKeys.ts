@@ -88,6 +88,9 @@ export const queryKeys = {
   rubricTemplates: {
     all: () => ["rubric-templates"] as const,
     list: () => ["rubric-templates", "list"] as const,
+    full: () => ["rubric-templates", "full"] as const,
+    resolved: (cycleId: number, trackId: number, templateType: string) =>
+      ["rubric-templates", "resolved", cycleId, trackId, templateType] as const,
   },
   scores: {
     my: (councilId: string) => ["scores", "my", councilId] as const,
