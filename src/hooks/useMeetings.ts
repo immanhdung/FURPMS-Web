@@ -14,6 +14,14 @@ export function useMeetingsQuery() {
   });
 }
 
+/** Lịch họp hội đồng chấm đề tài của tôi (PI). */
+export function useMyMeetingsQuery() {
+  return useQuery({
+    queryKey: queryKeys.meetings.mine(),
+    queryFn: meetingService.mine,
+  });
+}
+
 export function useCouncilMeetingsQuery(councilId: string | null) {
   return useQuery({
     queryKey: queryKeys.meetings.byCouncil(councilId ?? ""),

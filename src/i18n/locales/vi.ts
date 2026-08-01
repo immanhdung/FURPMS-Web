@@ -162,12 +162,17 @@ export const vi = {
     submitProposal: "Nộp đề cương",
     progressReports: "Báo cáo tiến độ",
     deliverables: "Sản phẩm",
+    myMeetings: "Lịch họp của tôi",
     finalReports: "Báo cáo tổng kết",
     aiSearch: "Tìm kiếm AI",
     invitations: "Lời mời",
     assignedReviews: "Đề tài được phân công",
     councilMemberships: "Thành viên hội đồng",
     scoring: "Chấm điểm",
+  },
+  piMeetings: {
+    title: "Lịch họp của tôi",
+    subtitle: "Buổi họp hội đồng chấm đề tài của bạn — bạn sẽ trình bày trước hội đồng.",
   },
   deliverablesPage: {
     title: "Sản phẩm",

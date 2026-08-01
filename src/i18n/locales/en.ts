@@ -161,12 +161,17 @@ export const en = {
     submitProposal: "Submit Proposal",
     progressReports: "Progress Reports",
     deliverables: "Deliverables",
+    myMeetings: "My meetings",
     finalReports: "Final Reports",
     aiSearch: "AI Search",
     invitations: "Invitations",
     assignedReviews: "Assigned Reviews",
     councilMemberships: "Council Memberships",
     scoring: "Scoring",
+  },
+  piMeetings: {
+    title: "My meetings",
+    subtitle: "Council meetings for your projects — you will present before the council.",
   },
   deliverablesPage: {
     title: "Deliverables",

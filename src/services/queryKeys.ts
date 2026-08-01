@@ -36,6 +36,7 @@ export const queryKeys = {
     all: () => ["meetings"] as const,
     list: () => ["meetings", "list"] as const,
     byCouncil: (councilId: string) => ["meetings", "council", councilId] as const,
+    mine: () => ["meetings", "mine"] as const,
   },
   tracks: {
     all: () => ["tracks"] as const,

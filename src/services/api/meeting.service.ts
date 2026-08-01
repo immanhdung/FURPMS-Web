@@ -5,6 +5,9 @@ import type { AttendanceEntry, Meeting, ScheduleConflict, ScheduleMeetingPayload
 export const meetingService = {
   list: () => axiosClient.get<ApiResponse<Meeting[]>>("/meetings").then((res) => res.data.data),
 
+  /** Lịch họp hội đồng chấm đề tài CỦA TÔI (PI) — PI phải trình bày trước hội đồng. */
+  mine: () => axiosClient.get<ApiResponse<Meeting[]>>("/meetings/my").then((res) => res.data.data),
+
   create: (councilId: string, payload: ScheduleMeetingPayload) =>
     axiosClient
       .post<ApiResponse<Meeting>>(`/councils/${councilId}/meetings`, payload)

@@ -61,6 +61,7 @@ export const NAV_ITEMS: NavItem[] = [
   { labelKey: "nav.submitProposal", path: ROUTES.SUBMIT_PROPOSAL, icon: FilePlus2, roles: [ROLES.FACULTY] },
   { labelKey: "nav.progressReports", path: ROUTES.PROGRESS_REPORTS, icon: FileBarChart, roles: [ROLES.FACULTY] },
   { labelKey: "nav.deliverables", path: ROUTES.DELIVERABLES, icon: Package, roles: [ROLES.FACULTY] },
+  { labelKey: "nav.myMeetings", path: ROUTES.MY_MEETINGS, icon: CalendarClock, roles: [ROLES.FACULTY] },
   { labelKey: "nav.finalReports", path: ROUTES.FINAL_REPORTS, icon: FileCheck2, roles: [ROLES.FACULTY] },
   { labelKey: "nav.aiSearch", path: ROUTES.AI_SEARCH, icon: Sparkles, roles: [ROLES.FACULTY] },
 
