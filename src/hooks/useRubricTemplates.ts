@@ -22,6 +22,15 @@ export function useResolvedRubricQuery(cycleId?: number, trackId?: number, templ
   });
 }
 
+/** Bộ áp dụng cho 1 hội đồng — form chấm điểm dùng cái này (BE tự suy đợt+lĩnh vực+loại vòng). */
+export function useRubricForCouncilQuery(councilId: string | null) {
+  return useQuery({
+    queryKey: queryKeys.rubricTemplates.forCouncil(councilId ?? ""),
+    queryFn: () => rubricTemplateService.forCouncil(councilId as string),
+    enabled: Boolean(councilId),
+  });
+}
+
 function useInvalidateTemplates() {
   const queryClient = useQueryClient();
   return () => queryClient.invalidateQueries({ queryKey: queryKeys.rubricTemplates.all() });

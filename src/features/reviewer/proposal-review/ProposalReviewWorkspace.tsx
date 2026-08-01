@@ -123,7 +123,7 @@ export function ProposalReviewWorkspace() {
             {!isSecretary && (
               <TabsContent value="scoring">
                 {isRoundOpen ? (
-                  <RubricScoringForm councilId={councilId} roundType={membership.roundType ?? REVIEW_ROUND_TYPE.REVIEW} />
+                  <RubricScoringForm councilId={councilId} />
                 ) : (
                   <EmptyState
                     icon={Lock}

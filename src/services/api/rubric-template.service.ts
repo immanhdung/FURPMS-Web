@@ -18,6 +18,15 @@ export const rubricTemplateService = {
       })
       .then((res) => res.data.data),
 
+  /**
+   * Bộ áp dụng cho 1 hội đồng — reviewer chấm chỉ có councilId, BE tự suy
+   * (đợt, lĩnh vực, loại vòng) từ hội đồng đó. Không có bộ riêng → bộ mặc định.
+   */
+  forCouncil: (councilId: string) =>
+    axiosClient
+      .get<ApiResponse<RubricTemplateFull | null>>(`/rubric-templates/for-council/${councilId}`)
+      .then((res) => res.data.data),
+
   update: (id: number, payload: UpdateTemplatePayload) =>
     axiosClient.patch<ApiResponse<null>>(`/rubric-templates/${id}`, payload).then((res) => res.data),
 

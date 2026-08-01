@@ -9,30 +9,30 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
-import { useMyScoreQuery, useRubricTemplatesQuery, useSubmitScoreMutation } from "@/hooks/useReviewScoring";
+import { useMyScoreQuery, useSubmitScoreMutation } from "@/hooks/useReviewScoring";
+import { useRubricForCouncilQuery } from "@/hooks/useRubricTemplates";
 import { ROUTES } from "@/constants/routes";
 import type { ScoreDetailPayload } from "@/types/review-scoring";
 
 interface RubricScoringFormProps {
   councilId: string;
-  roundType: string;
+  // roundType đã bỏ: BE tự suy loại vòng từ councilId khi trả bộ tiêu chí.
 }
 
-export function RubricScoringForm({ councilId, roundType }: RubricScoringFormProps) {
+export function RubricScoringForm({ councilId }: RubricScoringFormProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { data: templates, isLoading: isTemplatesLoading } = useRubricTemplatesQuery();
+  // Lấy ĐÚNG bộ tiêu chí cho hội đồng này: BE tự suy (đợt + lĩnh vực + loại vòng) từ councilId
+  // rồi trả bộ đã gắn cho lĩnh vực đó; chưa gắn thì trả bộ mặc định (không bao giờ kẹt).
+  const { data: resolvedTemplate, isLoading: isTemplatesLoading } = useRubricForCouncilQuery(councilId);
   const { data: existingScore, isLoading: isScoreLoading } = useMyScoreQuery(councilId);
   const submitMutation = useSubmitScoreMutation(councilId);
 
   /**
-   * Confirmed live: `templateType` (not `roundType`, which doesn't exist on this response) uses
-   * this app's exact casing ("REVIEW", "PROGRESS_CHECK") — no name conversion needed. The list
-   * endpoint already returns each template's full `criteria` array, which is the sole source of
-   * truth for what the backend requires — don't cross-reference the standalone /rubric-criteria
-   * list or fall back to "all active criteria"; both produced wrong submissions in live testing.
+   * `criteria` trong bộ trả về là NGUỒN DUY NHẤT cho những gì BE yêu cầu — đừng đối chiếu với
+   * danh sách /rubric-criteria hay fallback "mọi tiêu chí đang bật"; cả hai từng gây nộp sai.
    */
-  const matchingTemplate = templates?.find((t) => t.templateType?.toUpperCase() === roundType?.toUpperCase());
+  const matchingTemplate = resolvedTemplate ?? null;
   const activeCriteria = useMemo(() => matchingTemplate?.criteria ?? [], [matchingTemplate]);
 
   const [scores, setScores] = useState<Record<number, { givenScore: number; comments: string }>>({});
