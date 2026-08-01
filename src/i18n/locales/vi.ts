@@ -453,7 +453,14 @@ export const vi = {
     noRounds: "Chưa có vòng chấm",
     noRoundsDesc: "Bấm \"Tạo vòng\" để mở vòng chấm cho lĩnh vực này.",
     dim: { SCIENCE: "Khoa học", FINANCE: "Tài chính" },
-    type: { SCREENING: "Sơ loại", REVIEW: "Xét duyệt đề cương", ACCEPTANCE: "Nghiệm thu" },
+    // Nhãn LOẠI VÒNG — đổi tên hiển thị ngay tại đây (không đụng code). Mã bên trái là CỐ ĐỊNH:
+    // hệ thống dựa vào ACCEPTANCE để chuyển đề tài sang COMPLETED, đổi mã sẽ vỡ vòng đời.
+    type: {
+      SCREENING: "Sơ loại",
+      REVIEW: "Xét duyệt đề cương",
+      PROGRESS_CHECK: "Kiểm tra tiến độ",
+      ACCEPTANCE: "Nghiệm thu",
+    },
     addProject: "Thêm đề tài",
     addProjectTitle: "Thêm đề tài vào vòng",
     addProjectDesc: "Chọn đề tài của lĩnh vực để đưa vào vòng chấm này.",

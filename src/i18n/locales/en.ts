@@ -450,7 +450,14 @@ export const en = {
     noRounds: "No review rounds",
     noRoundsDesc: "Click \"New round\" to open a review round for this field.",
     dim: { SCIENCE: "Science", FINANCE: "Finance" },
-    type: { SCREENING: "Screening", REVIEW: "Proposal review", ACCEPTANCE: "Acceptance" },
+    // Round-type labels — rename here (no code change). Codes on the left are FIXED: the system
+    // keys off ACCEPTANCE to move a project to COMPLETED, so changing a code breaks the lifecycle.
+    type: {
+      SCREENING: "Screening",
+      REVIEW: "Proposal review",
+      PROGRESS_CHECK: "Progress check",
+      ACCEPTANCE: "Acceptance",
+    },
     addProject: "Add proposal",
     addProjectTitle: "Add proposal to round",
     addProjectDesc: "Pick a proposal of this field to include in this round.",
