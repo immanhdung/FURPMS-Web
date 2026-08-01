@@ -16,6 +16,7 @@ import { useReviewBoardQuery } from "@/hooks/useReviewBoard";
 import { RoundCouncilsPanel } from "@/features/staff/review-board/RoundCouncilsPanel";
 import { RoundProposalsPanel } from "@/features/staff/review-board/RoundProposalsPanel";
 import { CreateRoundSheet } from "@/features/staff/review-board/CreateRoundSheet";
+import { RoundRubricPicker } from "@/features/staff/review-board/RoundRubricPicker";
 
 export function ReviewBoardPage() {
   const { t } = useTranslation();
@@ -150,6 +151,10 @@ export function ReviewBoardPage() {
                   {t(`reviewBoard.dim.${selectedRound.dimension}`)} · {t(`reviewBoard.type.${selectedRound.roundType}`)}
                 </span>
                 {selectedRound.status && <StatusBadge status={selectedRound.status} />}
+                {/* Bộ tiêu chí riêng cho vòng này — để trống thì dùng bộ theo (đợt + lĩnh vực). */}
+                <div className="ml-auto">
+                  <RoundRubricPicker round={selectedRound} cycleId={cycleId as number} trackId={trackId as number} />
+                </div>
               </div>
 
               <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">

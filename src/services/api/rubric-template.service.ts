@@ -33,6 +33,12 @@ export const rubricTemplateService = {
   saveScopes: (id: number, payload: SaveScopesPayload) =>
     axiosClient.put<ApiResponse<null>>(`/rubric-templates/${id}/scopes`, payload).then((res) => res.data),
 
+  /** Gắn/gỡ bộ RIÊNG cho 1 vòng chấm. null = bỏ gắn, dùng bộ theo (đợt + lĩnh vực). */
+  setRoundTemplate: (roundId: string, templateId: number | null) =>
+    axiosClient
+      .patch<ApiResponse<null>>(`/rubric-templates/rounds/${roundId}`, { templateId })
+      .then((res) => res.data),
+
   duplicate: (id: number) =>
     axiosClient
       .post<ApiResponse<RubricTemplateFull>>(`/rubric-templates/${id}/duplicate`)

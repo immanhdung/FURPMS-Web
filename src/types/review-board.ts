@@ -29,6 +29,8 @@ export interface ReviewBoardRound {
   roundType: string;
   status: string;
   result?: string | null;
+  /** Bộ tiêu chí gắn RIÊNG cho vòng này; null = dùng bộ theo (đợt + lĩnh vực). */
+  rubricTemplateId?: number | null;
   canDelete: boolean;
   projects: ReviewBoardProjectRound[];
   councils: ReviewBoardCouncil[];

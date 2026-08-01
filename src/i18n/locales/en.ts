@@ -8,12 +8,14 @@ export const en = {
     criteriaCount: "{{n}} criteria",
     scopeCount: "{{n}} scopes",
     duplicate: "Duplicate",
-    configure: "Configure",
+    configure: "Set as default for",
     appliesTo: "Applies to:",
     basic: "Basic",
     applied: "Applied",
-    scopeHint: "Tick the fields in each cycle where this set applies. Each field (per round type) uses only one set.",
+    scopeHint: "Pick the fields where this set is the DEFAULT. Each field has one default (per round type) — individual rounds can still pick a different set.",
     noEligibleCycle: "No cycle matches the research types ticked above.",
+    forThisRound: "Set for this round:",
+    inherit: "By cycle & field (default)",
   },
   // Toast messages (called via i18n.t inside hooks).
   toast: {
@@ -61,6 +63,8 @@ export const en = {
     rubricScopesFailed: "Could not save the scope.",
     rubricDuplicated: "Criteria set duplicated.",
     rubricDuplicateFailed: "Could not duplicate the set.",
+    roundRubricSaved: "Round criteria set saved.",
+    roundRubricFailed: "Could not save the set for this round.",
   },
   common: {
     save: "Save",

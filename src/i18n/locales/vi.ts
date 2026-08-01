@@ -9,12 +9,14 @@ export const vi = {
     criteriaCount: "{{n}} tiêu chí",
     scopeCount: "{{n}} phạm vi",
     duplicate: "Sao chép",
-    configure: "Cấu hình",
+    configure: "Đặt làm mặc định cho",
     appliesTo: "Áp dụng cho loại:",
     basic: "Cơ bản",
     applied: "Ứng dụng",
-    scopeHint: "Tick lĩnh vực trong từng đợt để bộ này khả dụng ở đó. Mỗi lĩnh vực (cùng loại vòng) chỉ dùng 1 bộ.",
+    scopeHint: "Chọn lĩnh vực mà bộ này làm MẶC ĐỊNH. Mỗi lĩnh vực chỉ có 1 bộ mặc định (cùng loại vòng) — nhưng từng vòng vẫn chọn bộ khác được ở màn Hội đồng & Chấm.",
     noEligibleCycle: "Chưa có đợt nào khớp loại đề tài đã tick ở trên.",
+    forThisRound: "Bộ cho vòng này:",
+    inherit: "Theo đợt & lĩnh vực (mặc định)",
   },
   // Thông báo toast (dùng qua i18n.t trong hooks — trước đây hardcode nên bật EN vẫn ra tiếng Việt).
   toast: {
@@ -62,6 +64,8 @@ export const vi = {
     rubricScopesFailed: "Không lưu được phạm vi.",
     rubricDuplicated: "Đã sao chép bộ tiêu chí.",
     rubricDuplicateFailed: "Không sao chép được.",
+    roundRubricSaved: "Đã lưu bộ tiêu chí cho vòng.",
+    roundRubricFailed: "Không lưu được bộ cho vòng.",
   },
   common: {
     save: "Lưu",

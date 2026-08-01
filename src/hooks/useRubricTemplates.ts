@@ -63,6 +63,21 @@ export function useSaveRubricScopesMutation() {
   });
 }
 
+/** Gắn/gỡ bộ tiêu chí riêng cho 1 vòng chấm (mỗi vòng có thể dùng bộ khác nhau, hoặc chung 1 bộ). */
+export function useSetRoundRubricMutation(cycleId?: number, trackId?: number) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ roundId, templateId }: { roundId: string; templateId: number | null }) =>
+      rubricTemplateService.setRoundTemplate(roundId, templateId),
+    onSuccess: () => {
+      toast.success(i18n.t("toast.roundRubricSaved"));
+      queryClient.invalidateQueries({ queryKey: queryKeys.reviewBoard.board(cycleId ?? 0, trackId ?? 0) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.rubricTemplates.all() });
+    },
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.roundRubricFailed")),
+  });
+}
+
 export function useDuplicateRubricTemplateMutation() {
   const invalidate = useInvalidateTemplates();
   return useMutation({
