@@ -872,6 +872,7 @@ export const en = {
     noDocuments: "No documents submitted",
     noDocumentsDesc: "The PI hasn't uploaded any files for this proposal yet.",
     openInNewTab: "Open in new tab",
+    download: "Download",
     noPreview: "Preview not available",
     noPreviewDesc: "This file type can't be previewed inline — open it in a new tab instead.",
     previewFailed: "Couldn't load preview",

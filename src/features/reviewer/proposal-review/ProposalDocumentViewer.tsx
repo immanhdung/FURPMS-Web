@@ -24,7 +24,10 @@ function getFileKind(fileName: string): FileKind {
 
 type PreviewState = { docId: string; url: string } | { docId: string; rendered: true } | { docId: string; failed: true };
 
-const ZOOM_MIN = 0.5;
+// Trang A4 mà docx-preview dựng ra rộng ~816px, trong khi khung xem chỉ chiếm nửa màn
+// ⇒ mặc định 100% là tràn ra ngoài, người chấm chỉ thấy được nửa trái. Cho phép thu nhỏ
+// sâu hơn để "vừa khung", muốn đọc kỹ thì tự phóng to.
+const ZOOM_MIN = 0.3;
 const ZOOM_MAX = 2;
 const ZOOM_STEP = 0.1;
 
@@ -39,6 +42,28 @@ export function ProposalDocumentViewer({ proposalId }: { proposalId: string }) {
   const [preview, setPreview] = useState<PreviewState | null>(null);
   const [zoom, setZoom] = useState(1);
   const docxContainerRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * Thu trang cho vừa bề ngang khung xem. Không có bước này thì trang A4 (~816px) tràn ra
+   * khỏi khung hẹp và người chấm chỉ đọc được nửa trái — đúng lỗi nhìn thấy khi test.
+   */
+  const fitToWidth = () => {
+    // Đợi trình duyệt vẽ xong mới đo — gọi ngay sau renderAsync thì offsetWidth còn 0,
+    // hàm thoát sớm và khung vẫn giữ 100% (đúng lỗi thấy khi test).
+    requestAnimationFrame(() => {
+      const page = docxContainerRef.current?.querySelector<HTMLElement>(".docx");
+      const viewport = scrollAreaRef.current;
+      if (!page || !viewport) return;
+
+      const available = viewport.clientWidth - 32; // trừ padding hai bên
+      const pageWidth = page.offsetWidth;
+      if (pageWidth <= 0 || available <= 0) return;
+
+      // Chỉ THU NHỎ cho vừa, không tự phóng to quá 100% (phóng lên chữ vỡ nét).
+      setZoom(Math.max(ZOOM_MIN, Math.min(1, Number((available / pageWidth).toFixed(2)))));
+    });
+  };
 
   const activeDoc = documents?.find((d) => d.id === selectedId) ?? documents?.[0];
   const fileKind = activeDoc ? getFileKind(activeDoc.fileName) : "other";
@@ -63,7 +88,10 @@ export function ProposalDocumentViewer({ proposalId }: { proposalId: string }) {
         if (!container) return;
         container.innerHTML = "";
         await renderAsync(blob, container);
-        if (!cancelled) setPreview({ docId: activeDoc.id, rendered: true });
+        if (!cancelled) {
+          setPreview({ docId: activeDoc.id, rendered: true });
+          fitToWidth();
+        }
       })
       .catch(() => {
         if (!cancelled) setPreview({ docId: activeDoc.id, failed: true });
@@ -83,6 +111,17 @@ export function ProposalDocumentViewer({ proposalId }: { proposalId: string }) {
   const openInNewTab = async (doc: ProposalDocument) => {
     const blob = await proposalDocumentService.downloadBlob(proposalId, doc.id);
     window.open(URL.createObjectURL(blob), "_blank", "noopener");
+  };
+
+  /** Tải hẳn về máy — có người muốn đọc offline / mở bằng Word thay vì xem trong trình duyệt. */
+  const downloadFile = async (doc: ProposalDocument) => {
+    const blob = await proposalDocumentService.downloadBlob(proposalId, doc.id);
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = doc.fileName;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   const canZoom = Boolean(activeDoc) && fileKind !== "other" && !previewError && !isPreviewLoading;
@@ -148,15 +187,21 @@ export function ProposalDocumentViewer({ proposalId }: { proposalId: string }) {
             </div>
           )}
           {activeDoc && (
-            <Button size="sm" variant="outline" onClick={() => openInNewTab(activeDoc)}>
-              <ExternalLink />
-              {t("reviewWorkspace.openInNewTab")}
-            </Button>
+            <>
+              <Button size="sm" variant="outline" onClick={() => downloadFile(activeDoc)}>
+                <Download />
+                {t("reviewWorkspace.download")}
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => openInNewTab(activeDoc)}>
+                <ExternalLink />
+                {t("reviewWorkspace.openInNewTab")}
+              </Button>
+            </>
           )}
         </div>
       </div>
 
-      <div className="relative flex-1 overflow-auto bg-muted/30">
+      <div ref={scrollAreaRef} className="relative flex-1 overflow-auto bg-muted/30">
         {!activeDoc ? null : fileKind === "other" ? (
           <EmptyState
             icon={Download}
@@ -190,12 +235,12 @@ export function ProposalDocumentViewer({ proposalId }: { proposalId: string }) {
             {/* Always mounted while active so docx-preview has a stable node to render into.
                 No overflow-auto here — the outer panel is the single scroll container, so zooming
                 grows this box and the outer scrollbars pick it up naturally. */}
+            {/* Căn GIỮA theo chiều ngang: khung xem thường rộng hơn trang sau khi đã thu vừa,
+                để trái như cũ thì trang lệch hẳn về một bên, nhìn như bị cắt. */}
             {fileKind === "docx" && (
-              <div
-                ref={docxContainerRef}
-                className={cn("docx-preview-container p-4", isPreviewLoading && "hidden")}
-                style={{ zoom }}
-              />
+              <div className={cn("flex justify-center p-4", isPreviewLoading && "hidden")} style={{ zoom }}>
+                <div ref={docxContainerRef} className="docx-preview-container" />
+              </div>
             )}
           </>
         )}

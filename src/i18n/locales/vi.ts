@@ -877,6 +877,7 @@ export const vi = {
     noDocuments: "Chưa có tài liệu",
     noDocumentsDesc: "PI chưa tải lên tài liệu nào cho đề tài này.",
     openInNewTab: "Mở trong tab mới",
+    download: "Tải về",
     noPreview: "Không xem trước được",
     noPreviewDesc: "Định dạng file này không xem trước trực tiếp được — hãy mở trong tab mới.",
     previewFailed: "Không tải được bản xem trước",
