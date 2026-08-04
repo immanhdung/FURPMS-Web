@@ -12,8 +12,11 @@ dist
 dist-ssr
 *.local
 
-# Env local của từng máy (template: .env.example)
+# Env RIÊNG của từng máy. Các file .env.development / .env.remote / .env.production
+# thì CỐ Ý commit — để ai clone về cũng chạy đúng ngay, không phải hỏi nhau URL.
 .env
+.env.local
+.env.*.local
 
 # Editor directories and files
 .vscode/*
@@ -26,3 +29,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Script + ảnh chụp E2E (chạy tại chỗ, không đưa lên repo)
+.e2e/
