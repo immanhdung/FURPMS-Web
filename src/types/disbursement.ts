@@ -18,7 +18,23 @@ export interface Disbursement {
   bankReference?: string | null;
   status: string;
   notes?: string | null;
+
+  /**
+   * Sản phẩm minh chứng của đợt (rule #15: hệ thống không quản tiền, chỉ theo dõi
+   * mốc + minh chứng). BE trả kèm tên/trạng thái nên FE không phải tự ghép.
+   */
   deliverableId?: number | null;
+  deliverableName?: string | null;
+  /** PENDING / PASSED / FAILED — null khi đợt chưa gắn sản phẩm. */
+  deliverableAcceptanceStatus?: string | null;
+  deliverableSubmittedAt?: string | null;
+  /** Có gắn sản phẩm nhưng sản phẩm chưa nghiệm thu Đạt ⇒ BE chặn đánh dấu giải ngân. */
+  isBlockedByDeliverable?: boolean;
+}
+
+/** Gắn sản phẩm minh chứng cho đợt; `null` = gỡ. */
+export interface LinkDeliverablePayload {
+  deliverableId: number | null;
 }
 
 /** Rule tuần 10: hệ thống không quản tiền — Staff chỉ "đánh dấu đã giải ngân" (kèm ghi chú/minh chứng). */

@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import i18n from "@/i18n";
 import { disbursementService } from "@/services/api/disbursement.service";
 import { queryKeys } from "@/services/queryKeys";
 import type { ApiError } from "@/types/common";
@@ -23,6 +24,20 @@ export function useGenerateDisbursementsMutation(contractId: string) {
       queryClient.invalidateQueries({ queryKey: queryKeys.disbursements.list(contractId) });
     },
     onError: (error: ApiError) => toast.error(error.message || "Unable to generate the schedule."),
+  });
+}
+
+/** Gắn/gỡ sản phẩm minh chứng cho 1 đợt (P5). BE chặn nếu sản phẩm khác hợp đồng, hoặc đợt đã giải ngân. */
+export function useLinkDeliverableMutation(contractId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, deliverableId }: { id: number; deliverableId: number | null }) =>
+      disbursementService.linkDeliverable(id, { deliverableId }),
+    onSuccess: () => {
+      toast.success(i18n.t("toast.disbursementLinked"));
+      queryClient.invalidateQueries({ queryKey: queryKeys.disbursements.list(contractId) });
+    },
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.disbursementLinkFailed")),
   });
 }
 

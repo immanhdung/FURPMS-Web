@@ -19,6 +19,8 @@ export const en = {
   },
   // Toast messages (called via i18n.t inside hooks).
   toast: {
+    disbursementLinked: "Evidence deliverable updated for this tranche.",
+    disbursementLinkFailed: "Could not link the evidence deliverable.",
     attendanceSaved: "Attendance saved.",
     attendanceFailed: "Could not save attendance.",
     confirmOnBehalfFailed: "Could not confirm on behalf.",
@@ -1004,7 +1006,11 @@ export const en = {
       evidence: "Evidence (contract/vouchers)",
       uploadEvidence: "Upload evidence",
       noEvidence: "No evidence yet.",
-      evidenceNote: "The system only tracks milestones + evidence, not money.",
+      pickProduct: "Select the evidence deliverable for this tranche",
+      noProduct: "No evidence deliverable linked to this tranche.",
+      unlinkProduct: "Unlink",
+      blockedByProduct: "Evidence deliverable has not passed acceptance",
+      evidenceNote:"The system only tracks milestones + evidence, not money.",
       disbursedOn: "Disbursed on {{date}}",
       markDisbursed: "Mark as disbursed",
       markTitle: "Mark as disbursed — tranche {{n}}",

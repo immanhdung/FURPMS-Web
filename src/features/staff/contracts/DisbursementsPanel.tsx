@@ -8,6 +8,7 @@ import { StatusBadge } from "@/components/shared/StatusBadge";
 import { useDisbursementsQuery, useGenerateDisbursementsMutation } from "@/hooks/useDisbursements";
 import { ConfirmDisbursementDialog } from "@/features/staff/contracts/ConfirmDisbursementDialog";
 import { DisbursementEvidence } from "@/features/staff/contracts/DisbursementEvidence";
+import { DisbursementDeliverableLink } from "@/features/staff/contracts/DisbursementDeliverableLink";
 import { DISBURSEMENT_STATUS, type Disbursement } from "@/types/disbursement";
 import { formatDate } from "@/utils/format";
 
@@ -66,7 +67,10 @@ export function DisbursementsPanel({ contractId, canManage }: { contractId: stri
 
       {disbursements.map((d) => {
         const isDisbursed = d.status === DISBURSEMENT_STATUS.DISBURSED;
-        const isReady = !isDisbursed && Boolean(d.conditionMetAt);
+        // Có gắn sản phẩm mà sản phẩm chưa nghiệm thu Đạt ⇒ BE sẽ chặn (409).
+        // Khoá nút ngay ở FE để Staff không bấm rồi mới ăn lỗi.
+        const isBlocked = !isDisbursed && Boolean(d.isBlockedByDeliverable);
+        const isReady = !isDisbursed && !isBlocked && Boolean(d.conditionMetAt);
 
         return (
           <div key={d.id} className="space-y-2 rounded-lg border border-border p-3">
@@ -93,12 +97,20 @@ export function DisbursementsPanel({ contractId, canManage }: { contractId: stri
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                   <Clock className="size-3" />
-                  {isReady
-                    ? t("contract.disbursement.conditionMet", { date: formatDate(d.conditionMetAt) })
-                    : t("contract.disbursement.waiting")}
+                  {isBlocked
+                    ? t("contract.disbursement.blockedByProduct")
+                    : isReady
+                      ? t("contract.disbursement.conditionMet", { date: formatDate(d.conditionMetAt) })
+                      : t("contract.disbursement.waiting")}
                 </span>
                 {canManage && (
-                  <Button size="sm" variant={isReady ? "default" : "outline"} onClick={() => setConfirming(d)}>
+                  <Button
+                    size="sm"
+                    variant={isReady ? "default" : "outline"}
+                    disabled={isBlocked}
+                    title={isBlocked ? t("contract.disbursement.blockedByProduct") : undefined}
+                    onClick={() => setConfirming(d)}
+                  >
                     <BanknoteArrowUp />
                     {t("contract.disbursement.markDisbursed")}
                   </Button>
@@ -106,6 +118,7 @@ export function DisbursementsPanel({ contractId, canManage }: { contractId: stri
               </div>
             )}
 
+            <DisbursementDeliverableLink contractId={contractId} disbursement={d} canManage={canManage} />
             <DisbursementEvidence disbursementId={d.id} canManage={canManage} />
           </div>
         );

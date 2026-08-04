@@ -20,6 +20,8 @@ export const vi = {
   },
   // Thông báo toast (dùng qua i18n.t trong hooks — trước đây hardcode nên bật EN vẫn ra tiếng Việt).
   toast: {
+    disbursementLinked: "Đã cập nhật sản phẩm minh chứng của đợt.",
+    disbursementLinkFailed: "Không gắn được sản phẩm minh chứng.",
     attendanceSaved: "Đã lưu điểm danh.",
     attendanceFailed: "Không lưu được điểm danh.",
     confirmOnBehalfFailed: "Không thể xác nhận thay.",
@@ -1008,6 +1010,11 @@ export const vi = {
       uploadEvidence: "Tải minh chứng",
       noEvidence: "Chưa có minh chứng.",
       evidenceNote: "Hệ thống chỉ theo dõi mốc + minh chứng, không quản lý tiền.",
+      // P5 — san pham minh chung cho tung dot
+      pickProduct: "Chọn sản phẩm minh chứng cho đợt này",
+      noProduct: "Đợt này chưa gắn sản phẩm minh chứng.",
+      unlinkProduct: "Gỡ",
+      blockedByProduct: "Sản phẩm minh chứng chưa nghiệm thu Đạt",
       disbursedOn: "Đã giải ngân {{date}}",
       markDisbursed: "Đánh dấu đã giải ngân",
       markTitle: "Đánh dấu đã giải ngân — đợt {{n}}",

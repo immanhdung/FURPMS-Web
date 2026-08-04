@@ -1,6 +1,6 @@
 import { axiosClient } from "@/services/api/axiosClient";
 import type { ApiResponse } from "@/types/common";
-import type { ConfirmDisbursementPayload, Disbursement } from "@/types/disbursement";
+import type { ConfirmDisbursementPayload, Disbursement, LinkDeliverablePayload } from "@/types/disbursement";
 
 export const disbursementService = {
   listByContract: (contractId: string) =>
@@ -18,5 +18,11 @@ export const disbursementService = {
   confirm: (id: number, payload: ConfirmDisbursementPayload) =>
     axiosClient
       .post<ApiResponse<Disbursement>>(`/disbursements/${id}/confirm`, payload)
+      .then((res) => res.data.data),
+
+  /** Gắn/gỡ sản phẩm minh chứng cho đợt (P5 — thầy: mỗi đợt phải có sản phẩm minh chứng). */
+  linkDeliverable: (id: number, payload: LinkDeliverablePayload) =>
+    axiosClient
+      .put<ApiResponse<Disbursement>>(`/disbursements/${id}/deliverable`, payload)
       .then((res) => res.data.data),
 };
