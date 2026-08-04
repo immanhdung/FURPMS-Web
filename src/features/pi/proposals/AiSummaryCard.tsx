@@ -1,13 +1,29 @@
 import { useTranslation } from "react-i18next";
-import { CheckCircle2, Loader2, Sparkles } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useSummarizeProposalMutation } from "@/hooks/useProposalAi";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useProposalSummaryQuery, useSummarizeProposalMutation } from "@/hooks/useProposalAi";
+import { formatDateTime } from "@/utils/format";
 
+/**
+ * Tóm tắt AI của đề cương.
+ *
+ * Dùng ở CẢ màn PI lẫn màn chấm của reviewer — người cần bản tóm tắt nhất chính là
+ * **người chấm** (đọc nhiều đề tài, thời gian ngắn), trước đây card này chỉ có ở màn PI.
+ *
+ * Mở màn là đọc bản đã sinh sẵn (cache `llm_outputs`, không tốn quota Gemini);
+ * chưa có mới hiện nút tạo.
+ */
 export function AiSummaryCard({ proposalId }: { proposalId: string }) {
   const { t } = useTranslation();
+  const { data: cached, isLoading } = useProposalSummaryQuery(proposalId);
   const summarizeMutation = useSummarizeProposalMutation();
+
+  const summary = summarizeMutation.data ?? cached ?? null;
+  // Bản người sửa tay được ưu tiên hơn bản AI viết (PATCH /proposals/{id}/summary).
+  const text = summary?.editedText?.trim() || summary?.summaryText?.trim() || "";
 
   return (
     <Card variant="glass" className="border-primary/15">
@@ -26,27 +42,24 @@ export function AiSummaryCard({ proposalId }: { proposalId: string }) {
             disabled={summarizeMutation.isPending}
           >
             {summarizeMutation.isPending ? <Loader2 className="animate-spin" /> : <Sparkles />}
-            {summarizeMutation.data ? t("proposal.regenerate") : t("proposal.generate")}
+            {text ? t("proposal.regenerate") : t("proposal.generate")}
           </Button>
         </div>
       </CardHeader>
       <CardContent>
-        {!summarizeMutation.data && !summarizeMutation.isPending && (
-          <p className="text-xs text-muted-foreground">{t("proposal.aiSummaryDesc")}</p>
-        )}
-        {summarizeMutation.isPending && <div className="h-16 animate-pulse rounded-lg bg-muted" />}
-        {summarizeMutation.data && (
-          <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="space-y-2.5">
-            <p className="text-sm text-foreground">{summarizeMutation.data.summary}</p>
-            <ul className="space-y-1.5">
-              {summarizeMutation.data.highlights.map((highlight, index) => (
-                <li key={index} className="flex items-start gap-1.5 text-xs text-muted-foreground">
-                  <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-success" />
-                  {highlight}
-                </li>
-              ))}
-            </ul>
+        {isLoading || summarizeMutation.isPending ? (
+          <Skeleton className="h-16 w-full rounded-lg" />
+        ) : text ? (
+          <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
+            <p className="whitespace-pre-line text-sm text-foreground">{text}</p>
+            <p className="text-[11px] text-muted-foreground">
+              {summary?.isEditedByHuman
+                ? t("proposal.aiSummaryEdited")
+                : t("proposal.aiSummaryGeneratedAt", { date: formatDateTime(summary?.generatedAt) })}
+            </p>
           </motion.div>
+        ) : (
+          <p className="text-xs text-muted-foreground">{t("proposal.aiSummaryDesc")}</p>
         )}
       </CardContent>
     </Card>

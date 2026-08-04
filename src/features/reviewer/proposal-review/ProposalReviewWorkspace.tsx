@@ -12,6 +12,7 @@ import { useCouncilMeetingsQuery } from "@/hooks/useMeetings";
 import { useProposalQuery } from "@/hooks/useProposals";
 import { ProposalSummaryView } from "@/features/pi/proposals/ProposalSummaryView";
 import { RubricScoringForm } from "@/features/reviewer/proposal-review/RubricScoringForm";
+import { AiSummaryCard } from "@/features/pi/proposals/AiSummaryCard";
 import { AcceptanceEvaluationForm } from "@/features/reviewer/proposal-review/AcceptanceEvaluationForm";
 import { MinutesPanel } from "@/features/reviewer/proposal-review/MinutesPanel";
 import { ProposalDocumentViewer } from "@/features/reviewer/proposal-review/ProposalDocumentViewer";
@@ -68,7 +69,10 @@ export function ProposalReviewWorkspace() {
 
       {/* Left: the PI's submitted file, so reviewers can read it while scoring on the right. */}
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:items-start">
-        <div className="lg:sticky lg:top-4">
+        <div className="space-y-4 lg:sticky lg:top-4">
+          {/* Người chấm đọc nhiều đề tài trong thời gian ngắn → bản tóm tắt nằm ngay
+              trên file gốc. Trước đây card này chỉ có ở màn PI, tức đưa nhầm người. */}
+          <AiSummaryCard proposalId={membership.proposalId} />
           <ProposalDocumentViewer proposalId={membership.proposalId} />
         </div>
 
@@ -123,7 +127,7 @@ export function ProposalReviewWorkspace() {
             {!isSecretary && (
               <TabsContent value="scoring">
                 {isRoundOpen ? (
-                  <RubricScoringForm councilId={councilId} />
+                  <RubricScoringForm councilId={councilId} proposalId={membership.proposalId} />
                 ) : (
                   <EmptyState
                     icon={Lock}

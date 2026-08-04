@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { aiService } from "@/services/api/ai.service";
 
@@ -19,6 +19,18 @@ export function useSimilarityCheckMutation() {
 export function useSummarizeProposalMutation() {
   return useMutation({
     mutationFn: (proposalId: string) => aiService.summarizeProposal(proposalId),
+  });
+}
+
+/**
+ * Tóm tắt AI đã sinh trước đó — đọc cache `llm_outputs`, KHÔNG gọi Gemini.
+ * Nhờ vậy reviewer mở màn chấm là thấy ngay tóm tắt Staff/PI đã tạo, không tốn quota.
+ */
+export function useProposalSummaryQuery(proposalId: string | null) {
+  return useQuery({
+    queryKey: ["ai", "summary", proposalId ?? ""],
+    queryFn: () => aiService.getProposalSummary(proposalId as string),
+    enabled: Boolean(proposalId),
     onError: () => toast.error("Unable to generate an AI summary."),
   });
 }
@@ -40,6 +52,20 @@ export function useSuggestReviewersMutation() {
 export function useGenerateFeedbackMutation() {
   return useMutation({
     mutationFn: (proposalId: string) => aiService.generateFeedback(proposalId),
+  });
+}
+
+/** Đối chiếu form ↔ file đề cương (thầy 29/07). */
+export function useCheckConsistencyMutation() {
+  return useMutation({
+    mutationFn: (proposalId: string) => aiService.checkConsistency(proposalId),
+  });
+}
+
+/** AI gợi ý điểm theo từng tiêu chí — người chấm vẫn quyết định cuối (rule #12). */
+export function useSuggestScoresMutation(councilId: string) {
+  return useMutation({
+    mutationFn: (proposalId: string) => aiService.suggestScores(councilId, proposalId),
     onError: () => toast.error("Unable to generate AI feedback."),
   });
 }

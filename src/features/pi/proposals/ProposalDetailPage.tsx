@@ -16,6 +16,7 @@ import { ProposalStatusTimeline } from "@/features/pi/proposals/ProposalStatusTi
 import { ProposalSummaryView } from "@/features/pi/proposals/ProposalSummaryView";
 import { SubmitProposalDialog } from "@/features/pi/proposals/SubmitProposalDialog";
 import { AiSummaryCard } from "@/features/pi/proposals/AiSummaryCard";
+import { AiConsistencyCard } from "@/features/pi/proposals/AiConsistencyCard";
 import { AiFeedbackCard } from "@/features/pi/proposals/AiFeedbackCard";
 import { ExpectedProductsCard } from "@/features/pi/proposals/ExpectedProductsCard";
 import { ProposalDocumentsCard } from "@/features/pi/proposals/ProposalDocumentsCard";
@@ -106,6 +107,9 @@ export function ProposalDetailPage() {
 
       {/* Tài liệu đính kèm — gỡ/thêm được khi còn nháp; nộp xong chỉ tải về. */}
       <ProposalDocumentsCard proposalId={proposal.id} editable={isDraft} />
+
+      {/* Đối chiếu form ↔ file để full-width: mỗi dòng lệch là 1 việc PI phải sửa. */}
+      <AiConsistencyCard proposalId={proposal.id} />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <AiSummaryCard proposalId={proposal.id} />

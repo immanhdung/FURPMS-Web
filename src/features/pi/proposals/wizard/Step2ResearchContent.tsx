@@ -46,10 +46,32 @@ export function Step2ResearchContent({ form, file, onFileChange }: Step2Props) {
 
   const applyExtraction = (result: AiExtractionResult) => {
     setExtraction(result);
-    setValue("titleEN", result.titleEN, { shouldValidate: true });
-    if (result.titleVI) setValue("titleVI", result.titleVI);
-    setValue("abstractEN", result.abstractEN, { shouldValidate: true });
+    // Chỉ ghi đè field AI thật sự đọc được — không xoá trắng thứ PI đã gõ tay.
+    const fill = (field: "titleVI" | "titleEN" | "abstractEN" | "objectives" | "methodology" | "expectedOutput",
+                  value?: string | null) => {
+      if (value?.trim()) setValue(field, value.trim(), { shouldValidate: true });
+    };
+
+    fill("titleVI", result.titleVi);
+    fill("titleEN", result.titleEn);
+    fill("abstractEN", result.abstractVi);
+    fill("objectives", result.researchObjectives);
+    fill("methodology", result.methodology);
+    fill("expectedOutput", result.expectedOutput);
+    if (result.durationMonths) setValue("durationMonths", result.durationMonths, { shouldValidate: true });
   };
+
+  /** Nhãn các trường AI đã điền, để PI biết cần soát lại chỗ nào (rule #10: AI chỉ prefill, PI vẫn duyệt). */
+  const filledFields = (result: AiExtractionResult) =>
+    [
+      result.titleVi && t("wizard.step2.fieldTitleVI"),
+      result.titleEn && t("wizard.step2.fieldTitleEN"),
+      result.abstractVi && t("wizard.step2.fieldAbstract"),
+      result.researchObjectives && t("wizard.step2.fieldObjectives"),
+      result.methodology && t("wizard.step2.fieldMethodology"),
+      result.expectedOutput && t("wizard.step2.fieldExpectedOutput"),
+      result.durationMonths && t("wizard.step2.fieldDuration"),
+    ].filter(Boolean) as string[];
 
   const runExtraction = () => {
     if (!file) return;
@@ -175,19 +197,23 @@ export function Step2ResearchContent({ form, file, onFileChange }: Step2Props) {
               animate={{ opacity: 1, y: 0 }}
               className="space-y-2 rounded-lg border border-border p-3 text-sm"
             >
-              <p className="text-xs font-medium text-muted-foreground">{t("wizard.step2.aiSuggestedArea")}</p>
-              <Badge variant="secondary">{extraction.researchArea}</Badge>
-              <p className="pt-1 text-xs font-medium text-muted-foreground">{t("wizard.step2.keywords")}</p>
-              <div className="flex flex-wrap gap-1">
-                {extraction.keywords.map((keyword) => (
-                  <Badge key={keyword} variant="outline">
-                    {keyword}
-                  </Badge>
-                ))}
-              </div>
-              <p className="pt-1 text-xs text-muted-foreground">
-                {t("wizard.step2.autoFilled")}
-              </p>
+              {extraction.warning ? (
+                <p className="text-xs text-warning">{extraction.warning}</p>
+              ) : filledFields(extraction).length === 0 ? (
+                <p className="text-xs text-muted-foreground">{t("wizard.step2.nothingExtracted")}</p>
+              ) : (
+                <>
+                  <p className="text-xs font-medium text-muted-foreground">{t("wizard.step2.filledFields")}</p>
+                  <div className="flex flex-wrap gap-1">
+                    {filledFields(extraction).map((label) => (
+                      <Badge key={label} variant="outline">
+                        {label}
+                      </Badge>
+                    ))}
+                  </div>
+                  <p className="pt-1 text-xs text-muted-foreground">{t("wizard.step2.autoFilled")}</p>
+                </>
+              )}
             </motion.div>
           )}
         </div>

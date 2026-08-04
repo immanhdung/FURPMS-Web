@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { ClipboardList, Loader2, Save } from "lucide-react";
+import { ClipboardList, Loader2, Save, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,15 +11,18 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { useMyScoreQuery, useSubmitScoreMutation } from "@/hooks/useReviewScoring";
 import { useRubricForCouncilQuery } from "@/hooks/useRubricTemplates";
+import { useSuggestScoresMutation } from "@/hooks/useProposalAi";
 import { ROUTES } from "@/constants/routes";
 import type { ScoreDetailPayload } from "@/types/review-scoring";
 
 interface RubricScoringFormProps {
   councilId: string;
+  /** Để AI đọc nội dung đề cương khi gợi ý điểm. Không có thì ẩn nút AI. */
+  proposalId?: string | null;
   // roundType đã bỏ: BE tự suy loại vòng từ councilId khi trả bộ tiêu chí.
 }
 
-export function RubricScoringForm({ councilId }: RubricScoringFormProps) {
+export function RubricScoringForm({ councilId, proposalId }: RubricScoringFormProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   // Lấy ĐÚNG bộ tiêu chí cho hội đồng này: BE tự suy (đợt + lĩnh vực + loại vòng) từ councilId
@@ -39,6 +42,14 @@ export function RubricScoringForm({ councilId }: RubricScoringFormProps) {
   const [generalComments, setGeneralComments] = useState("");
   const [otherRecommendations, setOtherRecommendations] = useState("");
   const [seededFor, setSeededFor] = useState<string | null>(null);
+
+  // AI chỉ GỢI Ý: hiện dưới từng tiêu chí kèm nút "Áp dụng", KHÔNG tự ghi đè điểm
+  // người chấm đã nhập (rule #12 — quyết định là của con người).
+  const suggestMutation = useSuggestScoresMutation(councilId);
+  const suggestionById = useMemo(
+    () => new Map((suggestMutation.data ?? []).map((s) => [s.criterionId, s])),
+    [suggestMutation.data],
+  );
 
   const isLoading = isTemplatesLoading || isScoreLoading;
   const isReady = !isLoading && activeCriteria.length > 0;
@@ -128,6 +139,22 @@ export function RubricScoringForm({ councilId }: RubricScoringFormProps) {
         </div>
       </div>
 
+      {proposalId && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/15 bg-primary/4 px-3 py-2">
+          <p className="text-xs text-muted-foreground">{t("review.aiSuggestHint")}</p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={suggestMutation.isPending}
+            onClick={() => suggestMutation.mutate(proposalId)}
+          >
+            {suggestMutation.isPending ? <Loader2 className="animate-spin" /> : <Sparkles />}
+            {suggestMutation.data ? t("review.aiSuggestAgain") : t("review.aiSuggest")}
+          </Button>
+        </div>
+      )}
+
       <div className="space-y-3">
         {activeCriteria.map((criterion, index) => (
           <Card key={criterion.id}>
@@ -172,6 +199,39 @@ export function RubricScoringForm({ councilId }: RubricScoringFormProps) {
                   }))
                 }
               />
+
+              {suggestionById.get(criterion.id) && (
+                <div className="flex flex-wrap items-start gap-2 rounded-md bg-primary/4 px-2.5 py-2 text-xs">
+                  <Sparkles className="mt-0.5 size-3.5 shrink-0 text-primary" />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-foreground">
+                      {t("review.aiSuggestedScore", {
+                        score: suggestionById.get(criterion.id)!.suggestedScore,
+                        max: criterion.maxScore,
+                      })}
+                    </p>
+                    <p className="text-muted-foreground">{suggestionById.get(criterion.id)!.comment}</p>
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="h-6 shrink-0 px-2 text-xs"
+                    onClick={() => {
+                      const s = suggestionById.get(criterion.id)!;
+                      setScores((prev) => ({
+                        ...prev,
+                        [criterion.id]: {
+                          givenScore: s.suggestedScore,
+                          comments: prev[criterion.id]?.comments || s.comment,
+                        },
+                      }));
+                    }}
+                  >
+                    {t("review.aiApply")}
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         ))}
