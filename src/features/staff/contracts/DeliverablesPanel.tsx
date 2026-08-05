@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
+import { DeliverableFiles } from "@/components/shared/DeliverableFiles";
 import { useCreateDeliverableMutation, useDeliverablesQuery } from "@/hooks/useDeliverables";
 import { SubmitDeliverableDialog } from "@/features/staff/contracts/SubmitDeliverableDialog";
 import { EvaluateDeliverableDialog } from "@/features/staff/contracts/EvaluateDeliverableDialog";
@@ -128,19 +129,14 @@ export function DeliverablesPanel({
             {isSubmitted && (
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                 <span>{t("contract.deliverable.submitted", { date: formatDateTime(d.submittedAt) })}</span>
-                {d.fileUrl && (
-                  <a
-                    href={d.fileUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-primary hover:underline"
-                  >
-                    <ExternalLink className="size-3" />
-                    {t("contract.deliverable.openFile")}
-                  </a>
-                )}
               </div>
             )}
+
+            {/* File/link thật PI đã nộp. Trước đây chỗ này chỉ render đúng `fileUrl` thành thẻ <a>:
+                file upload thì cần token nên bấm ra 401, link thiếu "https://" thì bấm đi lạc, còn
+                file đã upload + minh chứng thử nghiệm KHÔNG hề được liệt kê ⇒ Staff nghiệm thu
+                mà không thấy sản phẩm nào. */}
+            <DeliverableFiles deliverable={d} />
 
             {d.qualityAssessment && (
               <p

@@ -128,7 +128,9 @@ export function ReviewBoardPage() {
                 )}
               >
                 <span className="font-medium">{t("staff.round", { num: round.roundNumber })}</span>
-                <span className="text-xs">{t(`reviewBoard.dim.${round.dimension}`)}</span>
+                {/* Không hiện "phương diện" nữa: rule #16 bỏ FINANCE nên mọi vòng đều là SCIENCE —
+                    nhãn chỉ có đúng một giá trị thì dán lên chỉ tổ rối. Loại vòng mới là thứ phân biệt. */}
+                <span className="text-xs">{t(`reviewBoard.type.${round.roundType}`)}</span>
                 {round.status && <StatusBadge status={round.status} />}
               </button>
             ))}
@@ -148,7 +150,7 @@ export function ReviewBoardPage() {
                   {t("staff.round", { num: selectedRound.roundNumber })}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  {t(`reviewBoard.dim.${selectedRound.dimension}`)} · {t(`reviewBoard.type.${selectedRound.roundType}`)}
+                  {t(`reviewBoard.type.${selectedRound.roundType}`)}
                 </span>
                 {selectedRound.status && <StatusBadge status={selectedRound.status} />}
                 {/* Bộ tiêu chí riêng cho vòng này — để trống thì dùng bộ theo (đợt + lĩnh vực). */}

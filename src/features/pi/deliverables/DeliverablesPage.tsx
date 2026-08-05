@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
+import { DeliverableFiles } from "@/components/shared/DeliverableFiles";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useMyContractsQuery } from "@/hooks/useMyContracts";
 import { useDeliverablesQuery } from "@/hooks/useDeliverables";
@@ -90,14 +91,11 @@ export function DeliverablesPage() {
                     {isSubmitted && (
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                         <span>{t("contract.deliverable.submitted", { date: formatDateTime(d.submittedAt) })}</span>
-                        {d.fileUrl && (
-                          <a href={d.fileUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline">
-                            <ExternalLink className="size-3" />
-                            {t("contract.deliverable.openFile")}
-                          </a>
-                        )}
                       </div>
                     )}
+
+                    {/* PI cũng phải xem lại được đúng thứ mình đã nộp (file + minh chứng thử nghiệm). */}
+                    <DeliverableFiles deliverable={d} />
 
                     {d.qualityAssessment && (
                       <p className="text-xs text-muted-foreground">

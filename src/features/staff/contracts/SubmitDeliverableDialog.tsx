@@ -33,6 +33,15 @@ interface SubmitDeliverableDialogProps {
  * (QĐ543 Điều 13.1 yêu cầu). Nay chọn file thật: upload lên hệ thống rồi tự lấy URL
  * download của BE, giống báo cáo tiến độ / tổng kết.
  */
+/**
+ * Người dùng quen gõ "drive.google.com/..." không kèm scheme. Lưu nguyên như vậy thì trình duyệt
+ * hiểu là đường dẫn tương đối ⇒ bấm vào lạc sang trang trống. Bổ sung "https://" cho chắc.
+ */
+const normalizeLink = (raw: string) => {
+  const url = raw.trim();
+  return url && !/^https?:\/\//i.test(url) ? `https://${url}` : url;
+};
+
 export function SubmitDeliverableDialog({
   open,
   onOpenChange,
@@ -60,8 +69,15 @@ export function SubmitDeliverableDialog({
       setTrialFile(null);
       setDescription(deliverable.description ?? "");
       setExistingFileUrl(deliverable.fileUrl ?? null);
-      setLinkUrl(deliverable.fileUrl?.startsWith("http") ? deliverable.fileUrl : "");
-      setMode(deliverable.fileUrl?.startsWith("http") ? "link" : "file");
+      /**
+       * Phân biệt bằng "có phải đường dẫn nội bộ do BE sinh sau upload không" (bắt đầu bằng "/"),
+       * KHÔNG phải bằng `startsWith("http")`: PI gõ link thiếu scheme ("abc.com") thì điều kiện cũ
+       * cho ra false ⇒ mở lại form thấy chế độ Tải file trống trơn, link đã nhập biến mất.
+       */
+      const url = deliverable.fileUrl ?? "";
+      const isUploaded = url.startsWith("/");
+      setLinkUrl(isUploaded ? "" : url);
+      setMode(url && !isUploaded ? "link" : "file");
       setExistingTrialUrl(deliverable.trialEvidenceUrl ?? null);
     }
   }, [open, deliverable]);
@@ -76,7 +92,7 @@ export function SubmitDeliverableDialog({
       // Upload trước, lấy URL download của hệ thống rồi mới gọi submit.
       const fileUrl =
         mode === "link"
-          ? linkUrl.trim()
+          ? normalizeLink(linkUrl)
           : productFile
             ? (await deliverableDocumentService.upload(deliverable.id, productFile, false)).downloadUrl
             : existingFileUrl!;
