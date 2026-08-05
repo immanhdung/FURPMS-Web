@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -32,14 +33,23 @@ const DOT_STYLES: Record<string, string> = {
 };
 
 export function StatusBadge({ status }: { status: string }) {
+  const { t } = useTranslation();
   const key = status.toLowerCase();
   const style = STATUS_STYLES[key] ?? "bg-muted text-muted-foreground";
   const dot = DOT_STYLES[key] ?? "bg-muted-foreground";
 
+  /**
+   * Trước đây render THẲNG giá trị enum của BE, nên giao diện tiếng Việt vẫn hiện "PASSED",
+   * "IN_PROGRESS", "PENDING_SIGNATURE"… (thầy bắt lúc demo 05/08: "bên tiếng Việt phải full
+   * tiếng Việt, có chỗ để là passed"). Nay tra bảng `status.*`; key nào chưa có thì vẫn hiện
+   * enum để lộ ra mà bổ sung, chứ không hiện trống.
+   */
+  const label = t(`status.${status.toUpperCase()}`, { defaultValue: status });
+
   return (
     <Badge variant="secondary" className={cn("gap-1.5 font-medium", style)}>
       <span className={cn("size-1.5 shrink-0 rounded-full", dot)} />
-      {status}
+      {label}
     </Badge>
   );
 }

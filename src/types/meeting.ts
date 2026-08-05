@@ -21,11 +21,14 @@ export interface ScheduleMeetingPayload {
   agenda?: string;
 }
 
-/** Giá trị canonical BE chấp nhận (IN_PERSON | GOOGLE_MEET | TEAMS); nhãn dịch qua i18n. */
+/**
+ * Chỉ 2 hình thức (thầy 05/08, cả 2 bản note đều nêu): trực tiếp / trực tuyến.
+ * Nền tảng cụ thể (Meet / Teams / Zoom) không còn phân biệt — Staff dán link nào cũng được.
+ * BE map mọi giá trị cũ về ONLINE khi đọc nên dữ liệu cũ vẫn hiển thị đúng.
+ */
 export const MEETING_MODES = [
-  { value: "GOOGLE_MEET", labelKey: "reviewBoard.modeGoogleMeet" },
-  { value: "TEAMS", labelKey: "reviewBoard.modeTeams" },
   { value: "IN_PERSON", labelKey: "reviewBoard.modeOffline" },
+  { value: "ONLINE", labelKey: "reviewBoard.modeOnline" },
 ] as const;
 
 export const IN_PERSON = "IN_PERSON";

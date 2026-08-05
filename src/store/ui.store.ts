@@ -19,7 +19,12 @@ interface UiState {
 export const useUiStore = create<UiState>()(
   persist(
     (set) => ({
-      theme: "system",
+      /**
+       * Mặc định SÁNG, không theo hệ thống (thầy 05/08: "để default mặc định màu trắng").
+       * Máy chấm để dark mode thì "system" làm cả hệ thống hiện tối — ảnh chụp tài liệu và
+       * biểu đồ đều lệch màu so với bản in.
+       */
+      theme: "light",
       sidebarCollapsed: false,
       commandPaletteOpen: false,
       sampleFillEnabled: import.meta.env.DEV,

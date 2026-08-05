@@ -1,15 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
-import { Loader2, Sparkles } from "lucide-react";
 import { FormSheet } from "@/components/shared/FormSheet";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useGenerateGoogleMeetLink, useScheduleMeetingMutation, useUpdateMeetingMutation } from "@/hooks/useMeetings";
+import { useScheduleMeetingMutation, useUpdateMeetingMutation } from "@/hooks/useMeetings";
 import { MEETING_MODES, IN_PERSON, type Meeting } from "@/types/meeting";
 
 const schema = z
@@ -50,15 +48,12 @@ export function ScheduleMeetingSheet({ open, onOpenChange, councilId, meeting = 
   const scheduleMutation = useScheduleMeetingMutation(councilId);
   const updateMutation = useUpdateMeetingMutation(councilId);
   const isSubmitting = scheduleMutation.isPending || updateMutation.isPending;
-  const generateLinkMutation = useGenerateGoogleMeetLink();
-  const [generatedLink, setGeneratedLink] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     control,
     watch,
-    setValue,
     reset,
     formState: { errors },
   } = useForm<FormValues>({
@@ -72,7 +67,6 @@ export function ScheduleMeetingSheet({ open, onOpenChange, councilId, meeting = 
   // Mở form sửa phải thấy lịch đang đặt, không thì lưu lại là ghi đè trắng.
   useEffect(() => {
     if (!open) return;
-    setGeneratedLink(null);
     reset(
       meeting
         ? {
@@ -98,7 +92,6 @@ export function ScheduleMeetingSheet({ open, onOpenChange, councilId, meeting = 
     };
     const done = () => {
       reset();
-      setGeneratedLink(null);
       onOpenChange(false);
     };
     if (meeting) {
@@ -167,28 +160,9 @@ export function ScheduleMeetingSheet({ open, onOpenChange, councilId, meeting = 
           <label htmlFor="meeting-link" className="mb-1.5 block text-sm font-medium text-foreground">
             {t("reviewBoard.meetingLinkLabel")}
           </label>
-          <div className="flex gap-2">
-            <Input id="meeting-link" placeholder="https://..." {...register("meetingLink")} />
-            {platform === "GOOGLE_MEET" && (
-              <Button
-                type="button"
-                variant="outline"
-                disabled={generateLinkMutation.isPending}
-                onClick={() =>
-                  generateLinkMutation.mutate(undefined, {
-                    onSuccess: (data) => {
-                      setValue("meetingLink", data.meetingLink);
-                      setGeneratedLink(data.meetingLink);
-                    },
-                  })
-                }
-              >
-                {generateLinkMutation.isPending ? <Loader2 className="animate-spin" /> : <Sparkles />}
-                {t("reviewBoard.generate")}
-              </Button>
-            )}
-          </div>
-          {generatedLink && <p className="mt-1 text-xs text-muted-foreground">{t("reviewBoard.generatedLink", { link: generatedLink })}</p>}
+          {/* Chỉ còn ô dán link. Nút "tạo link Google Meet" gắn với nền tảng cụ thể mà hệ thống
+              không còn phân biệt Meet/Teams/Zoom nữa (thầy 05/08). */}
+          <Input id="meeting-link" placeholder="https://..." {...register("meetingLink")} />
         </div>
       )}
 
