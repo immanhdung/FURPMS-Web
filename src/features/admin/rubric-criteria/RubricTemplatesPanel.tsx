@@ -74,6 +74,18 @@ export function RubricTemplatesPanel() {
                 <span className="text-xs text-muted-foreground">
                   {t("rubricSet.criteriaCount", { n: tpl.criteria.length })}
                 </span>
+                {/* QĐ543 BM03 ghi "Cộng 100" — bộ chưa cộng đủ thì BE không cho đem chấm.
+                    Hiện thẳng con số ra đây, đừng bắt người dùng tự cộng nhẩm rồi mới biết. */}
+                <span
+                  className={
+                    tpl.isTotalValid
+                      ? "text-xs font-medium text-success"
+                      : "text-xs font-medium text-destructive"
+                  }
+                >
+                  {t("rubricSet.totalScore", { total: tpl.totalCriteriaScore, max: tpl.maxTotalScore })}
+                  {!tpl.isTotalValid && ` — ${t("rubricSet.totalInvalid")}`}
+                </span>
                 {tpl.scopes.length > 0 && (
                   <Badge variant="outline">{t("rubricSet.scopeCount", { n: tpl.scopes.length })}</Badge>
                 )}

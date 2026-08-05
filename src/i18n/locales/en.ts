@@ -43,6 +43,8 @@ export const en = {
     noFile: "no file",
   },
   rubricSet: {
+    totalScore: "{{total}}/{{max}} pts",
+    totalInvalid: "cannot be used for scoring yet",
     pageSubtitle: "Each set is one scoring sheet. Assign it to research types and to each (cycle + field).",
     createBtn: "New criteria set",
     createTitle: "New criteria set",

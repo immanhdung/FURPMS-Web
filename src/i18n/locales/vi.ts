@@ -44,6 +44,8 @@ export const vi = {
     noFile: "chưa có file",
   },
   rubricSet: {
+    totalScore: "{{total}}/{{max}} điểm",
+    totalInvalid: "chưa dùng chấm được",
     pageSubtitle: "Mỗi bộ = một phiếu chấm. Gắn bộ cho loại đề tài và cho từng (đợt + lĩnh vực).",
     createBtn: "Tạo bộ tiêu chí",
     createTitle: "Tạo bộ tiêu chí",

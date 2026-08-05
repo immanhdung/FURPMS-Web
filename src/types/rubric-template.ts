@@ -21,6 +21,10 @@ export interface RubricTemplateFull {
   templateType: string; // REVIEW | ACCEPTANCE | PROGRESS_CHECK
   name: string;
   maxTotalScore: number;
+  /** Tổng điểm các tiêu chí ĐANG BẬT (BE tính sẵn). */
+  totalCriteriaScore: number;
+  /** `totalCriteriaScore === maxTotalScore` — chưa khớp thì BE không cho dùng bộ này để chấm. */
+  isTotalValid: boolean;
   appliesBasic: boolean;
   appliesApplied: boolean;
   isActive: boolean;
