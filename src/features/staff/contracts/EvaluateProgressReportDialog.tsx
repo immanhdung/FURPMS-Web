@@ -45,9 +45,16 @@ export function EvaluateProgressReportDialog({
 
   const { data: report, isLoading: isLoadingDetail } = useProgressReportQuery(open ? reportId : null);
 
-  // Thầy 29/07: Staff phải XEM được file PI nộp rồi mới cho Đạt/Không đạt.
+  /**
+   * Thầy 29/07: Staff phải XEM được bản báo cáo rồi mới cho Đạt/Không đạt.
+   *
+   * "Xem được" = **file upload HOẶC link PI dán**. Cổng này trước chỉ đếm file upload nên PI nộp
+   * bằng link (đường mình vừa mở cho họ vì file báo cáo có thể rất nặng) vẫn bị báo "chưa nộp
+   * file" và khoá luôn nút chấm — đúng thứ mình vừa cho phép lại chặn ở cửa sau.
+   */
   const { data: docs } = useProgressReportDocumentsQuery(reportId);
-  const hasFile = Boolean(docs && docs.length > 0);
+  const reportLink = report?.reportFileUrl?.trim();
+  const hasFile = Boolean((docs && docs.length > 0) || reportLink);
 
   const openDoc = async (documentId: string) => {
     if (!reportId) return;
@@ -77,9 +84,20 @@ export function EvaluateProgressReportDialog({
           {/* File PI nộp — bấm mở xem trước khi chấm. Chưa có file thì khóa nút lưu. */}
           <div className="rounded-lg border border-border p-3">
             <p className="text-sm font-medium text-foreground">{t("contract.reportFiles")}</p>
-            {hasFile ? (
+            {reportLink && (
+              <a
+                href={/^https?:\/\//i.test(reportLink) ? reportLink : `https://${reportLink}`}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
+              >
+                <FileText className="size-3.5 shrink-0" />
+                <span className="truncate">{reportLink}</span>
+              </a>
+            )}
+            {docs && docs.length > 0 ? (
               <ul className="mt-1.5 space-y-1">
-                {docs!.map((d) => (
+                {docs.map((d) => (
                   <li key={d.id}>
                     <button
                       type="button"
@@ -92,7 +110,7 @@ export function EvaluateProgressReportDialog({
                   </li>
                 ))}
               </ul>
-            ) : (
+            ) : reportLink ? null : (
               <p className="mt-1 text-xs text-destructive">{t("contract.noReportFile")}</p>
             )}
           </div>

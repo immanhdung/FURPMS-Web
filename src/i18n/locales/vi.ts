@@ -1047,6 +1047,7 @@ export const vi = {
     noMinutesDesc: "Thư ký chưa soạn biên bản cho cuộc họp hội đồng này.",
   },
   contract: {
+    extensionCapHint: "Đề tài {{duration}} tháng → gia hạn tối đa {{cap}} tháng (QĐ543 Điều 10.4: tối đa 1/2 thời gian thực hiện).",
     alreadyContracted: "Đã ẩn {{n}} đề tài vì đã có hợp đồng.",
     startDate: "Ngày bắt đầu",
     endDate: "Ngày kết thúc",

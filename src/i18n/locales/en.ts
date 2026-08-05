@@ -1040,6 +1040,7 @@ export const en = {
     noMinutesDesc: "The secretary hasn't drafted the minutes for this council meeting yet.",
   },
   contract: {
+    extensionCapHint: "{{duration}}-month project → extension capped at {{cap}} months (Decision 543, Article 10.4: at most half the project duration).",
     alreadyContracted: "{{n}} proposal(s) hidden — they already have a contract.",
     startDate: "Start date",
     endDate: "End date",
