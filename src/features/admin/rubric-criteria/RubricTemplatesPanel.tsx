@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ChevronDown, ChevronRight, Copy, Layers, Loader2, Pencil, Plus, Save, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Copy, Filter, Layers, Loader2, Pencil, Plus, Save, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { cn } from "@/lib/utils";
@@ -34,6 +35,13 @@ export function RubricTemplatesPanel() {
   const deleteTemplateMutation = useDeleteRubricTemplateMutation();
 
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  /**
+   * Bộ lọc gom về MỘT hàng (thầy 05/08: *"filter năm, filter ứng dụng/cơ bản, cái nào cùng
+   * filter thì nhóm lại"*). Trước đây không có bộ lọc nào — vài chục bộ tiêu chí đổ thẳng ra
+   * một danh sách dài.
+   */
+  const [typeFilter, setTypeFilter] = useState<"ALL" | "BASIC" | "APPLIED">("ALL");
+  const [roundFilter, setRoundFilter] = useState<string>("ALL");
   // Mặc định thu gọn tiêu chí: nhiều bộ × nhiều tiêu chí thì trang dài không đọc nổi.
   const [openCriteriaId, setOpenCriteriaId] = useState<number | null>(null);
 
@@ -51,9 +59,51 @@ export function RubricTemplatesPanel() {
     return <EmptyState icon={Layers} title={t("rubricSet.none")} description={t("rubricSet.noneDesc")} />;
   }
 
+  const roundTypes = Array.from(new Set(templates.map((x) => x.templateType))).sort();
+  const visible = templates.filter((x) => {
+    if (typeFilter === "BASIC" && !x.appliesBasic) return false;
+    if (typeFilter === "APPLIED" && !x.appliesApplied) return false;
+    if (roundFilter !== "ALL" && x.templateType !== roundFilter) return false;
+    return true;
+  });
+
   return (
     <div className="space-y-3">
-      {templates.map((tpl) => (
+      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2">
+        <Filter className="size-3.5 shrink-0 text-muted-foreground" />
+        <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as typeof typeFilter)}>
+          <SelectTrigger className="h-8 w-44 text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">{t("rubricSet.filterAllTypes")}</SelectItem>
+            <SelectItem value="BASIC">{t("rubricSet.basic")}</SelectItem>
+            <SelectItem value="APPLIED">{t("rubricSet.applied")}</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={roundFilter} onValueChange={setRoundFilter}>
+          <SelectTrigger className="h-8 w-52 text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">{t("rubricSet.filterAllRounds")}</SelectItem>
+            {roundTypes.map((rt) => (
+              <SelectItem key={rt} value={rt}>
+                {t(`reviewBoard.type.${rt}`, rt)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <span className="ml-auto text-xs text-muted-foreground">
+          {t("rubricSet.filterCount", { shown: visible.length, total: templates.length })}
+        </span>
+      </div>
+
+      {visible.length === 0 && (
+        <EmptyState icon={Layers} title={t("rubricSet.filterEmpty")} className="min-h-32 border-none p-4" />
+      )}
+
+      {visible.map((tpl) => (
         <Card key={tpl.id}>
           <CardContent className="space-y-3 p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">

@@ -90,6 +90,10 @@ export const vi = {
     noFile: "chưa có file",
   },
   rubricSet: {
+    filterAllTypes: "Mọi loại đề tài",
+    filterAllRounds: "Mọi loại vòng",
+    filterCount: "Hiện {{shown}}/{{total}} bộ",
+    filterEmpty: "Không có bộ nào khớp bộ lọc",
     totalScore: "{{total}}/{{max}} điểm",
     totalInvalid: "chưa dùng chấm được",
     pageSubtitle: "Mỗi bộ = một phiếu chấm. Gắn bộ cho loại đề tài và cho từng (đợt + lĩnh vực).",

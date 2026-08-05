@@ -89,6 +89,10 @@ export const en = {
     noFile: "no file",
   },
   rubricSet: {
+    filterAllTypes: "All research types",
+    filterAllRounds: "All round types",
+    filterCount: "Showing {{shown}}/{{total}}",
+    filterEmpty: "No template matches the filters",
     totalScore: "{{total}}/{{max}} pts",
     totalInvalid: "cannot be used for scoring yet",
     pageSubtitle: "Each set is one scoring sheet. Assign it to research types and to each (cycle + field).",
