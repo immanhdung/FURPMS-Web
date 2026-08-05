@@ -107,6 +107,9 @@ const PiFinalReportsPage = lazy(() =>
 const PiMyMeetingsPage = lazy(() =>
   import("@/features/pi/meetings/MyMeetingsPage").then((m) => ({ default: m.MyMeetingsPage }))
 );
+const PiMyAmendmentsPage = lazy(() =>
+  import("@/features/pi/amendments/MyAmendmentsPage").then((m) => ({ default: m.MyAmendmentsPage }))
+);
 const PiDeliverablesPage = lazy(() =>
   import("@/features/pi/deliverables/DeliverablesPage").then((m) => ({ default: m.DeliverablesPage }))
 );
@@ -140,6 +143,7 @@ const FEATURE_PAGES: Partial<Record<string, ComponentType>> = {
   [ROUTES.DELIVERABLES]: PiDeliverablesPage,
   [ROUTES.MY_MEETINGS]: PiMyMeetingsPage,
   [ROUTES.FINAL_REPORTS]: PiFinalReportsPage,
+  [ROUTES.MY_AMENDMENTS]: PiMyAmendmentsPage,
 };
 
 const proposalReviewsRoles = NAV_ITEMS.find((item) => item.path === ROUTES.PROPOSAL_REVIEWS)?.roles ?? [];

@@ -31,6 +31,7 @@ export const ROUTES = {
   PROGRESS_REPORTS: "/progress-reports",
   DELIVERABLES: "/deliverables",
   MY_MEETINGS: "/my-meetings",
+  MY_AMENDMENTS: "/my-amendments",
   FINAL_REPORTS: "/final-reports",
   AI_SEARCH: "/ai-search",
 

@@ -13,6 +13,7 @@ import { useProposalQuery } from "@/hooks/useProposals";
 import { ProposalSummaryView } from "@/features/pi/proposals/ProposalSummaryView";
 import { RubricScoringForm } from "@/features/reviewer/proposal-review/RubricScoringForm";
 import { AiSummaryCard } from "@/features/pi/proposals/AiSummaryCard";
+import { AcceptanceDossierPanel } from "@/features/reviewer/proposal-review/AcceptanceDossierPanel";
 import { AcceptanceEvaluationForm } from "@/features/reviewer/proposal-review/AcceptanceEvaluationForm";
 import { MinutesPanel } from "@/features/reviewer/proposal-review/MinutesPanel";
 import { ProposalDocumentViewer } from "@/features/reviewer/proposal-review/ProposalDocumentViewer";
@@ -111,6 +112,8 @@ export function ProposalReviewWorkspace() {
           <Tabs defaultValue="info">
             <TabsList>
               <TabsTrigger value="info">{t("reviewWorkspace.tabInfo")}</TabsTrigger>
+              {/* Nghiệm thu phải nhìn được đề tài ĐÃ LÀM RA GÌ, không chỉ đề cương như vòng 1. */}
+              {isAcceptanceRound && <TabsTrigger value="dossier">{t("reviewWorkspace.tabDossier")}</TabsTrigger>}
               {!isSecretary && <TabsTrigger value="scoring">{t("reviewWorkspace.tabScoring")}</TabsTrigger>}
               {isAcceptanceRound && <TabsTrigger value="acceptance">{t("reviewWorkspace.tabAcceptance")}</TabsTrigger>}
               <TabsTrigger value="minutes">{t("reviewWorkspace.tabMinutes")}</TabsTrigger>
@@ -123,6 +126,12 @@ export function ProposalReviewWorkspace() {
                 <p className="text-sm text-muted-foreground">{t("reviewWorkspace.loadingInfo")}</p>
               )}
             </TabsContent>
+
+            {isAcceptanceRound && (
+              <TabsContent value="dossier">
+                <AcceptanceDossierPanel councilId={councilId} proposalId={membership.proposalId} />
+              </TabsContent>
+            )}
 
             {!isSecretary && (
               <TabsContent value="scoring">

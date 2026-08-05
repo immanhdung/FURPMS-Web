@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 import { ClipboardList, Loader2, Save, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,6 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { useMyScoreQuery, useSubmitScoreMutation } from "@/hooks/useReviewScoring";
 import { useRubricForCouncilQuery } from "@/hooks/useRubricTemplates";
 import { useSuggestScoresMutation } from "@/hooks/useProposalAi";
-import { ROUTES } from "@/constants/routes";
 import type { ScoreDetailPayload } from "@/types/review-scoring";
 
 interface RubricScoringFormProps {
@@ -24,7 +22,6 @@ interface RubricScoringFormProps {
 
 export function RubricScoringForm({ councilId, proposalId }: RubricScoringFormProps) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   // Lấy ĐÚNG bộ tiêu chí cho hội đồng này: BE tự suy (đợt + lĩnh vực + loại vòng) từ councilId
   // rồi trả bộ đã gắn cho lĩnh vực đó; chưa gắn thì trả bộ mặc định (không bao giờ kẹt).
   const { data: resolvedTemplate, isLoading: isTemplatesLoading } = useRubricForCouncilQuery(councilId);
@@ -116,7 +113,8 @@ export function RubricScoringForm({ councilId, proposalId }: RubricScoringFormPr
         otherRecommendations: otherRecommendations || undefined,
         scoreDetails,
       },
-      { onSuccess: () => navigate(ROUTES.ASSIGNED_REVIEWS) }
+      // KHÔNG rời trang sau khi nộp: người chấm hay muốn xem lại/sửa điểm ngay,
+      // bị đá về danh sách rồi phải mò vào lại là khó chịu.
     );
   };
 

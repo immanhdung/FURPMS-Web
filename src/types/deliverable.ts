@@ -16,12 +16,15 @@ export interface Deliverable {
   isCompleted: boolean;
   submittedAt?: string | null;
   fileUrl?: string | null;
+  /** Minh chứng thử nghiệm (QĐ543 Điều 13.1). */
+  trialEvidenceUrl?: string | null;
   qualityAssessment?: string | null;
 }
 
 /** PI nộp sản phẩm. */
 export interface SubmitDeliverablePayload {
   fileUrl: string;
+  trialEvidenceUrl?: string;
   description?: string;
 }
 

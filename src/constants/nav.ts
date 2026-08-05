@@ -1,4 +1,5 @@
 import {
+  FilePenLine,
   LayoutDashboard,
   CalendarRange,
   FolderKanban,
@@ -63,6 +64,8 @@ export const NAV_ITEMS: NavItem[] = [
   { labelKey: "nav.deliverables", path: ROUTES.DELIVERABLES, icon: Package, roles: [ROLES.FACULTY] },
   { labelKey: "nav.myMeetings", path: ROUTES.MY_MEETINGS, icon: CalendarClock, roles: [ROLES.FACULTY] },
   { labelKey: "nav.finalReports", path: ROUTES.FINAL_REPORTS, icon: FileCheck2, roles: [ROLES.FACULTY] },
+  // PI xin điều chỉnh/gia hạn hợp đồng — BE đã cho phép từ lâu, trước đây thiếu màn.
+  { labelKey: "nav.myAmendments", path: ROUTES.MY_AMENDMENTS, icon: FilePenLine, roles: [ROLES.FACULTY] },
   { labelKey: "nav.aiSearch", path: ROUTES.AI_SEARCH, icon: Sparkles, roles: [ROLES.FACULTY] },
 
   // Review Committee
