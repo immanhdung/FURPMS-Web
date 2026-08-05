@@ -77,6 +77,13 @@ export function ContractDetailSheet({ open, onOpenChange, contractId }: Contract
                 <span className="text-xs text-muted-foreground">
                   {formatDate(contract.startDate)} – {formatDate(contract.endDate)}
                 </span>
+                {/* Duyệt gia hạn là BE đổi luôn EndDate. Không đối chiếu với hạn GỐC thì
+                    nhìn vào chỉ thấy một cái ngày, không biết đã gia hạn hay chưa. */}
+                {contract.originalEndDate && contract.originalEndDate !== contract.endDate && (
+                  <span className="rounded-full bg-warning/10 px-2 py-0.5 text-xs font-medium text-warning">
+                    {t("contract.extendedFrom", { date: formatDate(contract.originalEndDate) })}
+                  </span>
+                )}
                 {contract.maxExtensionMonths != null && (
                   <span className="text-xs text-muted-foreground">
                     {t("contract.maxExtension", { n: contract.maxExtensionMonths })}

@@ -1054,6 +1054,7 @@ export const en = {
     detailTitle: "Contract details",
     loadingContract: "Loading contract...",
     loadingProposal: "Loading proposal...",
+    extendedFrom: "Extended — original {{date}}",
     maxExtension: "Max extension: {{n}} months",
     sideARep: "Side A representative",
     econtract: "E-contract",

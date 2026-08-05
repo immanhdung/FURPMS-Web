@@ -16,7 +16,23 @@ import { formatDate, formatDateTime } from "@/utils/format";
  * Sản phẩm phải nộp của hợp đồng.
  * PI nộp file → Staff nghiệm thu. Nghiệm thu ĐẠT sẽ mở điều kiện chi tiền cho đợt giải ngân tương ứng.
  */
-export function DeliverablesPanel({ contractId, canManage }: { contractId: string; canManage: boolean }) {
+/**
+ * Sản phẩm của hợp đồng.
+ *
+ * `canSubmit` mặc định FALSE: người NỘP sản phẩm là **PI** (trang /deliverables),
+ * Staff chỉ **thêm sản phẩm phải giao + nghiệm thu**. Panel này nhúng trong màn Hợp đồng
+ * của Staff mà vẫn hiện nút "Nộp lại" ⇒ Staff nộp hộ PI — lỗi sai vai thứ BA cùng kiểu
+ * (sau báo cáo tổng kết và yêu cầu điều chỉnh).
+ */
+export function DeliverablesPanel({
+  contractId,
+  canManage,
+  canSubmit = false,
+}: {
+  contractId: string;
+  canManage: boolean;
+  canSubmit?: boolean;
+}) {
   const { t } = useTranslation();
   const { data: deliverables, isLoading } = useDeliverablesQuery(contractId);
   const [submitting, setSubmitting] = useState<Deliverable | null>(null);
@@ -137,8 +153,9 @@ export function DeliverablesPanel({ contractId, canManage }: { contractId: strin
             )}
 
             <div className="flex flex-wrap gap-2">
-              {/* PI nộp/nộp lại — BE cho phép nộp lại khi bị đánh trượt. */}
-              {!isPassed && (
+              {/* PI nộp/nộp lại — BE cho phép nộp lại khi bị đánh trượt.
+                  Staff KHÔNG nộp hộ: panel này nhúng ở màn Staff nên phải gác bằng canSubmit. */}
+              {canSubmit && !isPassed && (
                 <Button size="sm" variant="outline" onClick={() => setSubmitting(d)}>
                   <Upload />
                   {isSubmitted ? t("contract.deliverable.resubmit") : t("contract.deliverable.submit")}

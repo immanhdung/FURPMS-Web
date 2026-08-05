@@ -6,6 +6,8 @@ export interface Contract {
   scopeTitle?: string | null;
   startDate?: string | null;
   endDate?: string | null;
+  /** Hạn GỐC lúc ký — khác endDate nghĩa là đã gia hạn. */
+  originalEndDate?: string | null;
   maxExtensionMonths?: number | null;
   sideARepresentative?: string | null;
   econtractUrl?: string | null;

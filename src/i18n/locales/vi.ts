@@ -1061,6 +1061,7 @@ export const vi = {
     detailTitle: "Chi tiết hợp đồng",
     loadingContract: "Đang tải hợp đồng...",
     loadingProposal: "Đang tải đề cương...",
+    extendedFrom: "Đã gia hạn — hạn gốc {{date}}",
     maxExtension: "Gia hạn tối đa: {{n}} tháng",
     sideARep: "Đại diện Bên A",
     econtract: "Hợp đồng điện tử",

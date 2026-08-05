@@ -33,6 +33,9 @@ function useAmendmentAction<TArgs>(
     onSuccess: () => {
       toast.success(successMessage);
       queryClient.invalidateQueries({ queryKey: queryKeys.amendments.list(contractId) });
+      // Duyệt "gia hạn" là BE ĐỔI LUÔN hạn hợp đồng. Không nạp lại hợp đồng thì màn hình
+      // vẫn hiện hạn cũ ⇒ người dùng tưởng duyệt xong chẳng có tác dụng gì.
+      queryClient.invalidateQueries({ queryKey: queryKeys.contracts.all() });
     },
     onError: (error: ApiError) => toast.error(error.message || errorMessage),
   });
