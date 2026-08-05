@@ -2,27 +2,33 @@ import type { AiExtractionResult } from "@/types/ai-extraction";
 
 export const SAMPLE_AI_EXTRACTIONS: AiExtractionResult[] = [
   {
-    titleEN: "Deep Learning Approaches for Automated Plagiarism Detection in Academic Manuscripts",
-    titleVI: "Ứng dụng học sâu trong phát hiện đạo văn tự động cho các bài báo học thuật",
-    abstractEN:
+    titleEn: "Deep Learning Approaches for Automated Plagiarism Detection in Academic Manuscripts",
+    titleVi: "Ứng dụng học sâu trong phát hiện đạo văn tự động cho các bài báo học thuật",
+    abstractVi:
       "This study proposes a transformer-based semantic similarity framework for detecting plagiarism across academic manuscripts. We evaluate the approach on a corpus of published papers and demonstrate improved precision over traditional n-gram methods.",
-    keywords: ["deep learning", "plagiarism detection", "natural language processing", "transformers"],
-    researchArea: "Artificial Intelligence",
+    researchObjectives: "Xây dựng và đánh giá mô hình đề xuất.",
+    methodology: "Thực nghiệm trên bộ dữ liệu công bố, so sánh với phương pháp nền.",
+    expectedOutput: "01 bài báo hội nghị + mã nguồn.",
+    durationMonths: 12,
   },
   {
-    titleEN: "A Lightweight IoT Framework for Smart Campus Environmental Monitoring",
-    titleVI: "Một khung IoT nhẹ cho giám sát môi trường khuôn viên trường học thông minh",
-    abstractEN:
+    titleEn: "A Lightweight IoT Framework for Smart Campus Environmental Monitoring",
+    titleVi: "Một khung IoT nhẹ cho giám sát môi trường khuôn viên trường học thông minh",
+    abstractVi:
       "We present an energy-efficient IoT architecture for real-time environmental monitoring across university campuses, combining low-power sensor nodes with edge-based anomaly detection.",
-    keywords: ["IoT", "smart campus", "edge computing", "sensor networks"],
-    researchArea: "Information Technology",
+    researchObjectives: "Xây dựng và đánh giá mô hình đề xuất.",
+    methodology: "Thực nghiệm trên bộ dữ liệu công bố, so sánh với phương pháp nền.",
+    expectedOutput: "01 bài báo hội nghị + mã nguồn.",
+    durationMonths: 12,
   },
   {
-    titleEN: "Predictive Analytics for Student Retention Using Ensemble Learning",
-    titleVI: "Phân tích dự đoán tỷ lệ giữ chân sinh viên bằng học máy tổ hợp",
-    abstractEN:
+    titleEn: "Predictive Analytics for Student Retention Using Ensemble Learning",
+    titleVi: "Phân tích dự đoán tỷ lệ giữ chân sinh viên bằng học máy tổ hợp",
+    abstractVi:
       "This research develops an ensemble machine learning pipeline to predict at-risk students early in the academic term, enabling timely intervention by academic advisors.",
-    keywords: ["predictive analytics", "ensemble learning", "student retention", "data science"],
-    researchArea: "Data Science",
+    researchObjectives: "Xây dựng và đánh giá mô hình đề xuất.",
+    methodology: "Thực nghiệm trên bộ dữ liệu công bố, so sánh với phương pháp nền.",
+    expectedOutput: "01 bài báo hội nghị + mã nguồn.",
+    durationMonths: 12,
   },
 ];

@@ -31,7 +31,9 @@ export function useProposalSummaryQuery(proposalId: string | null) {
     queryKey: ["ai", "summary", proposalId ?? ""],
     queryFn: () => aiService.getProposalSummary(proposalId as string),
     enabled: Boolean(proposalId),
-    onError: () => toast.error("Unable to generate an AI summary."),
+    // TanStack Query v5 BỎ `onError` trên useQuery. Để lại thì không khớp overload nào,
+    // kiểu dữ liệu trả về suy ra `{}` — mọi field của tóm tắt thành lỗi kiểu ở nơi dùng.
+    // Lỗi khi đọc cache cũng không cần toast: chưa có tóm tắt là chuyện bình thường.
   });
 }
 

@@ -42,16 +42,6 @@ export function CreateContractSheet({ open, onOpenChange, contract = null }: Cre
   const approvedProposals = (allApproved ?? []).filter((p) => !contractedProposalIds.has(p.id));
   const hiddenCount = (allApproved?.length ?? 0) - approvedProposals.length;
 
-  /**
-   * Trần gia hạn KHÔNG phải con số cố định.
-   * QĐ543 Điều 10.4: *"Gia hạn tối đa 1/2 tổng thời gian thực hiện của đề tài được phê duyệt"*.
-   * "6 tháng" mà tài liệu nội bộ hay nhắc chỉ đúng khi đề tài dài 12 tháng — Mẫu 1 giới hạn
-   * "không quá 12 tháng" nên đó là ca hay gặp, không phải luật.
-   */
-  const selectedProposalId = watch("proposalId");
-  const selectedDuration =
-    approvedProposals.find((p) => p.id === selectedProposalId)?.durationMonths ?? 0;
-  const extensionCap = selectedDuration > 0 ? Math.floor(selectedDuration / 2) : null;
   const createMutation = useCreateContractMutation();
   const updateMutation = useUpdateContractMutation();
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
@@ -77,6 +67,17 @@ export function CreateContractSheet({ open, onOpenChange, contract = null }: Cre
       econtractUrl: "",
     },
   });
+
+  /**
+   * Trần gia hạn KHÔNG phải con số cố định.
+   * QĐ543 Điều 10.4: *"Gia hạn tối đa 1/2 tổng thời gian thực hiện của đề tài được phê duyệt"*.
+   * "6 tháng" mà tài liệu nội bộ hay nhắc chỉ đúng khi đề tài dài 12 tháng — Mẫu 1 giới hạn
+   * "không quá 12 tháng" nên đó là ca hay gặp, không phải luật.
+   */
+  const selectedProposalId = watch("proposalId");
+  const selectedDuration =
+    approvedProposals.find((p) => p.id === selectedProposalId)?.durationMonths ?? 0;
+  const extensionCap = selectedDuration > 0 ? Math.floor(selectedDuration / 2) : null;
 
   // Mở form sửa phải thấy giá trị đang có, không thì lưu lại là ghi đè trắng.
   useEffect(() => {

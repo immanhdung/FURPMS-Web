@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { CircleCheck, CircleX, ClipboardCheck, ExternalLink, Package, Plus, Upload } from "lucide-react";
+import { CircleCheck, CircleX, ClipboardCheck, Package, Plus, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";

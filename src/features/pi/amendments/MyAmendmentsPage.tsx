@@ -113,9 +113,9 @@ export function MyAmendmentsPage() {
                   <p className="text-sm text-foreground">{a.changeDescription}</p>
                   {a.justification && <p className="text-xs text-muted-foreground">{a.justification}</p>}
                   <p className="text-xs text-muted-foreground">{formatDate(a.requestedAt)}</p>
-                  {a.reviewNotes && (
+                  {a.reviewerComments && (
                     <p className="text-xs text-foreground">
-                      {t("amendments.reviewNotes")}: {a.reviewNotes}
+                      {t("amendments.reviewNotes")}: {a.reviewerComments}
                     </p>
                   )}
                 </li>

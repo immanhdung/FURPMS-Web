@@ -94,10 +94,10 @@ export function SubmitDeliverableDialog({
         mode === "link"
           ? normalizeLink(linkUrl)
           : productFile
-            ? (await deliverableDocumentService.upload(deliverable.id, productFile, false)).downloadUrl
+            ? (await deliverableDocumentService.upload(deliverable.id, productFile, false)).downloadUrl ?? ""
             : existingFileUrl!;
       const trialEvidenceUrl = trialFile
-        ? (await deliverableDocumentService.upload(deliverable.id, trialFile, true)).downloadUrl
+        ? (await deliverableDocumentService.upload(deliverable.id, trialFile, true)).downloadUrl ?? undefined
         : existingTrialUrl ?? undefined;
 
       submitMutation.mutate(

@@ -1,3 +1,13 @@
+export interface ProgressReportItem {
+  id: number;
+  activityId: number;
+  activityName: string;
+  completionRate: number;
+  completionStatus: string;
+  evidenceDescription?: string | null;
+  notes?: string | null;
+}
+
 export interface ProgressReport {
   id: string;
   contractId: string;
@@ -18,6 +28,8 @@ export interface ProgressReport {
   dueDate?: string | null;
   scheduledMeetingAt?: string | null;
   meetingLink?: string | null;
+  /** Bảng tiến độ theo hoạt động (BM06) — CHỈ có ở endpoint chi tiết, không có ở danh sách. */
+  items?: ProgressReportItem[] | null;
   evaluationResult?: string | null;
   evaluationComments?: string | null;
   submittedAt?: string | null;

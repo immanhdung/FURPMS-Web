@@ -2,22 +2,22 @@ import type { AiFeedbackItem, ReviewerSuggestion, SemanticSearchResult, SummaryR
 
 export const SAMPLE_SUMMARIES: SummaryResult[] = [
   {
-    summary:
+    id: "mock-summary-1",
+    proposalId: "mock-proposal-1",
+    summaryText:
       "This proposal investigates a transformer-based approach to detecting plagiarism across academic manuscripts, combining semantic embeddings with citation-graph analysis to improve precision over traditional n-gram methods.",
-    highlights: [
-      "Novel combination of transformer embeddings and citation graphs",
-      "Evaluated on a corpus of 10,000+ published papers",
-      "Reports 12% precision improvement over baseline methods",
-    ],
+    isEditedByHuman: false,
+    generatedAt: "2026-08-01T00:00:00Z",
+    source: "textFields",
   },
   {
-    summary:
+    id: "mock-summary-2",
+    proposalId: "mock-proposal-2",
+    summaryText:
       "The project proposes a lightweight IoT architecture for real-time environmental monitoring across university campuses, using low-power sensor nodes with edge-based anomaly detection to reduce cloud dependency.",
-    highlights: [
-      "Energy-efficient edge computing architecture",
-      "Real-time anomaly detection at the sensor level",
-      "Pilot deployment planned across 3 campus buildings",
-    ],
+    isEditedByHuman: false,
+    generatedAt: "2026-08-01T00:00:00Z",
+    source: "textFields",
   },
 ];
 

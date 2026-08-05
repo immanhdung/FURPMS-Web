@@ -1,4 +1,8 @@
-export interface ApiResponse<T> {
+/**
+ * BE có 2 dạng: `ApiResponse<T>` (có data) và `ApiResponse` trần (chỉ message) — xem
+ * `FURPMS.Application/Common/ApiResponse.cs`. Mặc định `T = null` để FE viết được cả hai.
+ */
+export interface ApiResponse<T = null> {
   success: boolean;
   message?: string | null;
   data: T;

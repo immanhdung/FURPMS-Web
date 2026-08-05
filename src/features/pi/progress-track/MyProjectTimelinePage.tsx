@@ -77,7 +77,7 @@ export function MyProjectTimelinePage() {
                       )}
                     </span>
                   </span>
-                  <StatusBadge status={contract.status} />
+                  {contract.status && <StatusBadge status={contract.status} />}
                 </button>
 
                 {/* Tái dùng đúng timeline của màn Staff — cùng một nguồn sự thật, khỏi lệch. */}

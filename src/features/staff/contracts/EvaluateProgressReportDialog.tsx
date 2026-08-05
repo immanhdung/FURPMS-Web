@@ -12,7 +12,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   useEvaluateProgressReportMutation,
   useProgressReportDocumentsQuery,
@@ -20,7 +19,6 @@ import {
 } from "@/hooks/useProgressReports";
 import { ProgressReportDetailView } from "@/components/shared/ProgressReportDetailView";
 import { progressReportDocumentService } from "@/services/api/progress-report-document.service";
-import { formatDate } from "@/utils/format";
 
 /** QĐ543 Điều 10 / BM06 — kết quả đánh giá tiến độ (khớp giá trị BE nhận). */
 const PROGRESS_EVAL = { PASS: "PASS", CONDITIONAL: "CONDITIONAL", FAIL: "FAIL" } as const;
@@ -43,7 +41,7 @@ export function EvaluateProgressReportDialog({
   const [evaluationResult, setEvaluationResult] = useState<string>(PROGRESS_EVAL.PASS);
   const [evaluationComments, setEvaluationComments] = useState("");
 
-  const { data: report, isLoading: isLoadingDetail } = useProgressReportQuery(open ? reportId : null);
+  const { data: report } = useProgressReportQuery(open ? reportId : null);
 
   /**
    * Thầy 29/07: Staff phải XEM được bản báo cáo rồi mới cho Đạt/Không đạt.
@@ -105,7 +103,7 @@ export function EvaluateProgressReportDialog({
                       className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
                     >
                       <FileText className="size-3.5" />
-                      {d.originalFileName}
+                      {d.fileName}
                     </button>
                   </li>
                 ))}

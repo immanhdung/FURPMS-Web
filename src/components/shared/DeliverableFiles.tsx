@@ -80,11 +80,11 @@ export function DeliverableFiles({ deliverable }: { deliverable: Deliverable }) 
         <button
           key={d.id}
           type="button"
-          onClick={() => download(d.id, d.originalFileName)}
+          onClick={() => download(d.id, d.fileName)}
           className="flex w-full items-center gap-1.5 text-left text-xs text-primary hover:underline"
         >
           <Download className="size-3.5 shrink-0" />
-          <span className="truncate">{d.originalFileName}</span>
+          <span className="truncate">{d.fileName}</span>
         </button>
       ))}
     </div>

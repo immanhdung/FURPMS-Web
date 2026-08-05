@@ -68,7 +68,6 @@ export function CreateReviewRoundSheet({
     handleSubmit,
     control,
     reset,
-    formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { dimension: ROUND_DIMENSION.SCIENCE, prerequisiteRoundId: undefined },

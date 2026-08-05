@@ -170,7 +170,7 @@ export function CreateProgressReportSheet({ open, onOpenChange, contractId, prop
             {docs.map((d) => (
               <li key={d.id} className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <FileText className="size-3.5 shrink-0" />
-                <span className="truncate">{d.originalFileName}</span>
+                <span className="truncate">{d.fileName}</span>
               </li>
             ))}
           </ul>
