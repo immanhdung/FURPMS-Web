@@ -116,6 +116,12 @@ const PiMyTimelinePage = lazy(() =>
 const PiDeliverablesPage = lazy(() =>
   import("@/features/pi/deliverables/DeliverablesPage").then((m) => ({ default: m.DeliverablesPage }))
 );
+const PendingChangeRequestsPage = lazy(() =>
+  import("@/features/staff/proposal-reviews/PendingChangeRequestsPanel").then((m) => ({ default: m.PendingChangeRequestsPanel }))
+);
+const DocumentRepositoryPage = lazy(() =>
+  import("@/features/staff/documents/DocumentRepositoryPage").then((m) => ({ default: m.DocumentRepositoryPage }))
+);
 
 const FEATURE_PAGES: Partial<Record<string, ComponentType>> = {
   [ROUTES.NOTIFICATIONS]: NotificationsPage,
@@ -148,6 +154,8 @@ const FEATURE_PAGES: Partial<Record<string, ComponentType>> = {
   [ROUTES.FINAL_REPORTS]: PiFinalReportsPage,
   [ROUTES.MY_AMENDMENTS]: PiMyAmendmentsPage,
   [ROUTES.MY_TIMELINE]: PiMyTimelinePage,
+  [ROUTES.CHANGE_REQUESTS]: PendingChangeRequestsPage,
+  [ROUTES.DOCUMENTS]: DocumentRepositoryPage,
 };
 
 const proposalReviewsRoles = NAV_ITEMS.find((item) => item.path === ROUTES.PROPOSAL_REVIEWS)?.roles ?? [];

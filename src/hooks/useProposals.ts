@@ -76,3 +76,21 @@ export function useWithdrawProposalMutation() {
     onError: (error: ApiError) => toast.error(error.message || "Unable to withdraw proposal."),
   });
 }
+
+export function useExportScientificMutation() {
+  return useMutation({
+    mutationFn: ({ id, titleSlug }: { id: string; titleSlug: string }) =>
+      proposalService.exportScientific(id, titleSlug),
+    onSuccess: () => toast.success("Thuyết minh đã được xuất thành công."),
+    onError: (error: ApiError) => toast.error(error.message || "Failed to export scientific report."),
+  });
+}
+
+export function useExportBudgetMutation() {
+  return useMutation({
+    mutationFn: ({ id, titleSlug }: { id: string; titleSlug: string }) =>
+      proposalService.exportBudget(id, titleSlug),
+    onSuccess: () => toast.success("Dự toán kinh phí đã được xuất thành công."),
+    onError: (error: ApiError) => toast.error(error.message || "Failed to export budget report."),
+  });
+}

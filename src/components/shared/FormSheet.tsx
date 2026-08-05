@@ -21,6 +21,7 @@ interface FormSheetProps {
   isSubmitting?: boolean;
   submitLabel?: string;
   formId: string;
+  submitVariant?: "default" | "destructive" | "outline" | "secondary";
 }
 
 export function FormSheet({
@@ -33,6 +34,7 @@ export function FormSheet({
   isSubmitting = false,
   submitLabel = "Save",
   formId,
+  submitVariant = "default",
 }: FormSheetProps) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -53,7 +55,7 @@ export function FormSheet({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button type="submit" form={formId} disabled={isSubmitting}>
+            <Button type="submit" form={formId} variant={submitVariant} disabled={isSubmitting}>
               {isSubmitting && <Loader2 className="animate-spin" />}
               {submitLabel}
             </Button>
@@ -63,3 +65,4 @@ export function FormSheet({
     </Sheet>
   );
 }
+
