@@ -24,7 +24,22 @@ import { formatDateTime } from "@/utils/format";
  * Báo cáo tổng kết: PI nộp → Staff yêu cầu sửa / duyệt → lưu trữ.
  * Chỉ có 1 báo cáo cho mỗi hợp đồng; nộp lại sẽ ghi đè bản cũ.
  */
-export function FinalReportPanel({ contractId, canManage }: { contractId: string; canManage: boolean }) {
+/**
+ * Báo cáo tổng kết (BM09).
+ *
+ * `canSubmitReport` mặc định FALSE: theo QĐ543 người nộp BM09 là **PI**, không phải Staff.
+ * Panel này đang nhúng trong màn Hợp đồng của Staff, mà trước đây vẫn hiện form "Nộp báo
+ * cáo tổng kết" ⇒ Staff nộp hộ PI, sai vai. Staff chỉ XEM + yêu cầu chỉnh sửa.
+ */
+export function FinalReportPanel({
+  contractId,
+  canManage,
+  canSubmitReport = false,
+}: {
+  contractId: string;
+  canManage: boolean;
+  canSubmitReport?: boolean;
+}) {
   const { t } = useTranslation();
   const { data: report, isLoading } = useFinalReportQuery(contractId);
   const submitMutation = useSubmitFinalReportMutation(contractId);
@@ -79,7 +94,7 @@ export function FinalReportPanel({ contractId, canManage }: { contractId: string
   const isAccepted = status === FINAL_REPORT_STATUS.ACCEPTED;
   const needsRevision = status === FINAL_REPORT_STATUS.REVISION_REQUIRED;
   // Nộp được khi: chưa nộp lần nào, hoặc bị trả về sửa. Đã duyệt/lưu trữ thì khóa.
-  const canSubmit = !report || needsRevision;
+  const canSubmit = canSubmitReport && (!report || needsRevision);
 
   return (
     <div className="space-y-4">

@@ -1145,6 +1145,9 @@ export const vi = {
       fileLink: "Đường dẫn file",
       fileLinkPlaceholder: "https://… link bài báo, dữ liệu hoặc phần mềm",
       // Nay CHỌN FILE thật thay vì dán URL (QĐ543 Điều 13.1 cần cả minh chứng thử nghiệm)
+      modeFile: "Tải file lên",
+      modeLink: "Dán link",
+      modeLinkHint: "Dùng khi file quá lớn — Google Drive, GitHub, DOI… Người chấm phải mở được link.",
       productFile: "File sản phẩm",
       productFileHint: "Bài báo, phần mềm, dữ liệu… (PDF/Word/ZIP)",
       trialEvidence: "Minh chứng thử nghiệm",

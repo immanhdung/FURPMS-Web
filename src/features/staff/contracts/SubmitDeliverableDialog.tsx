@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useSubmitDeliverableMutation } from "@/hooks/useDeliverables";
+import { cn } from "@/lib/utils";
 import { deliverableDocumentService } from "@/services/api/deliverable-document.service";
 import type { Deliverable } from "@/types/deliverable";
 
@@ -45,6 +46,9 @@ export function SubmitDeliverableDialog({
   const [trialFile, setTrialFile] = useState<File | null>(null);
   const [description, setDescription] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  // Upload file (mặc định) HOẶC dán link — sản phẩm nặng thì upload không nổi.
+  const [mode, setMode] = useState<"file" | "link">("file");
+  const [linkUrl, setLinkUrl] = useState("");
 
   // URL đã nộp trước đó — nộp lại mà không chọn file mới thì giữ nguyên bản cũ.
   const [existingFileUrl, setExistingFileUrl] = useState<string | null>(null);
@@ -56,11 +60,13 @@ export function SubmitDeliverableDialog({
       setTrialFile(null);
       setDescription(deliverable.description ?? "");
       setExistingFileUrl(deliverable.fileUrl ?? null);
+      setLinkUrl(deliverable.fileUrl?.startsWith("http") ? deliverable.fileUrl : "");
+      setMode(deliverable.fileUrl?.startsWith("http") ? "link" : "file");
       setExistingTrialUrl(deliverable.trialEvidenceUrl ?? null);
     }
   }, [open, deliverable]);
 
-  const hasProduct = Boolean(productFile || existingFileUrl);
+  const hasProduct = mode === "link" ? linkUrl.trim().length > 0 : Boolean(productFile || existingFileUrl);
   const isBusy = isUploading || submitMutation.isPending;
 
   const submit = async () => {
@@ -68,9 +74,12 @@ export function SubmitDeliverableDialog({
     setIsUploading(true);
     try {
       // Upload trước, lấy URL download của hệ thống rồi mới gọi submit.
-      const fileUrl = productFile
-        ? (await deliverableDocumentService.upload(deliverable.id, productFile, false)).downloadUrl
-        : existingFileUrl!;
+      const fileUrl =
+        mode === "link"
+          ? linkUrl.trim()
+          : productFile
+            ? (await deliverableDocumentService.upload(deliverable.id, productFile, false)).downloadUrl
+            : existingFileUrl!;
       const trialEvidenceUrl = trialFile
         ? (await deliverableDocumentService.upload(deliverable.id, trialFile, true)).downloadUrl
         : existingTrialUrl ?? undefined;
@@ -109,6 +118,28 @@ export function SubmitDeliverableDialog({
     </div>
   );
 
+  /**
+   * Sản phẩm có thể là dataset/phần mềm rất nặng — ép upload là bất khả thi.
+   * Cho chọn 1 trong 2 cách, miễn có đủ một đường để người chấm lấy được sản phẩm.
+   */
+  const modeToggle = (
+    <div className="flex gap-1 rounded-lg border border-border p-0.5">
+      {(["file", "link"] as const).map((m) => (
+        <button
+          key={m}
+          type="button"
+          onClick={() => setMode(m)}
+          className={cn(
+            "flex-1 rounded-md px-2 py-1 text-xs font-medium transition-colors",
+            mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          {m === "file" ? t("contract.deliverable.modeFile") : t("contract.deliverable.modeLink")}
+        </button>
+      ))}
+    </div>
+  );
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -118,15 +149,32 @@ export function SubmitDeliverableDialog({
         </DialogHeader>
 
         <div className="space-y-3">
-          {filePicker(
-            "deliverable-file",
-            t("contract.deliverable.productFile"),
-            t("contract.deliverable.productFileHint"),
-            true,
-            productFile,
-            existingFileUrl,
-            setProductFile
-          )}
+          {modeToggle}
+
+          {mode === "file"
+            ? filePicker(
+                "deliverable-file",
+                t("contract.deliverable.productFile"),
+                t("contract.deliverable.productFileHint"),
+                true,
+                productFile,
+                existingFileUrl,
+                setProductFile
+              )
+            : (
+              <div>
+                <label htmlFor="deliverable-link" className="mb-1.5 block text-sm font-medium text-foreground">
+                  {t("contract.deliverable.fileLink")} <span className="text-destructive">*</span>
+                </label>
+                <Input
+                  id="deliverable-link"
+                  placeholder={t("contract.deliverable.fileLinkPlaceholder")}
+                  value={linkUrl}
+                  onChange={(e) => setLinkUrl(e.target.value)}
+                />
+                <p className="mt-1 text-xs text-muted-foreground">{t("contract.deliverable.modeLinkHint")}</p>
+              </div>
+            )}
 
           {/* QĐ543 Điều 13.1 — hồ sơ nghiệm thu cần minh chứng thử nghiệm. */}
           {filePicker(
