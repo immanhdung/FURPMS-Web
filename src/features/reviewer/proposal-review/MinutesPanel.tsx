@@ -14,7 +14,7 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { useApproveMinutesMutation, useDecisionQuery, useSaveMinutesMutation } from "@/hooks/useDecision";
 import { useCouncilMembersQuery } from "@/hooks/useCouncilMembers";
 import { useCouncilMeetingsQuery, useMeetingAttendanceQuery, useSaveAttendanceMutation } from "@/hooks/useMeetings";
-import { useAllScoresQuery } from "@/hooks/useReviewScoring";
+import { useAllScoresQuery, useBallotTallyQuery } from "@/hooks/useReviewScoring";
 import { useFeedbackListQuery } from "@/hooks/useFeedback";
 import { REVIEW_DECISION } from "@/constants/statuses";
 import { formatDateTime } from "@/utils/format";
@@ -47,6 +47,8 @@ export function MinutesPanel({ councilId, memberRole }: { councilId: string; mem
 
   const { data: members } = useCouncilMembersQuery(councilId);
   const { data: scores, error: scoresError } = useAllScoresQuery(councilId);
+  // BM12 mục 10.1 — số phiếu phát ra/thu về/hợp lệ + Đạt/Không đạt + chi tiết từng thành viên.
+  const { data: tally } = useBallotTallyQuery(councilId);
   const { data: feedbackList, error: feedbackError } = useFeedbackListQuery(councilId);
   const isScoresForbidden = (scoresError as ApiError | null)?.status === 403;
   const isFeedbackForbidden = (feedbackError as ApiError | null)?.status === 403;
@@ -108,24 +110,6 @@ export function MinutesPanel({ councilId, memberRole }: { councilId: string; mem
   }
   const att = (memberId: string) => attendance[memberId] ?? { attended: true, reason: "" };
 
-  /**
-   * Số liệu cuộc họp (BM04 mục II.2) tính TẠI CHỖ khi biên bản chưa chốt.
-   * Trước đây chỉ đọc từ `decision` — mà `decision` chỉ có sau khi Chủ tịch duyệt biên bản, nên
-   * suốt lúc Thư ký đang soạn thì cả 4 ô đều "—": không có gì để mà điền vào biên bản.
-   */
-  const liveTally = (() => {
-    const roster = members ?? [];
-    const valid = (scores ?? []).filter((s) => s.isValidBallot);
-    const totals = valid.map((s) => s.totalScore ?? 0);
-    return {
-      totalMembers: roster.length || undefined,
-      attending: roster.length ? roster.filter((m) => att(m.id).attended).length : undefined,
-      validBallots: valid.length || undefined,
-      averageScore: totals.length
-        ? (totals.reduce((a, b) => a + b, 0) / totals.length).toFixed(1)
-        : undefined,
-    };
-  })();
   const setAttended = (memberId: string, attended: boolean) =>
     setAttendance((prev) => ({ ...prev, [memberId]: { attended, reason: attended ? "" : prev[memberId]?.reason ?? "" } }));
   const setReason = (memberId: string, reason: string) =>
@@ -248,12 +232,22 @@ export function MinutesPanel({ councilId, memberRole }: { councilId: string; mem
               <span className="text-xs font-medium text-warning">{t("minutes.draftNotApproved")}</span>
             ) : null}
           </div>
+          {/* QĐ543 BM12 mục 10.1 "Kết quả bỏ phiếu đánh giá": số phiếu phát ra / thu về /
+              hợp lệ / không hợp lệ, và Đạt / Không đạt. Trước đây chỉ có 4 ô (thành viên · có
+              mặt · phiếu hợp lệ · điểm TB) nên Thư ký không có số để điền vào biểu mẫu. */}
           <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[
-              { label: t("minutes.members"), value: decision?.totalMembers ?? liveTally.totalMembers },
-              { label: t("minutes.attending"), value: decision?.attendingMembers ?? liveTally.attending },
-              { label: t("minutes.validBallots"), value: decision?.validBallots ?? liveTally.validBallots },
-              { label: t("minutes.averageScore"), value: decision?.averageScore ?? liveTally.averageScore },
+              { label: t("minutes.ballotsIssued"), value: tally?.totalMembers ?? decision?.totalMembers },
+              { label: t("minutes.ballotsReturned"), value: tally?.ballotsReturned ?? decision?.attendingMembers },
+              { label: t("minutes.validBallots"), value: tally?.validBallots ?? decision?.validBallots },
+              { label: t("minutes.invalidBallots"), value: tally?.invalidBallots ?? decision?.invalidBallots },
+              ...(tally?.isAcceptanceRound
+                ? [
+                    { label: t("minutes.passCount"), value: tally?.passCount },
+                    { label: t("minutes.failCount"), value: tally?.failCount },
+                  ]
+                : []),
+              { label: t("minutes.averageScore"), value: tally?.averageScore ?? decision?.averageScore },
             ].map((item) => (
               <div key={item.label} className="rounded-lg border border-border p-2">
                 <dt className="text-xs text-muted-foreground">{item.label}</dt>
@@ -261,6 +255,42 @@ export function MinutesPanel({ councilId, memberRole }: { councilId: string; mem
               </div>
             ))}
           </dl>
+
+          {/* Chi tiết từng người chấm — thầy 05/08: "phải hiện bao nhiêu người chấm thì phải
+              hiện bao nhiêu pass bao nhiêu fail". */}
+          {tally && tally.ballots.length > 0 && (
+            <ul className="mt-3 divide-y divide-border rounded-lg border border-border">
+              {tally.ballots.map((b) => (
+                <li key={b.memberId} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-sm">
+                  <span className="min-w-0">
+                    <span className="font-medium text-foreground">{b.memberName}</span>
+                    {b.memberRole && (
+                      <span className="ml-1.5 text-xs text-muted-foreground">
+                        {t(`councils.role.${b.memberRole}`, b.memberRole)}
+                      </span>
+                    )}
+                  </span>
+                  <span className="flex items-center gap-2 text-xs">
+                    {!b.hasSubmitted ? (
+                      <span className="text-warning">{t("minutes.notSubmitted")}</span>
+                    ) : (
+                      <>
+                        {b.totalScore != null && (
+                          <span className="font-medium text-foreground">
+                            {b.totalScore}
+                            {b.maxScore ? `/${b.maxScore}` : ""}
+                          </span>
+                        )}
+                        {b.result && <StatusBadge status={b.result} />}
+                        {!b.isValidBallot && <span className="text-destructive">{t("minutes.invalidBallot")}</span>}
+                      </>
+                    )}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+
           <p className="mt-2 text-xs text-muted-foreground">
             {t("minutes.referenceOnly")}
           </p>

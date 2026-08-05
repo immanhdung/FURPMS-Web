@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { reviewScoringService } from "@/services/api/review-scoring.service";
+import type { BallotTally } from "@/types/ballot-tally";
 import { queryKeys } from "@/services/queryKeys";
 import type { ApiError } from "@/types/common";
 import type { SubmitScorePayload } from "@/types/review-scoring";
@@ -38,5 +39,14 @@ export function useSubmitScoreMutation(councilId: string) {
       queryClient.invalidateQueries({ queryKey: queryKeys.scores.my(councilId) });
     },
     onError: (error: ApiError) => toast.error(error.message || "Unable to submit score."),
+  });
+}
+
+/** BM12 mục 10.1 — kết quả bỏ phiếu chi tiết từng thành viên (dùng ở màn biên bản). */
+export function useBallotTallyQuery(councilId: string | null) {
+  return useQuery<BallotTally>({
+    queryKey: ["review-scoring", "ballot-tally", councilId ?? ""],
+    queryFn: () => reviewScoringService.ballotTally(councilId as string),
+    enabled: Boolean(councilId),
   });
 }

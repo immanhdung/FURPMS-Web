@@ -1029,6 +1029,12 @@ export const vi = {
     zoomOut: "Thu nhỏ",
   },
   minutes: {
+    ballotsIssued: "Phiếu phát ra",
+    ballotsReturned: "Phiếu thu về",
+    invalidBallots: "Phiếu không hợp lệ",
+    passCount: "Đạt",
+    failCount: "Không đạt",
+    notSubmitted: "Chưa nộp phiếu",
     unknownMember: "(không rõ thành viên)",
     invalidBallot: "phiếu không hợp lệ",
     rosterTitle: "Thông tin chung — Danh sách hội đồng",

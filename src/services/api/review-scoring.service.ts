@@ -1,5 +1,6 @@
 import { axiosClient } from "@/services/api/axiosClient";
 import type { ApiResponse } from "@/types/common";
+import type { BallotTally } from "@/types/ballot-tally";
 import type { RubricTemplate, ScoreResponse, SubmitScorePayload } from "@/types/review-scoring";
 
 export const reviewScoringService = {
@@ -17,6 +18,12 @@ export const reviewScoringService = {
   getMyScore: (councilId: string) =>
     axiosClient
       .get<ApiResponse<ScoreResponse | null>>(`/review-scoring/councils/${councilId}/scores/my`)
+      .then((res) => res.data.data),
+
+  /** BM12 mục 10.1 — phiếu của từng thành viên + số liệu tổng hợp. */
+  ballotTally: (councilId: string) =>
+    axiosClient
+      .get<ApiResponse<BallotTally>>(`/review-scoring/councils/${councilId}/ballot-tally`)
       .then((res) => res.data.data),
 
   getAllScores: (councilId: string) =>

@@ -1022,6 +1022,12 @@ export const en = {
     zoomOut: "Zoom out",
   },
   minutes: {
+    ballotsIssued: "Ballots issued",
+    ballotsReturned: "Ballots returned",
+    invalidBallots: "Invalid ballots",
+    passCount: "Passed",
+    failCount: "Not passed",
+    notSubmitted: "No ballot yet",
     unknownMember: "(unknown member)",
     invalidBallot: "invalid ballot",
     rosterTitle: "General info — Council roster",
