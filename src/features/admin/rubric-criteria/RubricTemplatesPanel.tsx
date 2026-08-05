@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Copy, Layers, Loader2, Pencil, Plus, Save, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Copy, Layers, Loader2, Pencil, Plus, Save, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -34,6 +34,8 @@ export function RubricTemplatesPanel() {
   const deleteTemplateMutation = useDeleteRubricTemplateMutation();
 
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  // Mặc định thu gọn tiêu chí: nhiều bộ × nhiều tiêu chí thì trang dài không đọc nổi.
+  const [openCriteriaId, setOpenCriteriaId] = useState<number | null>(null);
 
   if (isLoading) {
     return (
@@ -56,7 +58,18 @@ export function RubricTemplatesPanel() {
           <CardContent className="space-y-3 p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex min-w-0 flex-wrap items-center gap-2">
-                <span className="text-sm font-medium text-foreground">{tpl.name}</span>
+                <button
+                  type="button"
+                  className="flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-primary"
+                  onClick={() => setOpenCriteriaId(openCriteriaId === tpl.id ? null : tpl.id)}
+                >
+                  {openCriteriaId === tpl.id ? (
+                    <ChevronDown className="size-4 shrink-0" />
+                  ) : (
+                    <ChevronRight className="size-4 shrink-0" />
+                  )}
+                  {tpl.name}
+                </button>
                 <Badge variant="secondary">{t(`reviewBoard.type.${tpl.templateType}`, tpl.templateType)}</Badge>
                 <span className="text-xs text-muted-foreground">
                   {t("rubricSet.criteriaCount", { n: tpl.criteria.length })}
@@ -117,8 +130,9 @@ export function RubricTemplatesPanel() {
             </div>
 
             {/* Tiêu chí sửa NGAY TRONG bộ — trước đây phải mò xuống bảng phẳng bên dưới,
-                mà bảng đó lại gom theo LOẠI VÒNG nên không biết sửa của bộ nào. */}
-            <CriteriaEditor template={tpl} />
+                mà bảng đó lại gom theo LOẠI VÒNG nên không biết sửa của bộ nào.
+                Thu gọn được vì nhiều bộ × nhiều tiêu chí là trang dài lê thê. */}
+            {openCriteriaId === tpl.id && <CriteriaEditor template={tpl} />}
 
             {expandedId === tpl.id && <ScopeEditor template={tpl} />}
           </CardContent>
