@@ -1041,6 +1041,15 @@ export const vi = {
     noMinutesDesc: "Thư ký chưa soạn biên bản cho cuộc họp hội đồng này.",
   },
   contract: {
+    startDate: "Ngày bắt đầu",
+    endDate: "Ngày kết thúc",
+    editTitle: "Sửa hợp đồng",
+    editHint: "Sửa phần giấy tờ: số HĐ, phạm vi, thời hạn, đại diện Bên A. Không đổi được đề tài và tổng kinh phí.",
+    deleteTitle: "Xoá hợp đồng",
+    deleteConfirm: "Xoá hợp đồng \"{{number}}\"? Chỉ xoá được khi chưa ký và chưa ai nộp gì lên. Sản phẩm của đề tài được giữ lại.",
+    numberLabel: "Số hợp đồng",
+    scopeLabel: "Phạm vi ký",
+    maxExtensionLabel: "Gia hạn tối đa (tháng)",
     tabs: {
       timeline: "Tiến trình",
       disbursements: "Giải ngân",

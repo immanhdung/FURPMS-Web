@@ -15,6 +15,8 @@ export interface Contract {
   createdAt?: string | null;
 }
 
+export type UpdateContractPayload = Omit<CreateContractPayload, "proposalId">;
+
 export interface CreateContractPayload {
   proposalId: string;
   contractNumber?: string;

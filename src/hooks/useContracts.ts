@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { contractService } from "@/services/api/contract.service";
 import { queryKeys } from "@/services/queryKeys";
 import type { ApiError } from "@/types/common";
-import type { CreateContractPayload } from "@/types/contract";
+import type { CreateContractPayload, UpdateContractPayload } from "@/types/contract";
 
 export function useContractsQuery(mine = false) {
   return useQuery({
@@ -29,6 +29,34 @@ export function useCreateContractMutation() {
       queryClient.invalidateQueries({ queryKey: queryKeys.contracts.all() });
     },
     onError: (error: ApiError) => toast.error(error.message || "Unable to create contract."),
+  });
+}
+
+export function useUpdateContractMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: UpdateContractPayload }) =>
+      contractService.update(id, payload),
+    onSuccess: (_data, { id }) => {
+      toast.success("Contract updated.");
+      queryClient.invalidateQueries({ queryKey: queryKeys.contracts.detail(id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.contracts.all() });
+    },
+    onError: (error: ApiError) => toast.error(error.message || "Unable to update contract."),
+  });
+}
+
+export function useDeleteContractMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => contractService.remove(id),
+    onSuccess: () => {
+      toast.success("Contract deleted.");
+      queryClient.invalidateQueries({ queryKey: queryKeys.contracts.all() });
+    },
+    // BE trả 409 kèm lý do cụ thể ("đã có sản phẩm được nộp"…) — hiện nguyên văn,
+    // đừng nuốt mất rồi thay bằng câu chung chung.
+    onError: (error: ApiError) => toast.error(error.message || "Unable to delete contract."),
   });
 }
 

@@ -1034,6 +1034,15 @@ export const en = {
     noMinutesDesc: "The secretary hasn't drafted the minutes for this council meeting yet.",
   },
   contract: {
+    startDate: "Start date",
+    endDate: "End date",
+    editTitle: "Edit contract",
+    editHint: "Edit the paperwork: number, scope, dates, Side A representative. Proposal and total budget cannot be changed.",
+    deleteTitle: "Delete contract",
+    deleteConfirm: "Delete contract \"{{number}}\"? Only possible before signing and before anything has been submitted. Project deliverables are kept.",
+    numberLabel: "Contract number",
+    scopeLabel: "Scope title",
+    maxExtensionLabel: "Max extension (months)",
     tabs: {
       timeline: "Timeline",
       disbursements: "Disbursements",

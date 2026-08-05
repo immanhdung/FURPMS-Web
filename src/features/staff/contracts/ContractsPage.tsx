@@ -5,11 +5,12 @@ import { FileSignature, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/tables/DataTable";
 import { ErrorState } from "@/components/shared/ErrorState";
-import { useContractsQuery } from "@/hooks/useContracts";
+import { useContractsQuery, useDeleteContractMutation } from "@/hooks/useContracts";
 import { useProposalsQuery } from "@/hooks/useProposals";
 import { getContractColumns } from "@/features/staff/contracts/columns";
 import { CreateContractSheet } from "@/features/staff/contracts/CreateContractSheet";
 import { ContractDetailSheet } from "@/features/staff/contracts/ContractDetailSheet";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { sortByDateDesc } from "@/utils/sort";
 import type { Contract } from "@/types/contract";
 
@@ -21,6 +22,10 @@ export function ContractsPage() {
 
   const [createOpen, setCreateOpen] = useState(false);
   const [detailContractId, setDetailContractId] = useState<string | null>(null);
+  // Cùng một sheet dùng cho tạo và sửa — có `editing` là chế độ sửa.
+  const [editing, setEditing] = useState<Contract | null>(null);
+  const [deleting, setDeleting] = useState<Contract | null>(null);
+  const deleteMutation = useDeleteContractMutation();
 
   const proposalTitles = useMemo(
     () => Object.fromEntries((proposals ?? []).map((p) => [p.id, p.titleEN || p.titleVI || p.id])),
@@ -33,6 +38,8 @@ export function ContractsPage() {
         t,
         proposalTitles,
         onView: (contract: Contract) => setDetailContractId(contract.id),
+        onEdit: (contract: Contract) => setEditing(contract),
+        onDelete: (contract: Contract) => setDeleting(contract),
       }),
     [t, proposalTitles]
   );
@@ -77,6 +84,25 @@ export function ContractsPage() {
       )}
 
       <CreateContractSheet open={createOpen} onOpenChange={setCreateOpen} />
+
+      <CreateContractSheet
+        open={Boolean(editing)}
+        onOpenChange={(open) => !open && setEditing(null)}
+        contract={editing}
+      />
+
+      <ConfirmDialog
+        open={Boolean(deleting)}
+        onOpenChange={(open) => !open && setDeleting(null)}
+        title={t("contract.deleteTitle")}
+        description={t("contract.deleteConfirm", { number: deleting?.contractNumber ?? "" })}
+        variant="destructive"
+        isLoading={deleteMutation.isPending}
+        onConfirm={() =>
+          deleting &&
+          deleteMutation.mutate(deleting.id, { onSuccess: () => setDeleting(null) })
+        }
+      />
 
       <ContractDetailSheet
         open={Boolean(detailContractId)}

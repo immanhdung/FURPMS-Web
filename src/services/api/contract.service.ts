@@ -1,6 +1,6 @@
 import { axiosClient } from "@/services/api/axiosClient";
 import type { ApiResponse } from "@/types/common";
-import type { Contract, CreateContractPayload } from "@/types/contract";
+import type { Contract, CreateContractPayload, UpdateContractPayload } from "@/types/contract";
 
 export const contractService = {
   // mine=true → chỉ HĐ mình là PI (dùng cho trang PI: báo cáo tiến độ/sản phẩm/tổng kết).
@@ -11,6 +11,13 @@ export const contractService = {
 
   create: (payload: CreateContractPayload) =>
     axiosClient.post<ApiResponse<Contract>>("/contracts", payload).then((res) => res.data.data),
+
+  /** Sửa phần "giấy tờ" Staff gõ tay. BE không cho đổi đề tài / tổng kinh phí. */
+  update: (id: string, payload: UpdateContractPayload) =>
+    axiosClient.put<ApiResponse<Contract>>(`/contracts/${id}`, payload).then((res) => res.data.data),
+
+  /** Chỉ xoá được hợp đồng CHƯA KÝ và chưa có ai nộp gì lên — BE chặn, trả 409 kèm lý do. */
+  remove: (id: string) => axiosClient.delete<ApiResponse<null>>(`/contracts/${id}`),
 
   sign: (id: string) => axiosClient.post<ApiResponse<Contract>>(`/contracts/${id}/sign`).then((res) => res.data.data),
 

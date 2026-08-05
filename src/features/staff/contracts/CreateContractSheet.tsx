@@ -1,23 +1,37 @@
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { FormSheet } from "@/components/shared/FormSheet";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useCreateContractMutation } from "@/hooks/useContracts";
+import { useCreateContractMutation, useUpdateContractMutation } from "@/hooks/useContracts";
 import { useProposalsQuery } from "@/hooks/useProposals";
 import { PROPOSAL_STATUS } from "@/constants/statuses";
 import { contractSchema, type ContractFormValues } from "@/features/staff/contracts/contract.schema";
+import type { Contract } from "@/types/contract";
 
 interface CreateContractSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Có giá trị ⇒ chế độ SỬA hợp đồng đang có; null ⇒ tạo mới. */
+  contract?: Contract | null;
 }
 
-export function CreateContractSheet({ open, onOpenChange }: CreateContractSheetProps) {
+/**
+ * Tạo **và sửa** hợp đồng.
+ *
+ * Trước đây chỉ có tạo: Staff gõ sai số hợp đồng hay ngày là kẹt vĩnh viễn, chỉ còn cách tạo
+ * cái mới chồng lên. Sửa dùng lại y form này để hai đường không lệch nhau về ràng buộc.
+ * Chế độ sửa **ẩn ô chọn đề tài** — đổi đề tài nghĩa là hợp đồng khác hẳn, BE cũng không nhận.
+ */
+export function CreateContractSheet({ open, onOpenChange, contract = null }: CreateContractSheetProps) {
   const { t } = useTranslation();
+  const isEdit = Boolean(contract);
   const { data: approvedProposals } = useProposalsQuery({ status: PROPOSAL_STATUS.APPROVED });
   const createMutation = useCreateContractMutation();
+  const updateMutation = useUpdateContractMutation();
+  const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
   const {
     register,
@@ -39,26 +53,59 @@ export function CreateContractSheet({ open, onOpenChange }: CreateContractSheetP
     },
   });
 
+  // Mở form sửa phải thấy giá trị đang có, không thì lưu lại là ghi đè trắng.
+  useEffect(() => {
+    if (!open) return;
+    reset(
+      contract
+        ? {
+            proposalId: contract.proposalId ?? "",
+            contractNumber: contract.contractNumber ?? "",
+            scopeTitle: contract.scopeTitle ?? "",
+            startDate: contract.startDate?.slice(0, 10) ?? "",
+            endDate: contract.endDate?.slice(0, 10) ?? "",
+            maxExtensionMonths: contract.maxExtensionMonths ?? 0,
+            sideARepresentative: contract.sideARepresentative ?? "",
+            econtractUrl: contract.econtractUrl ?? "",
+          }
+        : {
+            proposalId: "",
+            contractNumber: "",
+            scopeTitle: "",
+            startDate: "",
+            endDate: "",
+            maxExtensionMonths: 0,
+            sideARepresentative: "",
+            econtractUrl: "",
+          }
+    );
+  }, [open, contract, reset]);
+
   const onSubmit = (values: ContractFormValues) => {
-    createMutation.mutate(values, {
-      onSuccess: () => {
-        reset();
-        onOpenChange(false);
-      },
-    });
+    const done = () => {
+      reset();
+      onOpenChange(false);
+    };
+    if (contract) {
+      const { proposalId: _ignored, ...payload } = values;
+      updateMutation.mutate({ id: contract.id, payload }, { onSuccess: done });
+      return;
+    }
+    createMutation.mutate(values, { onSuccess: done });
   };
 
   return (
     <FormSheet
       open={open}
       onOpenChange={onOpenChange}
-      title={t("contract.createTitle")}
-      description={t("contract.createHint")}
+      title={isEdit ? t("contract.editTitle") : t("contract.createTitle")}
+      description={isEdit ? t("contract.editHint") : t("contract.createHint")}
       formId="contract-form"
       onSubmit={handleSubmit(onSubmit)}
-      isSubmitting={createMutation.isPending}
-      submitLabel={t("contract.createBtn")}
+      isSubmitting={isSubmitting}
+      submitLabel={isEdit ? t("common.save") : t("contract.createBtn")}
     >
+      {!isEdit && (
       <div>
         <label className="mb-1.5 block text-sm font-medium text-foreground">{t("contract.approvedProposal")}</label>
         <Controller
@@ -84,17 +131,18 @@ export function CreateContractSheet({ open, onOpenChange }: CreateContractSheetP
           <p className="mt-1 text-xs text-warning">{t("contract.noApproved")}</p>
         )}
       </div>
+      )}
 
       <div>
         <label htmlFor="contract-number" className="mb-1.5 block text-sm font-medium text-foreground">
-          Contract number
+          {t("contract.numberLabel")}
         </label>
         <Input id="contract-number" {...register("contractNumber")} />
       </div>
 
       <div>
         <label htmlFor="contract-scope" className="mb-1.5 block text-sm font-medium text-foreground">
-          Scope title
+          {t("contract.scopeLabel")}
         </label>
         <Input id="contract-scope" {...register("scopeTitle")} />
       </div>
@@ -102,14 +150,14 @@ export function CreateContractSheet({ open, onOpenChange }: CreateContractSheetP
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label htmlFor="contract-start" className="mb-1.5 block text-sm font-medium text-foreground">
-            Start date
+            {t("contract.startDate")}
           </label>
           <Input id="contract-start" type="date" aria-invalid={Boolean(errors.startDate)} {...register("startDate")} />
           {errors.startDate && <p className="mt-1 text-xs text-destructive">{errors.startDate.message}</p>}
         </div>
         <div>
           <label htmlFor="contract-end" className="mb-1.5 block text-sm font-medium text-foreground">
-            End date
+            {t("contract.endDate")}
           </label>
           <Input id="contract-end" type="date" aria-invalid={Boolean(errors.endDate)} {...register("endDate")} />
           {errors.endDate && <p className="mt-1 text-xs text-destructive">{errors.endDate.message}</p>}
@@ -118,7 +166,7 @@ export function CreateContractSheet({ open, onOpenChange }: CreateContractSheetP
 
       <div>
         <label htmlFor="contract-extension" className="mb-1.5 block text-sm font-medium text-foreground">
-          Max extension (months)
+          {t("contract.maxExtensionLabel")}
         </label>
         <Input
           id="contract-extension"
@@ -134,7 +182,7 @@ export function CreateContractSheet({ open, onOpenChange }: CreateContractSheetP
 
       <div>
         <label htmlFor="contract-representative" className="mb-1.5 block text-sm font-medium text-foreground">
-          Side A representative
+          {t("contract.sideARep")}
         </label>
         <Input id="contract-representative" {...register("sideARepresentative")} />
       </div>

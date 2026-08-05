@@ -10,9 +10,11 @@ interface GetContractColumnsOptions {
   t: TFunction;
   proposalTitles: Record<string, string>;
   onView: (contract: Contract) => void;
+  onEdit: (contract: Contract) => void;
+  onDelete: (contract: Contract) => void;
 }
 
-export function getContractColumns({ t, proposalTitles, onView }: GetContractColumnsOptions): ColumnDef<Contract>[] {
+export function getContractColumns({ t, proposalTitles, onView, onEdit, onDelete }: GetContractColumnsOptions): ColumnDef<Contract>[] {
   return [
     {
       accessorKey: "contractNumber",
@@ -49,7 +51,15 @@ export function getContractColumns({ t, proposalTitles, onView }: GetContractCol
       enableHiding: false,
       cell: ({ row }) => (
         <div className="flex justify-end">
-          <DataTableRowActions onView={() => onView(row.original)} />
+          {/* Xoá chỉ bày ra khi hợp đồng CHƯA KÝ — ký rồi là có hiệu lực pháp lý, BE cũng chặn
+              (409). Bày nút để rồi báo lỗi thì chỉ tổ làm người dùng tưởng hệ thống hỏng. */}
+          <DataTableRowActions
+            onView={() => onView(row.original)}
+            onEdit={() => onEdit(row.original)}
+            onDelete={
+              row.original.status === "PENDING_SIGNATURE" ? () => onDelete(row.original) : undefined
+            }
+          />
         </div>
       ),
     },
