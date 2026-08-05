@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { formatDate } from "@/utils/format";
 import { motion } from "motion/react";
 import { ChevronDown, ChevronRight, Route } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,7 +19,7 @@ import { ContractMilestoneTimeline } from "@/features/staff/contracts/ContractMi
  */
 export function MyProjectTimelinePage() {
   const { t } = useTranslation();
-  const { data: contracts, proposalTitleById, isLoading } = useMyContractsQuery();
+  const { data: contracts, proposalTitleById, proposalById, isLoading } = useMyContractsQuery();
   // null = chưa bấm gì (dùng mặc định); "" = đã chủ động đóng hết.
   const [openId, setOpenId] = useState<string | null>(null);
 
@@ -70,11 +71,24 @@ export function MyProjectTimelinePage() {
                       <span className="block truncate text-sm font-medium text-foreground">
                         {proposalTitleById.get(contract.proposalId) || t("myTimeline.untitled")}
                       </span>
-                      {contract.contractNumber && (
-                        <span className="block text-xs text-muted-foreground">
-                          {t("reports.contractNo", { no: contract.contractNumber })}
+                      {/* Chỉ số hợp đồng thì nhìn vào không biết là đề tài gì (thầy 05/08).
+                          Bổ sung chủ nhiệm, lĩnh vực, thời gian thực hiện. */}
+                      <span className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+                        {contract.contractNumber && (
+                          <span>{t("reports.contractNo", { no: contract.contractNumber })}</span>
+                        )}
+                        {proposalById.get(contract.proposalId)?.principalInvestigatorName && (
+                          <span>
+                            {t("myTimeline.pi")}: {proposalById.get(contract.proposalId)?.principalInvestigatorName}
+                          </span>
+                        )}
+                        {proposalById.get(contract.proposalId)?.trackName && (
+                          <span>{proposalById.get(contract.proposalId)?.trackName}</span>
+                        )}
+                        <span>
+                          {formatDate(contract.startDate)} – {formatDate(contract.endDate)}
                         </span>
-                      )}
+                      </span>
                     </span>
                   </span>
                   {contract.status && <StatusBadge status={contract.status} />}

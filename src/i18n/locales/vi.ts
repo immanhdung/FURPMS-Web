@@ -47,6 +47,7 @@ export const vi = {
     "WHOLE": "Trọn gói",
   },
   myTimeline: {
+    pi: "Chủ nhiệm",
     title: "Tiến trình đề tài",
     subtitle: "Các mốc của đề tài bạn: ký hợp đồng, báo cáo tiến độ, giải ngân, kết thúc.",
     empty: "Chưa có hợp đồng nào",
@@ -1294,7 +1295,7 @@ export const vi = {
       finalVersion: "Bản cuối {{date}}",
       archivedAt: "Lưu trữ {{date}}",
       revisionRequested: "Yêu cầu chỉnh sửa",
-      reviewStaff: "Duyệt (Chuyên viên)",
+      reviewStaff: "Nội dung kiểm tra",
       revisionPlaceholder: "PI cần sửa gì…",
       requestRevision: "Yêu cầu sửa",
       accept: "Duyệt",

@@ -16,5 +16,20 @@ export function useMyContractsQuery() {
     [myProposals]
   );
 
-  return { data: contracts ?? [], proposalTitleById, isLoading: isProposalsLoading || isContractsLoading };
+  /**
+   * Bản tóm tắt đề tài cho các màn chỉ có `contract` trong tay (vd Tiến trình đề tài).
+   * Trước đây các màn đó chỉ hiện số hợp đồng + tên — thầy 05/08: *"hiện tại chỉ có 'abc06 Hợp
+   * đồng 06', sửa lại chi tiết hơn: tên đề tài, ai là PI, mô tả đề tài"*.
+   */
+  const proposalById = useMemo(
+    () => new Map((myProposals ?? []).map((p) => [p.id, p])),
+    [myProposals]
+  );
+
+  return {
+    data: contracts ?? [],
+    proposalTitleById,
+    proposalById,
+    isLoading: isProposalsLoading || isContractsLoading,
+  };
 }

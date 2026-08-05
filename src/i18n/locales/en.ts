@@ -46,6 +46,7 @@ export const en = {
     "WHOLE": "Whole",
   },
   myTimeline: {
+    pi: "PI",
     title: "Project timeline",
     subtitle: "Milestones of your project: contract signing, progress reports, disbursements, closing.",
     empty: "No contract yet",
@@ -1282,7 +1283,7 @@ export const en = {
       finalVersion: "Final version {{date}}",
       archivedAt: "Archived {{date}}",
       revisionRequested: "Revision requested",
-      reviewStaff: "Review (staff)",
+      reviewStaff: "Review notes",
       revisionPlaceholder: "What the PI needs to fix…",
       requestRevision: "Request revision",
       accept: "Accept",
