@@ -20,6 +20,19 @@ export function useProgressReportsQuery(contractId: string | null) {
   });
 }
 
+/**
+ * Chi tiết 1 kỳ báo cáo — gồm nội dung PI viết + bảng hoạt động (BM06).
+ * Danh sách chỉ trả bản tóm tắt (%, trạng thái) nên trước đây Staff mở ra đánh giá mà
+ * KHÔNG hề thấy PI đã viết gì; endpoint này có sẵn ở BE nhưng chưa nơi nào gọi.
+ */
+export function useProgressReportQuery(id: string | null) {
+  return useQuery({
+    queryKey: queryKeys.progressReports.detail(id ?? ""),
+    queryFn: () => progressReportService.getById(id as string),
+    enabled: Boolean(id),
+  });
+}
+
 export function useCreateProgressReportMutation(contractId: string) {
   const queryClient = useQueryClient();
   return useMutation({

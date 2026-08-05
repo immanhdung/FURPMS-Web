@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
-import { CalendarClock, ExternalLink, FileBarChart, PencilLine } from "lucide-react";
+import { CalendarClock, Eye, ExternalLink, FileBarChart, PencilLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useMyContractsQuery } from "@/hooks/useMyContracts";
 import { useProgressReportsQuery } from "@/hooks/useProgressReports";
 import { CreateProgressReportSheet } from "@/features/pi/progress-reports/CreateProgressReportSheet";
+import { ProgressReportDetailView } from "@/components/shared/ProgressReportDetailView";
 import { formatDate, formatDateTime } from "@/utils/format";
 import type { ProgressReport } from "@/types/progress-report";
 
@@ -18,6 +19,7 @@ export function ProgressReportsPage() {
   const { data: contracts, proposalTitleById, isLoading: isContractsLoading } = useMyContractsQuery();
   const [selectedContractId, setSelectedContractId] = useState<string | null>(null);
   const [fillingReport, setFillingReport] = useState<ProgressReport | null>(null);
+  const [viewingId, setViewingId] = useState<string | null>(null);
 
   const contractId = selectedContractId ?? contracts?.[0]?.id ?? null;
   const { data: reports, isLoading: isReportsLoading } = useProgressReportsQuery(contractId);
@@ -44,18 +46,30 @@ export function ProgressReportsPage() {
         />
       ) : (
         <>
-          <Select value={contractId ?? undefined} onValueChange={setSelectedContractId}>
-            <SelectTrigger className="w-full sm:w-80">
-              <SelectValue placeholder={t("reports.selectContract")} />
-            </SelectTrigger>
-            <SelectContent>
-              {contracts.map((contract) => (
-                <SelectItem key={contract.id} value={contract.id}>
-                  {contract.contractNumber || proposalTitleById.get(contract.proposalId) || contract.id}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {/* Trước đây ô này chỉ hiện trơ số hợp đồng ("04") — không ai đoán được đó là gì.
+              Nay có nhãn rõ + kèm TÊN ĐỀ TÀI để phân biệt khi PI có nhiều hợp đồng. */}
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">
+              {t("reports.contractLabel")}
+            </label>
+            <Select value={contractId ?? undefined} onValueChange={setSelectedContractId}>
+              <SelectTrigger className="w-full sm:w-96">
+                <SelectValue placeholder={t("reports.selectContract")} />
+              </SelectTrigger>
+              <SelectContent>
+                {contracts.map((contract) => {
+                  const title = proposalTitleById.get(contract.proposalId);
+                  return (
+                    <SelectItem key={contract.id} value={contract.id}>
+                      {contract.contractNumber
+                        ? `${t("reports.contractNo", { no: contract.contractNumber })}${title ? ` — ${title}` : ""}`
+                        : title || contract.id}
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+          </div>
 
           {isReportsLoading ? (
             <div className="space-y-2">
@@ -123,12 +137,28 @@ export function ProgressReportsPage() {
                       </p>
                     )}
 
-                    {!isSubmitted && (
-                      <Button size="sm" onClick={() => setFillingReport(report)}>
-                        <PencilLine />
-                        {t("reports.fillAndSubmit")}
-                      </Button>
-                    )}
+                    {/* Sửa được cho tới khi Staff ĐÃ đánh giá — nhất quán với sản phẩm và
+                        báo cáo tổng kết. Đánh giá xong thì chỉ còn xem lại. */}
+                    <div className="flex flex-wrap gap-2">
+                      {!report.evaluationResult && (
+                        <Button size="sm" onClick={() => setFillingReport(report)}>
+                          <PencilLine />
+                          {isSubmitted ? t("reports.editSubmitted") : t("reports.fillAndSubmit")}
+                        </Button>
+                      )}
+                      {isSubmitted && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setViewingId(viewingId === report.id ? null : report.id)}
+                        >
+                          <Eye />
+                          {viewingId === report.id ? t("common.close") : t("reports.viewSubmitted")}
+                        </Button>
+                      )}
+                    </div>
+
+                    {viewingId === report.id && <ProgressReportDetailView reportId={report.id} />}
                   </li>
                 );
               })}

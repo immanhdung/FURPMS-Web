@@ -12,11 +12,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   useEvaluateProgressReportMutation,
   useProgressReportDocumentsQuery,
+  useProgressReportQuery,
 } from "@/hooks/useProgressReports";
+import { ProgressReportDetailView } from "@/components/shared/ProgressReportDetailView";
 import { progressReportDocumentService } from "@/services/api/progress-report-document.service";
+import { formatDate } from "@/utils/format";
 
 /** QĐ543 Điều 10 / BM06 — kết quả đánh giá tiến độ (khớp giá trị BE nhận). */
 const PROGRESS_EVAL = { PASS: "PASS", CONDITIONAL: "CONDITIONAL", FAIL: "FAIL" } as const;
@@ -38,6 +42,8 @@ export function EvaluateProgressReportDialog({
   const evaluateMutation = useEvaluateProgressReportMutation(contractId);
   const [evaluationResult, setEvaluationResult] = useState<string>(PROGRESS_EVAL.PASS);
   const [evaluationComments, setEvaluationComments] = useState("");
+
+  const { data: report, isLoading: isLoadingDetail } = useProgressReportQuery(open ? reportId : null);
 
   // Thầy 29/07: Staff phải XEM được file PI nộp rồi mới cho Đạt/Không đạt.
   const { data: docs } = useProgressReportDocumentsQuery(reportId);
@@ -62,7 +68,12 @@ export function EvaluateProgressReportDialog({
           <DialogDescription>{t("contract.evalReportDesc")}</DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-3">
+        <div className="max-h-[65vh] space-y-3 overflow-y-auto pr-1">
+          {/* NỘI DUNG PI VIẾT — trước đây dialog này chỉ có ô chấm, Staff không hề thấy
+              PI đã điền gì, phải mở file ra đoán. Danh sách chỉ trả bản tóm tắt nên
+              phải gọi thêm chi tiết. */}
+          <ProgressReportDetailView reportId={open ? reportId : null} />
+
           {/* File PI nộp — bấm mở xem trước khi chấm. Chưa có file thì khóa nút lưu. */}
           <div className="rounded-lg border border-border p-3">
             <p className="text-sm font-medium text-foreground">{t("contract.reportFiles")}</p>
