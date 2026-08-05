@@ -1,6 +1,13 @@
 // Bản dịch tiếng Việt. Cấu trúc key theo nhóm chức năng để dễ tra.
 // Quy ước: dùng key mô tả (nav.dashboard) chứ không dùng nguyên câu tiếng Anh làm key.
 export const vi = {
+  myTimeline: {
+    title: "Tiến trình đề tài",
+    subtitle: "Các mốc của đề tài bạn: ký hợp đồng, báo cáo tiến độ, giải ngân, kết thúc.",
+    empty: "Chưa có hợp đồng nào",
+    emptyDesc: "Đề tài được duyệt và ký hợp đồng thì tiến trình sẽ hiện ở đây.",
+    untitled: "Đề tài chưa đặt tên",
+  },
   amendments: {
     myTitle: "Yêu cầu điều chỉnh",
     mySubtitle: "Xin điều chỉnh phạm vi, kinh phí, thời gian hoặc nhân sự của hợp đồng — gồm cả xin gia hạn.",
@@ -222,6 +229,7 @@ export const vi = {
     submitProposal: "Nộp đề cương",
     progressReports: "Báo cáo tiến độ",
     deliverables: "Sản phẩm",
+    myTimeline: "Tiến trình đề tài",
     myAmendments: "Điều chỉnh hợp đồng",
     myMeetings: "Lịch họp của tôi",
     finalReports: "Báo cáo tổng kết",

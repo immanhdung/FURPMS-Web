@@ -20,7 +20,23 @@ import { AMENDMENT_STATUS } from "@/types/amendment";
 import { formatDateTime } from "@/utils/format";
 
 /** Điều chỉnh hợp đồng: PI mô tả thay đổi + lý do → Staff duyệt hoặc từ chối. */
-export function AmendmentsPanel({ contractId, canManage }: { contractId: string; canManage: boolean }) {
+/**
+ * Yêu cầu điều chỉnh hợp đồng.
+ *
+ * `canRequest` mặc định FALSE: người XIN điều chỉnh là **PI** (trang /my-amendments),
+ * Staff chỉ **duyệt/từ chối**. Panel này nhúng trong màn Hợp đồng của Staff mà trước đây
+ * vẫn hiện form "Yêu cầu điều chỉnh mới" ⇒ Staff tự xin rồi tự duyệt, sai vai — cùng lỗi
+ * với form nộp báo cáo tổng kết.
+ */
+export function AmendmentsPanel({
+  contractId,
+  canManage,
+  canRequest = false,
+}: {
+  contractId: string;
+  canManage: boolean;
+  canRequest?: boolean;
+}) {
   const { t } = useTranslation();
   const { data: amendments, isLoading } = useAmendmentsQuery(contractId);
   const { data: categories } = useAmendmentCategoriesQuery();
@@ -49,7 +65,7 @@ export function AmendmentsPanel({ contractId, canManage }: { contractId: string;
 
   return (
     <div className="space-y-3">
-      {!showForm && (
+      {canRequest && !showForm && (
         <div className="flex justify-end">
           <Button size="sm" variant="outline" onClick={() => setShowForm(true)}>
             <Plus />
@@ -58,7 +74,7 @@ export function AmendmentsPanel({ contractId, canManage }: { contractId: string;
         </div>
       )}
 
-      {showForm && (
+      {canRequest && showForm && (
         <Card>
           <CardContent className="space-y-3 p-4">
             <p className="text-sm font-medium text-foreground">{t("contract.amendment.newRequest")}</p>

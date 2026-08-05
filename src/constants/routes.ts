@@ -32,6 +32,7 @@ export const ROUTES = {
   DELIVERABLES: "/deliverables",
   MY_MEETINGS: "/my-meetings",
   MY_AMENDMENTS: "/my-amendments",
+  MY_TIMELINE: "/my-timeline",
   FINAL_REPORTS: "/final-reports",
   AI_SEARCH: "/ai-search",
 

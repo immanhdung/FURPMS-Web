@@ -1,5 +1,12 @@
 // English translations. Keys must stay in sync with vi.ts.
 export const en = {
+  myTimeline: {
+    title: "Project timeline",
+    subtitle: "Milestones of your project: contract signing, progress reports, disbursements, closing.",
+    empty: "No contract yet",
+    emptyDesc: "Once your project is approved and the contract is signed, its timeline appears here.",
+    untitled: "Untitled project",
+  },
   amendments: {
     myTitle: "Amendment requests",
     mySubtitle: "Request changes to contract scope, budget, timeline or personnel — including extensions.",
@@ -220,6 +227,7 @@ export const en = {
     submitProposal: "Submit Proposal",
     progressReports: "Progress Reports",
     deliverables: "Deliverables",
+    myTimeline: "Project timeline",
     myAmendments: "Amendments",
     myMeetings: "My meetings",
     finalReports: "Final Reports",

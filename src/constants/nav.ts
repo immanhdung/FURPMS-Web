@@ -1,5 +1,6 @@
 import {
   FilePenLine,
+  Route,
   LayoutDashboard,
   CalendarRange,
   FolderKanban,
@@ -66,6 +67,8 @@ export const NAV_ITEMS: NavItem[] = [
   { labelKey: "nav.finalReports", path: ROUTES.FINAL_REPORTS, icon: FileCheck2, roles: [ROLES.FACULTY] },
   // PI xin điều chỉnh/gia hạn hợp đồng — BE đã cho phép từ lâu, trước đây thiếu màn.
   { labelKey: "nav.myAmendments", path: ROUTES.MY_AMENDMENTS, icon: FilePenLine, roles: [ROLES.FACULTY] },
+  // PI xem tiến trình đề tài của chính mình — trước đây timeline chỉ có ở màn Staff.
+  { labelKey: "nav.myTimeline", path: ROUTES.MY_TIMELINE, icon: Route, roles: [ROLES.FACULTY] },
   { labelKey: "nav.aiSearch", path: ROUTES.AI_SEARCH, icon: Sparkles, roles: [ROLES.FACULTY] },
 
   // Review Committee
