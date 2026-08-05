@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
@@ -9,8 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useGenerateGoogleMeetLink, useScheduleMeetingMutation } from "@/hooks/useMeetings";
-import { MEETING_MODES, IN_PERSON } from "@/types/meeting";
+import { useGenerateGoogleMeetLink, useScheduleMeetingMutation, useUpdateMeetingMutation } from "@/hooks/useMeetings";
+import { MEETING_MODES, IN_PERSON, type Meeting } from "@/types/meeting";
 
 const schema = z
   .object({
@@ -33,11 +33,23 @@ interface ScheduleMeetingSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   councilId: string;
+  /** Có giá trị ⇒ chế độ SỬA buổi họp đang có; null ⇒ đặt lịch mới. */
+  meeting?: Meeting | null;
 }
 
-export function ScheduleMeetingSheet({ open, onOpenChange, councilId }: ScheduleMeetingSheetProps) {
+/**
+ * Đặt lịch **và sửa** buổi họp hội đồng.
+ *
+ * Trước đây chỉ đặt được: Staff gõ nhầm giờ hay dán sai link Meet là kẹt, chỉ còn cách đặt buổi
+ * thứ hai — hội đồng nhìn vào thấy hai lịch, không biết theo cái nào. Sửa dùng lại đúng form này
+ * để hai đường không lệch ràng buộc (offline bắt buộc địa điểm…).
+ */
+export function ScheduleMeetingSheet({ open, onOpenChange, councilId, meeting = null }: ScheduleMeetingSheetProps) {
   const { t } = useTranslation();
+  const isEdit = Boolean(meeting);
   const scheduleMutation = useScheduleMeetingMutation(councilId);
+  const updateMutation = useUpdateMeetingMutation(councilId);
+  const isSubmitting = scheduleMutation.isPending || updateMutation.isPending;
   const generateLinkMutation = useGenerateGoogleMeetLink();
   const [generatedLink, setGeneratedLink] = useState<string | null>(null);
 
@@ -57,34 +69,55 @@ export function ScheduleMeetingSheet({ open, onOpenChange, councilId }: Schedule
   const platform = watch("platform");
   const isOffline = platform === IN_PERSON;
 
-  const onSubmit = (values: FormValues) => {
-    scheduleMutation.mutate(
-      {
-        ...values,
-        agenda: values.agenda || undefined,
-        meetingLink: isOffline ? undefined : values.meetingLink || undefined,
-        location: isOffline ? values.location || undefined : undefined,
-      },
-      {
-        onSuccess: () => {
-          reset();
-          setGeneratedLink(null);
-          onOpenChange(false);
-        },
-      }
+  // Mở form sửa phải thấy lịch đang đặt, không thì lưu lại là ghi đè trắng.
+  useEffect(() => {
+    if (!open) return;
+    setGeneratedLink(null);
+    reset(
+      meeting
+        ? {
+            title: meeting.title ?? "",
+            platform: meeting.platform ?? MEETING_MODES[0].value,
+            meetingLink: meeting.meetingLink ?? "",
+            location: meeting.location ?? "",
+            // <input type="datetime-local"> chỉ nhận "yyyy-MM-ddTHH:mm", cắt phần giây/timezone.
+            scheduledAt: meeting.scheduledAt ? meeting.scheduledAt.slice(0, 16) : "",
+            durationMinutes: meeting.durationMinutes ?? 60,
+            agenda: meeting.agenda ?? "",
+          }
+        : { title: "", platform: MEETING_MODES[0].value, meetingLink: "", location: "", scheduledAt: "", durationMinutes: 60, agenda: "" }
     );
+  }, [open, meeting, reset]);
+
+  const onSubmit = (values: FormValues) => {
+    const payload = {
+      ...values,
+      agenda: values.agenda || undefined,
+      meetingLink: isOffline ? undefined : values.meetingLink || undefined,
+      location: isOffline ? values.location || undefined : undefined,
+    };
+    const done = () => {
+      reset();
+      setGeneratedLink(null);
+      onOpenChange(false);
+    };
+    if (meeting) {
+      updateMutation.mutate({ id: meeting.id, payload }, { onSuccess: done });
+      return;
+    }
+    scheduleMutation.mutate(payload, { onSuccess: done });
   };
 
   return (
     <FormSheet
       open={open}
       onOpenChange={onOpenChange}
-      title={t("reviewBoard.scheduleMeeting")}
-      description={t("reviewBoard.scheduleMeetingHint")}
+      title={isEdit ? t("reviewBoard.editMeeting") : t("reviewBoard.scheduleMeeting")}
+      description={isEdit ? t("reviewBoard.editMeetingHint") : t("reviewBoard.scheduleMeetingHint")}
       formId="schedule-meeting-form"
       onSubmit={handleSubmit(onSubmit)}
-      isSubmitting={scheduleMutation.isPending}
-      submitLabel={t("reviewBoard.scheduleMeetingBtn")}
+      isSubmitting={isSubmitting}
+      submitLabel={isEdit ? t("common.save") : t("reviewBoard.scheduleMeetingBtn")}
     >
       <div>
         <label htmlFor="meeting-title" className="mb-1.5 block text-sm font-medium text-foreground">

@@ -1,13 +1,21 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AlertTriangle, CalendarClock, CalendarPlus, ExternalLink, MapPin, Video } from "lucide-react";
+import { AlertTriangle, CalendarClock, CalendarPlus, ExternalLink, MapPin, Pencil, Trash2, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { useCouncilMeetingsQuery, useEndMeetingMutation, useScheduleConflictsQuery, useStartMeetingMutation } from "@/hooks/useMeetings";
+import {
+  useCouncilMeetingsQuery,
+  useDeleteMeetingMutation,
+  useEndMeetingMutation,
+  useScheduleConflictsQuery,
+  useStartMeetingMutation,
+} from "@/hooks/useMeetings";
 import { ScheduleMeetingSheet } from "@/features/staff/proposal-reviews/ScheduleMeetingSheet";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { formatDateTime } from "@/utils/format";
+import type { Meeting } from "@/types/meeting";
 
 export function MeetingsPanel({ councilId }: { councilId: string }) {
   const { t } = useTranslation();
@@ -15,7 +23,11 @@ export function MeetingsPanel({ councilId }: { councilId: string }) {
   const { data: conflicts } = useScheduleConflictsQuery(councilId);
   const startMutation = useStartMeetingMutation();
   const endMutation = useEndMeetingMutation();
+  const deleteMutation = useDeleteMeetingMutation(councilId);
   const [scheduleOpen, setScheduleOpen] = useState(false);
+  // Cùng một sheet dùng cho đặt lịch và sửa — có `editing` là chế độ sửa.
+  const [editing, setEditing] = useState<Meeting | null>(null);
+  const [deleting, setDeleting] = useState<Meeting | null>(null);
 
   return (
     <div className="space-y-3">
@@ -80,13 +92,31 @@ export function MeetingsPanel({ councilId }: { councilId: string }) {
                   {t("staff.joinLink")}
                 </a>
               )}
-              <div className="flex gap-2 pt-1">
+              <div className="flex flex-wrap gap-2 pt-1">
                 <Button variant="outline" size="sm" onClick={() => startMutation.mutate(meeting.id)} disabled={startMutation.isPending}>
                   {t("staff.startMeeting")}
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => endMutation.mutate(meeting.id)} disabled={endMutation.isPending}>
                   {t("staff.endMeeting")}
                 </Button>
+                {/* Rule #17: đổi lịch được BẤT KỲ LÚC NÀO, nên nút Sửa luôn hiện. */}
+                <Button variant="ghost" size="sm" onClick={() => setEditing(meeting)}>
+                  <Pencil />
+                  {t("common.edit")}
+                </Button>
+                {/* Xoá chỉ bày khi buổi họp chưa diễn ra — đúng điều kiện BE chặn (409).
+                    Bày nút rồi báo lỗi chỉ làm người dùng tưởng hệ thống hỏng. */}
+                {meeting.status === "SCHEDULED" && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive"
+                    onClick={() => setDeleting(meeting)}
+                  >
+                    <Trash2 />
+                    {t("common.delete")}
+                  </Button>
+                )}
               </div>
             </li>
           ))}
@@ -94,6 +124,25 @@ export function MeetingsPanel({ councilId }: { councilId: string }) {
       )}
 
       <ScheduleMeetingSheet open={scheduleOpen} onOpenChange={setScheduleOpen} councilId={councilId} />
+
+      <ScheduleMeetingSheet
+        open={Boolean(editing)}
+        onOpenChange={(open) => !open && setEditing(null)}
+        councilId={councilId}
+        meeting={editing}
+      />
+
+      <ConfirmDialog
+        open={Boolean(deleting)}
+        onOpenChange={(open) => !open && setDeleting(null)}
+        title={t("reviewBoard.deleteMeeting")}
+        description={t("reviewBoard.deleteMeetingConfirm", {
+          time: deleting ? formatDateTime(deleting.scheduledAt) : "",
+        })}
+        variant="destructive"
+        isLoading={deleteMutation.isPending}
+        onConfirm={() => deleting && deleteMutation.mutate(deleting.id, { onSuccess: () => setDeleting(null) })}
+      />
     </div>
   );
 }

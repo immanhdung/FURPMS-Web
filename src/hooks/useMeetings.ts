@@ -75,6 +75,34 @@ export function useScheduleMeetingMutation(councilId: string) {
   });
 }
 
+export function useUpdateMeetingMutation(councilId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: ScheduleMeetingPayload }) =>
+      meetingService.update(id, payload),
+    onSuccess: () => {
+      toast.success("Meeting updated.");
+      queryClient.invalidateQueries({ queryKey: queryKeys.meetings.byCouncil(councilId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.meetings.all() });
+    },
+    onError: (error: ApiError) => toast.error(error.message || "Unable to update meeting."),
+  });
+}
+
+export function useDeleteMeetingMutation(councilId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => meetingService.remove(id),
+    onSuccess: () => {
+      toast.success("Meeting deleted.");
+      queryClient.invalidateQueries({ queryKey: queryKeys.meetings.byCouncil(councilId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.meetings.all() });
+    },
+    // BE trả 409 kèm lý do ("đã có điểm danh"...) — hiện nguyên văn.
+    onError: (error: ApiError) => toast.error(error.message || "Unable to delete meeting."),
+  });
+}
+
 export function useStartMeetingMutation() {
   const queryClient = useQueryClient();
   return useMutation({

@@ -547,6 +547,10 @@ export const vi = {
     langPlaceholder: "Tiếng Việt / Tiếng Anh",
   },
   reviewBoard: {
+    editMeeting: "Sửa lịch họp",
+    editMeetingHint: "Đổi giờ, địa điểm hoặc link họp. Thành viên hội đồng sẽ thấy lịch mới.",
+    deleteMeeting: "Xoá buổi họp",
+    deleteMeetingConfirm: "Xoá buổi họp lúc {{time}}? Chỉ xoá được buổi chưa diễn ra và chưa điểm danh.",
     pageTitle: "Hội đồng & Chấm",
     pageSubtitle: "Quản lý vòng chấm, hội đồng và lịch họp theo cả lĩnh vực của một đợt.",
     selectCycle: "Chọn đợt",
@@ -971,6 +975,8 @@ export const vi = {
     zoomOut: "Thu nhỏ",
   },
   minutes: {
+    unknownMember: "(không rõ thành viên)",
+    invalidBallot: "phiếu không hợp lệ",
     rosterTitle: "Thông tin chung — Danh sách hội đồng",
     rosterAutoNote: "Tự động lấy từ hội đồng — Thư ký không cần nhập lại.",
     mName: "Họ và tên",
@@ -1041,6 +1047,7 @@ export const vi = {
     noMinutesDesc: "Thư ký chưa soạn biên bản cho cuộc họp hội đồng này.",
   },
   contract: {
+    alreadyContracted: "Đã ẩn {{n}} đề tài vì đã có hợp đồng.",
     startDate: "Ngày bắt đầu",
     endDate: "Ngày kết thúc",
     editTitle: "Sửa hợp đồng",

@@ -5,7 +5,7 @@ import { Controller, useForm } from "react-hook-form";
 import { FormSheet } from "@/components/shared/FormSheet";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useCreateContractMutation, useUpdateContractMutation } from "@/hooks/useContracts";
+import { useContractsQuery, useCreateContractMutation, useUpdateContractMutation } from "@/hooks/useContracts";
 import { useProposalsQuery } from "@/hooks/useProposals";
 import { PROPOSAL_STATUS } from "@/constants/statuses";
 import { contractSchema, type ContractFormValues } from "@/features/staff/contracts/contract.schema";
@@ -28,7 +28,19 @@ interface CreateContractSheetProps {
 export function CreateContractSheet({ open, onOpenChange, contract = null }: CreateContractSheetProps) {
   const { t } = useTranslation();
   const isEdit = Boolean(contract);
-  const { data: approvedProposals } = useProposalsQuery({ status: PROPOSAL_STATUS.APPROVED });
+  const { data: allApproved } = useProposalsQuery({ status: PROPOSAL_STATUS.APPROVED });
+  const { data: existingContracts } = useContractsQuery();
+
+  /**
+   * Chỉ chào những đề tài **chưa có hợp đồng**.
+   *
+   * Trước đây đổ thẳng mọi đề tài APPROVED, kể cả đề tài đã ký hợp đồng từ đợt trước — Staff mở ra
+   * thấy cả danh sách cũ, không biết cái nào còn phải làm. Giai đoạn ký từng phần đã có
+   * `ContractPhase` lo (phase nằm TRONG một hợp đồng), nên một đề tài chỉ cần một hợp đồng.
+   */
+  const contractedProposalIds = new Set((existingContracts ?? []).map((c) => c.proposalId));
+  const approvedProposals = (allApproved ?? []).filter((p) => !contractedProposalIds.has(p.id));
+  const hiddenCount = (allApproved?.length ?? 0) - approvedProposals.length;
   const createMutation = useCreateContractMutation();
   const updateMutation = useUpdateContractMutation();
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
@@ -117,7 +129,7 @@ export function CreateContractSheet({ open, onOpenChange, contract = null }: Cre
                 <SelectValue placeholder={t("contract.selectApproved")} />
               </SelectTrigger>
               <SelectContent>
-                {approvedProposals?.map((proposal) => (
+                {approvedProposals.map((proposal) => (
                   <SelectItem key={proposal.id} value={proposal.id}>
                     {proposal.titleEN || proposal.titleVI || proposal.id}
                   </SelectItem>
@@ -127,8 +139,12 @@ export function CreateContractSheet({ open, onOpenChange, contract = null }: Cre
           )}
         />
         {errors.proposalId && <p className="mt-1 text-xs text-destructive">{errors.proposalId.message}</p>}
-        {approvedProposals && approvedProposals.length === 0 && (
+        {approvedProposals.length === 0 && (
           <p className="mt-1 text-xs text-warning">{t("contract.noApproved")}</p>
+        )}
+        {/* Nói rõ vì sao danh sách ngắn hơn số đề tài đã duyệt — khỏi tưởng mất dữ liệu. */}
+        {hiddenCount > 0 && (
+          <p className="mt-1 text-xs text-muted-foreground">{t("contract.alreadyContracted", { n: hiddenCount })}</p>
         )}
       </div>
       )}

@@ -16,6 +16,13 @@ export const meetingService = {
   listByCouncil: (councilId: string) =>
     axiosClient.get<ApiResponse<Meeting[]>>(`/councils/${councilId}/meetings`).then((res) => res.data.data),
 
+  /** Sửa lịch họp — rule #17 cho đổi lịch bất kỳ lúc nào. */
+  update: (id: string, payload: ScheduleMeetingPayload) =>
+    axiosClient.put<ApiResponse<Meeting>>(`/meetings/${id}`, payload).then((res) => res.data.data),
+
+  /** Chỉ xoá được buổi CHƯA DIỄN RA và chưa điểm danh — BE trả 409 kèm lý do. */
+  remove: (id: string) => axiosClient.delete<ApiResponse<null>>(`/meetings/${id}`),
+
   start: (id: string) => axiosClient.post<ApiResponse<Meeting>>(`/meetings/${id}/start`).then((res) => res.data.data),
 
   end: (id: string) => axiosClient.post<ApiResponse<Meeting>>(`/meetings/${id}/end`).then((res) => res.data.data),

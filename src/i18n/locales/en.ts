@@ -541,6 +541,10 @@ export const en = {
     langPlaceholder: "Vietnamese / English",
   },
   reviewBoard: {
+    editMeeting: "Edit meeting",
+    editMeetingHint: "Change the time, location or meeting link. Council members will see the new schedule.",
+    deleteMeeting: "Delete meeting",
+    deleteMeetingConfirm: "Delete the meeting at {{time}}? Only meetings that have not started and have no attendance recorded can be deleted.",
     pageTitle: "Review Board",
     pageSubtitle: "Manage review rounds, councils, and meetings for a whole research field in a cycle.",
     selectCycle: "Select cycle",
@@ -964,6 +968,8 @@ export const en = {
     zoomOut: "Zoom out",
   },
   minutes: {
+    unknownMember: "(unknown member)",
+    invalidBallot: "invalid ballot",
     rosterTitle: "General info — Council roster",
     rosterAutoNote: "Auto-loaded from the council — the secretary needn't re-enter it.",
     mName: "Full name",
@@ -1034,6 +1040,7 @@ export const en = {
     noMinutesDesc: "The secretary hasn't drafted the minutes for this council meeting yet.",
   },
   contract: {
+    alreadyContracted: "{{n}} proposal(s) hidden — they already have a contract.",
     startDate: "Start date",
     endDate: "End date",
     editTitle: "Edit contract",

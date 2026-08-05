@@ -50,7 +50,6 @@ export function MinutesPanel({ councilId, memberRole }: { councilId: string; mem
   const { data: feedbackList, error: feedbackError } = useFeedbackListQuery(councilId);
   const isScoresForbidden = (scoresError as ApiError | null)?.status === 403;
   const isFeedbackForbidden = (feedbackError as ApiError | null)?.status === 403;
-  const membersById = new Map((members ?? []).map((m) => [m.userId, m]));
 
   // Điểm danh (rule tuần 10): gắn với buổi họp của hội đồng (thường 1 buổi cho vòng xét duyệt).
   const { data: meetings } = useCouncilMeetingsQuery(councilId);
@@ -108,6 +107,25 @@ export function MinutesPanel({ councilId, memberRole }: { councilId: string; mem
     setAttendance(map);
   }
   const att = (memberId: string) => attendance[memberId] ?? { attended: true, reason: "" };
+
+  /**
+   * Số liệu cuộc họp (BM04 mục II.2) tính TẠI CHỖ khi biên bản chưa chốt.
+   * Trước đây chỉ đọc từ `decision` — mà `decision` chỉ có sau khi Chủ tịch duyệt biên bản, nên
+   * suốt lúc Thư ký đang soạn thì cả 4 ô đều "—": không có gì để mà điền vào biên bản.
+   */
+  const liveTally = (() => {
+    const roster = members ?? [];
+    const valid = (scores ?? []).filter((s) => s.isValidBallot);
+    const totals = valid.map((s) => s.totalScore ?? 0);
+    return {
+      totalMembers: roster.length || undefined,
+      attending: roster.length ? roster.filter((m) => att(m.id).attended).length : undefined,
+      validBallots: valid.length || undefined,
+      averageScore: totals.length
+        ? (totals.reduce((a, b) => a + b, 0) / totals.length).toFixed(1)
+        : undefined,
+    };
+  })();
   const setAttended = (memberId: string, attended: boolean) =>
     setAttendance((prev) => ({ ...prev, [memberId]: { attended, reason: attended ? "" : prev[memberId]?.reason ?? "" } }));
   const setReason = (memberId: string, reason: string) =>
@@ -232,10 +250,10 @@ export function MinutesPanel({ councilId, memberRole }: { councilId: string; mem
           </div>
           <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[
-              { label: t("minutes.members"), value: decision?.totalMembers },
-              { label: t("minutes.attending"), value: decision?.attendingMembers },
-              { label: t("minutes.validBallots"), value: decision?.validBallots },
-              { label: t("minutes.averageScore"), value: decision?.averageScore },
+              { label: t("minutes.members"), value: decision?.totalMembers ?? liveTally.totalMembers },
+              { label: t("minutes.attending"), value: decision?.attendingMembers ?? liveTally.attending },
+              { label: t("minutes.validBallots"), value: decision?.validBallots ?? liveTally.validBallots },
+              { label: t("minutes.averageScore"), value: decision?.averageScore ?? liveTally.averageScore },
             ].map((item) => (
               <div key={item.label} className="rounded-lg border border-border p-2">
                 <dt className="text-xs text-muted-foreground">{item.label}</dt>
@@ -258,16 +276,20 @@ export function MinutesPanel({ councilId, memberRole }: { councilId: string; mem
               <p className="mt-1 text-sm text-warning">{t("minutes.scoresForbidden")}</p>
             ) : scores && scores.length > 0 ? (
               <ul className="mt-1.5 space-y-1.5">
-                {scores.map((score) => {
-                  const total = score.scoreDetails?.reduce((sum, d) => sum + (d.givenScore || 0), 0) ?? 0;
-                  const reviewer = score.reviewerId ? membersById.get(score.reviewerId) : undefined;
-                  return (
-                    <li key={score.id} className="text-sm text-foreground">
-                      <span className="font-medium">{reviewer?.reviewerName ?? score.reviewerId ?? "—"}</span>: {total.toFixed(1)}
-                      {score.generalComments && <span className="text-muted-foreground"> — {score.generalComments}</span>}
-                    </li>
-                  );
-                })}
+                {/* Tên người chấm lấy THẲNG từ phiếu (BE đã trả `evaluatorName`). Trước đây tra
+                    `score.reviewerId` — trường không tồn tại ⇒ mọi dòng hiện "—: 58.0", Thư ký
+                    soạn biên bản không biết điểm nào của ai. */}
+                {scores.map((score) => (
+                  <li key={score.id} className="text-sm text-foreground">
+                    <span className="font-medium">{score.evaluatorName || t("minutes.unknownMember")}</span>:{" "}
+                    {score.totalScore?.toFixed(1)}
+                    {score.maxPossibleScore ? `/${score.maxPossibleScore.toFixed(0)}` : ""}
+                    {!score.isValidBallot && (
+                      <span className="ml-1 text-xs text-warning">({t("minutes.invalidBallot")})</span>
+                    )}
+                    {score.generalComments && <span className="text-muted-foreground"> — {score.generalComments}</span>}
+                  </li>
+                ))}
               </ul>
             ) : (
               <p className="mt-1 text-sm text-muted-foreground">{t("minutes.noScores")}</p>
@@ -280,15 +302,12 @@ export function MinutesPanel({ councilId, memberRole }: { councilId: string; mem
               <p className="mt-1 text-sm text-warning">{t("minutes.feedbackForbidden")}</p>
             ) : feedbackList && feedbackList.length > 0 ? (
               <ul className="mt-1.5 space-y-1.5">
-                {feedbackList.map((feedback) => {
-                  const reviewer = feedback.reviewerId ? membersById.get(feedback.reviewerId) : undefined;
-                  return (
-                    <li key={feedback.id} className="text-sm text-foreground">
-                      <span className="font-medium">{reviewer?.reviewerName ?? feedback.reviewerId ?? "—"}</span>:{" "}
-                      {feedback.overallAssessment ?? feedback.otherComments ?? "—"}
-                    </li>
-                  );
-                })}
+                {feedbackList.map((feedback) => (
+                  <li key={feedback.id} className="text-sm text-foreground">
+                    <span className="font-medium">{feedback.reviewerName || t("minutes.unknownMember")}</span>:{" "}
+                    {feedback.overallAssessment ?? feedback.otherComments ?? "—"}
+                  </li>
+                ))}
               </ul>
             ) : (
               <p className="mt-1 text-sm text-muted-foreground">{t("minutes.noFeedback")}</p>
