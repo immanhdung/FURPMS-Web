@@ -3,12 +3,17 @@ import type { TFunction } from "i18next";
 import { DataTableColumnHeader } from "@/components/tables/DataTableColumnHeader";
 import { DataTableRowActions } from "@/components/tables/DataTableRowActions";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { ROUND_TYPE_LABELS, rubricRoundTypeToAppType } from "@/constants/statuses";
+import { rubricRoundTypeToAppType } from "@/constants/statuses";
 import type { RubricCriterion } from "@/types/rubric-criterion";
 
-function roundTypeLabel(roundType: string) {
+/**
+ * Nhãn loại vòng phải đi qua i18n như mọi nơi khác trong app.
+ * Trước đây dùng `ROUND_TYPE_LABELS` — bảng tiếng Anh hardcode, nên cột này hiện
+ * "Review"/"Final" giữa giao diện tiếng Việt; "Final" lại chẳng ai hiểu là Nghiệm thu.
+ */
+function roundTypeLabel(roundType: string, t: TFunction) {
   const type = rubricRoundTypeToAppType(roundType);
-  return type ? ROUND_TYPE_LABELS[type] : roundType;
+  return type ? t(`reviewBoard.type.${type}`, type) : roundType;
 }
 
 interface GetRubricCriterionColumnsOptions {
@@ -25,7 +30,7 @@ export function getRubricCriterionColumns({
   return [
     {
       id: "roundType",
-      accessorFn: (row) => roundTypeLabel(row.roundType),
+      accessorFn: (row) => roundTypeLabel(row.roundType, t),
       header: ({ column }) => <DataTableColumnHeader column={column} title={t("rubricCriteria.roundType")} />,
     },
     {

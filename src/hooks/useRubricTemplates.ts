@@ -4,7 +4,12 @@ import i18n from "@/i18n";
 import { rubricTemplateService } from "@/services/api/rubric-template.service";
 import { queryKeys } from "@/services/queryKeys";
 import type { ApiError } from "@/types/common";
-import type { SaveScopesPayload, UpdateTemplatePayload } from "@/types/rubric-template";
+import type {
+  CreateTemplatePayload,
+  SaveCriterionPayload,
+  SaveScopesPayload,
+  UpdateTemplatePayload,
+} from "@/types/rubric-template";
 
 export function useRubricTemplatesFullQuery() {
   return useQuery({
@@ -87,5 +92,65 @@ export function useDuplicateRubricTemplateMutation() {
       invalidate();
     },
     onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.rubricDuplicateFailed")),
+  });
+}
+
+// ── CRUD bộ tiêu chí (P4 vá 05/08) ─────────────────────────────────────────
+// Trước đây chỉ có PATCH tên + duplicate: không tạo/xoá được bộ, và tiêu chí chỉ
+// thêm qua /rubric-criteria (gom theo LOẠI VÒNG nên luôn rơi vào bộ đầu tiên).
+
+export function useCreateRubricTemplateMutation() {
+  const invalidate = useInvalidateTemplates();
+  return useMutation({
+    mutationFn: (payload: CreateTemplatePayload) => rubricTemplateService.create(payload),
+    onSuccess: () => {
+      toast.success(i18n.t("toast.rubricSetCreated"));
+      invalidate();
+    },
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.rubricSetCreateFailed")),
+  });
+}
+
+export function useDeleteRubricTemplateMutation() {
+  const invalidate = useInvalidateTemplates();
+  return useMutation({
+    mutationFn: (id: number) => rubricTemplateService.remove(id),
+    onSuccess: () => {
+      toast.success(i18n.t("toast.rubricSetDeleted"));
+      invalidate();
+    },
+    // BE trả 409 kèm lý do rõ (đã dùng chấm điểm / đang gắn cho vòng) — hiện nguyên văn.
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.rubricSetDeleteFailed")),
+  });
+}
+
+export function useSaveTemplateCriterionMutation() {
+  const invalidate = useInvalidateTemplates();
+  return useMutation({
+    mutationFn: ({ templateId, criterionId, payload }: {
+      templateId: number; criterionId?: number; payload: SaveCriterionPayload;
+    }) =>
+      criterionId
+        ? rubricTemplateService.updateCriterion(templateId, criterionId, payload)
+        : rubricTemplateService.addCriterion(templateId, payload),
+    onSuccess: () => {
+      toast.success(i18n.t("toast.criterionSaved"));
+      invalidate();
+    },
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.criterionSaveFailed")),
+  });
+}
+
+export function useDeleteTemplateCriterionMutation() {
+  const invalidate = useInvalidateTemplates();
+  return useMutation({
+    mutationFn: ({ templateId, criterionId }: { templateId: number; criterionId: number }) =>
+      rubricTemplateService.removeCriterion(templateId, criterionId),
+    onSuccess: (res) => {
+      // BE có thể chỉ TẮT thay vì xoá (khi tiêu chí đã có điểm) — hiện đúng lời BE nói.
+      toast.success(res?.message || i18n.t("toast.criterionDeleted"));
+      invalidate();
+    },
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.criterionDeleteFailed")),
   });
 }

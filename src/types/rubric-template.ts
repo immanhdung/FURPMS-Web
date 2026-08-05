@@ -4,6 +4,8 @@ export interface RubricCriterionItem {
   criterionName: string;
   maxScore: number;
   sequence: number;
+  /** Màn quản lý trả cả tiêu chí đã tắt (để bật lại); màn chấm chỉ nhận tiêu chí đang bật. */
+  isActive: boolean;
 }
 
 /** Phạm vi áp dụng: bộ này dùng cho lĩnh vực nào trong đợt nào. */
@@ -35,4 +37,19 @@ export interface UpdateTemplatePayload {
 
 export interface SaveScopesPayload {
   entries: { cycleId: number; trackId: number }[];
+}
+
+export interface CreateTemplatePayload {
+  name: string;
+  /** REVIEW hoặc ACCEPTANCE — rule #16 chỉ có 2 hội đồng. */
+  templateType: string;
+  appliesBasic: boolean;
+  appliesApplied: boolean;
+}
+
+export interface SaveCriterionPayload {
+  criterionName: string;
+  maxScore: number;
+  sequence?: number;
+  isActive?: boolean;
 }

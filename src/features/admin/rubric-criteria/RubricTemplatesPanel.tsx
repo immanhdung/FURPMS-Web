@@ -1,17 +1,22 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Copy, Layers, Loader2, Save } from "lucide-react";
+import { Copy, Layers, Loader2, Pencil, Plus, Save, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { cn } from "@/lib/utils";
 import { useCyclesQuery } from "@/hooks/useCycles";
 import { useTracksByCycleQuery } from "@/hooks/useTracks";
 import {
+  useDeleteRubricTemplateMutation,
+  useDeleteTemplateCriterionMutation,
   useDuplicateRubricTemplateMutation,
   useRubricTemplatesFullQuery,
   useSaveRubricScopesMutation,
+  useSaveTemplateCriterionMutation,
   useUpdateRubricTemplateMutation,
 } from "@/hooks/useRubricTemplates";
 import type { RubricTemplateFull } from "@/types/rubric-template";
@@ -26,6 +31,7 @@ export function RubricTemplatesPanel() {
   const { data: templates, isLoading } = useRubricTemplatesFullQuery();
   const updateMutation = useUpdateRubricTemplateMutation();
   const duplicateMutation = useDuplicateRubricTemplateMutation();
+  const deleteTemplateMutation = useDeleteRubricTemplateMutation();
 
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
@@ -58,6 +64,8 @@ export function RubricTemplatesPanel() {
                 {tpl.scopes.length > 0 && (
                   <Badge variant="outline">{t("rubricSet.scopeCount", { n: tpl.scopes.length })}</Badge>
                 )}
+                {/* Bộ đã tắt vẫn nằm trong danh sách — không đánh dấu thì nhìn y hệt bộ đang dùng. */}
+                {!tpl.isActive && <Badge variant="secondary">{t("rubricSet.inactive")}</Badge>}
               </div>
               <div className="flex shrink-0 items-center gap-1.5">
                 <Button
@@ -77,6 +85,15 @@ export function RubricTemplatesPanel() {
                   onClick={() => setExpandedId(expandedId === tpl.id ? null : tpl.id)}
                 >
                   {expandedId === tpl.id ? t("common.close") : t("rubricSet.configure")}
+                </Button>
+                <Button
+                  size="icon-sm"
+                  variant="ghost"
+                  aria-label={t("rubricSet.deleteSet")}
+                  disabled={deleteTemplateMutation.isPending}
+                  onClick={() => deleteTemplateMutation.mutate(tpl.id)}
+                >
+                  <Trash2 className="size-3.5 text-destructive" />
                 </Button>
               </div>
             </div>
@@ -99,11 +116,160 @@ export function RubricTemplatesPanel() {
               ))}
             </div>
 
+            {/* Tiêu chí sửa NGAY TRONG bộ — trước đây phải mò xuống bảng phẳng bên dưới,
+                mà bảng đó lại gom theo LOẠI VÒNG nên không biết sửa của bộ nào. */}
+            <CriteriaEditor template={tpl} />
+
             {expandedId === tpl.id && <ScopeEditor template={tpl} />}
           </CardContent>
         </Card>
       ))}
     </div>
+  );
+}
+
+/**
+ * Thêm / sửa / xoá tiêu chí ngay trong bộ.
+ * Điểm mấu chốt: gọi `/rubric-templates/{id}/criteria` nên tiêu chí vào ĐÚNG bộ này —
+ * endpoint cũ `/rubric-criteria` tìm bộ bằng loại vòng nên luôn rơi vào bộ đầu tiên.
+ */
+function CriteriaEditor({ template }: { template: RubricTemplateFull }) {
+  const { t } = useTranslation();
+  const saveMutation = useSaveTemplateCriterionMutation();
+  const deleteMutation = useDeleteTemplateCriterionMutation();
+
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [draft, setDraft] = useState<{ criterionName: string; maxScore: string }>({ criterionName: "", maxScore: "" });
+  const [adding, setAdding] = useState(false);
+
+  const total = template.criteria.reduce((s, c) => s + Number(c.maxScore), 0);
+
+  const submit = (criterionId?: number) => {
+    const name = draft.criterionName.trim();
+    const score = Number(draft.maxScore);
+    if (!name || !score || score <= 0) return;
+    saveMutation.mutate(
+      { templateId: template.id, criterionId, payload: { criterionName: name, maxScore: score } },
+      { onSuccess: () => { setEditingId(null); setAdding(false); setDraft({ criterionName: "", maxScore: "" }); } }
+    );
+  };
+
+  const editorRow = (criterionId?: number) => (
+    <li className="flex flex-wrap items-center gap-2 px-3 py-2">
+      <Input
+        autoFocus
+        className="h-8 min-w-40 flex-1 text-xs"
+        placeholder={t("rubricSet.criterionName")}
+        value={draft.criterionName}
+        onChange={(e) => setDraft((d) => ({ ...d, criterionName: e.target.value }))}
+      />
+      <Input
+        type="number"
+        min={1}
+        className="h-8 w-20 text-xs"
+        placeholder={t("rubricSet.maxScore")}
+        value={draft.maxScore}
+        onChange={(e) => setDraft((d) => ({ ...d, maxScore: e.target.value }))}
+      />
+      <Button size="sm" className="h-8 text-xs" disabled={saveMutation.isPending} onClick={() => submit(criterionId)}>
+        {saveMutation.isPending ? <Loader2 className="animate-spin" /> : <Save />}
+        {t("common.save")}
+      </Button>
+      <Button
+        size="sm"
+        variant="ghost"
+        className="h-8 text-xs"
+        onClick={() => { setEditingId(null); setAdding(false); }}
+      >
+        {t("common.cancel")}
+      </Button>
+    </li>
+  );
+
+  return (
+    <ul className="divide-y divide-border rounded-lg border border-border">
+      {template.criteria.length === 0 && !adding && (
+        <li className="px-3 py-2 text-xs text-warning">{t("rubricSet.noCriteria")}</li>
+      )}
+
+      {template.criteria.map((c, i) =>
+        editingId === c.id ? (
+          <div key={c.id}>{editorRow(c.id)}</div>
+        ) : (
+          <li key={c.id} className="group flex items-center justify-between gap-3 px-3 py-2 text-xs">
+            <span className="flex min-w-0 items-center gap-2">
+              <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-semibold text-primary">
+                {i + 1}
+              </span>
+              <span className={cn("truncate text-foreground", !c.isActive && "line-through opacity-60")}>
+                {c.criterionName}
+              </span>
+            </span>
+            <span className="flex shrink-0 items-center gap-1">
+              <span className="tabular-nums text-muted-foreground">{c.maxScore}đ</span>
+              <Button
+                size="icon-sm"
+                variant="ghost"
+                aria-label={t("common.edit")}
+                onClick={() => {
+                  setEditingId(c.id);
+                  setAdding(false);
+                  setDraft({ criterionName: c.criterionName, maxScore: String(c.maxScore) });
+                }}
+              >
+                <Pencil className="size-3.5" />
+              </Button>
+              {/* Tiêu chí đã có điểm chấm thì BE chỉ tắt chứ không xoá (giữ lịch sử);
+                  phải có đường bật lại, không thì coi như mất hẳn. */}
+              {c.isActive ? (
+                <Button
+                  size="icon-sm"
+                  variant="ghost"
+                  aria-label={t("common.delete")}
+                  disabled={deleteMutation.isPending}
+                  onClick={() => deleteMutation.mutate({ templateId: template.id, criterionId: c.id })}
+                >
+                  <Trash2 className="size-3.5 text-destructive" />
+                </Button>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-7 px-2 text-xs"
+                  disabled={saveMutation.isPending}
+                  onClick={() =>
+                    saveMutation.mutate({
+                      templateId: template.id,
+                      criterionId: c.id,
+                      payload: { criterionName: c.criterionName, maxScore: c.maxScore, isActive: true },
+                    })
+                  }
+                >
+                  {t("rubricSet.restore")}
+                </Button>
+              )}
+            </span>
+          </li>
+        )
+      )}
+
+      {adding && editorRow()}
+
+      <li className="flex items-center justify-between gap-2 px-3 py-2 text-xs font-medium">
+        <Button
+          size="sm"
+          variant="ghost"
+          className="h-7 gap-1 px-2 text-xs"
+          onClick={() => { setAdding(true); setEditingId(null); setDraft({ criterionName: "", maxScore: "" }); }}
+        >
+          <Plus className="size-3.5" />
+          {t("rubricSet.addCriterion")}
+        </Button>
+        <span className="text-muted-foreground">
+          {t("rubricSet.total")}: <span className="tabular-nums text-foreground">{total}đ</span>
+        </span>
+      </li>
+    </ul>
   );
 }
 
