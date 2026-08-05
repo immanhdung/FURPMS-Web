@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
   useProgressReportDocumentsQuery,
+  useProgressReportQuery,
   useProposalActivitiesQuery,
   useSubmitProgressReportMutation,
   useUpdateProgressReportMutation,
@@ -52,18 +53,30 @@ export function CreateProgressReportSheet({ open, onOpenChange, contractId, prop
   const [expenditureToDate, setExpenditureToDate] = useState("");
   const [nextPeriodPlan, setNextPeriodPlan] = useState("");
   const [piRecommendations, setPiRecommendations] = useState("");
+  const [reportFileUrl, setReportFileUrl] = useState("");
 
-  // Prefill khi mở kỳ khác nhau.
+  /**
+   * Prefill phải lấy từ CHI TIẾT, không phải từ item của danh sách.
+   * Danh sách chỉ trả bản TÓM TẮT (%, chi tiêu) — 4 ô nội dung và bảng BM06 không có trong đó.
+   * Trước đây mở form sửa thì mấy ô chữ trắng trơn, bấm Nộp là **ghi đè trắng** bài đã nộp.
+   */
+  const { data: detail } = useProgressReportQuery(open ? (report?.id ?? null) : null);
+
   useEffect(() => {
-    if (open && report) {
-      setCompletedContent(report.completedContent ?? "");
-      setPendingContent(report.pendingContent ?? "");
-      setOverallCompletionPct(report.overallCompletionPct != null ? String(report.overallCompletionPct) : "");
-      setExpenditureToDate(report.expenditureToDate != null ? String(report.expenditureToDate) : "");
-      setNextPeriodPlan(report.nextPeriodPlan ?? "");
-      setPiRecommendations(report.piRecommendations ?? "");
+    if (!open || !report) return;
+    setCompletedContent(detail?.completedContent ?? "");
+    setPendingContent(detail?.pendingContent ?? "");
+    setOverallCompletionPct(report.overallCompletionPct != null ? String(report.overallCompletionPct) : "");
+    setExpenditureToDate(report.expenditureToDate != null ? String(report.expenditureToDate) : "");
+    setNextPeriodPlan(detail?.nextPeriodPlan ?? "");
+    setPiRecommendations(detail?.piRecommendations ?? "");
+    setReportFileUrl(detail?.reportFileUrl ?? report.reportFileUrl ?? "");
+    // Bảng hoạt động (BM06) cũng phải nạp lại, không thì nộp lại là mất sạch %.
+    if (detail?.items?.length) {
+      setItemRates(Object.fromEntries(detail.items.map((i) => [i.activityId, String(i.completionRate)])));
+      setItemNotes(Object.fromEntries(detail.items.map((i) => [i.activityId, i.notes ?? ""])));
     }
-  }, [open, report]);
+  }, [open, report, detail]);
 
   const onSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -75,6 +88,7 @@ export function CreateProgressReportSheet({ open, onOpenChange, contractId, prop
       expenditureToDate: expenditureToDate ? Number(expenditureToDate) : undefined,
       nextPeriodPlan: nextPeriodPlan || undefined,
       piRecommendations: piRecommendations || undefined,
+      reportFileUrl: reportFileUrl.trim() || undefined,
       // Bảng BM06: chỉ gửi hoạt động PI đã nhập % (bỏ dòng để trống).
       items: (activities ?? [])
         .filter((a) => itemRates[a.id] !== undefined && itemRates[a.id] !== "")
@@ -138,6 +152,19 @@ export function CreateProgressReportSheet({ open, onOpenChange, contractId, prop
             e.target.value = "";
           }}
         />
+        {/* Hoặc dán link — file báo cáo có thể rất nặng, ép upload là bất khả thi.
+            Chỉ cần CÓ MỘT đường để phòng QLKH xem được bản báo cáo. */}
+        <div className="mt-3 border-t border-border pt-3">
+          <label className="mb-1.5 block text-sm font-medium text-foreground">
+            {t("reports.orLink")}
+          </label>
+          <Input
+            placeholder={t("reports.orLinkPlaceholder")}
+            value={reportFileUrl}
+            onChange={(e) => setReportFileUrl(e.target.value)}
+          />
+        </div>
+
         {docs && docs.length > 0 && (
           <ul className="mt-2 space-y-1">
             {docs.map((d) => (

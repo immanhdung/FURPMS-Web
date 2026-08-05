@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 import {
@@ -11,7 +11,9 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useScheduleProgressReportMutation } from "@/hooks/useProgressReports";
+import { useScheduleProgressReportMutation,
+  useProgressReportQuery,
+} from "@/hooks/useProgressReports";
 
 interface ScheduleProgressReportDialogProps {
   open: boolean;
@@ -32,6 +34,21 @@ export function ScheduleProgressReportDialog({
   const [scheduledMeetingAt, setScheduledMeetingAt] = useState("");
   const [meetingLink, setMeetingLink] = useState("");
   const [roundName, setRoundName] = useState("");
+
+  /**
+   * Dialog này SỬA lịch đã có, nhưng trước đây mở ra TRẮNG TRƠN — không thấy hạn nộp,
+   * giờ họp, link họp đang đặt là gì. Lưu lại là ghi đè mất giá trị cũ mà không ai biết.
+   */
+  const { data: report } = useProgressReportQuery(open ? reportId : null);
+
+  useEffect(() => {
+    if (!open || !report) return;
+    setRoundName(report.roundName ?? "");
+    setDueDate(report.dueDate ? report.dueDate.slice(0, 10) : "");
+    // input datetime-local cần dạng yyyy-MM-ddTHH:mm
+    setScheduledMeetingAt(report.scheduledMeetingAt ? report.scheduledMeetingAt.slice(0, 16) : "");
+    setMeetingLink(report.meetingLink ?? "");
+  }, [open, report]);
 
   const reset = () => {
     setDueDate("");

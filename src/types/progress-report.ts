@@ -4,6 +4,8 @@ export interface ProgressReport {
   reportRound?: number | null;
   /** Tên đợt Staff đặt (vd "Giữa kỳ"); null → hiện "Kỳ {số}". */
   roundName?: string | null;
+  /** Link báo cáo PI dán thay cho upload (file quá lớn). */
+  reportFileUrl?: string | null;
   reportingPeriodStart?: string | null;
   reportingPeriodEnd?: string | null;
   completedContent?: string | null;

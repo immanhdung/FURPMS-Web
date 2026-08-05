@@ -37,6 +37,18 @@ export function ProgressReportDetailView({ reportId }: { reportId: string | null
         <span>
           {t("reports.completionPct")}: <b className="text-foreground">{report.overallCompletionPct}%</b>
         </span>
+        {/* Link báo cáo PI dán thay cho upload. Không hiện ở đây thì Staff/hội đồng
+            không có đường nào mở bản báo cáo ra xem trước khi đánh giá. */}
+        {report.reportFileUrl && (
+          <a
+            href={report.reportFileUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="font-medium text-primary hover:underline"
+          >
+            {t("reports.openReportLink")}
+          </a>
+        )}
       </div>
 
       {sections.map(([key, value]) =>
