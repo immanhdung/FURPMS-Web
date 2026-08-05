@@ -34,18 +34,20 @@ export function Breadcrumb() {
     return { path: fullPath, label: labelForSegment(fullPath, segment) };
   });
 
+  // min-w-0 + shrink-0 cho icon + truncate cho nhãn: nếu không, nhãn dài đẩy cả header
+  // tràn ngang ở màn hẹp (sidebar vẫn chiếm chỗ từ md) → chữ lòi khỏi khung.
   return (
-    <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-sm">
+    <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5 text-sm">
       <Link to={ROUTES.DASHBOARD} className="text-muted-foreground transition-colors hover:text-foreground">
         <Home className="size-3.5" />
       </Link>
       {crumbs.map((crumb, index) => (
         <Fragment key={crumb.path}>
-          <ChevronRight className="size-3.5 text-muted-foreground/50" />
+          <ChevronRight className="size-3.5 shrink-0 text-muted-foreground/50" />
           {index === crumbs.length - 1 ? (
-            <span className={cn("font-medium text-foreground")}>{crumb.label}</span>
+            <span className={cn("truncate font-medium text-foreground")}>{crumb.label}</span>
           ) : (
-            <Link to={crumb.path} className="text-muted-foreground transition-colors hover:text-foreground">
+            <Link to={crumb.path} className="hidden truncate text-muted-foreground transition-colors hover:text-foreground sm:block">
               {crumb.label}
             </Link>
           )}

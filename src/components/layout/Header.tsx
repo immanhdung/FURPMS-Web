@@ -32,11 +32,11 @@ export function Header() {
 
       <Breadcrumb />
 
-      <div className="ml-auto flex items-center gap-1.5">
+      <div className="ml-auto flex shrink-0 items-center gap-1.5">
         <Button
           variant="outline"
           size="sm"
-          className="hidden w-56 justify-start gap-2 rounded-full bg-card/60 text-muted-foreground sm:flex"
+          className="hidden w-56 justify-start gap-2 rounded-full bg-card/60 text-muted-foreground lg:flex"
           onClick={() => setCommandPaletteOpen(true)}
         >
           <Search className="size-3.5" />
@@ -46,7 +46,7 @@ export function Header() {
         <Button
           variant="ghost"
           size="icon-sm"
-          className="rounded-full sm:hidden"
+          className="rounded-full lg:hidden"
           aria-label={t("common.search")}
           onClick={() => setCommandPaletteOpen(true)}
         >

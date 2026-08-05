@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
-import { Route } from "lucide-react";
+import { ChevronDown, ChevronRight, Route } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -18,6 +19,8 @@ import { ContractMilestoneTimeline } from "@/features/staff/contracts/ContractMi
 export function MyProjectTimelinePage() {
   const { t } = useTranslation();
   const { data: contracts, proposalTitleById, isLoading } = useMyContractsQuery();
+  // null = chưa bấm gì (dùng mặc định); "" = đã chủ động đóng hết.
+  const [openId, setOpenId] = useState<string | null>(null);
 
   return (
     <div className="space-y-6">
@@ -46,26 +49,46 @@ export function MyProjectTimelinePage() {
         />
       ) : (
         <div className="space-y-6">
-          {contracts.map((contract) => (
-            <section key={contract.id} className="space-y-3 rounded-xl border border-border bg-card/95 p-4">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-foreground">
-                    {proposalTitleById.get(contract.proposalId) || t("myTimeline.untitled")}
-                  </p>
-                  {contract.contractNumber && (
-                    <p className="text-xs text-muted-foreground">
-                      {t("reports.contractNo", { no: contract.contractNumber })}
-                    </p>
-                  )}
-                </div>
-                <StatusBadge status={contract.status} />
-              </div>
+          {contracts.map((contract) => {
+            // Mặc định MỞ khi chỉ có 1 hợp đồng; nhiều hợp đồng thì thu gọn cho dễ nhìn —
+            // một đề tài có thể có nhiều hợp đồng theo giai đoạn, và PI có thể có nhiều đề tài.
+            const isOpen = openId === contract.id || (openId === null && contracts.length === 1);
+            return (
+              <section key={contract.id} className="rounded-xl border border-border bg-card/95">
+                <button
+                  type="button"
+                  className="flex w-full flex-wrap items-center justify-between gap-2 p-4 text-left"
+                  onClick={() => setOpenId(isOpen ? "" : contract.id)}
+                >
+                  <span className="flex min-w-0 items-center gap-2">
+                    {isOpen ? (
+                      <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
+                    ) : (
+                      <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+                    )}
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-medium text-foreground">
+                        {proposalTitleById.get(contract.proposalId) || t("myTimeline.untitled")}
+                      </span>
+                      {contract.contractNumber && (
+                        <span className="block text-xs text-muted-foreground">
+                          {t("reports.contractNo", { no: contract.contractNumber })}
+                        </span>
+                      )}
+                    </span>
+                  </span>
+                  <StatusBadge status={contract.status} />
+                </button>
 
-              {/* Tái dùng đúng timeline của màn Staff — cùng một nguồn sự thật, khỏi lệch. */}
-              <ContractMilestoneTimeline contract={contract} />
-            </section>
-          ))}
+                {/* Tái dùng đúng timeline của màn Staff — cùng một nguồn sự thật, khỏi lệch. */}
+                {isOpen && (
+                  <div className="px-4 pb-4">
+                    <ContractMilestoneTimeline contract={contract} />
+                  </div>
+                )}
+              </section>
+            );
+          })}
         </div>
       )}
     </div>

@@ -22,7 +22,10 @@ export function AppLayout() {
 
       <Sidebar />
 
-      <div className="relative z-10 flex min-h-screen flex-1 flex-col">
+      {/* min-w-0 BẮT BUỘC: flex item mặc định có min-width:auto nên cột này không co được
+          dưới bề rộng nội dung ⇒ ở màn hẹp (sidebar vẫn hiện từ md) nội dung bị đẩy tràn
+          ra ngoài, breadcrumb xuống 3 dòng, chữ lòi khỏi khung. */}
+      <div className="relative z-10 flex min-h-screen min-w-0 flex-1 flex-col">
         <Header />
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8">

@@ -19,6 +19,8 @@ export const vi = {
     categoryPlaceholder: "Chọn loại điều chỉnh",
     changeDescription: "Nội dung đề nghị thay đổi",
     changeDescriptionHint: "VD: Xin gia hạn thời gian thực hiện thêm 3 tháng",
+    extensionMonths: "Số tháng xin gia hạn",
+    extensionMonthsHint: "Chỉ nhập SỐ (ví dụ: 3). QĐ543: tổng gia hạn tối đa 6 tháng.",
     oldValue: "Giá trị hiện tại",
     newValue: "Giá trị đề nghị",
     justification: "Lý do",

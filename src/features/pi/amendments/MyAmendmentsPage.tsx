@@ -151,8 +151,15 @@ function CreateAmendmentDialog({
   const [oldValue, setOldValue] = useState("");
   const [newValue, setNewValue] = useState("");
 
+  // Loại "Gia hạn thời gian thực hiện" (code EXTENSION) là loại duy nhất BE tự áp dụng.
+  const isExtension = (categories ?? []).find((c) => String(c.id) === categoryId)?.code === "EXTENSION";
+
   const canSubmit =
-    categoryId && changeDescription.trim().length > 0 && justification.trim().length > 0 && !createMutation.isPending;
+    categoryId &&
+    changeDescription.trim().length > 0 &&
+    justification.trim().length > 0 &&
+    (!isExtension || Number(newValue) > 0) &&
+    !createMutation.isPending;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -193,16 +200,34 @@ function CreateAmendmentDialog({
             />
           </div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {/* Gia hạn là loại DUY NHẤT hệ thống tự áp dụng (cộng tháng vào hạn hợp đồng),
+              và BE chỉ hiểu SỐ NGUYÊN tháng. Gõ "3 tháng" là không áp dụng được ⇒ ép nhập số. */}
+          {isExtension ? (
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-foreground">{t("amendments.oldValue")}</label>
-              <Input value={oldValue} onChange={(e) => setOldValue(e.target.value)} />
+              <label className="mb-1.5 block text-sm font-medium text-foreground">
+                {t("amendments.extensionMonths")} <span className="text-destructive">*</span>
+              </label>
+              <Input
+                type="number"
+                min={1}
+                max={6}
+                value={newValue}
+                onChange={(e) => setNewValue(e.target.value)}
+              />
+              <p className="mt-1 text-xs text-muted-foreground">{t("amendments.extensionMonthsHint")}</p>
             </div>
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-foreground">{t("amendments.newValue")}</label>
-              <Input value={newValue} onChange={(e) => setNewValue(e.target.value)} />
+          ) : (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">{t("amendments.oldValue")}</label>
+                <Input value={oldValue} onChange={(e) => setOldValue(e.target.value)} />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">{t("amendments.newValue")}</label>
+                <Input value={newValue} onChange={(e) => setNewValue(e.target.value)} />
+              </div>
             </div>
-          </div>
+          )}
 
           <div>
             <label className="mb-1.5 block text-sm font-medium text-foreground">

@@ -18,6 +18,8 @@ export const en = {
     categoryPlaceholder: "Pick an amendment type",
     changeDescription: "Requested change",
     changeDescriptionHint: "e.g. Extend the implementation period by 3 months",
+    extensionMonths: "Extension (months)",
+    extensionMonthsHint: "Numbers only (e.g. 3). QĐ543 caps total extension at 6 months.",
     oldValue: "Current value",
     newValue: "Proposed value",
     justification: "Justification",
