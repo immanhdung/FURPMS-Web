@@ -411,6 +411,10 @@ export const en = {
     },
   },
   proposal: {
+    aiStrengths: "Strengths",
+    aiWeaknesses: "Weaknesses / to clarify",
+    aiSourceFile: "AI read the proposal file: {{name}}",
+    aiSourceForm: "AI only read the form (no proposal file attached).",
     myProposals: "My Proposals",
     myProposalsSubtitle: "Track and manage your research proposals.",
     newProposal: "New proposal",

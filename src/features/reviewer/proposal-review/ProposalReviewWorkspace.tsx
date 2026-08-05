@@ -73,7 +73,8 @@ export function ProposalReviewWorkspace() {
         <div className="space-y-4 lg:sticky lg:top-4">
           {/* Người chấm đọc nhiều đề tài trong thời gian ngắn → bản tóm tắt nằm ngay
               trên file gốc. Trước đây card này chỉ có ở màn PI, tức đưa nhầm người. */}
-          <AiSummaryCard proposalId={membership.proposalId} />
+          {/* Màn CHẤM ĐIỂM: tóm tắt tự chạy sẵn, người chấm mở ra là có (thầy 05/08). */}
+          <AiSummaryCard proposalId={membership.proposalId} autoGenerate />
           <ProposalDocumentViewer proposalId={membership.proposalId} />
         </div>
 

@@ -11,8 +11,13 @@ export interface SummaryResult {
   isEditedByHuman: boolean;
   editedText?: string | null;
   generatedAt: string;
+  /** `file+form` = AI đã đọc file đề cương gốc; `textFields` = chỉ có form. */
   source?: string | null;
   sourceFileName?: string | null;
+  // Prompt v2 (thầy 05/08): tóm tắt phải gồm tên đề tài, tóm tắt, ưu điểm, nhược điểm.
+  title?: string | null;
+  strengths?: string[] | null;
+  weaknesses?: string[] | null;
 }
 
 export interface SemanticSearchResult {

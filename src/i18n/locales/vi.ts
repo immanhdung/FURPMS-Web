@@ -413,6 +413,10 @@ export const vi = {
     },
   },
   proposal: {
+    aiStrengths: "Ưu điểm",
+    aiWeaknesses: "Nhược điểm / cần làm rõ",
+    aiSourceFile: "AI đã đọc file đề cương: {{name}}",
+    aiSourceForm: "AI chỉ đọc thông tin trên biểu mẫu (chưa có file đề cương đính kèm).",
     myProposals: "Đề cương của tôi",
     myProposalsSubtitle: "Theo dõi và quản lý các đề tài nghiên cứu của bạn.",
     newProposal: "Tạo đề cương",
