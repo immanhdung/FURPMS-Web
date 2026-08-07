@@ -33,10 +33,21 @@ export function CouncilMembersPanel({ councilId, trackId }: CouncilMembersPanelP
   const [addOpen, setAddOpen] = useState(false);
   const [removingMember, setRemovingMember] = useState<CouncilMember | null>(null);
 
+  /**
+   * QĐ543 Điều 8.2 / 12.2 + chốt của thầy 08/08: số thành viên phải **LẺ**.
+   * Báo NGAY khi đang gán người, thay vì để tới lúc bấm "Gửi thư mời" mới ăn 409 từ BE —
+   * lúc đó Staff đã mất công gán xong xuôi rồi.
+   */
+  const memberCount = members?.length ?? 0;
+  const isEvenCount = memberCount > 0 && memberCount % 2 === 0;
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-sm font-medium text-foreground">{t("reviewBoard.members")}</p>
+        <p className="text-sm font-medium text-foreground">
+          {t("reviewBoard.members")}
+          {memberCount > 0 && <span className="ml-1.5 text-xs text-muted-foreground">({memberCount})</span>}
+        </p>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={() => sendInvitationsMutation.mutate({})} disabled={sendInvitationsMutation.isPending}>
             <Mail />
@@ -48,6 +59,15 @@ export function CouncilMembersPanel({ councilId, trackId }: CouncilMembersPanelP
           </Button>
         </div>
       </div>
+
+      {/* Giải thích VÌ SAO phải lẻ, không chỉ báo "sai" — mọi thành viên đều chấm, Thư ký dựa vào
+          chênh lệch phiếu để soạn kết luận, Chủ tịch xem lại rồi mới ký. Hoà phiếu là không có
+          căn cứ nào để viết. */}
+      {isEvenCount && (
+        <p className="rounded-lg border border-warning/40 bg-warning/10 px-3 py-2 text-xs text-warning">
+          {t("reviewBoard.evenMembersWarning", { n: memberCount })}
+        </p>
+      )}
 
       {isLoading ? (
         <div className="space-y-2">

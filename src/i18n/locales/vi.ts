@@ -609,6 +609,7 @@ export const vi = {
     langPlaceholder: "Tiếng Việt / Tiếng Anh",
   },
   reviewBoard: {
+    evenMembersWarning: "Hội đồng đang có {{n}} thành viên — số CHẴN. Cần thêm hoặc bớt 1 người cho thành số lẻ: mọi thành viên đều chấm, Thư ký dựa vào chênh lệch phiếu Đạt/Không đạt để soạn kết luận, Chủ tịch xem lại rồi mới ký. Hoà phiếu thì không có căn cứ để kết luận. Chưa lẻ thì không gửi được thư mời.",
     slotBudget: "Đã xếp {{planned}}/{{budget}} phút của buổi họp",
     slotOverBudget: "vượt quá thời lượng buổi họp",
     editMeeting: "Sửa lịch họp",

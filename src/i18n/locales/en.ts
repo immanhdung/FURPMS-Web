@@ -603,6 +603,7 @@ export const en = {
     langPlaceholder: "Vietnamese / English",
   },
   reviewBoard: {
+    evenMembersWarning: "This council has {{n}} members — an EVEN number. Add or remove one: every member scores, the secretary writes the conclusion from the pass/fail margin, and the chair reviews before signing. A tie leaves no basis for a conclusion. Invitations cannot be sent until the count is odd.",
     slotBudget: "{{planned}}/{{budget}} minutes of the meeting allocated",
     slotOverBudget: "exceeds the meeting duration",
     editMeeting: "Edit meeting",
