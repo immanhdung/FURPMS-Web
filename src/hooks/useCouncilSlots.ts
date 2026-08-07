@@ -5,12 +5,13 @@ import { councilSlotService } from "@/services/api/council-slot.service";
 import type { ApiError } from "@/types/common";
 import type { SlotEntry } from "@/types/council-slot";
 
-const key = (councilId: string) => ["council-slots", councilId] as const;
+const key = (councilId: string | null) => ["council-slots", councilId ?? ""] as const;
 
-export function useCouncilSlotsQuery(councilId: string) {
+// Nhận null để nơi gọi tắt query khi sheet đang đóng.
+export function useCouncilSlotsQuery(councilId: string | null) {
   return useQuery({
     queryKey: key(councilId),
-    queryFn: () => councilSlotService.list(councilId),
+    queryFn: () => councilSlotService.list(councilId as string),
     enabled: Boolean(councilId),
   });
 }

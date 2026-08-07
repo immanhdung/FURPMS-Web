@@ -609,6 +609,8 @@ export const vi = {
     langPlaceholder: "Tiếng Việt / Tiếng Anh",
   },
   reviewBoard: {
+    slotBudget: "Đã xếp {{planned}}/{{budget}} phút của buổi họp",
+    slotOverBudget: "vượt quá thời lượng buổi họp",
     editMeeting: "Sửa lịch họp",
     editMeetingHint: "Đổi giờ, địa điểm hoặc link họp. Thành viên hội đồng sẽ thấy lịch mới.",
     deleteMeeting: "Xoá buổi họp",

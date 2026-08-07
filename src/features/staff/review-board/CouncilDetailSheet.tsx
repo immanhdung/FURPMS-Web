@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CouncilMembersPanel } from "@/features/staff/proposal-reviews/CouncilMembersPanel";
 import { MeetingsPanel } from "@/features/staff/proposal-reviews/MeetingsPanel";
 import { CouncilSlotsPanel } from "@/features/staff/review-board/CouncilSlotsPanel";
+import { useCouncilSlotsQuery } from "@/hooks/useCouncilSlots";
 
 interface CouncilDetailSheetProps {
   open: boolean;
@@ -19,6 +20,9 @@ interface CouncilDetailSheetProps {
  */
 export function CouncilDetailSheet({ open, onOpenChange, councilId, title }: CouncilDetailSheetProps) {
   const { t } = useTranslation();
+  // Danh sách đề tài của hội đồng — dùng để quyết định có hiện tab "Lịch chấm" hay không.
+  const { data: board } = useCouncilSlotsQuery(open ? councilId : null);
+  const hasMultipleProjects = (board?.slots.length ?? 0) > 1;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -35,7 +39,11 @@ export function CouncilDetailSheet({ open, onOpenChange, councilId, title }: Cou
                 <TabsList>
                   <TabsTrigger value="members">{t("reviewBoard.members")}</TabsTrigger>
                   <TabsTrigger value="meetings">{t("reviewBoard.meetings")}</TabsTrigger>
-                  <TabsTrigger value="slots">{t("reviewBoard.slots")}</TabsTrigger>
+                  {/* Lịch chấm = chia khung giờ con CHO TỪNG ĐỀ TÀI trong một buổi họp. Hội đồng
+                      chỉ có 1 đề tài thì slot trùng luôn buổi họp ⇒ tab này chỉ làm rối. */}
+                  {hasMultipleProjects && (
+                    <TabsTrigger value="slots">{t("reviewBoard.slots")}</TabsTrigger>
+                  )}
                 </TabsList>
                 <TabsContent value="members">
                   <CouncilMembersPanel councilId={councilId} />
@@ -43,9 +51,11 @@ export function CouncilDetailSheet({ open, onOpenChange, councilId, title }: Cou
                 <TabsContent value="meetings">
                   <MeetingsPanel councilId={councilId} />
                 </TabsContent>
-                <TabsContent value="slots">
-                  <CouncilSlotsPanel councilId={councilId} />
-                </TabsContent>
+                {hasMultipleProjects && (
+                  <TabsContent value="slots">
+                    <CouncilSlotsPanel councilId={councilId} />
+                  </TabsContent>
+                )}
               </Tabs>
             )}
           </div>

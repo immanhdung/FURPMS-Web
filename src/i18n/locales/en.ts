@@ -603,6 +603,8 @@ export const en = {
     langPlaceholder: "Vietnamese / English",
   },
   reviewBoard: {
+    slotBudget: "{{planned}}/{{budget}} minutes of the meeting allocated",
+    slotOverBudget: "exceeds the meeting duration",
     editMeeting: "Edit meeting",
     editMeetingHint: "Change the time, location or meeting link. Council members will see the new schedule.",
     deleteMeeting: "Delete meeting",

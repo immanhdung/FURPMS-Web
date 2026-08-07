@@ -16,7 +16,8 @@ interface Row {
 /** Lịch chấm (rule tuần 10): gán khung giờ con cho từng đề tài trong buổi họp của hội đồng. */
 export function CouncilSlotsPanel({ councilId }: { councilId: string }) {
   const { t } = useTranslation();
-  const { data: slots } = useCouncilSlotsQuery(councilId);
+  const { data: board } = useCouncilSlotsQuery(councilId);
+  const slots = board?.slots;
   const save = useSaveSlotsMutation(councilId);
   const [rows, setRows] = useState<Row[]>([]);
   const [loadedId, setLoadedId] = useState<string | null>(null);
@@ -46,6 +47,10 @@ export function CouncilSlotsPanel({ councilId }: { councilId: string }) {
       }))
     );
 
+  const planned = rows.reduce((sum, r) => sum + (r.duration || 0), 0);
+  const budget = board?.meetingDurationMinutes ?? 0;
+  const overBudget = budget > 0 && planned > budget;
+
   if (!slots || slots.length === 0) {
     return <EmptyState icon={CalendarClock} title={t("reviewBoard.noSlotProjects")} className="min-h-32 border-none p-4" />;
   }
@@ -53,6 +58,14 @@ export function CouncilSlotsPanel({ councilId }: { councilId: string }) {
   return (
     <div className="space-y-3 py-2">
       <p className="text-xs text-muted-foreground">{t("reviewBoard.slotHint")}</p>
+
+      {/* Quỹ giờ của buổi họp — trước đây Staff phải tự cộng, tới lúc Lưu mới ăn 400 vì tràn giờ. */}
+      {budget > 0 && (
+        <p className={overBudget ? "text-xs font-medium text-destructive" : "text-xs text-muted-foreground"}>
+          {t("reviewBoard.slotBudget", { planned, budget })}
+          {overBudget && ` — ${t("reviewBoard.slotOverBudget")}`}
+        </p>
+      )}
       <ol className="space-y-2">
         {rows.map((r, i) => (
           <li key={r.projectId} className="rounded-lg border border-border p-3">

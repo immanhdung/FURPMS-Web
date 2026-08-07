@@ -14,3 +14,15 @@ export interface SlotEntry {
   slotDurationMinutes?: number;
   slotOrder?: number;
 }
+
+/**
+ * Slot + khung giờ buổi họp. BE trả kèm để màn lịch chấm hiện "đã xếp 60/90 phút" —
+ * trước đây Staff phải tự cộng nhẩm, gán thêm đề tài cũng không ai nhắc còn đủ giờ hay không.
+ */
+export interface CouncilSlotBoard {
+  meetingId?: string | null;
+  meetingStartAt?: string | null;
+  meetingDurationMinutes?: number | null;
+  assignedMinutes: number;
+  slots: CouncilSlot[];
+}
