@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSystemSettingsQuery } from "@/hooks/useSystemSettings";
 import { ClipboardList, Loader2, Save, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,17 @@ interface RubricScoringFormProps {
 
 export function RubricScoringForm({ councilId, proposalId }: RubricScoringFormProps) {
   const { t } = useTranslation();
+
+  /**
+   * Bước nhảy ô điểm do Admin quy định (`SCORE_DECIMAL_PLACES`, mặc định 0 = số nguyên).
+   * Trước đây hardcode `step="0.5"` — cẩm nang Capstone gọi đúng đây là hardcode tham số nghiệp
+   * vụ, và BE nay chặn theo cấu hình nên để lệch thì người chấm gõ được mà nộp lại ăn 400.
+   */
+  const { data: systemSettings } = useSystemSettingsQuery();
+  const scoreDecimals = Number(
+    systemSettings?.find((x) => x.key === "SCORE_DECIMAL_PLACES")?.value ?? 0
+  );
+  const scoreStep = scoreDecimals > 0 ? String(1 / 10 ** scoreDecimals) : "1";
   // Lấy ĐÚNG bộ tiêu chí cho hội đồng này: BE tự suy (đợt + lĩnh vực + loại vòng) từ councilId
   // rồi trả bộ đã gắn cho lĩnh vực đó; chưa gắn thì trả bộ mặc định (không bao giờ kẹt).
   const { data: resolvedTemplate, isLoading: isTemplatesLoading } = useRubricForCouncilQuery(councilId);
@@ -169,7 +181,7 @@ export function RubricScoringForm({ councilId, proposalId }: RubricScoringFormPr
                     type="number"
                     min={0}
                     max={criterion.maxScore}
-                    step="0.5"
+                    step={scoreStep}
                     className="w-20"
                     // Hiện rỗng khi 0 (thay vì "0" dính đầu gây "05" khó chịu khi gõ tay); rỗng = 0 lúc nộp.
                     value={scores[criterion.id]?.givenScore || ""}
