@@ -178,7 +178,13 @@ export function AmendmentsPanel({
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-foreground">{a.categoryName ?? `Category ${a.categoryId}`}</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">{t("contract.amendment.requestedAt", { date: formatDateTime(a.requestedAt) })}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {t("contract.amendment.requestedAt", { date: formatDateTime(a.requestedAt) })}
+                    {/* Duyệt gia hạn là đổi luôn EndDate của hợp đồng. Không ghi lại DUYỆT LÚC NÀO
+                        thì nhìn vào chỉ thấy hạn mới, không truy được ai đổi và đổi khi nào
+                        (thầy 05/08: "ở đâu để biết đã gia hạn thêm"). */}
+                    {a.reviewedAt && ` · ${t("contract.amendment.reviewedAt", { date: formatDateTime(a.reviewedAt) })}`}
+                  </p>
                 </div>
                 <StatusBadge status={a.status} />
               </div>

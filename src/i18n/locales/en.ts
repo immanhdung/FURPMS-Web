@@ -1313,6 +1313,7 @@ export const en = {
       submitRequest: "Submit request",
       none: "No amendment requests",
       noneDesc: "Changes to scope, budget, timeline or team are recorded here.",
+      reviewedAt: "reviewed {{date}}",
       requestedAt: "Requested {{date}}",
       reviewer: "Reviewer:",
       commentsPlaceholder: "Comments (optional)",

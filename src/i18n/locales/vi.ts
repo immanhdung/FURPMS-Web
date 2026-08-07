@@ -1325,6 +1325,7 @@ export const vi = {
       submitRequest: "Gửi yêu cầu",
       none: "Chưa có yêu cầu điều chỉnh",
       noneDesc: "Thay đổi phạm vi, kinh phí, thời gian hoặc nhân sự được ghi ở đây.",
+      reviewedAt: "duyệt {{date}}",
       requestedAt: "Gửi {{date}}",
       reviewer: "Người duyệt:",
       commentsPlaceholder: "Ghi chú (tùy chọn)",
