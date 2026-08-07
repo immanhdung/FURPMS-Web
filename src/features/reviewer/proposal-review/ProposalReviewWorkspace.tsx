@@ -17,7 +17,7 @@ import { AcceptanceDossierPanel } from "@/features/reviewer/proposal-review/Acce
 import { AcceptanceEvaluationForm } from "@/features/reviewer/proposal-review/AcceptanceEvaluationForm";
 import { MinutesPanel } from "@/features/reviewer/proposal-review/MinutesPanel";
 import { ProposalDocumentViewer } from "@/features/reviewer/proposal-review/ProposalDocumentViewer";
-import { COUNCIL_MEMBER_ROLE, REVIEW_ROUND_TYPE, ROUND_STATUS } from "@/constants/statuses";
+import { REVIEW_ROUND_TYPE, ROUND_STATUS } from "@/constants/statuses";
 import { ROUTES } from "@/constants/routes";
 import { formatDateTime } from "@/utils/format";
 
@@ -44,8 +44,13 @@ export function ProposalReviewWorkspace() {
   }
 
   const isAcceptanceRound = membership.roundType?.toUpperCase() === REVIEW_ROUND_TYPE.ACCEPTANCE;
-  // The secretary compiles the meeting minutes rather than scoring the proposal themselves.
-  const isSecretary = membership.memberRole === COUNCIL_MEMBER_ROLE.SECRETARY;
+  /**
+   * Thư ký CŨNG chấm điểm — trước đây màn này ẩn tab "Chấm điểm" với Thư ký.
+   * Sai ba đường: QĐ543 **Điều 8.3.b** ghi *"các thành viên tham dự họp **cần đánh giá thẩm định**
+   * đề cương"* (không trừ ai); rule #11 *"Reviewer = mọi thành viên hội đồng, chức danh chỉ là
+   * field"*; và thầy 05/08 nhắc thẳng *"Thư ký có thể chấm điểm"*. BE vốn không hề chặn.
+   * Ngoài ra quorum 2/3 đếm theo số phiếu — loại Thư ký ra là hội đồng nhỏ khó đủ phiếu.
+   */
   // Staff must open the round before reviewers can score/evaluate it.
   const isRoundOpen = membership.roundStatus?.toUpperCase() === ROUND_STATUS.OPEN;
 
@@ -115,7 +120,7 @@ export function ProposalReviewWorkspace() {
               <TabsTrigger value="info">{t("reviewWorkspace.tabInfo")}</TabsTrigger>
               {/* Nghiệm thu phải nhìn được đề tài ĐÃ LÀM RA GÌ, không chỉ đề cương như vòng 1. */}
               {isAcceptanceRound && <TabsTrigger value="dossier">{t("reviewWorkspace.tabDossier")}</TabsTrigger>}
-              {!isSecretary && <TabsTrigger value="scoring">{t("reviewWorkspace.tabScoring")}</TabsTrigger>}
+              <TabsTrigger value="scoring">{t("reviewWorkspace.tabScoring")}</TabsTrigger>
               {isAcceptanceRound && <TabsTrigger value="acceptance">{t("reviewWorkspace.tabAcceptance")}</TabsTrigger>}
               <TabsTrigger value="minutes">{t("reviewWorkspace.tabMinutes")}</TabsTrigger>
             </TabsList>
@@ -134,19 +139,17 @@ export function ProposalReviewWorkspace() {
               </TabsContent>
             )}
 
-            {!isSecretary && (
-              <TabsContent value="scoring">
-                {isRoundOpen ? (
-                  <RubricScoringForm councilId={councilId} proposalId={membership.proposalId} />
-                ) : (
-                  <EmptyState
-                    icon={Lock}
-                    title={t("reviewWorkspace.roundNotOpen")}
-                    description={t("reviewWorkspace.roundNotOpenDesc")}
-                  />
-                )}
-              </TabsContent>
-            )}
+            <TabsContent value="scoring">
+              {isRoundOpen ? (
+                <RubricScoringForm councilId={councilId} proposalId={membership.proposalId} />
+              ) : (
+                <EmptyState
+                  icon={Lock}
+                  title={t("reviewWorkspace.roundNotOpen")}
+                  description={t("reviewWorkspace.roundNotOpenDesc")}
+                />
+              )}
+            </TabsContent>
 
             {isAcceptanceRound && (
               <TabsContent value="acceptance">
