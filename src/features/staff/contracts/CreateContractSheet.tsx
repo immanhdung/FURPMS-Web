@@ -176,12 +176,10 @@ export function CreateContractSheet({ open, onOpenChange, contract = null }: Cre
         <Input id="contract-number" {...register("contractNumber")} />
       </div>
 
-      <div>
-        <label htmlFor="contract-scope" className="mb-1.5 block text-sm font-medium text-foreground">
-          {t("contract.scopeLabel")}
-        </label>
-        <Input id="contract-scope" {...register("scopeTitle")} />
-      </div>
+      {/* Đã bỏ ô "Phạm vi ký" (08/08): rà hết mẫu BM05 của QĐ543 thì KHÔNG có mục nào như vậy —
+          khái niệm gần nhất là Điều 1 "Nội dung công việc" (tên đề tài + mã số) và Điều 2 "Sản
+          phẩm của đề tài", cả hai hệ thống đều tự sinh. Cột ScopeTitle vẫn giữ trong DB cho dữ
+          liệu cũ, chỉ ngừng cho nhập mới. */}
 
       <div className="grid grid-cols-2 gap-3">
         <div>
