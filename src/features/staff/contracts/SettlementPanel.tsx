@@ -117,11 +117,15 @@ export function SettlementPanel({ contractId, canManage }: { contractId: string;
           <div className="flex justify-end">
             <Button
               type="button"
-              disabled={!contracted || !disbursed || createMutation.isPending}
+              /* Rule #15 (thầy tuần 10): *"Tài chính = minh chứng, hệ thống KHÔNG quản tiền"* —
+                 kế toán chi tiền ngoài hệ thống. Trước đây form quyết toán BẮT NHẬP 2 ô số tiền
+                 mới cho tạo, tức là vẫn bắt Staff gõ tiền vào hệ thống. Nay để tuỳ chọn (bỏ trống
+                 = 0), giống chỗ xác nhận giải ngân đã sửa hồi tuần 12. */
+              disabled={createMutation.isPending}
               onClick={() =>
                 createMutation.mutate({
-                  totalContractedAmount: Number(contracted),
-                  totalDisbursedAmount: Number(disbursed),
+                  totalContractedAmount: Number(contracted || 0),
+                  totalDisbursedAmount: Number(disbursed || 0),
                   totalReturnedAmount: Number(returned || 0),
                   productsSubmittedSummary: productsSummary.trim() || undefined,
                   notes: notes.trim() || undefined,
