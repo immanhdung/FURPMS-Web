@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useMultiFileUpload } from "@/hooks/useMultiFileUpload";
 import { FileText, Loader2, Upload } from "lucide-react";
 import { FormSheet } from "@/components/shared/FormSheet";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,10 @@ export function CreateProgressReportSheet({ open, onOpenChange, contractId, prop
   // File báo cáo (BM06) — Staff cần mở xem file này rồi mới đánh giá Đạt/Không đạt.
   const { data: docs } = useProgressReportDocumentsQuery(report?.id ?? null);
   const uploadMutation = useUploadProgressReportDocMutation(report?.id ?? "");
+  // Một kỳ báo cáo thường kèm cả phụ lục/minh chứng — chọn một lượt thay vì từng tệp.
+  const { handleFiles, progress, isUploading } = useMultiFileUpload({
+    upload: (file) => uploadMutation.mutateAsync(file),
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // BM06 — bảng tiến độ theo từng hoạt động đã cam kết trong đề cương.
@@ -133,11 +138,11 @@ export function CreateProgressReportSheet({ open, onOpenChange, contractId, prop
             type="button"
             size="sm"
             variant="outline"
-            disabled={!report || uploadMutation.isPending}
+            disabled={!report || isUploading}
             onClick={() => fileInputRef.current?.click()}
           >
-            {uploadMutation.isPending ? <Loader2 className="animate-spin" /> : <Upload />}
-            {t("reports.chooseFile")}
+            {isUploading ? <Loader2 className="animate-spin" /> : <Upload />}
+            {progress ? `${progress.done}/${progress.total}` : t("reports.chooseFiles")}
           </Button>
         </div>
         <p className="mt-1 text-xs text-muted-foreground">{t("reports.attachFileHint")}</p>
@@ -145,10 +150,10 @@ export function CreateProgressReportSheet({ open, onOpenChange, contractId, prop
           ref={fileInputRef}
           type="file"
           accept=".pdf,.doc,.docx"
+          multiple
           className="hidden"
           onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) uploadMutation.mutate(f);
+            void handleFiles(e.target.files);
             e.target.value = "";
           }}
         />

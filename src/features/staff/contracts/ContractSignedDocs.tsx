@@ -7,12 +7,17 @@ import {
   useUploadContractDocMutation,
   openContractDoc,
 } from "@/hooks/useContractDocuments";
+import { useMultiFileUpload } from "@/hooks/useMultiFileUpload";
 
 /** Hồ sơ hợp đồng đã ký (BM05): Staff upload bản Word/scan có chữ ký; ai cũng mở xem. */
 export function ContractSignedDocs({ contractId }: { contractId: string }) {
   const { t } = useTranslation();
   const { data: files } = useContractDocumentsQuery(contractId);
   const upload = useUploadContractDocMutation(contractId);
+  // Bản ký thường là nhiều trang scan rời — chọn một lượt thay vì mở hộp thoại từng tệp.
+  const { handleFiles, progress, isUploading } = useMultiFileUpload({
+    upload: (file) => upload.mutateAsync(file),
+  });
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
@@ -22,16 +27,16 @@ export function ContractSignedDocs({ contractId }: { contractId: string }) {
         <input
           ref={inputRef}
           type="file"
+          multiple
           className="hidden"
           onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) upload.mutate(f);
+            void handleFiles(e.target.files);
             e.target.value = "";
           }}
         />
-        <Button size="sm" variant="outline" onClick={() => inputRef.current?.click()} disabled={upload.isPending}>
-          {upload.isPending ? <Loader2 className="animate-spin" /> : <Upload />}
-          {t("contract.uploadSigned")}
+        <Button size="sm" variant="outline" onClick={() => inputRef.current?.click()} disabled={isUploading}>
+          {isUploading ? <Loader2 className="animate-spin" /> : <Upload />}
+          {progress ? `${progress.done}/${progress.total}` : t("contract.uploadSigned")}
         </Button>
       </div>
       {(files?.length ?? 0) === 0 ? (

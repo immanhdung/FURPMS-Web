@@ -246,6 +246,10 @@ export const vi = {
     dropzoneLabel: "Tải lên PDF hoặc DOCX",
     dropzoneHint: "Kéo & thả tệp vào đây, hoặc bấm để chọn",
     unsupportedType: "Định dạng không hỗ trợ. Cho phép: {{accept}}",
+    filesRejected: "{{count}} tệp bị bỏ qua",
+    uploadPartial: "Chỉ tải lên được {{done}}/{{total}} tệp",
+    uploadAllDone: "Đã tải lên {{count}} tệp",
+    chooseFiles: "Chọn tệp",
     fileTooLarge: "Tệp quá lớn. Tối đa {{max}}MB.",
   },
   command: {
@@ -588,6 +592,7 @@ export const vi = {
     orLink: "Hoặc dán link báo cáo",
     orLinkPlaceholder: "https://… dùng khi file quá lớn để tải lên",
     attachFileHint: "Tải lên bản báo cáo (PDF/Word). Phòng QLKH cần xem file này để đánh giá.",
+    chooseFiles: "Chọn tệp",
     chooseFile: "Chọn file",
     fillAndSubmit: "Điền & nộp",
     roundN: "Kỳ {{n}}",

@@ -244,6 +244,10 @@ export const en = {
     dropzoneLabel: "Upload PDF or DOCX",
     dropzoneHint: "Drag & drop your file here, or click to browse",
     unsupportedType: "Unsupported file type. Allowed: {{accept}}",
+    filesRejected: "{{count}} file(s) skipped",
+    uploadPartial: "Only {{done}} of {{total}} files uploaded",
+    uploadAllDone: "Uploaded {{count}} files",
+    chooseFiles: "Choose files",
     fileTooLarge: "File is too large. Max size is {{max}}MB.",
   },
   command: {
@@ -583,6 +587,7 @@ export const en = {
     orLink: "Or paste a report link",
     orLinkPlaceholder: "https://… use this when the file is too large to upload",
     attachFileHint: "Upload the report (PDF/Word). The research office needs this file to evaluate.",
+    chooseFiles: "Choose files",
     chooseFile: "Choose file",
     fillAndSubmit: "Fill & submit",
     roundN: "Round {{n}}",

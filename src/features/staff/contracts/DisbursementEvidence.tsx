@@ -7,12 +7,17 @@ import {
   useUploadDisbursementEvidenceMutation,
   openDisbursementEvidence,
 } from "@/hooks/useDisbursementEvidence";
+import { useMultiFileUpload } from "@/hooks/useMultiFileUpload";
 
 /** Minh chứng 1 đợt giải ngân (rule tuần 10): Staff upload file HĐ/chứng từ; ai cũng mở xem được. */
 export function DisbursementEvidence({ disbursementId, canManage }: { disbursementId: number; canManage: boolean }) {
   const { t } = useTranslation();
   const { data: files } = useDisbursementEvidenceQuery(disbursementId);
   const upload = useUploadDisbursementEvidenceMutation(disbursementId);
+  // Một đợt giải ngân thường kèm cả xấp chứng từ — chọn một lượt.
+  const { handleFiles, progress, isUploading } = useMultiFileUpload({
+    upload: (file) => upload.mutateAsync(file),
+  });
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
@@ -24,16 +29,16 @@ export function DisbursementEvidence({ disbursementId, canManage }: { disburseme
             <input
               ref={inputRef}
               type="file"
+              multiple
               className="hidden"
               onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) upload.mutate(f);
+                void handleFiles(e.target.files);
                 e.target.value = "";
               }}
             />
-            <Button size="sm" variant="ghost" onClick={() => inputRef.current?.click()} disabled={upload.isPending}>
-              {upload.isPending ? <Loader2 className="animate-spin" /> : <Upload />}
-              {t("contract.disbursement.uploadEvidence")}
+            <Button size="sm" variant="ghost" onClick={() => inputRef.current?.click()} disabled={isUploading}>
+              {isUploading ? <Loader2 className="animate-spin" /> : <Upload />}
+              {progress ? `${progress.done}/${progress.total}` : t("contract.disbursement.uploadEvidence")}
             </Button>
           </>
         )}

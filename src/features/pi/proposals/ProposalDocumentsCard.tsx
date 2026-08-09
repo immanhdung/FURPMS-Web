@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useMultiFileUpload } from "@/hooks/useMultiFileUpload";
 import { Download, FileUp, Loader2, Paperclip, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,24 +41,15 @@ export function ProposalDocumentsCard({ proposalId, editable }: { proposalId: st
   const maxMb = policy?.maxFileSizeMb ?? 10;
   const allowed = policy?.allowedExtensions ?? [];
 
-  const handleFile = (file: File | undefined) => {
-    if (!file) return;
+  // QĐ543 Điều 6.4 đòi ít nhất thuyết minh + lý lịch khoa học, thực tế còn thêm phụ lục —
+  // chọn một lượt thay vì mở hộp thoại ba lần. Việc lọc dung lượng/định dạng nằm trong hook.
+  const { handleFiles, progress, isUploading } = useMultiFileUpload({
+    upload: (file) => uploadMutation.mutateAsync({ file, documentType }),
+  });
+
+  const onPick = (files: FileList | null) => {
     setLocalError(null);
-
-    const ext = file.name.includes(".") ? file.name.slice(file.name.lastIndexOf(".")).toLowerCase() : "";
-    if (allowed.length > 0 && !allowed.includes(ext)) {
-      setLocalError(t("common.unsupportedType", { accept: allowed.join(", ") }));
-      return;
-    }
-    if (file.size > maxMb * 1024 * 1024) {
-      setLocalError(t("common.fileTooLarge", { max: maxMb }));
-      return;
-    }
-
-    uploadMutation.mutate(
-      { file, documentType },
-      { onSuccess: () => { if (inputRef.current) inputRef.current.value = ""; } }
-    );
+    void handleFiles(files);
   };
 
   return (
@@ -136,16 +128,20 @@ export function ProposalDocumentsCard({ proposalId, editable }: { proposalId: st
                 type="file"
                 className="hidden"
                 accept={allowed.join(",")}
-                onChange={(e) => handleFile(e.target.files?.[0])}
+                multiple
+                onChange={(e) => {
+                  onPick(e.target.files);
+                  e.target.value = "";
+                }}
               />
               <Button
                 type="button"
                 size="sm"
-                disabled={uploadMutation.isPending}
+                disabled={isUploading}
                 onClick={() => inputRef.current?.click()}
               >
-                {uploadMutation.isPending ? <Loader2 className="animate-spin" /> : <FileUp />}
-                {t("proposal.chooseFile")}
+                {isUploading ? <Loader2 className="animate-spin" /> : <FileUp />}
+                {progress ? `${progress.done}/${progress.total}` : t("proposal.chooseFile")}
               </Button>
             </div>
 
