@@ -2,12 +2,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { adminService } from "@/services/api/admin.service";
 import { queryKeys } from "@/services/queryKeys";
-import { useAuthStore } from "@/store/auth.store";
-import { ROLES } from "@/constants/roles";
+import { useIsAdmin } from "@/hooks/useActiveRole";
 import type { SystemClockState } from "@/types/admin";
 
 export function useSystemClockQuery() {
-  const isAdmin = useAuthStore((state) => state.user?.roles.includes(ROLES.ADMIN) ?? false);
+  const isAdmin = useIsAdmin();
 
   return useQuery({
     queryKey: queryKeys.systemClock.detail(),

@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { TriangleAlert } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -31,6 +32,15 @@ export function CouncilDetailSheet({ open, onOpenChange, councilId, title }: Cou
           <SheetTitle>{title}</SheetTitle>
           <SheetDescription>{t("reviewBoard.councilManageDesc")}</SheetDescription>
         </SheetHeader>
+
+        {/* Cảnh báo quỹ giờ hiện NGAY ở đầu, không bắt Staff mở tab "Lịch chấm" mới thấy —
+            thứ tự thao tác thật là đặt lịch họp trước rồi mới gán thêm đề tài vào hội đồng. */}
+        {board?.warning && (
+          <div className="mx-4 flex items-start gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-400">
+            <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
+            <span>{board.warning}</span>
+          </div>
+        )}
 
         <ScrollArea className="flex-1 px-4">
           <div className="pb-6">

@@ -24,5 +24,13 @@ export interface CouncilSlotBoard {
   meetingStartAt?: string | null;
   meetingDurationMinutes?: number | null;
   assignedMinutes: number;
+  /** Tổng số đề tài hội đồng phải chấm. */
+  projectCount: number;
+  /** Số đề tài chưa được chia khung giờ. */
+  unscheduledCount: number;
+  /** Thời lượng buổi họp còn trống; âm nghĩa là đã vượt. */
+  remainingMinutes?: number | null;
+  /** Cảnh báo do BE tính sẵn — cảnh báo chứ KHÔNG chặn (rule #17 cho đổi lịch bất kỳ lúc nào). */
+  warning?: string | null;
   slots: CouncilSlot[];
 }

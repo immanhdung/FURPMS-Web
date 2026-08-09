@@ -19,8 +19,7 @@ import { DeliverablesPanel } from "@/features/staff/contracts/DeliverablesPanel"
 import { FinalReportPanel } from "@/features/staff/contracts/FinalReportPanel";
 import { AmendmentsPanel } from "@/features/staff/contracts/AmendmentsPanel";
 import { SettlementPanel } from "@/features/staff/contracts/SettlementPanel";
-import { useAuthStore } from "@/store/auth.store";
-import { ROLES } from "@/constants/roles";
+import { useIsManaging } from "@/hooks/useActiveRole";
 import { formatDate } from "@/utils/format";
 
 interface ContractDetailSheetProps {
@@ -54,10 +53,9 @@ export function ContractDetailSheet({ open, onOpenChange, contractId }: Contract
     }
   };
   // Chỉ Admin/Staff được sinh lịch & xác nhận chi tiền; PI chỉ xem (BE cũng chặn 403).
-  const canManage = useAuthStore((state) => {
-    const roles = state.user?.roles ?? [];
-    return roles.includes(ROLES.ADMIN) || roles.includes(ROLES.STAFF);
-  });
+  // Đọc theo VAI ĐANG CHỌN chứ không phải vai người đó có: người đa vai chuyển sang Giảng viên
+  // thì không nên còn thấy nút của Phòng QLKH ở đây (rule #23).
+  const canManage = useIsManaging();
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>

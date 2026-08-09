@@ -6,8 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useUiStore, type Theme } from "@/store/ui.store";
-import { useAuthStore } from "@/store/auth.store";
-import { ROLES } from "@/constants/roles";
+import { useIsAdmin } from "@/hooks/useActiveRole";
 import { UploadLimitsCard } from "@/features/settings/UploadLimitsCard";
 import { SystemSettingsCard } from "@/features/settings/SystemSettingsCard";
 import { useSystemSettingsQuery } from "@/hooks/useSystemSettings";
@@ -24,7 +23,7 @@ export function SettingsPage() {
   const setTheme = useUiStore((state) => state.setTheme);
   const sampleFillEnabled = useUiStore((state) => state.sampleFillEnabled);
   const setSampleFillEnabled = useUiStore((state) => state.setSampleFillEnabled);
-  const isAdmin = useAuthStore((state) => state.user?.roles.includes(ROLES.ADMIN) ?? false);
+  const isAdmin = useIsAdmin();
   const { data: systemSettings } = useSystemSettingsQuery(isAdmin);
 
   // Upload có card riêng (kèm danh sách đuôi file) nên tách ra khỏi nhóm chung.

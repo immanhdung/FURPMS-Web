@@ -4,8 +4,7 @@ import dayjs from "dayjs";
 import { FastForward, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useAuthStore } from "@/store/auth.store";
-import { ROLES } from "@/constants/roles";
+import { useIsAdmin } from "@/hooks/useActiveRole";
 import { cn } from "@/lib/utils";
 import {
   useAdjustSystemClockMutation,
@@ -17,7 +16,7 @@ const FORMAT = "DD MMM YYYY, HH:mm:ss";
 
 export function DevClockWidget() {
   const { t } = useTranslation();
-  const isAdmin = useAuthStore((state) => state.user?.roles.includes(ROLES.ADMIN) ?? false);
+  const isAdmin = useIsAdmin();
   const { data: clock } = useSystemClockQuery();
   const adjustClock = useAdjustSystemClockMutation();
   const resetClock = useResetSystemClockMutation();
