@@ -1541,7 +1541,7 @@ export const en = {
     formDesc: "Configure the submission window for this cycle.",
     detailsTitle: "Cycle details",
     name: "Name",
-    academicYear: "Academic year",
+    academicYear: "Year",
     researchType: "Research type",
     researchTypePlaceholder: "Select research type",
     start: "Start",

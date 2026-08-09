@@ -100,7 +100,7 @@ export function CycleFormSheet({ open, onOpenChange, cycle }: CycleFormSheetProp
         <label htmlFor="cycle-year" className="mb-1.5 block text-sm font-medium text-foreground">
           {t("cycles.academicYear")}
         </label>
-        <Input id="cycle-year" placeholder="2025-2026" aria-invalid={Boolean(errors.academicYear)} {...register("academicYear")} />
+        <Input id="cycle-year" inputMode="numeric" maxLength={4} placeholder="2026" aria-invalid={Boolean(errors.academicYear)} {...register("academicYear")} />
         {errors.academicYear && <p className="mt-1 text-xs text-destructive">{errors.academicYear.message}</p>}
       </div>
 

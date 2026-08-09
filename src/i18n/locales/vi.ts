@@ -1554,7 +1554,7 @@ export const vi = {
     formDesc: "Cấu hình cửa sổ nộp cho đợt này.",
     detailsTitle: "Chi tiết đợt",
     name: "Tên",
-    academicYear: "Năm học",
+    academicYear: "Năm",
     researchType: "Loại đề tài",
     researchTypePlaceholder: "Chọn loại đề tài",
     start: "Bắt đầu",
