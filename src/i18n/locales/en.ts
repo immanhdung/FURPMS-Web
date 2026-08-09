@@ -338,6 +338,23 @@ export const en = {
     confirmPassword: "Confirm new password",
     updatePassword: "Update password",
   },
+  contractIdentity: {
+    title: "Contract details",
+    description: "Bank account and national ID used to fill in the research contract (BM05, Party B).",
+    privacyNote:
+      "Only you can enter this — the research office cannot fill it in for you. It is always shown masked (****1234); the full number is written only into the contract file when it is exported for signing. Every change is recorded in the audit log.",
+    bankAccount: "Bank account number",
+    bankName: "Bank",
+    nationalId: "National ID number",
+    issuedDate: "Issued on",
+    issuedPlace: "Issued by",
+    add: "Add details",
+    update: "Update",
+    keepHint: "Leave blank to keep the current number.",
+    missingHint: "Not provided yet: {{fields}}. Optional — the contract can still be created with these left blank, as on paper.",
+    saved: "Contract details saved.",
+    saveFailed: "Could not save contract details.",
+  },
   profile: {
     title: "Profile",
     subtitle: "Your account information within FURPMS.",

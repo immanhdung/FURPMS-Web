@@ -28,6 +28,12 @@ const AcademicProfileCard = lazy(() =>
   import("@/features/auth/pages/AcademicProfileCard").then((m) => ({ default: m.AcademicProfileCard }))
 );
 
+// C3 — thông tin định danh để điền hợp đồng. Chỉ chính chủ khai được (endpoint chỉ có "/me"),
+// nên đặt ở trang hồ sơ cá nhân chứ không phải màn lập hợp đồng của Staff.
+const ContractIdentityCard = lazy(() =>
+  import("@/features/auth/pages/ContractIdentityCard").then((m) => ({ default: m.ContractIdentityCard }))
+);
+
 export function ProfilePage() {
   const { t } = useTranslation();
   const user = useAuthStore((state) => state.user);
@@ -103,6 +109,10 @@ export function ProfilePage() {
       {/* Academic Profile — all users can fill their scientific CV */}
       <Suspense fallback={<Skeleton className="h-48 w-full rounded-xl" />}>
         <AcademicProfileCard userId={user.id} />
+      </Suspense>
+
+      <Suspense fallback={<Skeleton className="h-48 w-full rounded-xl" />}>
+        <ContractIdentityCard />
       </Suspense>
     </div>
   );

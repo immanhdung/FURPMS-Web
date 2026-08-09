@@ -340,6 +340,23 @@ export const vi = {
     confirmPassword: "Xác nhận mật khẩu mới",
     updatePassword: "Cập nhật mật khẩu",
   },
+  contractIdentity: {
+    title: "Thông tin để lập hợp đồng",
+    description: "Số tài khoản và CCCD dùng để điền vào hợp đồng nghiên cứu (BM05 phần Bên B).",
+    privacyNote:
+      "Chỉ bạn khai được thông tin này — Phòng QLKH không nhập hộ. Hệ thống luôn hiển thị dạng che (****1234); số đầy đủ chỉ được điền vào file hợp đồng khi xuất ra để ký. Mọi lần thay đổi đều được ghi nhật ký.",
+    bankAccount: "Số tài khoản ngân hàng",
+    bankName: "Ngân hàng",
+    nationalId: "Số CCCD/CMND",
+    issuedDate: "Ngày cấp",
+    issuedPlace: "Nơi cấp",
+    add: "Khai thông tin",
+    update: "Cập nhật",
+    keepHint: "Để trống nếu giữ nguyên số cũ.",
+    missingHint: "Chưa khai: {{fields}}. Không bắt buộc — hợp đồng vẫn lập được, phần này để trống như bản giấy.",
+    saved: "Đã lưu thông tin lập hợp đồng.",
+    saveFailed: "Không lưu được thông tin lập hợp đồng.",
+  },
   profile: {
     title: "Hồ sơ",
     subtitle: "Thông tin tài khoản của bạn trong FURPMS.",
