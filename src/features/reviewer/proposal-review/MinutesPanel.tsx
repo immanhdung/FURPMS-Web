@@ -275,7 +275,7 @@ export function MinutesPanel({
                     <span className="font-medium text-foreground">{b.memberName}</span>
                     {b.memberRole && (
                       <span className="ml-1.5 text-xs text-muted-foreground">
-                        {t(`councils.role.${b.memberRole}`, b.memberRole)}
+                        {t(`reviewBoard.role.${b.memberRole}`, { defaultValue: b.memberRole })}
                       </span>
                     )}
                   </span>

@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
 import { CalendarClock, FolderKanban, User } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { MemberRoleBadge, RoundTypeBadge } from "@/components/shared/RoleBadge";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { formatDateTime } from "@/utils/format";
 import type { MyMembership } from "@/types/membership";
@@ -30,9 +30,9 @@ export function MembershipCard({ membership, actions, index = 0 }: MembershipCar
             </p>
             <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
               {membership.roundType && (
-                <Badge variant="secondary">{t(`reviewBoard.type.${membership.roundType}`, { defaultValue: membership.roundType })}</Badge>
+                <RoundTypeBadge type={membership.roundType} />
               )}
-              {membership.memberRole && <Badge variant="outline">{membership.memberRole}</Badge>}
+              <MemberRoleBadge role={membership.memberRole} />
               {membership.status && <StatusBadge status={membership.status} />}
               {membership.roundStatus && <StatusBadge status={membership.roundStatus} />}
             </div>

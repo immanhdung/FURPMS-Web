@@ -84,8 +84,9 @@ export function ProgressReportsPanel({ contractId }: { contractId: string }) {
               {report.dueDate && (
                 <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <CalendarClock className="size-3.5" />
-                  Due {formatDate(report.dueDate)}
-                  {report.scheduledMeetingAt && ` · Meeting ${formatDateTime(report.scheduledMeetingAt)}`}
+                  {t("reports.dueOn", { date: formatDate(report.dueDate) })}
+                  {report.scheduledMeetingAt &&
+                    ` · ${t("reports.workingSessionAt", { datetime: formatDateTime(report.scheduledMeetingAt) })}`}
                 </p>
               )}
 
@@ -97,13 +98,13 @@ export function ProgressReportsPanel({ contractId }: { contractId: string }) {
                   className="flex items-center gap-1 text-xs font-medium text-primary hover:underline"
                 >
                   <ExternalLink className="size-3.5" />
-                  Join link
+                  {t("reports.joinLink")}
                 </a>
               )}
 
               {report.evaluationResult && (
                 <p className="text-xs text-muted-foreground">
-                  Evaluation: <StatusBadge status={report.evaluationResult} />
+                  {t("reports.evaluationLabel")} <StatusBadge status={report.evaluationResult} />
                   {report.evaluationComments && ` — ${report.evaluationComments}`}
                 </p>
               )}
@@ -111,11 +112,11 @@ export function ProgressReportsPanel({ contractId }: { contractId: string }) {
               <div className="flex gap-2 pt-1">
                 <Button variant="outline" size="sm" onClick={() => setSchedulingReportId(report.id)}>
                   <CalendarClock />
-                  Schedule
+                  {t("reports.scheduleSession")}
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => setEvaluatingReportId(report.id)}>
                   <ClipboardCheck />
-                  Evaluate
+                  {t("reports.evaluateReport")}
                 </Button>
               </div>
             </li>

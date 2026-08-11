@@ -2,8 +2,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, CalendarClock, ExternalLink, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/shared/StatusBadge";
+import { MemberRoleBadge, RoundTypeBadge } from "@/components/shared/RoleBadge";
 import { PageLoader } from "@/components/shared/PageLoader";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -66,8 +66,8 @@ export function ProposalReviewWorkspace() {
           {membership.proposalTitleVI || "Untitled proposal"}
         </h1>
         <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-          {membership.roundType && <Badge variant="secondary">{membership.roundType}</Badge>}
-          {membership.memberRole && <Badge variant="outline">{membership.memberRole}</Badge>}
+          <RoundTypeBadge type={membership.roundType} />
+          <MemberRoleBadge role={membership.memberRole} />
           {membership.roundStatus && <StatusBadge status={membership.roundStatus} />}
           {membership.proposalStatus && <StatusBadge status={membership.proposalStatus} />}
         </div>

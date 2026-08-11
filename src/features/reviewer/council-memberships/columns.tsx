@@ -4,6 +4,7 @@ import { Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTableColumnHeader } from "@/components/tables/DataTableColumnHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
+import { useRoleLabel } from "@/components/shared/RoleBadge";
 import type { MyMembership } from "@/types/membership";
 
 export function getMembershipColumns(t: TFunction, onView: (membership: MyMembership) => void): ColumnDef<MyMembership>[] {
@@ -16,12 +17,12 @@ export function getMembershipColumns(t: TFunction, onView: (membership: MyMember
     {
       accessorKey: "roundType",
       header: ({ column }) => <DataTableColumnHeader column={column} title={t("reviewer.roundType")} />,
-      cell: ({ row }) => row.original.roundType ?? "-",
+      cell: ({ row }) => (row.original.roundType ? t(`reviewBoard.type.${row.original.roundType}`, { defaultValue: row.original.roundType }) : "-"),
     },
     {
       accessorKey: "memberRole",
       header: ({ column }) => <DataTableColumnHeader column={column} title={t("reviewer.role")} />,
-      cell: ({ row }) => row.original.memberRole ?? "-",
+      cell: ({ row }) => <MemberRoleCell role={row.original.memberRole} />,
     },
     {
       accessorKey: "status",
@@ -46,4 +47,10 @@ export function getMembershipColumns(t: TFunction, onView: (membership: MyMember
       ),
     },
   ];
+}
+
+/** Ô "Vai trò" — tách thành component vì `useRoleLabel` là hook, không gọi được trong `cell`. */
+function MemberRoleCell({ role }: { role?: string | null }) {
+  const label = useRoleLabel();
+  return <>{label.role(role)}</>;
 }

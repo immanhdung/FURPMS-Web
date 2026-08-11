@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { CheckCircle2, Clock, ExternalLink, FileBarChart, FileSignature, Flag, Milestone } from "lucide-react";
 import { useDisbursementsQuery } from "@/hooks/useDisbursements";
 import { useProgressReportsQuery } from "@/hooks/useProgressReports";
+import { StatusBadge } from "@/components/shared/StatusBadge";
 import { formatDate } from "@/utils/format";
 import { cn } from "@/lib/utils";
 import type { Contract } from "@/types/contract";
@@ -36,8 +37,9 @@ export function ContractMilestoneTimeline({ contract }: { contract: Contract }) 
     icon: Milestone,
     title: `${t("contract.timelineDisb", { n: d.roundNumber })}${d.conditionDescription ? ` — ${d.conditionDescription}` : ""}`,
     date: d.disbursedAt ?? d.conditionMetAt,
+    // `stage` đã nói rõ hơn cả enum ("Đủ điều kiện, chờ chi" vs "Chờ đủ điều kiện") nên KHÔNG
+    // gắn thêm badge trạng thái — trước đây mốc hiện "Đã giải ngân" hai lần liền nhau.
     stage: d.disbursedAt ? t("contract.mDisbursed") : d.conditionMetAt ? t("contract.mReady") : t("contract.mWaiting"),
-    badge: d.status,
     done: Boolean(d.disbursedAt),
   }));
 
@@ -47,7 +49,8 @@ export function ContractMilestoneTimeline({ contract }: { contract: Contract }) 
     title: t("contract.timelineReport", { n: r.reportRound ?? "" }),
     date: r.submittedAt ?? r.dueDate,
     stage: r.submittedAt ? t("contract.mReportSubmitted") : t("contract.mReportPending"),
-    badge: r.evaluationResult ?? r.status,
+    // Chỉ hiện KẾT QUẢ đánh giá (Đạt/Không đạt); trạng thái "Đã nộp" đã nằm ở `stage`.
+    badge: r.evaluationResult,
     done: Boolean(r.submittedAt),
   }));
 
@@ -111,7 +114,9 @@ export function ContractMilestoneTimeline({ contract }: { contract: Contract }) 
                   {n.date ? formatDate(n.date) : t("contract.mNoDate")}
                 </span>
                 {n.stage && <span>{n.stage}</span>}
-                {n.badge && <span className="font-medium text-foreground">{n.badge}</span>}
+                {/* Trước đây in THẲNG enum của BE nên timeline tiếng Việt vẫn lòi ra "DISBURSED",
+                    "SUBMITTED", "ACTIVE" — cùng lỗi lẫn ngôn ngữ mà thầy bắt hôm demo 05/08. */}
+                {n.badge && <StatusBadge status={n.badge} />}
               </div>
             </RowTag>
           </li>

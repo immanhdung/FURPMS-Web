@@ -23,7 +23,9 @@ export function getContractColumns({ t, proposalTitles, onView, onEdit, onDelete
     },
     {
       id: "proposal",
-      accessorFn: (row) => proposalTitles[row.proposalId] ?? row.proposalId,
+      // Ưu tiên tên BE trả kèm hợp đồng; bảng tra `proposalTitles` chỉ chứa các đề cương đang
+      // tải trên trang nên hợp đồng của đề cương ngoài trang từng hiện trơ ra GUID.
+      accessorFn: (row) => row.proposalTitle || proposalTitles[row.proposalId] || "-",
       header: ({ column }) => <DataTableColumnHeader column={column} title={t("staff.proposal")} />,
     },
     {

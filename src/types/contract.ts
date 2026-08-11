@@ -1,6 +1,8 @@
 export interface Contract {
   id: string;
   proposalId: string;
+  /** Tên đề tài do BE trả kèm — dùng thẳng, đừng tra ngược từ danh sách đề cương. */
+  proposalTitle?: string | null;
   piName?: string | null;
   contractNumber?: string | null;
   scopeTitle?: string | null;
