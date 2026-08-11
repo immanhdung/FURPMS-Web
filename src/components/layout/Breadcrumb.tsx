@@ -11,9 +11,19 @@ export function Breadcrumb() {
   const { t } = useTranslation();
   const segments = pathname.split("/").filter(Boolean);
 
-  const labelForSegment = (fullPath: string, segment: string): string => {
+  /**
+   * Mảnh đường dẫn là một ID (GUID hoặc số) thì KHÔNG đưa lên breadcrumb.
+   * Trước đây màn chấm điểm hiện "E01a2af6 D7e5 4467 8192 2af4536e52fb" — vô nghĩa với người
+   * đọc, lại đẩy nhãn thật ra khỏi khung. Tên đề tài đã có ở tiêu đề trang ngay bên dưới.
+   */
+  const isIdSegment = (segment: string) =>
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(segment) ||
+    /^\d+$/.test(segment);
+
+  const labelForSegment = (fullPath: string, segment: string): string | null => {
     const match = NAV_ITEMS.find((item) => item.path === fullPath);
     if (match) return t(match.labelKey);
+    if (isIdSegment(segment)) return null;
     return segment
       .split("-")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
@@ -29,10 +39,12 @@ export function Breadcrumb() {
     );
   }
 
-  const crumbs = segments.map((segment, index) => {
-    const fullPath = `/${segments.slice(0, index + 1).join("/")}`;
-    return { path: fullPath, label: labelForSegment(fullPath, segment) };
-  });
+  const crumbs = segments
+    .map((segment, index) => {
+      const fullPath = `/${segments.slice(0, index + 1).join("/")}`;
+      return { path: fullPath, label: labelForSegment(fullPath, segment) };
+    })
+    .filter((c): c is { path: string; label: string } => c.label !== null);
 
   // min-w-0 + shrink-0 cho icon + truncate cho nhãn: nếu không, nhãn dài đẩy cả header
   // tràn ngang ở màn hẹp (sidebar vẫn chiếm chỗ từ md) → chữ lòi khỏi khung.

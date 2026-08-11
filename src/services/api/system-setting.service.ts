@@ -10,6 +10,12 @@ export const systemSettingService = {
   uploadPolicy: () =>
     axiosClient.get<ApiResponse<UploadPolicy>>("/system-settings/upload-policy").then((res) => res.data.data),
 
+  /** Bước nhảy điểm — mọi user đăng nhập đọc được (danh sách setting đầy đủ chỉ Admin). */
+  scoringPolicy: () =>
+    axiosClient
+      .get<ApiResponse<{ scoreDecimalPlaces: number }>>("/system-settings/scoring-policy")
+      .then((res) => res.data.data),
+
   update: (key: string, value: string) =>
     axiosClient.put<ApiResponse<SystemSetting>>(`/system-settings/${key}`, { value }).then((res) => res.data.data),
 };

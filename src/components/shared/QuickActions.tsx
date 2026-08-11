@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 export interface QuickAction {
-  /** Khóa i18n cho nhãn (vd "dashboard.actions.submitProposal"). */
+  /** Khoá i18n cho nhãn (vd "dashboard.actions.submitProposal"). */
   labelKey: string;
   path: string;
   icon: LucideIcon;

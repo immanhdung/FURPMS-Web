@@ -79,7 +79,7 @@ export function EvaluateProgressReportDialog({
               phải gọi thêm chi tiết. */}
           <ProgressReportDetailView reportId={open ? reportId : null} />
 
-          {/* File PI nộp — bấm mở xem trước khi chấm. Chưa có file thì khóa nút lưu. */}
+          {/* File PI nộp — bấm mở xem trước khi chấm. Chưa có file thì khoá nút lưu. */}
           <div className="rounded-lg border border-border p-3">
             <p className="text-sm font-medium text-foreground">{t("contract.reportFiles")}</p>
             {reportLink && (

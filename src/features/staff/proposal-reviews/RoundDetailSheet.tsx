@@ -54,7 +54,7 @@ export function RoundDetailSheet({ open, onOpenChange, proposalId, trackId, roun
             </div>
 
             {/* Chỉ có "Mở vòng". Kết quả vòng KHÔNG chốt thủ công ở đây —
-                ra từ biên bản: Thư ký soạn → Chủ tịch duyệt & khóa (rule #12). */}
+                ra từ biên bản: Thư ký soạn → Chủ tịch duyệt & khoá (rule #12). */}
             {canOpen && (
               <div className="flex gap-2">
                 <Button size="sm" onClick={() => openMutation.mutate(round.id)} disabled={openMutation.isPending}>

@@ -108,7 +108,7 @@ export function ProposalDetailPage() {
 
       <ProposalSummaryView data={proposal} cycleName={cycleName} trackName={trackName} researchTypeName={researchTypeName} />
 
-      {/* Sản phẩm cam kết — chỉ sửa được khi còn nháp, vì nộp xong là khóa đề cương. */}
+      {/* Sản phẩm cam kết — chỉ sửa được khi còn nháp, vì nộp xong là khoá đề cương. */}
       <ExpectedProductsCard
         proposalId={proposal.id}
         editable={isDraft}

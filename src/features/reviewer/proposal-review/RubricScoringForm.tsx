@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useSystemSettingsQuery } from "@/hooks/useSystemSettings";
+import { useScoringPolicyQuery } from "@/hooks/useSystemSettings";
 import { ClipboardList, Loader2, Save, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -34,10 +34,8 @@ export function RubricScoringForm({ councilId, proposalId, projectId }: RubricSc
    * Trước đây hardcode `step="0.5"` — cẩm nang Capstone gọi đúng đây là hardcode tham số nghiệp
    * vụ, và BE nay chặn theo cấu hình nên để lệch thì người chấm gõ được mà nộp lại ăn 400.
    */
-  const { data: systemSettings } = useSystemSettingsQuery();
-  const scoreDecimals = Number(
-    systemSettings?.find((x) => x.key === "SCORE_DECIMAL_PLACES")?.value ?? 0
-  );
+  const { data: scoringPolicy } = useScoringPolicyQuery();
+  const scoreDecimals = scoringPolicy?.scoreDecimalPlaces ?? 0;
   const scoreStep = scoreDecimals > 0 ? String(1 / 10 ** scoreDecimals) : "1";
   // Lấy ĐÚNG bộ tiêu chí cho hội đồng này: BE tự suy (đợt + lĩnh vực + loại vòng) từ councilId
   // rồi trả bộ đã gắn cho lĩnh vực đó; chưa gắn thì trả bộ mặc định (không bao giờ kẹt).
@@ -191,15 +189,31 @@ export function RubricScoringForm({ councilId, proposalId, projectId }: RubricSc
                     className="w-20"
                     // Hiện rỗng khi 0 (thay vì "0" dính đầu gây "05" khó chịu khi gõ tay); rỗng = 0 lúc nộp.
                     value={scores[criterion.id]?.givenScore || ""}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      // Chặn NGAY LÚC GÕ thay vì đợi bấm nộp mới báo lỗi: thuộc tính max của ô số
+                      // không ngăn người dùng gõ 99 vào tiêu chí trần 10, họ điền xong cả phiếu
+                      // rồi mới biết sai. Cắt về trần và làm tròn theo bước nhảy đang cấu hình.
+                      const raw = e.target.value;
+                      if (raw === "") {
+                        setScores((prev) => ({
+                          ...prev,
+                          [criterion.id]: { ...prev[criterion.id], givenScore: 0 },
+                        }));
+                        return;
+                      }
+                      let v = Number(raw);
+                      if (Number.isNaN(v)) return;
+                      v = Math.min(Math.max(v, 0), criterion.maxScore);
+                      if (scoreDecimals === 0) v = Math.round(v);
+                      else {
+                        const f = 10 ** scoreDecimals;
+                        v = Math.round(v * f) / f;
+                      }
                       setScores((prev) => ({
                         ...prev,
-                        [criterion.id]: {
-                          ...prev[criterion.id],
-                          givenScore: e.target.value === "" ? 0 : Number(e.target.value),
-                        },
-                      }))
-                    }
+                        [criterion.id]: { ...prev[criterion.id], givenScore: v },
+                      }));
+                    }}
                   />
                   <span className="text-xs text-muted-foreground">/ {criterion.maxScore}</span>
                 </div>

@@ -28,7 +28,7 @@ export function useSaveMinutesMutation(councilId: string) {
   });
 }
 
-/** Chủ tịch duyệt & khóa biên bản — chỉ sau bước này đề tài mới đổi trạng thái (rule #12). */
+/** Chủ tịch duyệt & khoá biên bản — chỉ sau bước này đề tài mới đổi trạng thái (rule #12). */
 export function useApproveMinutesMutation(councilId: string, projectId?: string) {
   const queryClient = useQueryClient();
   return useMutation({

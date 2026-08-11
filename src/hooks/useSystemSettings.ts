@@ -5,6 +5,19 @@ import { queryKeys } from "@/services/queryKeys";
 import type { ApiError } from "@/types/common";
 
 /** Admin only — trả 403 với vai trò khác, nên chỉ gọi khi chắc chắn là Admin. */
+/**
+ * Bước nhảy điểm cho màn chấm. KHÔNG dùng useSystemSettingsQuery ở đây: endpoint đó chỉ cho
+ * Admin nên hội đồng luôn ăn 403, im lặng rơi về mặc định số nguyên — cấu hình cho phép thập
+ * phân của Admin sẽ không bao giờ có tác dụng với đúng người cần nó.
+ */
+export function useScoringPolicyQuery() {
+  return useQuery({
+    queryKey: ["system-settings", "scoring-policy"],
+    queryFn: systemSettingService.scoringPolicy,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
 export function useSystemSettingsQuery(enabled = true) {
   return useQuery({
     queryKey: queryKeys.systemSettings.list(),

@@ -92,7 +92,7 @@ export function FinalReportPanel({
   const isArchived = status === FINAL_REPORT_STATUS.ARCHIVED;
   const isAccepted = status === FINAL_REPORT_STATUS.ACCEPTED;
   const needsRevision = status === FINAL_REPORT_STATUS.REVISION_REQUIRED;
-  // Nộp được khi: chưa nộp lần nào, hoặc bị trả về sửa. Đã duyệt/lưu trữ thì khóa.
+  // Nộp được khi: chưa nộp lần nào, hoặc bị trả về sửa. Đã duyệt/lưu trữ thì khoá.
   const canSubmit = canSubmitReport && (!report || needsRevision);
 
   return (

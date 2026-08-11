@@ -34,7 +34,7 @@ export const reviewBoardService = {
       .post<ApiResponse<ReviewBoardCouncil>>(`/rounds/${roundId}/councils`, payload)
       .then((res) => res.data.data),
 
-  // Xóa cả hội đồng (chỉ khi chưa có phiếu chấm / biên bản / nghiệm thu — BE chặn).
+  // Xoá cả hội đồng (chỉ khi chưa có phiếu chấm / biên bản / nghiệm thu — BE chặn).
   deleteCouncil: (councilId: string) =>
     axiosClient.delete<ApiResponse>(`/councils/${councilId}`).then((res) => res.data),
 

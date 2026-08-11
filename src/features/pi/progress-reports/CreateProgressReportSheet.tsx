@@ -104,7 +104,7 @@ export function CreateProgressReportSheet({ open, onOpenChange, contractId, prop
           notes: itemNotes[a.id] || undefined,
         })),
     };
-    // Lưu nội dung trước, rồi nộp (khóa) — nộp xong không sửa được nữa.
+    // Lưu nội dung trước, rồi nộp (khoá) — nộp xong không sửa được nữa.
     updateMutation.mutate(
       { id: report.id, payload },
       {

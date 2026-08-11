@@ -36,7 +36,7 @@ function isSecretary(role?: string | null) {
 
 /**
  * Biên bản họp hội đồng (BIỂU MẪU 04 / 12 của QĐ 543).
- * Luồng bắt buộc (rule #12): Thư ký soạn nháp → Chủ tịch duyệt & khóa → BE mới đổi trạng thái đề tài.
+ * Luồng bắt buộc (rule #12): Thư ký soạn nháp → Chủ tịch duyệt & khoá → BE mới đổi trạng thái đề tài.
  * Điểm/phiếu chỉ hiển thị để THAM KHẢO, hệ thống không tự đếm phiếu ra kết quả.
  */
 export function MinutesPanel({
@@ -79,7 +79,7 @@ export function MinutesPanel({
   const [attendance, setAttendance] = useState<Record<string, { attended: boolean; reason: string }>>({});
   const [loadedAttMeetingId, setLoadedAttMeetingId] = useState<string | null>(null);
 
-  // Nạp bản nháp đang có vào form (chỉ khi chưa khóa). Set state trong lúc render (thay vì
+  // Nạp bản nháp đang có vào form (chỉ khi chưa khoá). Set state trong lúc render (thay vì
   // trong effect) là cách React khuyến nghị để đồng bộ từ dữ liệu vừa tải xong.
   if (decision && !decision.finalizedAt && decision.id !== loadedDraftId) {
     setLoadedDraftId(decision.id);
@@ -563,7 +563,7 @@ export function MinutesPanel({
         </Card>
       )}
 
-      {/* Nội dung biên bản (read-only cho người không phải Thư ký, hoặc đã khóa) */}
+      {/* Nội dung biên bản (read-only cho người không phải Thư ký, hoặc đã khoá) */}
       {decision && (!canDraft || locked) && (
         <Card>
           <CardContent className="space-y-3 p-4">
@@ -635,7 +635,7 @@ export function MinutesPanel({
         </Card>
       )}
 
-      {/* Chủ tịch duyệt & khóa */}
+      {/* Chủ tịch duyệt & khoá */}
       {canApprove && (
         <Card>
           <CardContent className="space-y-3 p-4">
