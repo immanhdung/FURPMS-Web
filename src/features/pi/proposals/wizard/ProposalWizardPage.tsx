@@ -50,7 +50,7 @@ const DEFAULT_VALUES: ProposalWizardValues = {
   applicationPotential: "",
   transferPotential: "",
   facilities: "",
-  fundingMethod: "",
+  totalBudget: undefined,
   durationMonths: 12,
   members: [],
 };
@@ -72,7 +72,7 @@ const SAMPLE_CONTENT: Partial<ProposalWizardValues> = {
   applicationPotential: "Directly deployable as a scoring service inside a bank's payment pipeline.",
   transferPotential: "The approach generalizes to insurance-claim and e-wallet fraud.",
   facilities: "University GPU server; anonymized transaction dataset from a partner bank.",
-  fundingMethod: "PARTIAL",
+  totalBudget: 95_000_000,
   durationMonths: 12,
   members: [
     {
@@ -133,7 +133,7 @@ export function ProposalWizardPage() {
         applicationPotential: existingProposal.applicationPotential ?? "",
         transferPotential: existingProposal.transferPotential ?? "",
         facilities: existingProposal.facilities ?? "",
-        fundingMethod: existingProposal.fundingMethod ?? "",
+        totalBudget: existingProposal.totalBudget ?? undefined,
         durationMonths: existingProposal.durationMonths || 12,
         members: existingProposal.members ?? [],
       });
@@ -302,7 +302,7 @@ export function ProposalWizardPage() {
       <div className="flex items-center justify-between gap-2">
         <Button type="button" variant="outline" onClick={handleBack} disabled={currentStep === 0}>
           <ArrowLeft />
-          Back
+          {t("common.back")}
         </Button>
 
         <div className="flex items-center gap-2">

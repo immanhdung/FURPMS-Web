@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
+import { formatCurrency } from "@/utils/format";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { ProposalMember } from "@/types/proposal-member";
@@ -18,6 +19,7 @@ interface ProposalSummaryData {
   facilities?: string | null;
   fundingMethod?: string | null;
   durationMonths?: number | null;
+  totalBudget?: number | null;
   members?: ProposalMember[] | null;
 }
 
@@ -48,7 +50,15 @@ export function ProposalSummaryView({ data, cycleName, trackName, researchTypeNa
             {cycleName && <Badge variant="secondary">{cycleName}</Badge>}
             {trackName && <Badge variant="secondary">{trackName}</Badge>}
             {researchTypeName && <Badge variant="secondary">{researchTypeName}</Badge>}
-            {data.durationMonths ? <Badge variant="outline">{data.durationMonths} months</Badge> : null}
+            {data.durationMonths ? (
+              <Badge variant="outline">{t("common.monthsCount", { n: data.durationMonths })}</Badge>
+            ) : null}
+            {/* Kinh phí là con số hội đồng soi đầu tiên — trước đây bản xem lại không hề hiện. */}
+            {data.totalBudget ? (
+              <Badge variant="outline">
+                {t("common.budgetTotal", { amount: formatCurrency(data.totalBudget) })}
+              </Badge>
+            ) : null}
           </div>
 
           {/* Ghi rõ nhãn Tên tiếng Việt / tiếng Anh (như các mục Mục tiêu, Tóm tắt) để khỏi nhầm. */}

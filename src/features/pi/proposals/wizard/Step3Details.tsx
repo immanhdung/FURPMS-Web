@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import type { UseFormReturn } from "react-hook-form";
-import { Controller } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useResearchTypesQuery } from "@/hooks/useResearchTypes";
+import { formatCurrency } from "@/utils/format";
 import type { ProposalWizardValues } from "@/features/pi/proposals/wizard/proposal-wizard.schema";
 
 /** Small helpers so labels/sections stay consistent without repeating classes. */
@@ -33,9 +33,18 @@ export function Step3Details({ form }: { form: UseFormReturn<ProposalWizardValue
   const { t } = useTranslation();
   const {
     register,
-    control,
+    watch,
     formState: { errors },
   } = form;
+
+  // Trần kinh phí suy từ LOẠI ĐỀ TÀI của đợt (bước 1 đã chốt) — hiện ngay lúc gõ, đừng để chủ
+  // nhiệm điền xong cả đề cương rồi mới ăn 400 ở bước nộp.
+  const { data: researchTypes } = useResearchTypesQuery();
+  const selectedType = researchTypes?.find((rt) => Number(rt.id) === Number(watch("researchType")));
+  const cap = selectedType?.maxBudgetCap && selectedType.maxBudgetCap > 0 ? selectedType.maxBudgetCap : null;
+  const capType = selectedType?.name ?? "";
+  const totalBudget = watch("totalBudget");
+  const overCap = cap != null && typeof totalBudget === "number" && totalBudget > cap;
 
   return (
     <div className="space-y-6">
@@ -132,25 +141,28 @@ export function Step3Details({ form }: { form: UseFormReturn<ProposalWizardValue
         </div>
       </Section>
 
+      {/* Bỏ ô "Phương thức cấp kinh phí" (Trọn gói / Theo mốc): lịch giải ngân do LOẠI ĐỀ TÀI
+          quyết định theo QĐ543 Điều 16, chủ nhiệm không có quyền chọn — để ô đó lại là hứa với PI
+          một lựa chọn không tồn tại. Thay bằng tổng dự toán, có trần Điều 14 hiện ngay tại chỗ. */}
       <Section title={t("wizard.step3.secPlan")}>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <FieldLabel htmlFor="fundingMethod">{t("wizard.step3.fundingMethod")}</FieldLabel>
-            <Controller
-              control={control}
-              name="fundingMethod"
-              render={({ field }) => (
-                <Select value={field.value || undefined} onValueChange={field.onChange}>
-                  <SelectTrigger id="fundingMethod" className="w-full">
-                    <SelectValue placeholder={t("wizard.step3.fundingPlaceholder")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="WHOLE">{t("wizard.step3.fundingWhole")}</SelectItem>
-                    <SelectItem value="PARTIAL">{t("wizard.step3.fundingPartial")}</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
+            <FieldLabel htmlFor="totalBudget">{t("wizard.step3.totalBudget")}</FieldLabel>
+            <Input
+              id="totalBudget"
+              type="number"
+              min={0}
+              step={1_000_000}
+              aria-invalid={overCap || Boolean(errors.totalBudget)}
+              {...register("totalBudget", { valueAsNumber: true })}
             />
+            {cap != null && (
+              <p className={`mt-1 text-xs ${overCap ? "text-destructive" : "text-muted-foreground"}`}>
+                {overCap
+                  ? t("wizard.step3.totalBudgetOverCap", { cap: formatCurrency(cap) })
+                  : t("wizard.step3.totalBudgetHint", { cap: formatCurrency(cap), type: capType })}
+              </p>
+            )}
           </div>
           <div>
             <FieldLabel htmlFor="durationMonths" required>

@@ -19,6 +19,8 @@ export interface ProposalDetail {
   transferPotential?: string | null;
   facilities?: string | null;
   fundingMethod?: string | null;
+  /** Tổng dự toán kinh phí; trần theo loại đề tài (QĐ543 Điều 14). */
+  totalBudget?: number | null;
   members?: ProposalMember[] | null;
   status?: string | null;
   createdAt?: string | null;
@@ -42,5 +44,7 @@ export interface ProposalPayload {
   transferPotential?: string;
   facilities?: string;
   fundingMethod?: string;
+  /** Tổng dự toán khi chủ nhiệm chưa tách theo hạng mục — BE bỏ qua nếu có `budgetItems`. */
+  totalBudget?: number;
   members?: ProposalMember[];
 }

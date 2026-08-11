@@ -29,7 +29,8 @@ export const proposalWizardSchema = z.object({
   applicationPotential: z.string().optional(),
   transferPotential: z.string().optional(),
   facilities: z.string().optional(),
-  fundingMethod: z.string().optional(),
+  /** Tổng dự toán; trần theo loại đề tài (QĐ543 Điều 14) kiểm ở Step3 + BE. */
+  totalBudget: z.number().min(0, "Kinh phí không được âm").optional(),
   durationMonths: z.number().min(1, "Duration is required"),
 
   members: z.array(proposalMemberSchema),
