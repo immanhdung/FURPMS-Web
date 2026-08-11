@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
+import { useBudgetCategoriesQuery } from "@/hooks/useBudgetCategories";
 import { formatCurrency } from "@/utils/format";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -20,6 +21,8 @@ interface ProposalSummaryData {
   fundingMethod?: string | null;
   durationMonths?: number | null;
   totalBudget?: number | null;
+  /** Dự toán theo hạng mục — dùng mã hoặc tên tuỳ nguồn (wizard gửi mã, BE trả tên). */
+  budgetItems?: { category?: string | null; categoryName?: string | null; amount: number }[] | null;
   members?: ProposalMember[] | null;
 }
 
@@ -101,9 +104,17 @@ export function ProposalSummaryView({ data, cycleName, trackName, researchTypeNa
             <Field label={t("wizard.step3.transferPotential")} value={data.transferPotential} />
           </div>
           <Field label={t("wizard.step3.facilities")} value={data.facilities} />
-          <Field label={t("proposal.fundingMethod")} value={data.fundingMethod} />
         </CardContent>
       </Card>
+
+      {data.budgetItems && data.budgetItems.length > 0 && (
+        <Card>
+          <CardContent className="p-4">
+            <p className="mb-2 text-xs font-medium text-muted-foreground">{t("wizard.step3.secPlan")}</p>
+            <BudgetSummaryTable items={data.budgetItems} />
+          </CardContent>
+        </Card>
+      )}
 
       {data.members && data.members.length > 0 && (
         <Card>
@@ -132,6 +143,52 @@ export function ProposalSummaryView({ data, cycleName, trackName, researchTypeNa
           </CardContent>
         </Card>
       )}
+    </div>
+  );
+}
+
+/**
+ * Bảng dự toán trong bản xem lại — hiện cả **tỷ lệ** từng hạng mục, vì đó chính là con số hội đồng
+ * đối chiếu với QĐ543 Điều 15 khi thẩm định kinh phí.
+ */
+function BudgetSummaryTable({
+  items,
+}: {
+  items: { category?: string | null; categoryName?: string | null; amount: number }[];
+}) {
+  const { t } = useTranslation();
+  const { data: categories } = useBudgetCategoriesQuery();
+  const total = items.reduce((sum, i) => sum + i.amount, 0);
+
+  // Wizard giữ MÃ hạng mục, chi tiết từ BE giữ TÊN — tra cả hai để bảng nào cũng đọc được.
+  const label = (raw?: string | null) => {
+    if (!raw) return "—";
+    const found = (categories ?? []).find((c) => c.code === raw || c.name === raw);
+    return found?.name ?? raw;
+  };
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <tbody>
+          {items.map((i, idx) => (
+            <tr key={idx} className="border-b border-border last:border-0">
+              <td className="py-1.5 pr-3 text-foreground">{label(i.category ?? i.categoryName)}</td>
+              <td className="w-40 py-1.5 text-right text-foreground">{formatCurrency(i.amount)}</td>
+              <td className="w-20 py-1.5 text-right text-muted-foreground">
+                {total > 0 ? `${((i.amount / total) * 100).toFixed(1)}%` : "—"}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+        <tfoot>
+          <tr className="border-t-2 border-border">
+            <td className="py-1.5 pr-3 font-medium text-foreground">{t("wizard.step3.budgetTotal")}</td>
+            <td className="py-1.5 text-right font-semibold text-foreground">{formatCurrency(total)}</td>
+            <td className="py-1.5 text-right text-muted-foreground">{total > 0 ? "100%" : "—"}</td>
+          </tr>
+        </tfoot>
+      </table>
     </div>
   );
 }

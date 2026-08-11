@@ -4,7 +4,7 @@ import type { UseFormReturn } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useResearchTypesQuery } from "@/hooks/useResearchTypes";
-import { formatCurrency } from "@/utils/format";
+import { BudgetBreakdownTable } from "@/features/pi/proposals/wizard/BudgetBreakdownTable";
 import type { ProposalWizardValues } from "@/features/pi/proposals/wizard/proposal-wizard.schema";
 
 /** Small helpers so labels/sections stay consistent without repeating classes. */
@@ -43,8 +43,6 @@ export function Step3Details({ form }: { form: UseFormReturn<ProposalWizardValue
   const selectedType = researchTypes?.find((rt) => Number(rt.id) === Number(watch("researchType")));
   const cap = selectedType?.maxBudgetCap && selectedType.maxBudgetCap > 0 ? selectedType.maxBudgetCap : null;
   const capType = selectedType?.name ?? "";
-  const totalBudget = watch("totalBudget");
-  const overCap = cap != null && typeof totalBudget === "number" && totalBudget > cap;
 
   return (
     <div className="space-y-6">
@@ -146,23 +144,9 @@ export function Step3Details({ form }: { form: UseFormReturn<ProposalWizardValue
           một lựa chọn không tồn tại. Thay bằng tổng dự toán, có trần Điều 14 hiện ngay tại chỗ. */}
       <Section title={t("wizard.step3.secPlan")}>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <FieldLabel htmlFor="totalBudget">{t("wizard.step3.totalBudget")}</FieldLabel>
-            <Input
-              id="totalBudget"
-              type="number"
-              min={0}
-              step={1_000_000}
-              aria-invalid={overCap || Boolean(errors.totalBudget)}
-              {...register("totalBudget", { valueAsNumber: true })}
-            />
-            {cap != null && (
-              <p className={`mt-1 text-xs ${overCap ? "text-destructive" : "text-muted-foreground"}`}>
-                {overCap
-                  ? t("wizard.step3.totalBudgetOverCap", { cap: formatCurrency(cap) })
-                  : t("wizard.step3.totalBudgetHint", { cap: formatCurrency(cap), type: capType })}
-              </p>
-            )}
+          <div className="sm:col-span-2">
+            <FieldLabel htmlFor="budget-LABOR">{t("wizard.step3.totalBudget")}</FieldLabel>
+            <BudgetBreakdownTable form={form} cap={cap} capType={capType} />
           </div>
           <div>
             <FieldLabel htmlFor="durationMonths" required>

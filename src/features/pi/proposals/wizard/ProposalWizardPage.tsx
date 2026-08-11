@@ -50,7 +50,7 @@ const DEFAULT_VALUES: ProposalWizardValues = {
   applicationPotential: "",
   transferPotential: "",
   facilities: "",
-  totalBudget: undefined,
+  budgetItems: [],
   durationMonths: 12,
   members: [],
 };
@@ -72,7 +72,13 @@ const SAMPLE_CONTENT: Partial<ProposalWizardValues> = {
   applicationPotential: "Directly deployable as a scoring service inside a bank's payment pipeline.",
   transferPotential: "The approach generalizes to insurance-claim and e-wallet fraud.",
   facilities: "University GPU server; anonymized transaction dataset from a partner bank.",
-  totalBudget: 95_000_000,
+  // Dự toán mẫu: tổng 95tr, mọi hạng mục dưới trần % của QĐ543 Điều 15.
+  budgetItems: [
+    { category: "LABOR", amount: 62_000_000 },
+    { category: "EQUIPMENT", amount: 18_000_000 },
+    { category: "CONFERENCE", amount: 9_000_000 },
+    { category: "OFFICE_OTHER", amount: 6_000_000 },
+  ],
   durationMonths: 12,
   members: [
     {
@@ -133,7 +139,10 @@ export function ProposalWizardPage() {
         applicationPotential: existingProposal.applicationPotential ?? "",
         transferPotential: existingProposal.transferPotential ?? "",
         facilities: existingProposal.facilities ?? "",
-        totalBudget: existingProposal.totalBudget ?? undefined,
+        // Nạp lại theo MÃ hạng mục; tên đổi theo quy định nhưng mã thì giữ.
+        budgetItems: (existingProposal.budgetItems ?? [])
+          .filter((i) => i.categoryCode)
+          .map((i) => ({ category: i.categoryCode as string, amount: i.amount })),
         durationMonths: existingProposal.durationMonths || 12,
         members: existingProposal.members ?? [],
       });
