@@ -29,6 +29,8 @@ export interface ScoreDetailPayload {
 
 export interface SubmitScorePayload {
   templateId: number;
+  /** Đề tài đang chấm — bắt buộc khi hội đồng chấm nhiều đề tài. */
+  projectId?: string;
   generalComments?: string;
   otherRecommendations?: string;
   scoreDetails: ScoreDetailPayload[];

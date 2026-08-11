@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import i18n from "@/i18n";
 import { organizationalUnitService } from "@/services/api/organizational-unit.service";
 import { queryKeys } from "@/services/queryKeys";
 import type { ApiError } from "@/types/common";
@@ -21,6 +22,18 @@ export function useCreateOrganizationalUnitMutation() {
       queryClient.invalidateQueries({ queryKey: queryKeys.organizationalUnits.all() });
     },
     onError: (error: ApiError) => toast.error(error.message || "Unable to create organizational unit."),
+  });
+}
+
+export function useDeleteOrganizationalUnitMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => organizationalUnitService.remove(id),
+    onSuccess: () => {
+      toast.success(i18n.t("toast.orgUnitDeleted"));
+      queryClient.invalidateQueries({ queryKey: queryKeys.organizationalUnits.all() });
+    },
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.orgUnitDeleteFailed")),
   });
 }
 

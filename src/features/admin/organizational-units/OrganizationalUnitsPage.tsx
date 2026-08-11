@@ -6,7 +6,11 @@ import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/tables/DataTable";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { DetailSheet } from "@/components/shared/DetailSheet";
-import { useOrganizationalUnitsQuery } from "@/hooks/useOrganizationalUnits";
+import {
+  useOrganizationalUnitsQuery,
+  useDeleteOrganizationalUnitMutation,
+} from "@/hooks/useOrganizationalUnits";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { getOrgUnitColumns } from "@/features/admin/organizational-units/columns";
 import { OrgUnitFormSheet } from "@/features/admin/organizational-units/OrgUnitFormSheet";
 import type { OrganizationalUnit } from "@/types/organizational-unit";
@@ -18,6 +22,8 @@ export function OrganizationalUnitsPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [editingUnit, setEditingUnit] = useState<OrganizationalUnit | null>(null);
   const [viewingUnit, setViewingUnit] = useState<OrganizationalUnit | null>(null);
+  const [deletingUnit, setDeletingUnit] = useState<OrganizationalUnit | null>(null);
+  const deleteMutation = useDeleteOrganizationalUnitMutation();
 
   const parentNames = useMemo(() => Object.fromEntries((data ?? []).map((u) => [u.id, u.name])), [data]);
 
@@ -30,6 +36,7 @@ export function OrganizationalUnitsPage() {
           setEditingUnit(unit);
           setFormOpen(true);
         },
+        onDelete: (unit) => setDeletingUnit(unit),
         t,
       }),
     [parentNames, t]
@@ -89,6 +96,19 @@ export function OrganizationalUnitsPage() {
           { label: t("orgUnits.parentUnit"), value: viewingUnit?.parentId ? parentNames[viewingUnit.parentId] : "-" },
           { label: t("orgUnits.sortOrder"), value: viewingUnit?.sortOrder ?? "-" },
         ]}
+      />
+      <ConfirmDialog
+        open={Boolean(deletingUnit)}
+        onOpenChange={(open) => !open && setDeletingUnit(null)}
+        title={t("orgUnits.deleteTitle")}
+        description={t("orgUnits.deleteDesc", { name: deletingUnit?.name ?? "" })}
+        variant="destructive"
+        confirmLabel={t("common.delete")}
+        isLoading={deleteMutation.isPending}
+        onConfirm={() =>
+          deletingUnit &&
+          deleteMutation.mutate(deletingUnit.id, { onSuccess: () => setDeletingUnit(null) })
+        }
       />
     </div>
   );

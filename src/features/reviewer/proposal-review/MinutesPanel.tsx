@@ -39,16 +39,25 @@ function isSecretary(role?: string | null) {
  * Luồng bắt buộc (rule #12): Thư ký soạn nháp → Chủ tịch duyệt & khóa → BE mới đổi trạng thái đề tài.
  * Điểm/phiếu chỉ hiển thị để THAM KHẢO, hệ thống không tự đếm phiếu ra kết quả.
  */
-export function MinutesPanel({ councilId, memberRole }: { councilId: string; memberRole?: string | null }) {
+export function MinutesPanel({
+  councilId,
+  memberRole,
+  projectId,
+}: {
+  councilId: string;
+  memberRole?: string | null;
+  /** Đề tài đang xem. Hội đồng chấm nhiều đề tài mà thiếu nó thì hiện biên bản của đề tài khác. */
+  projectId?: string | null;
+}) {
   const { t } = useTranslation();
-  const { data: decision, isLoading } = useDecisionQuery(councilId);
+  const { data: decision, isLoading } = useDecisionQuery(councilId, projectId ?? undefined);
   const saveMutation = useSaveMinutesMutation(councilId);
-  const approveMutation = useApproveMinutesMutation(councilId);
+  const approveMutation = useApproveMinutesMutation(councilId, projectId ?? undefined);
 
   const { data: members } = useCouncilMembersQuery(councilId);
-  const { data: scores, error: scoresError } = useAllScoresQuery(councilId);
+  const { data: scores, error: scoresError } = useAllScoresQuery(councilId, projectId ?? undefined);
   // BM12 mục 10.1 — số phiếu phát ra/thu về/hợp lệ + Đạt/Không đạt + chi tiết từng thành viên.
-  const { data: tally } = useBallotTallyQuery(councilId);
+  const { data: tally } = useBallotTallyQuery(councilId, projectId ?? undefined);
   const { data: feedbackList, error: feedbackError } = useFeedbackListQuery(councilId);
   const isScoresForbidden = (scoresError as ApiError | null)?.status === 403;
   const isFeedbackForbidden = (feedbackError as ApiError | null)?.status === 403;

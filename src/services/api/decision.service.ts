@@ -3,9 +3,11 @@ import type { ApiResponse } from "@/types/common";
 import type { DecisionResponse, SaveMinutesPayload } from "@/types/decision";
 
 export const decisionService = {
-  get: (councilId: string) =>
+  get: (councilId: string, projectId?: string) =>
     axiosClient
-      .get<ApiResponse<DecisionResponse | null>>(`/review-scoring/councils/${councilId}/decision`)
+      .get<ApiResponse<DecisionResponse | null>>(`/review-scoring/councils/${councilId}/decision`, {
+        params: projectId ? { projectId } : undefined,
+      })
       .then((res) => res.data.data),
 
   /** Thư ký soạn/sửa biên bản → lưu bản NHÁP (chưa đổi trạng thái đề tài). */
@@ -15,8 +17,12 @@ export const decisionService = {
       .then((res) => res.data.data),
 
   /** Chủ tịch duyệt = KHÓA biên bản; BE tự cập nhật đề tài + vòng chấm (rule #12). */
-  approveMinutes: (councilId: string) =>
+  approveMinutes: (councilId: string, projectId?: string) =>
     axiosClient
-      .post<ApiResponse<DecisionResponse>>(`/review-scoring/councils/${councilId}/minutes/approve`)
+      .post<ApiResponse<DecisionResponse>>(
+        `/review-scoring/councils/${councilId}/minutes/approve`,
+        null,
+        { params: projectId ? { projectId } : undefined }
+      )
       .then((res) => res.data.data),
 };

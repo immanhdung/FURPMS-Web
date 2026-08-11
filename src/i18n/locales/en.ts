@@ -129,6 +129,14 @@ export const en = {
   },
   // Toast messages (called via i18n.t inside hooks).
   toast: {
+    orgUnitDeleted: "Unit deleted.",
+    orgUnitDeleteFailed: "Could not delete the unit.",
+    scoreSubmitted: "Score saved.",
+    scoreSubmitFailed: "Could not save the score.",
+    minutesSaved: "Minutes saved as a draft.",
+    minutesSaveFailed: "Could not save the minutes.",
+    minutesApproved: "Minutes approved and locked. The project status has been updated.",
+    minutesApproveFailed: "Could not approve the minutes.",
     cycleDeleted: "Research cycle deleted.",
     cycleDeleteFailed: "Could not delete the research cycle.",
     disbursementLinked: "Evidence deliverable updated for this tranche.",
@@ -1496,6 +1504,8 @@ export const en = {
     formDesc: "Expense categories used in proposal budgets.",
   },
   orgUnits: {
+    deleteTitle: "Delete unit?",
+    deleteDesc: 'Permanently delete "{{name}}". Only possible when no user, project, research order or child unit references it.',
     title: "Organizational Units",
     subtitle: "Faculties, departments, and offices structure.",
     newBtn: "New unit",

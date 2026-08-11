@@ -131,6 +131,14 @@ export const vi = {
   },
   // Thông báo toast (dùng qua i18n.t trong hooks — trước đây hardcode nên bật EN vẫn ra tiếng Việt).
   toast: {
+    orgUnitDeleted: "Đã xoá đơn vị.",
+    orgUnitDeleteFailed: "Không xoá được đơn vị.",
+    scoreSubmitted: "Đã lưu phiếu chấm.",
+    scoreSubmitFailed: "Không lưu được phiếu chấm.",
+    minutesSaved: "Đã lưu bản nháp biên bản.",
+    minutesSaveFailed: "Không lưu được biên bản.",
+    minutesApproved: "Đã chốt và khoá biên bản. Trạng thái đề tài đã được cập nhật.",
+    minutesApproveFailed: "Không chốt được biên bản.",
     cycleDeleted: "Đã xoá đợt nghiên cứu.",
     cycleDeleteFailed: "Không xoá được đợt nghiên cứu.",
     disbursementLinked: "Đã cập nhật sản phẩm minh chứng của đợt.",
@@ -1509,6 +1517,8 @@ export const vi = {
     formDesc: "Các mục chi dùng trong dự toán đề cương.",
   },
   orgUnits: {
+    deleteTitle: "Xoá đơn vị?",
+    deleteDesc: 'Xoá vĩnh viễn "{{name}}". Chỉ xoá được khi không người dùng, đề tài, danh mục đặt hàng hay đơn vị con nào đang dùng.',
     title: "Đơn vị",
     subtitle: "Cơ cấu khoa, bộ môn và phòng ban.",
     newBtn: "Thêm đơn vị",

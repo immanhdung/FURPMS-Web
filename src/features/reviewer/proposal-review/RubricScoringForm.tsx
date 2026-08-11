@@ -18,10 +18,15 @@ interface RubricScoringFormProps {
   councilId: string;
   /** Để AI đọc nội dung đề cương khi gợi ý điểm. Không có thì ẩn nút AI. */
   proposalId?: string | null;
+  /**
+   * Đề tài ĐANG chấm. BẮT BUỘC khi hội đồng chấm nhiều đề tài — thiếu nó thì máy chủ từ chối
+   * ("cần chỉ rõ projectId") và phiếu đọc lên cũng là của đề tài khác.
+   */
+  projectId?: string | null;
   // roundType đã bỏ: BE tự suy loại vòng từ councilId khi trả bộ tiêu chí.
 }
 
-export function RubricScoringForm({ councilId, proposalId }: RubricScoringFormProps) {
+export function RubricScoringForm({ councilId, proposalId, projectId }: RubricScoringFormProps) {
   const { t } = useTranslation();
 
   /**
@@ -37,7 +42,7 @@ export function RubricScoringForm({ councilId, proposalId }: RubricScoringFormPr
   // Lấy ĐÚNG bộ tiêu chí cho hội đồng này: BE tự suy (đợt + lĩnh vực + loại vòng) từ councilId
   // rồi trả bộ đã gắn cho lĩnh vực đó; chưa gắn thì trả bộ mặc định (không bao giờ kẹt).
   const { data: resolvedTemplate, isLoading: isTemplatesLoading } = useRubricForCouncilQuery(councilId);
-  const { data: existingScore, isLoading: isScoreLoading } = useMyScoreQuery(councilId);
+  const { data: existingScore, isLoading: isScoreLoading } = useMyScoreQuery(councilId, projectId ?? undefined);
   const submitMutation = useSubmitScoreMutation(councilId);
 
   /**
@@ -121,6 +126,7 @@ export function RubricScoringForm({ councilId, proposalId }: RubricScoringFormPr
     submitMutation.mutate(
       {
         templateId: matchingTemplate.id,
+        projectId: projectId ?? undefined,
         generalComments: generalComments || undefined,
         otherRecommendations: otherRecommendations || undefined,
         scoreDetails,

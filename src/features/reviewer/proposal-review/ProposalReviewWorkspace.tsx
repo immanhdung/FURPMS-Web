@@ -141,7 +141,7 @@ export function ProposalReviewWorkspace() {
 
             <TabsContent value="scoring">
               {isRoundOpen ? (
-                <RubricScoringForm councilId={councilId} proposalId={membership.proposalId} />
+                <RubricScoringForm councilId={councilId} proposalId={membership.proposalId} projectId={membership.projectId} />
               ) : (
                 <EmptyState
                   icon={Lock}
@@ -166,7 +166,7 @@ export function ProposalReviewWorkspace() {
             )}
 
             <TabsContent value="minutes">
-              <MinutesPanel councilId={councilId} memberRole={membership.memberRole} />
+              <MinutesPanel councilId={councilId} memberRole={membership.memberRole} projectId={membership.projectId} />
             </TabsContent>
           </Tabs>
         </div>
