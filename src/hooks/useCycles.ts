@@ -57,6 +57,22 @@ export function useOpenCycleMutation() {
   });
 }
 
+/**
+ * Xoá đợt tạo nhầm. BE chỉ cho xoá khi đợt CHƯA có đề tài / vòng chấm / danh mục đặt hàng /
+ * lịch sử gia hạn — đợt đã dùng thật thì đóng lại chứ không xoá khỏi lịch sử.
+ */
+export function useDeleteCycleMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => cycleService.remove(id),
+    onSuccess: () => {
+      toast.success(i18n.t("toast.cycleDeleted"));
+      queryClient.invalidateQueries({ queryKey: queryKeys.cycles.all() });
+    },
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.cycleDeleteFailed")),
+  });
+}
+
 export function useCloseCycleMutation() {
   const queryClient = useQueryClient();
   return useMutation({

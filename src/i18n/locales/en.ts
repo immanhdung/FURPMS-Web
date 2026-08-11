@@ -129,6 +129,8 @@ export const en = {
   },
   // Toast messages (called via i18n.t inside hooks).
   toast: {
+    cycleDeleted: "Research cycle deleted.",
+    cycleDeleteFailed: "Could not delete the research cycle.",
     disbursementLinked: "Evidence deliverable updated for this tranche.",
     disbursementLinkFailed: "Could not link the evidence deliverable.",
     attendanceSaved: "Attendance saved.",
@@ -1556,6 +1558,9 @@ export const en = {
     emptyDesc: "Create a cycle to open submissions for a research type.",
     closeTitle: "Close cycle",
     closeDesc: 'Are you sure you want to close "{{name}}"? PIs will no longer be able to submit proposals for this cycle.',
+    deleteBtn: "Delete cycle",
+    deleteTitle: "Delete research cycle?",
+    deleteDesc: 'Permanently delete "{{name}}". Only possible while the cycle has no projects, review rounds or extension history — close a cycle that has been used instead.',
     closeBtn: "Close cycle",
     openCycle: "Open cycle",
     createTitle: "Create Research Cycle",
@@ -1590,6 +1595,7 @@ export const en = {
     attachField: "Attach a field",
     selectFieldToAttach: "Select a field to attach",
     noAvailableFields: "Every field is already attached to this cycle.",
+    attachManyBtn: "Attach {{count}} fields",
     attachBtn: "Attach",
   },
   researchOrders: {

@@ -14,6 +14,9 @@ export const cycleService = {
 
   open: (id: number) => axiosClient.post<ApiResponse<Cycle>>(`/cycles/${id}/open`).then((res) => res.data.data),
 
+  remove: (id: number) =>
+    axiosClient.delete<ApiResponse<void>>(`/cycles/${id}`).then((res) => res.data),
+
   close: (id: number) => axiosClient.post<ApiResponse<Cycle>>(`/cycles/${id}/close`).then((res) => res.data.data),
 
   // Gia hạn deadline đợt (rule tuần 10) — ghi log, không ghi đè.

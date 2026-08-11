@@ -3,6 +3,7 @@ import type { TFunction } from "i18next";
 import { CalendarClock, FolderPlus, Lock, Unlock } from "lucide-react";
 import { DataTableColumnHeader } from "@/components/tables/DataTableColumnHeader";
 import { DataTableRowActions, type RowAction } from "@/components/tables/DataTableRowActions";
+import { Trash2 } from "lucide-react";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { CYCLE_STATUS } from "@/constants/statuses";
 import { formatDate } from "@/utils/format";
@@ -13,6 +14,7 @@ interface GetCycleColumnsOptions {
   researchTypeNames: Record<number, string>;
   onView: (cycle: Cycle) => void;
   onEdit: (cycle: Cycle) => void;
+  onDelete: (cycle: Cycle) => void;
   onOpen: (cycle: Cycle) => void;
   onClose: (cycle: Cycle) => void;
   onAddField: (cycle: Cycle) => void;
@@ -24,6 +26,7 @@ export function getCycleColumns({
   researchTypeNames,
   onView,
   onEdit,
+  onDelete,
   onOpen,
   onClose,
   onAddField,
@@ -75,6 +78,9 @@ export function getCycleColumns({
         if (status === CYCLE_STATUS.OPEN) {
           extraActions.push({ label: t("cycles.closeBtn"), icon: Lock, onSelect: () => onClose(cycle), variant: "destructive" as const });
         }
+        // Xoá dành cho đợt tạo nhầm. BE chặn nếu đợt đã có đề tài/vòng chấm/gia hạn — đợt đã dùng
+        // thật thì ĐÓNG, không xoá khỏi lịch sử.
+        extraActions.push({ label: t("cycles.deleteBtn"), icon: Trash2, onSelect: () => onDelete(cycle), variant: "destructive" as const });
         return (
           <div className="flex justify-end">
             <DataTableRowActions

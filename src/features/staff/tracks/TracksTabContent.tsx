@@ -6,40 +6,32 @@ import { DataTable } from "@/components/tables/DataTable";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { ToggleActiveDialog } from "@/components/shared/ToggleActiveDialog";
 import { useDeactivateTrackMutation, useTracksQuery } from "@/hooks/useTracks";
-import { useUsersQuery } from "@/hooks/useUsers";
 import { getTrackColumns } from "@/features/staff/tracks/columns";
 import { TrackFormSheet } from "@/features/staff/tracks/TrackFormSheet";
-import { AssignTrackOwnerDialog } from "@/features/staff/tracks/AssignTrackOwnerDialog";
 import { sortByIdDesc } from "@/utils/sort";
 import type { Track } from "@/types/track";
 
 export function TracksTabContent() {
   const { t } = useTranslation();
   const { data, isLoading, isError, refetch, isRefetching } = useTracksQuery();
-  const { data: users } = useUsersQuery();
   const deactivateMutation = useDeactivateTrackMutation();
   const sortedData = useMemo(() => sortByIdDesc(data), [data]);
 
   const [formOpen, setFormOpen] = useState(false);
   const [editingTrack, setEditingTrack] = useState<Track | null>(null);
-  const [assigningTrack, setAssigningTrack] = useState<Track | null>(null);
   const [deactivatingTrack, setDeactivatingTrack] = useState<Track | null>(null);
-
-  const ownerNames = useMemo(() => Object.fromEntries((users ?? []).map((u) => [u.id, u.fullName])), [users]);
 
   const columns = useMemo(
     () =>
       getTrackColumns({
         t,
-        ownerNames,
         onEdit: (track) => {
           setEditingTrack(track);
           setFormOpen(true);
         },
-        onAssignOwner: (track) => setAssigningTrack(track),
         onDeactivate: (track) => setDeactivatingTrack(track),
       }),
-    [t, ownerNames]
+    [t]
   );
 
   return (
@@ -74,7 +66,6 @@ export function TracksTabContent() {
       )}
 
       <TrackFormSheet open={formOpen} onOpenChange={setFormOpen} track={editingTrack} />
-      <AssignTrackOwnerDialog open={Boolean(assigningTrack)} onOpenChange={(open) => !open && setAssigningTrack(null)} track={assigningTrack} />
 
       <ToggleActiveDialog
         open={Boolean(deactivatingTrack)}

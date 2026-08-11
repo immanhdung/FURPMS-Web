@@ -131,6 +131,8 @@ export const vi = {
   },
   // Thông báo toast (dùng qua i18n.t trong hooks — trước đây hardcode nên bật EN vẫn ra tiếng Việt).
   toast: {
+    cycleDeleted: "Đã xoá đợt nghiên cứu.",
+    cycleDeleteFailed: "Không xoá được đợt nghiên cứu.",
     disbursementLinked: "Đã cập nhật sản phẩm minh chứng của đợt.",
     disbursementLinkFailed: "Không gắn được sản phẩm minh chứng.",
     attendanceSaved: "Đã lưu điểm danh.",
@@ -1569,6 +1571,9 @@ export const vi = {
     emptyDesc: "Tạo đợt để mở nộp cho một loại đề tài.",
     closeTitle: "Đóng đợt",
     closeDesc: 'Bạn chắc chắn muốn đóng "{{name}}"? PI sẽ không thể nộp đề cương cho đợt này nữa.',
+    deleteBtn: "Xoá đợt",
+    deleteTitle: "Xoá đợt nghiên cứu?",
+    deleteDesc: 'Xoá vĩnh viễn đợt "{{name}}". Chỉ xoá được khi đợt chưa có đề tài, vòng chấm hay lịch sử gia hạn — đợt đã dùng thật thì đóng lại thay vì xoá.',
     closeBtn: "Đóng đợt",
     openCycle: "Mở đợt",
     createTitle: "Tạo đợt nghiên cứu",
@@ -1603,6 +1608,7 @@ export const vi = {
     attachField: "Gắn thêm lĩnh vực",
     selectFieldToAttach: "Chọn lĩnh vực để gắn",
     noAvailableFields: "Mọi lĩnh vực đều đã gắn vào đợt này.",
+    attachManyBtn: "Gắn {{count}} lĩnh vực",
     attachBtn: "Gắn",
   },
   researchOrders: {

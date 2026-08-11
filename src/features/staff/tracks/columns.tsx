@@ -1,6 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import type { TFunction } from "i18next";
-import { UserCog, PowerOff } from "lucide-react";
+import { PowerOff } from "lucide-react";
 import { DataTableColumnHeader } from "@/components/tables/DataTableColumnHeader";
 import { DataTableRowActions } from "@/components/tables/DataTableRowActions";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -8,17 +8,13 @@ import type { Track } from "@/types/track";
 
 interface GetTrackColumnsOptions {
   t: TFunction;
-  ownerNames: Record<string, string>;
   onEdit: (track: Track) => void;
-  onAssignOwner: (track: Track) => void;
   onDeactivate: (track: Track) => void;
 }
 
 export function getTrackColumns({
   t,
-  ownerNames,
   onEdit,
-  onAssignOwner,
   onDeactivate,
 }: GetTrackColumnsOptions): ColumnDef<Track>[] {
   return [
@@ -31,11 +27,11 @@ export function getTrackColumns({
       header: ({ column }) => <DataTableColumnHeader column={column} title={t("common.description")} />,
       cell: ({ row }) => row.original.description ?? "-",
     },
-    {
-      id: "owner",
-      accessorFn: (row) => (row.ownerId ? (ownerNames[row.ownerId] ?? row.ownerId) : t("staff.unassigned")),
-      header: ({ column }) => <DataTableColumnHeader column={column} title={t("staff.owner")} />,
-    },
+    // Cột "Phụ trách" đã ẩn: `ResearchTrack.OwnerId` chỉ được ghi vào rồi đọc ra để hiện, không có
+    // chỗ nào trong hệ thống dùng nó — không gửi thông báo, không phân quyền, không lọc danh sách.
+    // QĐ543 cũng không có khái niệm này. Giữ lại cột trong DB (chưa xoá) phòng khi sau này nối
+    // thật (vd: nộp đề cương vào lĩnh vực thì báo cho người phụ trách), nhưng KHÔNG bày ra giao
+    // diện một chức năng bấm vào không dẫn tới đâu.
     {
       accessorKey: "isActive",
       header: ({ column }) => <DataTableColumnHeader column={column} title={t("common.status")} />,
@@ -49,7 +45,6 @@ export function getTrackColumns({
           <DataTableRowActions
             onEdit={() => onEdit(row.original)}
             extraActions={[
-              { label: t("staff.assignOwner"), icon: UserCog, onSelect: () => onAssignOwner(row.original) },
               ...(row.original.isActive
                 ? [{ label: t("common.deactivate"), icon: PowerOff, onSelect: () => onDeactivate(row.original), variant: "destructive" as const }]
                 : []),

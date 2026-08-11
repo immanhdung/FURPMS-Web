@@ -7,7 +7,8 @@ import { DataTable } from "@/components/tables/DataTable";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useCloseCycleMutation, useCyclesQuery, useOpenCycleMutation } from "@/hooks/useCycles";
+import { useCloseCycleMutation,
+  useDeleteCycleMutation, useCyclesQuery, useOpenCycleMutation } from "@/hooks/useCycles";
 import { useResearchTypesQuery } from "@/hooks/useResearchTypes";
 import { getCycleColumns } from "@/features/admin/cycles/columns";
 import { CycleFormSheet } from "@/features/admin/cycles/CycleFormSheet";
@@ -24,11 +25,13 @@ export function CyclesPage() {
   const { data: researchTypes } = useResearchTypesQuery();
   const openMutation = useOpenCycleMutation();
   const closeMutation = useCloseCycleMutation();
+  const deleteMutation = useDeleteCycleMutation();
 
   const [formOpen, setFormOpen] = useState(false);
   const [editingCycle, setEditingCycle] = useState<Cycle | null>(null);
   const [detailCycleId, setDetailCycleId] = useState<number | null>(null);
   const [closingCycle, setClosingCycle] = useState<Cycle | null>(null);
+  const [deletingCycle, setDeletingCycle] = useState<Cycle | null>(null);
   const [addingFieldToCycle, setAddingFieldToCycle] = useState<Cycle | null>(null);
   const [extendingCycle, setExtendingCycle] = useState<Cycle | null>(null);
 
@@ -50,6 +53,7 @@ export function CyclesPage() {
         },
         onOpen: (cycle) => openMutation.mutate(cycle.id),
         onClose: (cycle) => setClosingCycle(cycle),
+        onDelete: (cycle) => setDeletingCycle(cycle),
         onAddField: (cycle) => setAddingFieldToCycle(cycle),
         onExtend: (cycle) => setExtendingCycle(cycle),
       }),
@@ -145,6 +149,22 @@ export function CyclesPage() {
           closingCycle &&
           closeMutation.mutate(closingCycle.id, {
             onSuccess: () => setClosingCycle(null),
+          })
+        }
+      />
+
+      <ConfirmDialog
+        open={Boolean(deletingCycle)}
+        onOpenChange={(open) => !open && setDeletingCycle(null)}
+        title={t("cycles.deleteTitle")}
+        description={t("cycles.deleteDesc", { name: deletingCycle?.name ?? "" })}
+        variant="destructive"
+        confirmLabel={t("cycles.deleteBtn")}
+        isLoading={deleteMutation.isPending}
+        onConfirm={() =>
+          deletingCycle &&
+          deleteMutation.mutate(deletingCycle.id, {
+            onSuccess: () => setDeletingCycle(null),
           })
         }
       />

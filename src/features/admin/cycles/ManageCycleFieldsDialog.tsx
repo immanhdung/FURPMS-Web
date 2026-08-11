@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useTracksQuery, useTracksByCycleQuery, useAttachTrackToCycleMutation, useDetachTrackFromCycleMutation } from "@/hooks/useTracks";
 import type { Cycle } from "@/types/cycle";
 
@@ -31,11 +31,36 @@ export function ManageCycleFieldsDialog({ open, onOpenChange, cycle }: ManageCyc
   const attachMutation = useAttachTrackToCycleMutation(cycleId ?? 0);
   const detachMutation = useDetachTrackFromCycleMutation(cycleId ?? 0);
 
-  const [pickId, setPickId] = useState<string | undefined>();
+  // E1: chọn NHIỀU lĩnh vực rồi gắn một lượt. Trước đây mỗi lần chỉ chọn được 1 rồi bấm "Gắn",
+  // đợt mở 4 lĩnh vực là lặp 4 vòng — thao tác thừa mà không có lý do nghiệp vụ nào.
+  const [picked, setPicked] = useState<Set<number>>(new Set());
+  const [attaching, setAttaching] = useState(false);
+
+  const toggle = (id: number) =>
+    setPicked((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  // Gắn TUẦN TỰ: mỗi lĩnh vực là một yêu cầu riêng, bắn song song thì lỗi ở giữa khó truy.
+  const attachPicked = async () => {
+    if (!cycleId || picked.size === 0) return;
+    setAttaching(true);
+    try {
+      for (const id of picked) {
+        await attachMutation.mutateAsync(id);
+      }
+      setPicked(new Set());
+    } finally {
+      setAttaching(false);
+    }
+  };
 
   const attachedIds = useMemo(() => new Set((attached ?? []).map((tk) => tk.id)), [attached]);
   const available = (allTracks ?? []).filter((tk) => !attachedIds.has(tk.id));
-  const busy = attachMutation.isPending || detachMutation.isPending;
+  const busy = attaching || detachMutation.isPending;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -77,30 +102,26 @@ export function ManageCycleFieldsDialog({ open, onOpenChange, cycle }: ManageCyc
             {available.length === 0 ? (
               <p className="text-xs text-muted-foreground">{t("cycles.noAvailableFields")}</p>
             ) : (
-              <div className="flex items-center gap-2">
-                <Select value={pickId} onValueChange={setPickId}>
-                  <SelectTrigger className="flex-1">
-                    <SelectValue placeholder={t("cycles.selectFieldToAttach")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {available.map((tk) => (
-                      <SelectItem key={tk.id} value={tk.id.toString()}>
-                        {tk.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button
-                  type="button"
-                  disabled={!pickId || busy}
-                  onClick={() =>
-                    pickId &&
-                    cycleId &&
-                    attachMutation.mutate(Number(pickId), { onSuccess: () => setPickId(undefined) })
-                  }
-                >
-                  {attachMutation.isPending ? <Loader2 className="animate-spin" /> : <Plus />}
-                  {t("cycles.attachBtn")}
+              <div className="space-y-2">
+                <ul className="max-h-52 space-y-1 overflow-y-auto rounded-lg border border-border p-2">
+                  {available.map((tk) => (
+                    <li key={tk.id}>
+                      <label className="flex cursor-pointer items-center gap-2 rounded-md px-1.5 py-1 hover:bg-muted/60">
+                        <Checkbox
+                          checked={picked.has(tk.id)}
+                          onCheckedChange={() => toggle(tk.id)}
+                          disabled={busy}
+                        />
+                        <span className="min-w-0 flex-1 truncate text-sm text-foreground">{tk.name}</span>
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+                <Button type="button" disabled={picked.size === 0 || busy} onClick={attachPicked}>
+                  {attaching ? <Loader2 className="animate-spin" /> : <Plus />}
+                  {picked.size > 1
+                    ? t("cycles.attachManyBtn", { count: picked.size })
+                    : t("cycles.attachBtn")}
                 </Button>
               </div>
             )}
