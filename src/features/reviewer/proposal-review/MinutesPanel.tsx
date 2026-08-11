@@ -530,6 +530,9 @@ export function MinutesPanel({
                 disabled={!result || saveMutation.isPending}
                 onClick={() =>
                   saveMutation.mutate({
+                    // Hội đồng chấm nhiều đề tài: thiếu projectId thì máy chủ từ chối
+                    // ("cần chỉ rõ projectId") — biên bản không lưu được.
+                    projectId: projectId ?? undefined,
                     result,
                     councilComments: councilComments || undefined,
                     recommendations: recommendations || undefined,
