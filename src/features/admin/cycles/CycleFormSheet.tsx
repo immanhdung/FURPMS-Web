@@ -36,7 +36,9 @@ export function CycleFormSheet({ open, onOpenChange, cycle }: CycleFormSheetProp
     resolver: zodResolver(cycleSchema),
     defaultValues: {
       name: "",
-      academicYear: "",
+      // Điền sẵn năm hiện tại — gần như đợt nào cũng thuộc năm đang chạy, bắt gõ lại là thừa.
+      // Vẫn sửa được để tạo đợt cho năm sau.
+      academicYear: String(new Date().getFullYear()),
       researchTypeId: 0,
       submissionStartDate: "",
       submissionDeadline: "",
@@ -58,7 +60,7 @@ export function CycleFormSheet({ open, onOpenChange, cycle }: CycleFormSheetProp
             }
           : {
               name: "",
-              academicYear: "",
+              academicYear: String(new Date().getFullYear()),
               researchTypeId: 0,
               submissionStartDate: "",
               submissionDeadline: "",
