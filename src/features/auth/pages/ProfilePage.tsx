@@ -66,7 +66,7 @@ export function ProfilePage() {
             <div className="mt-2 flex flex-wrap justify-center gap-1.5 sm:justify-start">
               {user.roles.map((role) => (
                 <Badge key={role} variant="secondary">
-                  {role}
+                  {t(`roleName.${role}`, { defaultValue: role })}
                 </Badge>
               ))}
             </div>
@@ -96,7 +96,10 @@ export function ProfilePage() {
         <CardContent className="space-y-3 text-sm">
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">{t("profile.status")}</span>
-            <span className="font-medium text-foreground">{user.status ?? t("common.active")}</span>
+            {/* `status` là mã của máy chủ (ACTIVE/INACTIVE…) — đổi sang chữ Việt như mọi nơi khác. */}
+            <span className="font-medium text-foreground">
+              {user.status ? t(`status.${user.status}`, { defaultValue: user.status }) : t("common.active")}
+            </span>
           </div>
           <Separator />
           <div className="flex items-center justify-between">

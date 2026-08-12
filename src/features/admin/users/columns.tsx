@@ -46,7 +46,9 @@ export function getUserColumns({ t, onView, onEdit }: GetUserColumnsOptions): Co
         <div className="flex flex-wrap gap-1">
           {row.original.roles.map((role) => (
             <Badge key={role} variant="secondary">
-              {role}
+              {/* Bảng nhãn `roleName` đã có sẵn cả vi lẫn en — trước đây cột này in thẳng mã
+                  Admin/Staff/Faculty/ReviewCommittee. */}
+              {t(`roleName.${role}`, { defaultValue: role })}
             </Badge>
           ))}
         </div>

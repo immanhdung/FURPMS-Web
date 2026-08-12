@@ -318,7 +318,7 @@ export const vi = {
   },
   deliverablesPage: {
     title: "Sản phẩm",
-    subtitle: "Nộp sản phẩm phải giao của đề tài (do phòng QLKH mở sẵn) — Staff sẽ nghiệm thu.",
+    subtitle: "Nộp sản phẩm phải giao của đề tài (do Phòng Quản lý khoa học mở sẵn) — Phòng QLKH sẽ nghiệm thu.",
     empty: "Chưa có sản phẩm nào",
     emptyDesc: "Phòng QLKH chưa mở sản phẩm cho hợp đồng này.",
   },
@@ -473,7 +473,7 @@ export const vi = {
     productName: "Tên sản phẩm — vd: 01 bài báo tạp chí Q2",
     productRequirements: "Yêu cầu — hạng tạp chí, cỡ dữ liệu, tiêu chí nghiệm thu…",
     addProduct: "Thêm sản phẩm",
-    partialWarning: "Đề tài này cấp kinh phí theo mốc (PARTIAL). Nếu không khai ít nhất 1 sản phẩm, Staff sẽ không sinh được lịch giải ngân sau khi ký hợp đồng.",
+    partialWarning: "Đề tài chưa khai sản phẩm nào. Phòng Quản lý khoa học cần có sản phẩm để gắn làm minh chứng cho từng đợt giải ngân sau khi ký hợp đồng.",
     // Tài liệu đính kèm
     attachments: "Tài liệu đính kèm",
     attachmentsDesc: "Tài liệu kèm theo đề cương — bản thuyết minh đã ký, lý lịch khoa học của chủ nhiệm, và minh chứng.",
@@ -1071,7 +1071,7 @@ export const vi = {
     tabInfo: "Thông tin đề tài",
     loadingInfo: "Đang tải thông tin đề tài…",
     roundNotOpen: "Vòng chưa mở",
-    roundNotOpenDesc: "Staff chưa mở vòng chấm này — vui lòng quay lại sau khi vòng được mở.",
+    roundNotOpenDesc: "Phòng Quản lý khoa học chưa mở vòng chấm này — vui lòng quay lại sau khi vòng được mở.",
     noDocuments: "Chưa có tài liệu",
     noDocumentsDesc: "PI chưa tải lên tài liệu nào cho đề tài này.",
     openInNewTab: "Mở trong tab mới",
@@ -1276,7 +1276,7 @@ export const vi = {
     },
     deliverable: {
       none: "Hợp đồng chưa có sản phẩm nào",
-      noneDesc: "Staff bấm \"Thêm sản phẩm\" để định nghĩa các sản phẩm PI phải nộp cho hợp đồng này.",
+      noneDesc: "Phòng Quản lý khoa học bấm \"Thêm sản phẩm\" để định nghĩa các sản phẩm chủ nhiệm phải nộp cho hợp đồng này.",
       accepted: "sản phẩm đã nghiệm thu",
       add: "Thêm sản phẩm",
       dueOptional: "Hạn nộp (tùy chọn)",
