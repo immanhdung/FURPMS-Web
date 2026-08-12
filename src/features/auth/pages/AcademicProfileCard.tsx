@@ -24,31 +24,16 @@ const academicProfileSchema = z.object({
   nationality: z.string().optional(),
   gsPgsYear: z.number().int().positive().optional().or(z.literal("")),
   gsPgsInstitution: z.string().optional(),
-  isiScopusCount: z.number().int().min(0),
-  intlJournalCount: z.number().int().min(0),
-  domesticJournalCount: z.number().int().min(0),
-  intlConferenceCount: z.number().int().min(0),
-  domesticConferenceCount: z.number().int().min(0),
-  patentsCount: z.number().int().min(0),
-  phdSupervisedCount: z.number().int().min(0),
-  masterSupervisedCount: z.number().int().min(0),
   institution: z.string().optional(),
   institutionAddress: z.string().optional(),
   specializationAreas: z.string().optional(),
 });
 
-type AcademicProfileFormValues = z.infer<typeof academicProfileSchema>;
+// Các ô đếm công trình KHÔNG còn trong biểu mẫu này. Từ 14/08 chúng là **số suy ra** từ danh
+// sách công trình (`AcademicWorksCard`) — QĐ543 BM02 đòi cả số (14.1–14.5) lẫn danh sách chi
+// tiết (14.6), mà khai tay hai chỗ riêng thì sớm muộn cũng lệch nhau.
 
-const DEFAULT_COUNTS = {
-  isiScopusCount: 0,
-  intlJournalCount: 0,
-  domesticJournalCount: 0,
-  intlConferenceCount: 0,
-  domesticConferenceCount: 0,
-  patentsCount: 0,
-  phdSupervisedCount: 0,
-  masterSupervisedCount: 0,
-};
+type AcademicProfileFormValues = z.infer<typeof academicProfileSchema>;
 
 interface AcademicProfileCardProps {
   userId: string;
@@ -63,27 +48,15 @@ function FieldLabel({ htmlFor, children, required }: { htmlFor?: string; childre
   );
 }
 
-function CounterField({
-  id,
-  label,
-  value,
-  onChange,
-}: {
-  id: string;
-  label: string;
-  value: number;
-  onChange: (v: number) => void;
-}) {
+/**
+ * Ô thống kê **chỉ đọc** — số cộng từ danh sách công trình, không gõ tay.
+ * Ứng với BM02 mục 14.1–14.5 · 15 · 19.1 · 19.3.
+ */
+function CounterStat({ label, value }: { label: string; value: number }) {
   return (
-    <div>
-      <FieldLabel htmlFor={id}>{label}</FieldLabel>
-      <Input
-        id={id}
-        type="number"
-        min={0}
-        value={value}
-        onChange={(e) => onChange(Math.max(0, parseInt(e.target.value, 10) || 0))}
-      />
+    <div className="rounded-lg border border-border bg-background px-3 py-2.5">
+      <p className="text-xl font-semibold tabular-nums text-foreground">{value}</p>
+      <p className="mt-0.5 text-xs leading-snug text-muted-foreground">{label}</p>
     </div>
   );
 }
@@ -100,7 +73,6 @@ export function AcademicProfileCard({ userId }: AcademicProfileCardProps) {
     reset,
   } = useForm<AcademicProfileFormValues>({
     resolver: zodResolver(academicProfileSchema),
-    defaultValues: DEFAULT_COUNTS,
   });
 
   useEffect(() => {
@@ -116,14 +88,6 @@ export function AcademicProfileCard({ userId }: AcademicProfileCardProps) {
         nationality: profile.nationality ?? "Vietnamese",
         gsPgsYear: profile.gsPgsYear ?? ("" as unknown as number),
         gsPgsInstitution: profile.gsPgsInstitution ?? "",
-        isiScopusCount: profile.isiScopusCount ?? 0,
-        intlJournalCount: profile.intlJournalCount ?? 0,
-        domesticJournalCount: profile.domesticJournalCount ?? 0,
-        intlConferenceCount: profile.intlConferenceCount ?? 0,
-        domesticConferenceCount: profile.domesticConferenceCount ?? 0,
-        patentsCount: profile.patentsCount ?? 0,
-        phdSupervisedCount: profile.phdSupervisedCount ?? 0,
-        masterSupervisedCount: profile.masterSupervisedCount ?? 0,
         institution: profile.institution ?? "",
         institutionAddress: profile.institutionAddress ?? "",
         specializationAreas: profile.specializationAreas ?? "",
@@ -143,14 +107,6 @@ export function AcademicProfileCard({ userId }: AcademicProfileCardProps) {
       nationality: values.nationality || undefined,
       gsPgsYear: values.gsPgsYear ? Number(values.gsPgsYear) : undefined,
       gsPgsInstitution: values.gsPgsInstitution || undefined,
-      isiScopusCount: values.isiScopusCount,
-      intlJournalCount: values.intlJournalCount,
-      domesticJournalCount: values.domesticJournalCount,
-      intlConferenceCount: values.intlConferenceCount,
-      domesticConferenceCount: values.domesticConferenceCount,
-      patentsCount: values.patentsCount,
-      phdSupervisedCount: values.phdSupervisedCount,
-      masterSupervisedCount: values.masterSupervisedCount,
       institution: values.institution || undefined,
       institutionAddress: values.institutionAddress || undefined,
       specializationAreas: values.specializationAreas || undefined,
@@ -302,109 +258,40 @@ export function AcademicProfileCard({ userId }: AcademicProfileCardProps) {
 
           <Separator />
 
-          {/* Section: Publication Counts */}
+          {/*
+            Thống kê công trình — CHỈ ĐỌC.
+            QĐ543 BM02 đòi cả số lượng (mục 14.1–14.5, 15, 19.1/19.3) lẫn danh sách chi tiết
+            (14.6, 17, 19.4). Trước đây các ô này nhập tay còn danh sách thì không có — vừa
+            thiếu so với biểu mẫu, vừa không tra được nguồn. Nay số cộng từ danh sách công
+            trình ở khối bên dưới nên hai phần không thể lệch nhau.
+          */}
           <div>
             <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               {t("academicProfile.sectionPublications")}
             </h3>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <Controller
-                control={control}
-                name="isiScopusCount"
-                render={({ field }) => (
-                  <CounterField
-                    id="isiScopusCount"
-                    label={t("academicProfile.isiScopusCount")}
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                )}
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <CounterStat label={t("academicProfile.isiScopusCount")} value={profile?.isiScopusCount ?? 0} />
+              <CounterStat label={t("academicProfile.intlJournalCount")} value={profile?.intlJournalCount ?? 0} />
+              <CounterStat
+                label={t("academicProfile.domesticJournalCount")}
+                value={profile?.domesticJournalCount ?? 0}
               />
-              <Controller
-                control={control}
-                name="intlJournalCount"
-                render={({ field }) => (
-                  <CounterField
-                    id="intlJournalCount"
-                    label={t("academicProfile.intlJournalCount")}
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                )}
+              <CounterStat
+                label={t("academicProfile.intlConferenceCount")}
+                value={profile?.intlConferenceCount ?? 0}
               />
-              <Controller
-                control={control}
-                name="domesticJournalCount"
-                render={({ field }) => (
-                  <CounterField
-                    id="domesticJournalCount"
-                    label={t("academicProfile.domesticJournalCount")}
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                )}
+              <CounterStat
+                label={t("academicProfile.domesticConferenceCount")}
+                value={profile?.domesticConferenceCount ?? 0}
               />
-              <Controller
-                control={control}
-                name="intlConferenceCount"
-                render={({ field }) => (
-                  <CounterField
-                    id="intlConferenceCount"
-                    label={t("academicProfile.intlConferenceCount")}
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                )}
-              />
-              <Controller
-                control={control}
-                name="domesticConferenceCount"
-                render={({ field }) => (
-                  <CounterField
-                    id="domesticConferenceCount"
-                    label={t("academicProfile.domesticConferenceCount")}
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                )}
-              />
-              <Controller
-                control={control}
-                name="patentsCount"
-                render={({ field }) => (
-                  <CounterField
-                    id="patentsCount"
-                    label={t("academicProfile.patentsCount")}
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                )}
-              />
-              <Controller
-                control={control}
-                name="phdSupervisedCount"
-                render={({ field }) => (
-                  <CounterField
-                    id="phdSupervisedCount"
-                    label={t("academicProfile.phdSupervisedCount")}
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                )}
-              />
-              <Controller
-                control={control}
-                name="masterSupervisedCount"
-                render={({ field }) => (
-                  <CounterField
-                    id="masterSupervisedCount"
-                    label={t("academicProfile.masterSupervisedCount")}
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                )}
+              <CounterStat label={t("academicProfile.patentsCount")} value={profile?.patentsCount ?? 0} />
+              <CounterStat label={t("academicProfile.phdSupervisedCount")} value={profile?.phdSupervisedCount ?? 0} />
+              <CounterStat
+                label={t("academicProfile.masterSupervisedCount")}
+                value={profile?.masterSupervisedCount ?? 0}
               />
             </div>
+            <p className="mt-2.5 text-xs text-muted-foreground">{t("academicWorks.countsNote")}</p>
           </div>
         </div>
 

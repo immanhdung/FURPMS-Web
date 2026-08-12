@@ -27,7 +27,6 @@ import {
   Scale,
   Package,
   FileEdit,
-  FolderOpen,
 } from "lucide-react";
 import { ALL_ROLES, ROLES } from "@/constants/roles";
 import type { Role } from "@/constants/roles";
@@ -59,7 +58,8 @@ export const NAV_ITEMS: NavItem[] = [
   { labelKey: "nav.assignments", path: ROUTES.ASSIGNMENTS, icon: UserCheck, roles: [ROLES.STAFF] },
   { labelKey: "nav.contracts", path: ROUTES.CONTRACTS, icon: FileSignature, roles: [ROLES.STAFF] },
   { labelKey: "nav.changeRequests", path: ROUTES.CHANGE_REQUESTS, icon: FileEdit, roles: [ROLES.STAFF] },
-  { labelKey: "nav.documents", path: ROUTES.DOCUMENTS, icon: FolderOpen, roles: [ROLES.STAFF, ROLES.ADMIN] },
+  // Tạm ẩn: chưa dùng tới, để khỏi rối menu demo — route/page vẫn còn, bật lại chỉ cần bỏ comment.
+  // { labelKey: "nav.documents", path: ROUTES.DOCUMENTS, icon: FolderOpen, roles: [ROLES.STAFF, ROLES.ADMIN] },
 
   // PI (Faculty)
   { labelKey: "nav.dashboard", path: ROUTES.DASHBOARD, icon: LayoutDashboard, roles: [ROLES.FACULTY] },

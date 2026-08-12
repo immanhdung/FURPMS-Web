@@ -24,4 +24,23 @@ export interface AcademicProfile {
   updatedAt?: string | null;
 }
 
-export type AcademicProfilePayload = Omit<AcademicProfile, "userId" | "updatedAt">;
+/**
+ * Phần **gửi lên** khi lưu hồ sơ.
+ *
+ * Các ô đếm công trình bị loại khỏi đây: từ 14/08 chúng là **số suy ra** — máy chủ cộng lại từ
+ * bảng công trình sau mỗi lần thêm/sửa/xoá (QĐ543 BM02 mục 14.1–14.5, 15, 19.1/19.3 phải khớp
+ * với danh sách chi tiết ở 14.6, 17, 19.4). Gửi số lên là ghi đè số đúng bằng số client đoán.
+ */
+export type AcademicProfilePayload = Omit<
+  AcademicProfile,
+  | "userId"
+  | "updatedAt"
+  | "isiScopusCount"
+  | "intlJournalCount"
+  | "domesticJournalCount"
+  | "intlConferenceCount"
+  | "domesticConferenceCount"
+  | "patentsCount"
+  | "phdSupervisedCount"
+  | "masterSupervisedCount"
+>;
