@@ -131,7 +131,9 @@ export function CreateUserSheet({ open, onOpenChange }: CreateUserSheetProps) {
                       field.onChange(next);
                     }}
                   />
-                  {role}
+                  {/* Trước đây in thẳng mã vai (Admin/Staff/Faculty/ReviewCommittee) giữa form
+                      tiếng Việt — bảng nhãn `roleName` vốn đã có sẵn mà không ai dùng. */}
+                  {t(`roleName.${role}`, { defaultValue: role })}
                 </label>
               ))}
             </div>
