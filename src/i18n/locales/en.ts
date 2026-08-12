@@ -1254,6 +1254,7 @@ export const en = {
       uploadEvidence: "Upload evidence",
       noEvidence: "No evidence yet.",
       pickProduct: "Select the evidence deliverable for this tranche",
+      noProductToPick: "This contract has no deliverables yet — add them under the Deliverables tab first, then come back to link one.",
       noProduct: "No evidence deliverable linked to this tranche.",
       unlinkProduct: "Unlink",
       blockedByProduct: "Evidence deliverable has not passed acceptance",

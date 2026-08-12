@@ -1263,6 +1263,7 @@ export const vi = {
       evidenceNote: "Hệ thống chỉ theo dõi mốc + minh chứng, không quản lý tiền.",
       // P5 — san pham minh chung cho tung dot
       pickProduct: "Chọn sản phẩm minh chứng cho đợt này",
+      noProductToPick: "Hợp đồng chưa khai sản phẩm nào — sang tab Sản phẩm thêm trước, rồi quay lại gắn cho đợt này.",
       noProduct: "Đợt này chưa gắn sản phẩm minh chứng.",
       unlinkProduct: "Gỡ",
       blockedByProduct: "Sản phẩm minh chứng chưa nghiệm thu Đạt",

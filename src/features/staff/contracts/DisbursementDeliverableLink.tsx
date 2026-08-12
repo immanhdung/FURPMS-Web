@@ -30,7 +30,7 @@ export function DisbursementDeliverableLink({
   const editable = canManage && !isDisbursed;
 
   // Chỉ nạp danh sách khi thật sự cần chọn — đợt đã gắn/đã giải ngân thì khỏi gọi API.
-  const { data: deliverables } = useDeliverablesQuery(
+  const { data: deliverables, isLoading } = useDeliverablesQuery(
     editable && !disbursement.deliverableId ? contractId : null,
   );
 
@@ -61,6 +61,25 @@ export function DisbursementDeliverableLink({
   if (!editable) {
     return (
       <p className="text-xs text-muted-foreground">{t("contract.disbursement.noProduct")}</p>
+    );
+  }
+
+  /*
+   * Hợp đồng CHƯA khai sản phẩm nào thì đừng dựng ô chọn rỗng.
+   *
+   * Radix Select mở ra với `SelectContent` không có mục nào — lại nằm trong Sheet — sẽ quẩn ở
+   * khâu đo vị trí và làm treo giao diện. Mà kể cả không treo thì một ô chọn rỗng cũng vô nghĩa:
+   * người dùng cần biết phải sang tab Sản phẩm khai trước, không phải bấm vào một danh sách trống.
+   */
+  if (isLoading) {
+    return <p className="text-xs text-muted-foreground">{t("common.loading")}</p>;
+  }
+
+  if ((deliverables?.length ?? 0) === 0) {
+    return (
+      <p className="text-xs text-muted-foreground">
+        {t("contract.disbursement.noProductToPick")}
+      </p>
     );
   }
 
