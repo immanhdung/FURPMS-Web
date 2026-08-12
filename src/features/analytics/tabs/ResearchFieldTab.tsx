@@ -20,7 +20,7 @@ export function ResearchFieldTab({ cycleId }: { cycleId?: number }) {
 
   return (
     <ChartCard title={t("analytics.fieldsTitle")} description={t("analytics.fieldsDesc")} height={360}>
-      <BarChartCardBody data={tracks} categoryKey="trackName" valueKey="proposalCount" colorful />
+      <BarChartCardBody data={tracks} categoryKey="trackName" valueKey="total" colorful />
     </ChartCard>
   );
 }

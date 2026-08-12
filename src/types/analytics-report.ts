@@ -19,11 +19,14 @@ export interface AnalyticsOverview {
   councilPerformance?: { council: string; score: number }[];
 }
 
+/** Khớp đúng `GET /analytics/by-track` — BE trả total/passed/failed/pending. */
 export interface TrackAnalyticsItem {
   trackId?: string;
   trackName?: string;
-  proposalCount?: number;
-  approvedCount?: number;
+  total?: number;
+  passed?: number;
+  failed?: number;
+  pending?: number;
 }
 
 export interface FunnelStageItem {

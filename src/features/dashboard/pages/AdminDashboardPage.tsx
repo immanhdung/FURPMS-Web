@@ -87,8 +87,8 @@ export function AdminDashboardPage() {
                 data={data?.monthlyTrend ?? []}
                 xKey="label"
                 series={[
-                  { key: "submitted", label: "Submitted" },
-                  { key: "approved", label: "Approved", color: "#14B8A6" },
+                  { key: "submitted", label: t("analytics.seriesSubmitted") },
+                  { key: "approved", label: t("analytics.seriesApproved"), color: "#14B8A6" },
                 ]}
               />
             </ChartCard>
@@ -112,8 +112,8 @@ export function AdminDashboardPage() {
                 data={data?.reviewProgress ?? []}
                 xKey="label"
                 series={[
-                  { key: "completed", label: "Completed", color: "#22C55E" },
-                  { key: "pending", label: "Pending", color: "#F59E0B" },
+                  { key: "completed", label: t("analytics.seriesCompleted"), color: "#22C55E" },
+                  { key: "pending", label: t("analytics.seriesPending"), color: "#F59E0B" },
                 ]}
               />
             </ChartCard>

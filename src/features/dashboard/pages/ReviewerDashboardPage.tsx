@@ -73,8 +73,8 @@ export function ReviewerDashboardPage() {
                 data={data?.reviewCompletionTrend ?? []}
                 xKey="label"
                 series={[
-                  { key: "completed", label: "Completed", color: "#22C55E" },
-                  { key: "pending", label: "Pending", color: "#F59E0B" },
+                  { key: "completed", label: t("analytics.seriesCompleted"), color: "#22C55E" },
+                  { key: "pending", label: t("analytics.seriesPending"), color: "#F59E0B" },
                 ]}
               />
             </ChartCard>
