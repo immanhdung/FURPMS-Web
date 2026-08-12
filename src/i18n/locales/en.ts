@@ -1463,6 +1463,8 @@ export const en = {
       budgetShare: "Share",
       budgetTotal: "TOTAL",
       budgetPctHint: "Per-item ceilings follow Decision 543 Article 15, computed on the total. The total is summed from the items.",
+      budgetLegacy: "retired item",
+      budgetLegacyHint: "This estimate still holds money in an item no longer listed in Decision 543 Article 15. Move it into one of the six current items (set the old row to 0) before submitting.",
       totalBudgetHint: "Cap {{cap}} under Decision 543 Article 14 — {{type}}. Exceeding it requires the Rector's approval (Article 14.3).",
       totalBudgetOverCap: "Exceeds the {{cap}} cap. Lower the estimate, or contact the Research Management Office if an over-cap grant was already approved.",
       fundingMethod: "Funding Method",

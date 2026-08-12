@@ -28,9 +28,30 @@ export function BudgetBreakdownTable({
   const { data: categories } = useBudgetCategoriesQuery();
   const { setValue, watch } = form;
 
-  const active = (categories ?? []).filter((c) => c.isActive).sort((a, b) => a.sequence - b.sequence);
+  const all = categories ?? [];
   const items = watch("budgetItems") ?? [];
   const amountOf = (code: string) => items.find((i) => i.category === code)?.amount ?? 0;
+
+  /*
+   * Bảng phải gồm 06 hạng mục hiện hành **CỘNG** mọi hạng mục đã ngừng dùng mà đề cương này còn
+   * tiền trong đó — đề cương lưu trước khi đổi sang bộ hạng mục của Điều 15 vẫn còn dòng ở "Chi
+   * đoàn ra", "Quản lý phí"…
+   *
+   * Nếu chỉ lọc `isActive` thì số tiền đó **biến mất khỏi màn hình nhưng vẫn nằm trong tổng**:
+   * chủ nhiệm thấy 6 dòng cộng ra 148tr trong khi dòng TỔNG ghi 168tr, mọi tỷ lệ đều lệch, và nếu
+   * tổng vượt trần Điều 14 thì bị chặn mà không có cách nào tìm ra 20tr kia nằm ở đâu.
+   */
+  const legacyCodes = items
+    .map((i) => i.category)
+    .filter((code) => {
+      const cat = all.find((c) => c.code === code);
+      return cat != null && !cat.isActive;
+    });
+
+  const rows = [
+    ...all.filter((c) => c.isActive),
+    ...all.filter((c) => legacyCodes.includes(c.code)),
+  ].sort((a, b) => Number(a.isActive === b.isActive ? 0 : a.isActive ? -1 : 1) || a.sequence - b.sequence);
 
   const total = items.reduce((sum, i) => sum + (Number.isFinite(i.amount) ? i.amount : 0), 0);
   const overCap = cap != null && total > cap;
@@ -43,7 +64,7 @@ export function BudgetBreakdownTable({
     setValue("budgetItems", next, { shouldDirty: true });
   };
 
-  if (active.length === 0) return null;
+  if (rows.length === 0) return null;
 
   return (
     <div className="space-y-2">
@@ -58,14 +79,21 @@ export function BudgetBreakdownTable({
             </tr>
           </thead>
           <tbody>
-            {active.map((c) => {
+            {rows.map((c) => {
               const amount = amountOf(c.code);
               const share = total > 0 ? (amount / total) * 100 : 0;
               // Tỷ lệ chỉ có nghĩa khi đã có tổng; tổng 0 thì đừng bôi đỏ cả bảng.
               const over = c.maxPercentage != null && total > 0 && share > c.maxPercentage;
               return (
                 <tr key={c.id} className="border-t border-border">
-                  <td className="px-3 py-2 text-foreground">{c.name}</td>
+                  <td className="px-3 py-2 text-foreground">
+                    {c.name}
+                    {!c.isActive && (
+                      <span className="ml-2 rounded bg-warning/15 px-1.5 py-0.5 text-xs font-medium text-warning">
+                        {t("wizard.step3.budgetLegacy")}
+                      </span>
+                    )}
+                  </td>
                   <td className="px-3 py-2 text-right text-muted-foreground">
                     {c.maxPercentage != null ? `${c.maxPercentage}%` : "—"}
                   </td>
@@ -115,6 +143,9 @@ export function BudgetBreakdownTable({
         </p>
       )}
       <p className="text-xs text-muted-foreground">{t("wizard.step3.budgetPctHint")}</p>
+      {rows.some((c) => !c.isActive) && (
+        <p className="text-xs text-warning">{t("wizard.step3.budgetLegacyHint")}</p>
+      )}
     </div>
   );
 }

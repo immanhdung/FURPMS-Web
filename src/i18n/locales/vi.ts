@@ -1476,6 +1476,8 @@ export const vi = {
       budgetShare: "Tỷ lệ",
       budgetTotal: "TỔNG DỰ TOÁN",
       budgetPctHint: "Tỷ lệ tối đa từng hạng mục theo QĐ543 Điều 15, tính trên tổng dự toán. Tổng tự cộng từ các hạng mục.",
+      budgetLegacy: "hạng mục cũ",
+      budgetLegacyHint: "Dự toán này còn tiền ở hạng mục không còn trong QĐ543 Điều 15. Hãy chuyển số tiền đó sang một trong 06 hạng mục hiện hành (đưa dòng cũ về 0) trước khi nộp.",
       totalBudgetHint: "Trần {{cap}} theo QĐ543 Điều 14 — {{type}}. Vượt trần phải được Hiệu trưởng phê duyệt (Điều 14.3).",
       totalBudgetOverCap: "Vượt trần {{cap}}. Hãy giảm dự toán, hoặc liên hệ Phòng Quản lý khoa học nếu đề tài đã được duyệt cấp vượt trần.",
       fundingMethod: "Phương thức cấp kinh phí",
