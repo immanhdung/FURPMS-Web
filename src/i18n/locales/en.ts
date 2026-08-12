@@ -1684,6 +1684,8 @@ export const en = {
     temporaryPassword: "Temporary password",
     lastLogin: "Last login",
     filterAll: "All",
+    active: "Active",
+    locked: "Locked",
   },
   academicProfile: {
     title: "Academic Profile (Scientific CV)",

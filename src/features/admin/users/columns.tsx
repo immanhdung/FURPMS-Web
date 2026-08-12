@@ -3,6 +3,7 @@ import type { TFunction } from "i18next";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { DataTableColumnHeader } from "@/components/tables/DataTableColumnHeader";
+import { StatusBadge } from "@/components/shared/StatusBadge";
 import { DataTableRowActions } from "@/components/tables/DataTableRowActions";
 import type { AdminUser } from "@/types/user";
 
@@ -60,9 +61,13 @@ export function getUserColumns({ t, onView, onEdit }: GetUserColumnsOptions): Co
       cell: ({ row }) => row.original.department ?? "-",
     },
     {
-      accessorKey: "status",
+      id: "status",
+      // BE trả `isActive` (bool), không có `status` — cột này trước đây luôn hiện "-".
+      accessorFn: (row) => (row.isActive === false ? t("users.locked") : t("users.active")),
       header: ({ column }) => <DataTableColumnHeader column={column} title={t("common.status")} />,
-      cell: ({ row }) => row.original.status ?? "-",
+      cell: ({ row }) => (
+        <StatusBadge status={row.original.isActive === false ? "INACTIVE" : "ACTIVE"} />
+      ),
     },
     {
       id: "actions",

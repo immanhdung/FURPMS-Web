@@ -1697,6 +1697,8 @@ export const vi = {
     temporaryPassword: "Mật khẩu tạm",
     lastLogin: "Đăng nhập gần nhất",
     filterAll: "Tất cả",
+    active: "Đang hoạt động",
+    locked: "Đã khoá",
   },
   academicProfile: {
     title: "Lý lịch khoa học",

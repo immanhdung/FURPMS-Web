@@ -2,7 +2,6 @@ import { useTranslation } from "react-i18next";
 import { DetailSheet } from "@/components/shared/DetailSheet";
 import { Badge } from "@/components/ui/badge";
 import { useUserQuery } from "@/hooks/useUsers";
-import { ACADEMIC_DEGREES } from "@/types/user";
 import { formatDateTime } from "@/utils/format";
 
 interface UserDetailSheetProps {
@@ -39,9 +38,16 @@ export function UserDetailSheet({ open, onOpenChange, userId }: UserDetailSheetP
         { label: t("users.department"), value: user?.department },
         {
           label: t("users.academicDegree"),
-          value: ACADEMIC_DEGREES.find((d) => d.value === user?.academicDegree)?.label,
+          // BE trả CHUỖI tiếng Việt; trước đây đem so với MÃ SỐ trong ACADEMIC_DEGREES nên
+          // không bao giờ khớp và ô này luôn hiện "-".
+          value: user?.academicDegree,
         },
-        { label: t("common.status"), value: user?.status },
+        {
+          // `UserDto` không có trường `status` — chỉ có `isActive`. Đọc trường không tồn tại nên
+          // ô Trạng thái luôn trống.
+          label: t("common.status"),
+          value: user ? t(user.isActive ? "users.active" : "users.locked") : undefined,
+        },
         { label: t("users.lastLogin"), value: user?.lastLoginAt ? formatDateTime(user.lastLoginAt) : undefined },
       ]}
     />

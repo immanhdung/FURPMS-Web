@@ -39,7 +39,8 @@ export function EditUserSheet({ open, onOpenChange, user }: EditUserSheetProps) 
         fullName: user.fullName,
         phoneNumber: user.phoneNumber ?? "",
         department: user.department ?? "",
-        academicDegree: user.academicDegree ?? undefined,
+        // BE trả chuỗi ("Tiến sĩ") còn form chọn theo mã số — dò ngược qua nhãn.
+        academicDegree: ACADEMIC_DEGREES.find((d) => d.label === user.academicDegree)?.value,
         roles: user.roles,
       });
     }
