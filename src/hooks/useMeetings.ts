@@ -103,15 +103,27 @@ export function useDeleteMeetingMutation(councilId: string) {
   });
 }
 
+export function useUndoStartMeetingMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => meetingService.undoStart(id),
+    onSuccess: () => {
+      toast.success("Đã đưa buổi họp về trạng thái đã lên lịch.");
+      queryClient.invalidateQueries({ queryKey: queryKeys.meetings.all() });
+    },
+    onError: (error: ApiError) => toast.error(error.message || "Không hoàn tác được."),
+  });
+}
+
 export function useStartMeetingMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => meetingService.start(id),
     onSuccess: () => {
-      toast.success("Meeting started.");
+      toast.success("Đã bắt đầu buổi họp.");
       queryClient.invalidateQueries({ queryKey: queryKeys.meetings.all() });
     },
-    onError: (error: ApiError) => toast.error(error.message || "Unable to start meeting."),
+    onError: (error: ApiError) => toast.error(error.message || "Không bắt đầu được buổi họp."),
   });
 }
 

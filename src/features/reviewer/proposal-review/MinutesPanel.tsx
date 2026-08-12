@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FileText, Gavel, Loader2, Lock, MessagesSquare, Plus, Save, ShieldCheck, Trash2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
@@ -53,6 +54,7 @@ export function MinutesPanel({
   const { data: decision, isLoading } = useDecisionQuery(councilId, projectId ?? undefined);
   const saveMutation = useSaveMinutesMutation(councilId);
   const approveMutation = useApproveMinutesMutation(councilId, projectId ?? undefined);
+  const [confirmApprove, setConfirmApprove] = useState(false);
 
   const { data: members } = useCouncilMembersQuery(councilId);
   const { data: scores, error: scoresError } = useAllScoresQuery(councilId, projectId ?? undefined);
@@ -645,10 +647,15 @@ export function MinutesPanel({
                 {t("minutes.approveHint")}
               </p>
             </div>
+            {/*
+              Duyệt & khoá là thao tác KHÔNG LÙI ĐƯỢC (rule #12): khoá xong không sửa điểm, không
+              sửa biên bản, và trạng thái đề tài đổi theo. Bấm nhầm giữa buổi họp là hỏng cả vòng —
+              phải hỏi lại, nêu rõ hậu quả.
+            */}
             <Button
               type="button"
               disabled={approveMutation.isPending}
-              onClick={() => approveMutation.mutate()}
+              onClick={() => setConfirmApprove(true)}
             >
               {approveMutation.isPending ? <Loader2 className="animate-spin" /> : <ShieldCheck />}
               {t("minutes.approveAndLock")}
@@ -656,6 +663,17 @@ export function MinutesPanel({
           </CardContent>
         </Card>
       )}
+
+      <ConfirmDialog
+        open={confirmApprove}
+        onOpenChange={setConfirmApprove}
+        title={t("minutes.approveConfirmTitle")}
+        description={t("minutes.approveConfirmDesc")}
+        confirmLabel={t("minutes.approveAndLock")}
+        variant="destructive"
+        isLoading={approveMutation.isPending}
+        onConfirm={() => approveMutation.mutate(undefined, { onSuccess: () => setConfirmApprove(false) })}
+      />
 
       {/* Chưa có gì và mình không phải Thư ký */}
       {!decision && !canDraft && (

@@ -6,7 +6,12 @@ import { CalendarClock, CalendarDays, Table2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/tables/DataTable";
 import { ErrorState } from "@/components/shared/ErrorState";
-import { useEndMeetingMutation, useMeetingsQuery, useStartMeetingMutation } from "@/hooks/useMeetings";
+import {
+  useEndMeetingMutation,
+  useMeetingsQuery,
+  useStartMeetingMutation,
+  useUndoStartMeetingMutation,
+} from "@/hooks/useMeetings";
 import { getMeetingColumns } from "@/features/staff/meetings/columns";
 import { MeetingsAgenda } from "@/features/staff/meetings/MeetingsAgenda";
 import { ROUTES } from "@/constants/routes";
@@ -18,6 +23,7 @@ export function MeetingsPage() {
   const [view, setView] = useState<"calendar" | "table">("calendar");
   const { data, isLoading, isError, refetch, isRefetching } = useMeetingsQuery();
   const startMutation = useStartMeetingMutation();
+  const undoStartMutation = useUndoStartMeetingMutation();
   const endMutation = useEndMeetingMutation();
   const sortedData = useMemo(() => sortByDateDesc(data, (m) => m.scheduledAt), [data]);
 
@@ -26,9 +32,10 @@ export function MeetingsPage() {
       getMeetingColumns({
         t,
         onStart: (meeting) => startMutation.mutate(meeting.id),
+        onUndoStart: (meeting) => undoStartMutation.mutate(meeting.id),
         onEnd: (meeting) => endMutation.mutate(meeting.id),
       }),
-    [t, startMutation, endMutation]
+    [t, startMutation, endMutation, undoStartMutation]
   );
 
   return (

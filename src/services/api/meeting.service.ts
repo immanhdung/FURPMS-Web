@@ -25,6 +25,10 @@ export const meetingService = {
 
   start: (id: string) => axiosClient.post<ApiResponse<Meeting>>(`/meetings/${id}/start`).then((res) => res.data.data),
 
+  /** Đường lui khi bấm nhầm "Bắt đầu" — về lại trạng thái đã lên lịch. */
+  undoStart: (id: string) =>
+    axiosClient.post<ApiResponse<Meeting>>(`/meetings/${id}/undo-start`).then((res) => res.data.data),
+
   end: (id: string) => axiosClient.post<ApiResponse<Meeting>>(`/meetings/${id}/end`).then((res) => res.data.data),
 
   scheduleConflicts: (councilId: string) =>

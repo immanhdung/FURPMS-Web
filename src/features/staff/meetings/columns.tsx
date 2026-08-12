@@ -1,6 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import type { TFunction } from "i18next";
-import { ExternalLink, Play, Square } from "lucide-react";
+import { ExternalLink, Play, Square, Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTableColumnHeader } from "@/components/tables/DataTableColumnHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -11,9 +11,10 @@ interface GetMeetingColumnsOptions {
   t: TFunction;
   onStart: (meeting: Meeting) => void;
   onEnd: (meeting: Meeting) => void;
+  onUndoStart: (meeting: Meeting) => void;
 }
 
-export function getMeetingColumns({ t, onStart, onEnd }: GetMeetingColumnsOptions): ColumnDef<Meeting>[] {
+export function getMeetingColumns({ t, onStart, onEnd, onUndoStart }: GetMeetingColumnsOptions): ColumnDef<Meeting>[] {
   return [
     {
       id: "title",
@@ -52,12 +53,26 @@ export function getMeetingColumns({ t, onStart, onEnd }: GetMeetingColumnsOption
               </a>
             </Button>
           )}
-          <Button variant="ghost" size="icon-sm" title={t("staff.startMeeting")} aria-label={t("staff.startMeeting")} onClick={() => onStart(row.original)}>
-            <Play />
-          </Button>
-          <Button variant="ghost" size="icon-sm" title={t("staff.endMeeting")} aria-label={t("staff.endMeeting")} onClick={() => onEnd(row.original)}>
-            <Square />
-          </Button>
+          {/*
+            Chỉ hiện nút HỢP LỆ với trạng thái hiện tại. Trước đây luôn hiện cả Bắt đầu lẫn Kết
+            thúc, bấm sai thì ăn lỗi 409 — mà buổi họp đã "Đang diễn ra" thì không có đường lui,
+            kẹt luôn.
+          */}
+          {row.original.status === "SCHEDULED" && (
+            <Button variant="ghost" size="icon-sm" title={t("staff.startMeeting")} aria-label={t("staff.startMeeting")} onClick={() => onStart(row.original)}>
+              <Play />
+            </Button>
+          )}
+          {row.original.status === "IN_PROGRESS" && (
+            <>
+              <Button variant="ghost" size="icon-sm" title={t("staff.undoStartMeeting")} aria-label={t("staff.undoStartMeeting")} onClick={() => onUndoStart(row.original)}>
+                <Undo2 />
+              </Button>
+              <Button variant="ghost" size="icon-sm" title={t("staff.endMeeting")} aria-label={t("staff.endMeeting")} onClick={() => onEnd(row.original)}>
+                <Square />
+              </Button>
+            </>
+          )}
         </div>
       ),
     },
