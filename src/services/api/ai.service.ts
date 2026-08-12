@@ -1,4 +1,4 @@
-import { axiosClient } from "@/services/api/axiosClient";
+import { AI_TIMEOUT_MS, axiosClient } from "@/services/api/axiosClient";
 import type { ApiResponse } from "@/types/common";
 import type { AiExtractionResult, SimilarityCheckResult } from "@/types/ai-extraction";
 import type {
@@ -19,7 +19,7 @@ export const aiService = {
     // Trước đây gọi sai đường dẫn ⇒ nút "trích xuất bằng AI" ở wizard luôn 404,
     // tức Đường B (upload + AI, rule #10/#20) chưa từng chạy.
     return axiosClient
-      .post<ApiResponse<AiExtractionResult>>("/proposals/extract", formData)
+      .post<ApiResponse<AiExtractionResult>>("/proposals/extract", formData, { timeout: AI_TIMEOUT_MS })
       .then((res) => res.data.data);
   },
 
@@ -28,13 +28,13 @@ export const aiService = {
     formData.append("file", file);
     formData.append("topicId", String(topicId));
     return axiosClient
-      .post<ApiResponse<SimilarityCheckResult>>("/ai/similarity-check", formData)
+      .post<ApiResponse<SimilarityCheckResult>>("/ai/similarity-check", formData, { timeout: AI_TIMEOUT_MS })
       .then((res) => res.data.data);
   },
 
   summarizeProposal: (proposalId: string) =>
     axiosClient
-      .post<ApiResponse<SummaryResult>>(`/proposals/${proposalId}/generate-summary`)
+      .post<ApiResponse<SummaryResult>>(`/proposals/${proposalId}/generate-summary`, null, { timeout: AI_TIMEOUT_MS })
       .then((res) => res.data.data),
 
   getProposalSummary: (proposalId: string) =>
@@ -44,17 +44,17 @@ export const aiService = {
 
   semanticSearch: (query: string) =>
     axiosClient
-      .post<ApiResponse<SemanticSearchResult[]>>("/ai/search", { query })
+      .post<ApiResponse<SemanticSearchResult[]>>("/ai/search", { query }, { timeout: AI_TIMEOUT_MS })
       .then((res) => res.data.data),
 
   suggestReviewers: (trackId: string) =>
     axiosClient
-      .post<ApiResponse<ReviewerSuggestion[]>>("/ai/suggest-reviewers", { trackId })
+      .post<ApiResponse<ReviewerSuggestion[]>>("/ai/suggest-reviewers", { trackId }, { timeout: AI_TIMEOUT_MS })
       .then((res) => res.data.data),
 
   generateFeedback: (proposalId: string) =>
     axiosClient
-      .post<ApiResponse<AiFeedbackItem[]>>(`/ai/proposals/${proposalId}/feedback`)
+      .post<ApiResponse<AiFeedbackItem[]>>(`/ai/proposals/${proposalId}/feedback`, null, { timeout: AI_TIMEOUT_MS })
       .then((res) => res.data.data),
 
   /** Góp ý đã sinh trước đó — không tốn quota Gemini. */
@@ -66,7 +66,7 @@ export const aiService = {
   /** Đối chiếu thông tin đã điền với file đề cương đính kèm — chỉ ra chỗ thiếu/lệch. */
   checkConsistency: (proposalId: string) =>
     axiosClient
-      .post<ApiResponse<AiConsistencyResult>>(`/ai/proposals/${proposalId}/consistency-check`)
+      .post<ApiResponse<AiConsistencyResult>>(`/ai/proposals/${proposalId}/consistency-check`, null, { timeout: AI_TIMEOUT_MS })
       .then((res) => res.data.data),
 
   /** AI gợi ý điểm theo từng tiêu chí của bộ tiêu chí đang áp cho hội đồng. */
@@ -74,6 +74,8 @@ export const aiService = {
     axiosClient
       .post<ApiResponse<AiScoreSuggestion[]>>(
         `/ai/councils/${councilId}/proposals/${proposalId}/score-suggestion`,
+        null,
+        { timeout: AI_TIMEOUT_MS },
       )
       .then((res) => res.data.data),
 
@@ -87,6 +89,8 @@ export const aiService = {
    */
   reviewKit: (councilId: string, proposalId: string) =>
     axiosClient
-      .post<ApiResponse<ReviewKit>>(`/ai/councils/${councilId}/proposals/${proposalId}/review-kit`)
+      .post<ApiResponse<ReviewKit>>(`/ai/councils/${councilId}/proposals/${proposalId}/review-kit`, null, {
+        timeout: AI_TIMEOUT_MS,
+      })
       .then((res) => res.data.data),
 };

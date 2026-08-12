@@ -3,6 +3,19 @@ import { API_BASE_URL } from "@/constants/env";
 import { tokenStorage } from "@/utils/storage";
 import type { ApiError } from "@/types/common";
 
+/**
+ * Hạn chờ cho lời gọi **AI** — dài hơn hẳn mức thường.
+ *
+ * Gemini đọc file thuyết minh rồi mới sinh nội dung: đo thật trên máy là **36 giây** cho tóm tắt
+ * và **54 giây** cho góp ý. Hạn 15 giây mặc định cắt đứt TẤT CẢ các lời gọi đó — máy chủ vẫn chạy
+ * xong bình thường và lưu kết quả, chỉ trình duyệt bỏ cuộc trước rồi báo lỗi. Đây chính là lỗi
+ * "AI bên PI chạy lỗi" ở buổi demo 14/08.
+ *
+ * Không nâng hạn mặc định lên cho mọi lời gọi: màn hình bình thường mà treo một phút thì tệ hơn
+ * là báo lỗi sớm. Chỉ những đường thật sự gọi mô hình mới dùng hạn này.
+ */
+export const AI_TIMEOUT_MS = 180_000;
+
 export const axiosClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 15000,
