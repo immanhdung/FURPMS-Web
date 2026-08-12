@@ -469,6 +469,10 @@ export const en = {
   proposal: {
     aiStrengths: "Strengths",
     aiSummaryWorking: "AI is reading the proposal file and summarising — this takes 30–60 seconds, keep the page open.",
+    aiReviewKit: "AI review assistant",
+    aiReviewKitRun: "Summarise & suggest scores",
+    aiReviewKitAgain: "Run again",
+    aiReviewKitWorking: "AI is reading the proposal file to summarise AND propose per-criterion scores — this takes 30–60 seconds, keep the page open.",
     aiWeaknesses: "Weaknesses / to clarify",
     aiSourceFile: "AI read the proposal file: {{name}}",
     aiSourceForm: "AI only read the form (no proposal file attached).",
@@ -815,6 +819,7 @@ export const en = {
     noRubricRound: "No rubric template is available for this round.",
     scoreRange: "Score for \"{{name}}\" must be between 0 and {{max}}.",
     aiSuggestHint: "AI can propose a score for each criterion as a reference — the decision stays yours.",
+    aiSuggestFromKit: "Press “Summarise & suggest scores” on the card above to have AI propose a score for each criterion — the decision stays yours.",
     aiSuggest: "AI score suggestion",
     aiSuggestAgain: "Suggest again",
     aiSuggestedScore: "AI suggests {{score}}/{{max}}",

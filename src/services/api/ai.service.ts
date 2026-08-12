@@ -5,6 +5,7 @@ import type {
   AiConsistencyResult,
   AiFeedbackItem,
   AiScoreSuggestion,
+  ReviewKit,
   ReviewerSuggestion,
   SemanticSearchResult,
   SummaryResult,
@@ -74,5 +75,18 @@ export const aiService = {
       .post<ApiResponse<AiScoreSuggestion[]>>(
         `/ai/councils/${councilId}/proposals/${proposalId}/score-suggestion`,
       )
+      .then((res) => res.data.data),
+
+  /**
+   * Một lần gọi ra CẢ tóm tắt lẫn gợi ý điểm.
+   *
+   * Trước đây người chấm bấm "Tóm tắt" chờ 30–60 giây, xong mới bấm "Gợi ý điểm" chờ thêm lượt
+   * nữa — đúng lúc hội đồng đang ngồi nhìn. Gói Gemini miễn phí lại giới hạn request mỗi phút nên
+   * bấm hai lần liên tiếp rất dễ bị chặn. Máy chủ chạy hai phần song song, tổng thời gian chờ
+   * xấp xỉ một lần gọi.
+   */
+  reviewKit: (councilId: string, proposalId: string) =>
+    axiosClient
+      .post<ApiResponse<ReviewKit>>(`/ai/councils/${councilId}/proposals/${proposalId}/review-kit`)
       .then((res) => res.data.data),
 };

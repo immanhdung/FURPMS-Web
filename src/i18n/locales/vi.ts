@@ -471,6 +471,10 @@ export const vi = {
   proposal: {
     aiStrengths: "Ưu điểm",
     aiSummaryWorking: "AI đang đọc tệp thuyết minh và tóm tắt — mất khoảng 30–60 giây, đừng đóng trang.",
+    aiReviewKit: "AI hỗ trợ chấm",
+    aiReviewKitRun: "Tóm tắt & gợi ý điểm",
+    aiReviewKitAgain: "Chạy lại",
+    aiReviewKitWorking: "AI đang đọc tệp thuyết minh để tóm tắt VÀ đề xuất điểm từng tiêu chí — mất khoảng 30–60 giây, đừng đóng trang.",
     aiWeaknesses: "Nhược điểm / cần làm rõ",
     aiSourceFile: "AI đã đọc file đề cương: {{name}}",
     aiSourceForm: "AI chỉ đọc thông tin trên biểu mẫu (chưa có file đề cương đính kèm).",
@@ -822,6 +826,7 @@ export const vi = {
     scoreRange: "Điểm \"{{name}}\" phải trong khoảng 0–{{max}}.",
     // AI goi y cham diem — CHI la goi y, nguoi cham quyet dinh cuoi (rule #12)
     aiSuggestHint: "AI có thể đề xuất điểm cho từng tiêu chí để bạn tham khảo — quyết định vẫn là của bạn.",
+    aiSuggestFromKit: "Bấm “AI tóm tắt & gợi ý điểm” ở thẻ phía trên để AI đề xuất điểm cho từng tiêu chí — quyết định vẫn là của bạn.",
     aiSuggest: "AI gợi ý điểm",
     aiSuggestAgain: "Gợi ý lại",
     aiSuggestedScore: "AI đề xuất {{score}}/{{max}}",

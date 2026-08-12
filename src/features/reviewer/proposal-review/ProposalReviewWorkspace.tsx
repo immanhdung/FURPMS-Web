@@ -79,7 +79,9 @@ export function ProposalReviewWorkspace() {
           {/* Người chấm đọc nhiều đề tài trong thời gian ngắn → bản tóm tắt nằm ngay
               trên file gốc. Trước đây card này chỉ có ở màn PI, tức đưa nhầm người. */}
           {/* Màn CHẤM ĐIỂM: tóm tắt tự chạy sẵn, người chấm mở ra là có (thầy 05/08). */}
-          <AiSummaryCard proposalId={membership.proposalId} autoGenerate />
+          {/* Có councilId ⇒ một lần bấm ra CẢ tóm tắt lẫn gợi ý điểm, thay vì bắt người chấm
+              chờ hai lượt 30–60 giây liên tiếp ngay lúc hội đồng đang ngồi nhìn. */}
+          <AiSummaryCard proposalId={membership.proposalId} councilId={councilId} autoGenerate />
           <ProposalDocumentViewer proposalId={membership.proposalId} />
         </div>
 

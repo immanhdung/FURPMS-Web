@@ -69,3 +69,16 @@ export interface AiScoreSuggestion {
   suggestedScore: number;
   comment: string;
 }
+
+/**
+ * Bộ tài liệu AI cho người chấm — tóm tắt + gợi ý điểm trong **một lần bấm**.
+ *
+ * Hai phần có lỗi riêng chứ không chung một lỗi: một phần hỏng thì phần còn lại vẫn dùng được,
+ * và người chấm biết chính xác thiếu cái gì thay vì thấy màn hình trắng.
+ */
+export interface ReviewKit {
+  summary: SummaryResult | null;
+  suggestions: AiScoreSuggestion[];
+  summaryError: string | null;
+  suggestionsError: string | null;
+}

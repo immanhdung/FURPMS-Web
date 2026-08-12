@@ -11,7 +11,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { useMyScoreQuery, useSubmitScoreMutation } from "@/hooks/useReviewScoring";
 import { useRubricForCouncilQuery } from "@/hooks/useRubricTemplates";
-import { useSuggestScoresMutation } from "@/hooks/useProposalAi";
+import { useScoreSuggestionsQuery } from "@/hooks/useProposalAi";
+import type { AiScoreSuggestion } from "@/types/ai-tools";
 import type { ScoreDetailPayload } from "@/types/review-scoring";
 
 interface RubricScoringFormProps {
@@ -57,10 +58,14 @@ export function RubricScoringForm({ councilId, proposalId, projectId }: RubricSc
 
   // AI chỉ GỢI Ý: hiện dưới từng tiêu chí kèm nút "Áp dụng", KHÔNG tự ghi đè điểm
   // người chấm đã nhập (rule #12 — quyết định là của con người).
-  const suggestMutation = useSuggestScoresMutation(councilId);
+  //
+  // Gợi ý do nút AI gộp ở thẻ tóm tắt phía trên sinh ra (một lần bấm ra cả tóm tắt lẫn gợi ý),
+  // form này chỉ ĐỌC cache. Trước đây mỗi chỗ một nút ⇒ người chấm chờ hai lượt 30–60 giây liên
+  // tiếp và tốn hai request Gemini, mà gói miễn phí thì giới hạn request mỗi phút.
+  const { data: suggestions } = useScoreSuggestionsQuery(councilId, proposalId ?? null);
   const suggestionById = useMemo(
-    () => new Map((suggestMutation.data ?? []).map((s) => [s.criterionId, s])),
-    [suggestMutation.data],
+    () => new Map(((suggestions as AiScoreSuggestion[] | undefined) ?? []).map((s) => [s.criterionId, s])),
+    [suggestions],
   );
 
   const isLoading = isTemplatesLoading || isScoreLoading;
@@ -153,19 +158,10 @@ export function RubricScoringForm({ councilId, proposalId, projectId }: RubricSc
         </div>
       </div>
 
-      {proposalId && (
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/15 bg-primary/4 px-3 py-2">
-          <p className="text-xs text-muted-foreground">{t("review.aiSuggestHint")}</p>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={suggestMutation.isPending}
-            onClick={() => suggestMutation.mutate(proposalId)}
-          >
-            {suggestMutation.isPending ? <Loader2 className="animate-spin" /> : <Sparkles />}
-            {suggestMutation.data ? t("review.aiSuggestAgain") : t("review.aiSuggest")}
-          </Button>
+      {proposalId && !suggestionById.size && (
+        <div className="flex items-start gap-2 rounded-lg border border-primary/15 bg-primary/4 px-3 py-2">
+          <Sparkles className="mt-0.5 size-3.5 shrink-0 text-primary" />
+          <p className="text-xs text-muted-foreground">{t("review.aiSuggestFromKit")}</p>
         </div>
       )}
 
