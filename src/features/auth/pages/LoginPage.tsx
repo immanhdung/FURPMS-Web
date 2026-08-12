@@ -2,6 +2,8 @@ import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
+import { ROUTES } from "@/constants/routes";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -111,6 +113,13 @@ export function LoginPage() {
             {loginMutation.isPending && <Loader2 className="animate-spin" />}
             {t("auth.signIn")}
           </Button>
+
+          <Link
+            to={ROUTES.FORGOT_PASSWORD}
+            className="block text-center text-sm text-slate-400 transition-colors hover:text-slate-200"
+          >
+            {t("auth.forgotLink")}
+          </Link>
         </form>
 
         <div className="mt-6 text-center text-sm text-slate-400">

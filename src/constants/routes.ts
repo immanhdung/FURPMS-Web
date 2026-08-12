@@ -18,6 +18,8 @@ export const ROUTES = {
   SETTINGS: "/settings",
   PROFILE: "/profile",
   CHANGE_PASSWORD: "/change-password",
+  FORGOT_PASSWORD: "/forgot-password",
+  RESET_PASSWORD: "/reset-password",
 
   PROPOSAL_REVIEWS: "/proposal-reviews",
   REVIEW_BOARD: "/review-board",

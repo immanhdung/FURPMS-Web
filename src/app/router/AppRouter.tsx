@@ -5,6 +5,8 @@ import { AuthLayout } from "@/components/layout/AuthLayout";
 import { ComingSoonPage } from "@/components/shared/ComingSoonPage";
 import { NotFoundPage } from "@/components/shared/NotFoundPage";
 import { UnauthorizedPage } from "@/components/shared/UnauthorizedPage";
+import { ForgotPasswordPage } from "@/features/auth/pages/ForgotPasswordPage";
+import { ResetPasswordPage } from "@/features/auth/pages/ResetPasswordPage";
 import { PageLoader } from "@/components/shared/PageLoader";
 import { useBootstrapAuth } from "@/hooks/useAuth";
 import { ROUTES } from "@/constants/routes";
@@ -181,6 +183,8 @@ export function AppRouter() {
             </Route>
           </Route>
 
+          <Route path={ROUTES.FORGOT_PASSWORD} element={<ForgotPasswordPage />} />
+          <Route path={ROUTES.RESET_PASSWORD} element={<ResetPasswordPage />} />
           <Route path={ROUTES.UNAUTHORIZED} element={<UnauthorizedPage />} />
 
           <Route element={<ProtectedRoute />}>
