@@ -1411,6 +1411,8 @@ export const en = {
       chooseCycleForType: "Pick a cycle to see its research type.",
     },
     step2: {
+      alreadyAttached: "Files already attached",
+      attachMoreHint: "Pick another file below if needed — existing files stay. To remove one, open the proposal detail page.",
       title: "Research Content",
       abstract: "Abstract",
       objectives: "Research Objectives",

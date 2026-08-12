@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FileDropzone } from "@/components/shared/FileDropzone";
+import { useProposalDocumentsQuery } from "@/hooks/useProposalDocuments";
+import { formatDateTime } from "@/utils/format";
 import { IndeterminateProgressBar } from "@/components/shared/ProgressBar";
 import { useResearchTypesQuery } from "@/hooks/useResearchTypes";
 import { useResearchOrdersQuery } from "@/hooks/useResearchOrders";
@@ -18,15 +20,25 @@ import type { AiExtractionResult, SimilarityCheckResult } from "@/types/ai-extra
 
 interface Step2Props {
   form: UseFormReturn<ProposalWizardValues>;
+  /** Có khi đang SỬA đề cương đã lưu — để liệt kê tài liệu đã đính kèm trước đó. */
+  proposalId?: string;
   file: File | null;
   onFileChange: (file: File | null) => void;
 }
 
-export function Step2ResearchContent({ form, file, onFileChange }: Step2Props) {
+export function Step2ResearchContent({ form, file, onFileChange, proposalId }: Step2Props) {
   const { t } = useTranslation();
   const { control, watch, setValue } = form;
   const researchTypeId = watch("researchType");
   const cycleId = watch("cycleId");
+
+  /*
+   * Đang SỬA một đề cương đã lưu thì phải thấy tài liệu đã đính kèm.
+   *
+   * Trước đây bước này chỉ biết `file` — tệp vừa chọn trong phiên hiện tại — nên mở lại đề cương
+   * cũ là khung đính kèm trắng trơn, chủ nhiệm tưởng mất bài (màn Xem thì vẫn hiện đủ).
+   */
+  const { data: attached } = useProposalDocumentsQuery(proposalId ?? null);
 
   const { data: researchTypes } = useResearchTypesQuery();
   const selectedType = researchTypes?.find((rt) => rt.id === researchTypeId);
@@ -131,6 +143,24 @@ export function Step2ResearchContent({ form, file, onFileChange }: Step2Props) {
       )}
 
       <div>
+        {(attached?.length ?? 0) > 0 && (
+          <div className="mb-3 space-y-1.5 rounded-lg border border-border p-3">
+            <p className="text-xs font-medium text-muted-foreground">{t("wizard.step2.alreadyAttached")}</p>
+            <ul className="space-y-1">
+              {attached!.map((d) => (
+                <li key={d.id} className="flex flex-wrap items-center gap-x-2 text-sm text-foreground">
+                  <span className="font-medium">{d.fileName}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {d.documentType ? `${d.documentType} · ` : ""}
+                    {d.uploadedAt ? formatDateTime(d.uploadedAt) : ""}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <p className="text-xs text-muted-foreground">{t("wizard.step2.attachMoreHint")}</p>
+          </div>
+        )}
+
         <FileDropzone
           file={file}
           onFileSelect={(selected) => {

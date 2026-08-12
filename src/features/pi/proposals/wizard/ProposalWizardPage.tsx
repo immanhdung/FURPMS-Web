@@ -301,7 +301,14 @@ export function ProposalWizardPage() {
       <Card>
         <CardContent className="p-5">
           {currentStep === 0 && <Step1CycleFieldType form={form} />}
-          {currentStep === 1 && <Step2ResearchContent form={form} file={uploadedFile} onFileChange={setUploadedFile} />}
+          {currentStep === 1 && (
+            <Step2ResearchContent
+              form={form}
+              file={uploadedFile}
+              onFileChange={setUploadedFile}
+              proposalId={proposalId ?? undefined}
+            />
+          )}
           {currentStep === 2 && <Step3Details form={form} />}
           {currentStep === 3 && <Step4TeamMembers form={form} />}
           {currentStep === 4 && <Step5Preview form={form} />}

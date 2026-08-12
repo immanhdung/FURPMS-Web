@@ -1423,6 +1423,8 @@ export const vi = {
       chooseCycleForType: "Chọn đợt để biết loại đề tài.",
     },
     step2: {
+      alreadyAttached: "Tài liệu đã đính kèm",
+      attachMoreHint: "Chọn thêm tệp bên dưới nếu cần — tệp cũ vẫn giữ nguyên. Muốn xoá thì vào màn chi tiết đề cương.",
       title: "Nội dung nghiên cứu",
       abstract: "Tóm tắt",
       objectives: "Mục tiêu nghiên cứu",
