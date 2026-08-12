@@ -530,6 +530,8 @@ export const en = {
     backToDashboard: "Back to dashboard",
     unauthorized: "You don't have access to this page",
     unauthorizedDesc: "Your role does not have permission to view this resource. If you believe this is a mistake, contact your administrator.",
+    unauthorizedRoleHint: "You are viewing the system as **{{role}}** — this page belongs to another role. Switch roles to continue, or use the dropdown in the top-right corner.",
+    switchToRole: "Switch to {{role}}",
   },
   devClock: {
     timeTravel: "Demo time travel",
@@ -1673,6 +1675,7 @@ export const en = {
     selectDegree: "Select degree",
     temporaryPassword: "Temporary password",
     lastLogin: "Last login",
+    filterAll: "All",
   },
   academicProfile: {
     title: "Academic Profile (Scientific CV)",

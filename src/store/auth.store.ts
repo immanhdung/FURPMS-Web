@@ -3,10 +3,21 @@ import type { User } from "@/types/auth";
 import type { Role } from "@/constants/roles";
 import { getPrimaryRole } from "@/constants/roles";
 
-const ACTIVE_ROLE_KEY = "furpms-active-role";
+/**
+ * Vai đang xem lưu theo TỪNG NGƯỜI DÙNG.
+ *
+ * Trước đây dùng chung một khoá `furpms-active-role`: A chọn xem với vai Giảng viên, đăng xuất, B
+ * đăng nhập trên cùng trình duyệt mà cũng có vai Giảng viên ⇒ B bị ném thẳng vào chế độ Giảng viên
+ * dù chưa hề chọn. Từ khi `RoleGuard` chặn theo vai đang chọn, hậu quả là B mở màn nào của vai
+ * chính cũng ăn "Bạn không có quyền" — không hiểu vì sao và không biết đường ra.
+ */
+const ACTIVE_ROLE_PREFIX = "furpms-active-role:";
+const LEGACY_ACTIVE_ROLE_KEY = "furpms-active-role";
 
-function readStoredActiveRole(): Role | null {
-  return (localStorage.getItem(ACTIVE_ROLE_KEY) as Role | null) ?? null;
+const roleKeyFor = (userId: string) => `${ACTIVE_ROLE_PREFIX}${userId}`;
+
+function readStoredActiveRole(userId: string): Role | null {
+  return (localStorage.getItem(roleKeyFor(userId)) as Role | null) ?? null;
 }
 
 /**
@@ -16,7 +27,10 @@ function readStoredActiveRole(): Role | null {
  */
 function resolveActiveRole(user: User | null): Role | null {
   if (!user) return null;
-  const stored = readStoredActiveRole();
+  // Dọn khoá dùng chung của bản cũ để không ai còn dính vai của người trước.
+  localStorage.removeItem(LEGACY_ACTIVE_ROLE_KEY);
+
+  const stored = readStoredActiveRole(user.id);
   if (stored && user.roles.includes(stored)) return stored;
   return getPrimaryRole(user.roles) ?? null;
 }
@@ -41,15 +55,15 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setUser: (user) => set({ user, isAuthenticated: Boolean(user), activeRole: resolveActiveRole(user) }),
 
-  setActiveRole: (role) => {
-    localStorage.setItem(ACTIVE_ROLE_KEY, role);
-    set({ activeRole: role });
-  },
+  setActiveRole: (role) =>
+    set((state) => {
+      if (state.user) localStorage.setItem(roleKeyFor(state.user.id), role);
+      return { activeRole: role };
+    }),
 
   setInitializing: (value) => set({ isInitializing: value }),
 
-  logout: () => {
-    localStorage.removeItem(ACTIVE_ROLE_KEY);
-    set({ user: null, isAuthenticated: false, activeRole: null });
-  },
+  // Đăng xuất KHÔNG xoá vai đã chọn: lần sau người đó đăng nhập lại vẫn về đúng chỗ đang làm dở.
+  // Khoá theo userId nên không ảnh hưởng người khác.
+  logout: () => set({ user: null, isAuthenticated: false, activeRole: null }),
 }));
