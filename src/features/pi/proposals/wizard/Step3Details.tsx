@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useResearchTypesQuery } from "@/hooks/useResearchTypes";
 import { BudgetBreakdownTable } from "@/features/pi/proposals/wizard/BudgetBreakdownTable";
+import { ExpectedProductsCard } from "@/features/pi/proposals/ExpectedProductsCard";
 import type { ProposalWizardValues } from "@/features/pi/proposals/wizard/proposal-wizard.schema";
 
 /** Small helpers so labels/sections stay consistent without repeating classes. */
@@ -29,7 +30,14 @@ function Section({ title, hint, children }: { title: string; hint?: string; chil
   );
 }
 
-export function Step3Details({ form }: { form: UseFormReturn<ProposalWizardValues> }) {
+export function Step3Details({
+  form,
+  proposalId,
+}: {
+  form: UseFormReturn<ProposalWizardValues>;
+  /** Có khi đang SỬA đề cương đã lưu — sản phẩm cam kết gắn với đề cương nên cần id. */
+  proposalId?: string;
+}) {
   const { t } = useTranslation();
   const {
     register,
@@ -161,6 +169,22 @@ export function Step3Details({ form }: { form: UseFormReturn<ProposalWizardValue
             {errors.durationMonths && <p className="mt-1 text-xs text-destructive">{errors.durationMonths.message}</p>}
           </div>
         </div>
+      </Section>
+
+      {/*
+        Sản phẩm cam kết — QĐ543 Điều 11.1: hồ sơ nghiệm thu gồm "các sản phẩm cam kết theo Đề
+        cương/Hợp đồng". Trước đây wizard hoàn toàn không có mục này nên nộp lần đầu là thiếu, phải
+        vào màn chi tiết khai bù mà chẳng ai nhắc.
+
+        Sản phẩm gắn với đề cương đã lưu nên chỉ hiện khi đã có id: đề cương mới thì bấm "Lưu nháp"
+        một lần rồi quay lại bước này.
+      */}
+      <Section title={t("wizard.step3.secProducts")} hint={t("wizard.step3.secProductsHint")}>
+        {proposalId ? (
+          <ExpectedProductsCard proposalId={proposalId} editable />
+        ) : (
+          <p className="text-sm text-muted-foreground">{t("wizard.step3.productsNeedDraft")}</p>
+        )}
       </Section>
     </div>
   );

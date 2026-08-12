@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { UseFormReturn } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import { Loader2, Sparkles, SearchCheck } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,10 +13,9 @@ import { formatDateTime } from "@/utils/format";
 import { IndeterminateProgressBar } from "@/components/shared/ProgressBar";
 import { useResearchTypesQuery } from "@/hooks/useResearchTypes";
 import { useResearchOrdersQuery } from "@/hooks/useResearchOrders";
-import { useExtractProposalMutation, useSimilarityCheckMutation } from "@/hooks/useProposalAi";
-import { SimilarityWarningDialog } from "@/features/pi/proposals/wizard/SimilarityWarningDialog";
+import { useExtractProposalMutation } from "@/hooks/useProposalAi";
 import type { ProposalWizardValues } from "@/features/pi/proposals/wizard/proposal-wizard.schema";
-import type { AiExtractionResult, SimilarityCheckResult } from "@/types/ai-extraction";
+import type { AiExtractionResult } from "@/types/ai-extraction";
 
 interface Step2Props {
   form: UseFormReturn<ProposalWizardValues>;
@@ -50,11 +49,8 @@ export function Step2ResearchContent({ form, file, onFileChange, proposalId }: S
   const { data: cycleOrders } = useResearchOrdersQuery(cycleId ? { cycleId } : undefined);
 
   const extractMutation = useExtractProposalMutation();
-  const similarityMutation = useSimilarityCheckMutation();
 
   const [extraction, setExtraction] = useState<AiExtractionResult | null>(null);
-  const [similarity, setSimilarity] = useState<SimilarityCheckResult | null>(null);
-  const [warningOpen, setWarningOpen] = useState(false);
 
   const applyExtraction = (result: AiExtractionResult) => {
     setExtraction(result);
@@ -90,19 +86,6 @@ export function Step2ResearchContent({ form, file, onFileChange, proposalId }: S
     extractMutation.mutate(file, { onSuccess: applyExtraction });
   };
 
-  const runSimilarityCheck = () => {
-    const orderId = watch("orderId");
-    if (!file || !orderId) return;
-    similarityMutation.mutate(
-      { file, topicId: orderId },
-      {
-        onSuccess: (result) => {
-          setSimilarity(result);
-          if (!result.passed) setWarningOpen(true);
-        },
-      }
-    );
-  };
 
   if (!selectedType) {
     return <p className="text-sm text-muted-foreground">{t("wizard.step2.selectTypeFirst")}</p>;
@@ -166,53 +149,23 @@ export function Step2ResearchContent({ form, file, onFileChange, proposalId }: S
           onFileSelect={(selected) => {
             onFileChange(selected);
             setExtraction(null);
-            setSimilarity(null);
           }}
           onRemove={() => {
             onFileChange(null);
             setExtraction(null);
-            setSimilarity(null);
           }}
           label={isApplied ? t("wizard.step2.uploadApplied") : t("wizard.step2.uploadBasic")}
           hint={t("wizard.step2.dropHint")}
         />
       </div>
 
-      {isApplied ? (
-        <div className="space-y-3">
-          <Button
-            type="button"
-            variant="outline"
-            disabled={!file || !watch("orderId") || similarityMutation.isPending}
-            onClick={runSimilarityCheck}
-          >
-            {similarityMutation.isPending ? <Loader2 className="animate-spin" /> : <SearchCheck />}
-            {t("wizard.step2.checkSimilarity")}
-          </Button>
-
-          {similarityMutation.isPending && <IndeterminateProgressBar label={t("wizard.step2.comparing")} />}
-
-          {similarity && (
-            <motion.div
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-2 rounded-lg border border-border p-3 text-sm"
-            >
-              <Badge variant={similarity.passed ? "secondary" : "destructive"}>{similarity.score}{t("wizard.step2.matchSuffix")}</Badge>
-              <span className="text-muted-foreground">
-                {similarity.passed ? t("wizard.step2.matchGood") : t("wizard.step2.matchLow")}
-              </span>
-            </motion.div>
-          )}
-
-          <SimilarityWarningDialog
-            open={warningOpen}
-            onOpenChange={setWarningOpen}
-            score={similarity?.score ?? 0}
-            onContinue={() => {}}
-          />
-        </div>
-      ) : (
+      {/*
+        Trước đây khối này rẽ nhánh: đề tài ỨNG DỤNG thì hiện "Kiểm tra trùng lặp", CƠ BẢN mới có
+        "AI đọc file điền hộ". Hai vấn đề: nút kiểm tra trùng lặp gọi `/ai/similarity-check` mà BE
+        KHÔNG hề có endpoint đó (bấm là lỗi), và chủ nhiệm đề tài ứng dụng thì vĩnh viễn không dùng
+        được AI điền hộ — trong khi đó mới là thứ chạy thật.
+        Nay bỏ nhánh, ai cũng dùng chung một đường.
+      */}
         <div className="space-y-3">
           <Button type="button" variant="outline" disabled={!file || extractMutation.isPending} onClick={runExtraction}>
             {extractMutation.isPending ? <Loader2 className="animate-spin" /> : <Sparkles />}
@@ -247,7 +200,6 @@ export function Step2ResearchContent({ form, file, onFileChange, proposalId }: S
             </motion.div>
           )}
         </div>
-      )}
     </div>
   );
 }

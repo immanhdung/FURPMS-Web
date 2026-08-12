@@ -445,6 +445,7 @@ export const en = {
   },
   proposal: {
     aiStrengths: "Strengths",
+    aiSummaryWorking: "AI is reading the proposal file and summarising — this takes 30–60 seconds, keep the page open.",
     aiWeaknesses: "Weaknesses / to clarify",
     aiSourceFile: "AI read the proposal file: {{name}}",
     aiSourceForm: "AI only read the form (no proposal file attached).",
@@ -1473,6 +1474,9 @@ export const en = {
       facilities: "Facilities & Resources",
       facilitiesPlaceholder: "Labs, equipment, or data you already have access to",
       secPlan: "Plan & funding",
+      secProducts: "Committed deliverables",
+      secProductsHint: "What the project commits to deliver — these are the items accepted at hand-over and linked as disbursement evidence (Decision 543, Article 11.1).",
+      productsNeedDraft: "Click \"Save draft\" once, then come back to this step to add deliverables — they attach to a saved proposal.",
       totalBudget: "Budget estimate by item",
       budgetCategory: "Item",
       budgetMaxPct: "Max",

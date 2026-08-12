@@ -68,7 +68,17 @@ export function AiSummaryCard({
       </CardHeader>
       <CardContent>
         {isLoading || summarizeMutation.isPending ? (
-          <Skeleton className="h-16 w-full rounded-lg" />
+          /* AI đọc file rồi mới tóm tắt nên mất 30–60 giây. Chỉ hiện khung xám thì trông như treo —
+             lúc demo là người xem tưởng hỏng. Nói thẳng đang làm gì và mất bao lâu. */
+          <div className="space-y-2">
+            {summarizeMutation.isPending && (
+              <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="size-4 animate-spin" />
+                {t("proposal.aiSummaryWorking")}
+              </p>
+            )}
+            <Skeleton className="h-16 w-full rounded-lg" />
+          </div>
         ) : text ? (
           <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
             {summary?.title && (

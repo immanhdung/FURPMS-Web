@@ -447,6 +447,7 @@ export const vi = {
   },
   proposal: {
     aiStrengths: "Ưu điểm",
+    aiSummaryWorking: "AI đang đọc tệp thuyết minh và tóm tắt — mất khoảng 30–60 giây, đừng đóng trang.",
     aiWeaknesses: "Nhược điểm / cần làm rõ",
     aiSourceFile: "AI đã đọc file đề cương: {{name}}",
     aiSourceForm: "AI chỉ đọc thông tin trên biểu mẫu (chưa có file đề cương đính kèm).",
@@ -1486,6 +1487,9 @@ export const vi = {
       facilities: "Cơ sở vật chất & nguồn lực",
       facilitiesPlaceholder: "Phòng thí nghiệm, thiết bị, hoặc dữ liệu bạn đã có",
       secPlan: "Kế hoạch & kinh phí",
+      secProducts: "Sản phẩm dự kiến",
+      secProductsHint: "Sản phẩm đề tài cam kết giao — đây sẽ là các mục được nghiệm thu và gắn làm minh chứng giải ngân (QĐ543 Điều 11.1).",
+      productsNeedDraft: "Bấm \"Lưu nháp\" một lần rồi quay lại bước này để khai sản phẩm — sản phẩm gắn với đề cương đã lưu.",
       totalBudget: "Dự toán kinh phí theo hạng mục",
       budgetCategory: "Hạng mục",
       budgetMaxPct: "Tối đa",

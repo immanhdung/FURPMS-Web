@@ -242,15 +242,15 @@ export function AcademicProfileCard({ userId }: AcademicProfileCardProps) {
               </div>
               <div>
                 <FieldLabel htmlFor="dateOfBirth">{t("academicProfile.dateOfBirth")}</FieldLabel>
-                <Input id="dateOfBirth" type="date" {...register("dateOfBirth")} />
+                <Input id="dateOfBirth" type="date" autoComplete="bday" {...register("dateOfBirth")} />
               </div>
               <div>
                 <FieldLabel htmlFor="nationality">{t("academicProfile.nationality")}</FieldLabel>
-                <Input id="nationality" {...register("nationality")} />
+                <Input id="nationality" autoComplete="country-name" {...register("nationality")} />
               </div>
               <div>
                 <FieldLabel htmlFor="hometown">{t("academicProfile.hometown")}</FieldLabel>
-                <Input id="hometown" {...register("hometown")} />
+                <Input id="hometown" autoComplete="address-level2" {...register("hometown")} />
               </div>
               <div>
                 <FieldLabel htmlFor="specialization">{t("academicProfile.specialization")}</FieldLabel>
@@ -269,11 +269,11 @@ export function AcademicProfileCard({ userId }: AcademicProfileCardProps) {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <FieldLabel htmlFor="institution">{t("academicProfile.institution")}</FieldLabel>
-                <Input id="institution" {...register("institution")} />
+                <Input id="institution" autoComplete="organization" {...register("institution")} />
               </div>
               <div className="sm:col-span-2">
                 <FieldLabel htmlFor="institutionAddress">{t("academicProfile.institutionAddress")}</FieldLabel>
-                <Input id="institutionAddress" {...register("institutionAddress")} />
+                <Input id="institutionAddress" autoComplete="street-address" {...register("institutionAddress")} />
               </div>
               <div>
                 <FieldLabel htmlFor="gsPgsYear">{t("academicProfile.gsPgsYear")}</FieldLabel>

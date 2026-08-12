@@ -309,7 +309,7 @@ export function ProposalWizardPage() {
               proposalId={proposalId ?? undefined}
             />
           )}
-          {currentStep === 2 && <Step3Details form={form} />}
+          {currentStep === 2 && <Step3Details form={form} proposalId={proposalId ?? undefined} />}
           {currentStep === 3 && <Step4TeamMembers form={form} />}
           {currentStep === 4 && <Step5Preview form={form} />}
         </CardContent>
