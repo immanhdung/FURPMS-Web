@@ -19,9 +19,19 @@ export const contractService = {
   /** Chỉ xoá được hợp đồng CHƯA KÝ và chưa có ai nộp gì lên — BE chặn, trả 409 kèm lý do. */
   remove: (id: string) => axiosClient.delete<ApiResponse<null>>(`/contracts/${id}`),
 
-  sign: (id: string) => axiosClient.post<ApiResponse<Contract>>(`/contracts/${id}/sign`).then((res) => res.data.data),
+  /** Ghi nhận đã ký. `signedOn` = ngày ký GHI TRÊN GIẤY (yyyy-MM-dd), khác ngày bấm nút. */
+  sign: (id: string, signedOn?: string) =>
+    axiosClient
+      .post<ApiResponse<Contract>>(`/contracts/${id}/sign`, null, { params: signedOn ? { signedOn } : undefined })
+      .then((res) => res.data.data),
 
   // BM05 — tự sinh Word hợp đồng (rule tuần 10). Tải qua axios (kèm token) rồi lưu file.
   exportWord: (id: string) =>
     axiosClient.get<Blob>(`/contracts/${id}/export-word`, { responseType: "blob" }).then((res) => res.data),
+
+  /** BM13 — Biên bản nghiệm thu & thanh lý hợp đồng (QĐ543 Điều 13.2). */
+  exportSettlementWord: (id: string) =>
+    axiosClient
+      .get<Blob>(`/contracts/${id}/export-settlement-word`, { responseType: "blob" })
+      .then((res) => res.data),
 };

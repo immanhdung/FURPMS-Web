@@ -63,12 +63,12 @@ export function useDeleteContractMutation() {
 export function useSignContractMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => contractService.sign(id),
-    onSuccess: (_data, id) => {
-      toast.success("Contract signed.");
+    mutationFn: ({ id, signedOn }: { id: string; signedOn?: string }) => contractService.sign(id, signedOn),
+    onSuccess: (_data, { id }) => {
+      toast.success("Đã ghi nhận hợp đồng đã ký.");
       queryClient.invalidateQueries({ queryKey: queryKeys.contracts.detail(id) });
       queryClient.invalidateQueries({ queryKey: queryKeys.contracts.all() });
     },
-    onError: (error: ApiError) => toast.error(error.message || "Unable to sign contract."),
+    onError: (error: ApiError) => toast.error(error.message || "Không ghi nhận được hợp đồng đã ký."),
   });
 }

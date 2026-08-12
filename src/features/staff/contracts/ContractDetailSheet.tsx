@@ -9,10 +9,11 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { PageLoader } from "@/components/shared/PageLoader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useContractQuery, useSignContractMutation } from "@/hooks/useContracts";
+import { useContractQuery } from "@/hooks/useContracts";
 import { useProposalQuery } from "@/hooks/useProposals";
 import { ContractMilestoneTimeline } from "@/features/staff/contracts/ContractMilestoneTimeline";
 import { ContractSignedDocs } from "@/features/staff/contracts/ContractSignedDocs";
+import { SignContractDialog } from "@/features/staff/contracts/SignContractDialog";
 import { ProgressReportsPanel } from "@/features/staff/contracts/ProgressReportsPanel";
 import { DisbursementsPanel } from "@/features/staff/contracts/DisbursementsPanel";
 import { DeliverablesPanel } from "@/features/staff/contracts/DeliverablesPanel";
@@ -32,8 +33,29 @@ export function ContractDetailSheet({ open, onOpenChange, contractId }: Contract
   const { t } = useTranslation();
   const { data: contract, isLoading } = useContractQuery(contractId);
   const { data: proposal } = useProposalQuery(contract?.proposalId ?? null);
-  const signMutation = useSignContractMutation();
+  const [signOpen, setSignOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
+
+  const [exportingSettlement, setExportingSettlement] = useState(false);
+
+  /** BM13 — biên bản thanh lý; cùng đường tải như hợp đồng gốc (qua axios để kèm token). */
+  const handleExportSettlement = async () => {
+    if (!contract) return;
+    setExportingSettlement(true);
+    try {
+      const blob = await contractService.exportSettlementWord(contract.id);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `BienBanThanhLy-${contract.contractNumber ?? contract.id}.docx`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      toast.error(t("contract.exportWordError"));
+    } finally {
+      setExportingSettlement(false);
+    }
+  };
 
   const handleExportWord = async () => {
     if (!contract) return;
@@ -113,19 +135,31 @@ export function ContractDetailSheet({ open, onOpenChange, contractId }: Contract
               </div>
 
               <div className="flex flex-wrap gap-2">
-                <Button size="sm" onClick={() => contractId && signMutation.mutate(contractId)} disabled={signMutation.isPending}>
-                  <FileSignature />
-                  {t("contract.signContract")}
-                </Button>
+                {/* Chỉ hiện khi CHƯA ký — ký rồi thì không có gì để bấm nữa. */}
+                {contract.status === "PENDING_SIGNATURE" && (
+                  <Button size="sm" onClick={() => setSignOpen(true)}>
+                    <FileSignature />
+                    {t("contract.signContract")}
+                  </Button>
+                )}
                 {canManage && (
                   <Button size="sm" variant="outline" onClick={handleExportWord} disabled={exporting}>
                     {exporting ? <Loader2 className="animate-spin" /> : <FileDown />}
                     {t("contract.exportWord")}
                   </Button>
                 )}
+                {/* BM13 — biên bản thanh lý (QĐ543 Điều 13.2), chỉ có nghĩa khi hợp đồng đã ký. */}
+                {canManage && contract.status !== "PENDING_SIGNATURE" && (
+                  <Button size="sm" variant="outline" onClick={handleExportSettlement} disabled={exportingSettlement}>
+                    {exportingSettlement ? <Loader2 className="animate-spin" /> : <FileDown />}
+                    {t("contract.exportSettlementWord")}
+                  </Button>
+                )}
               </div>
 
               {canManage && <ContractSignedDocs contractId={contract.id} />}
+
+      <SignContractDialog open={signOpen} onOpenChange={setSignOpen} contractId={contractId} />
 
               {/* Thứ tự tab theo đúng dòng đời hợp đồng: tiền → sản phẩm → báo cáo → tổng kết → điều chỉnh → chốt sổ */}
               <Tabs defaultValue="timeline">
