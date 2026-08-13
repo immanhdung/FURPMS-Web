@@ -6,6 +6,9 @@ export const vi = {
     "ACCEPTANCE": "Nghiệm thu",
     "ACCEPTED": "Đã tiếp nhận",
     "ACTIVE": "Đang hiệu lực",
+    // Thiếu key này thì StatusBadge rơi về hiện NGUYÊN mã tiếng Anh "Inactive" —
+    // đúng chỗ sót tiếng Anh ở màn Staff (P2-7).
+    "INACTIVE": "Ngừng hoạt động",
     "APPROVED": "Đã duyệt",
     "ARCHIVED": "Đã lưu trữ",
     "ASSIGNED": "Đã phân công",

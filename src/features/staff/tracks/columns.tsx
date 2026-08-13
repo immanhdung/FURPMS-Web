@@ -35,7 +35,7 @@ export function getTrackColumns({
     {
       accessorKey: "isActive",
       header: ({ column }) => <DataTableColumnHeader column={column} title={t("common.status")} />,
-      cell: ({ row }) => <StatusBadge status={row.original.isActive ? "Active" : "Inactive"} />,
+      cell: ({ row }) => <StatusBadge status={row.original.isActive ? "ACTIVE" : "INACTIVE"} />,
     },
     {
       id: "actions",

@@ -5,6 +5,7 @@ export const en = {
     "ACCEPTANCE": "Acceptance",
     "ACCEPTED": "Accepted",
     "ACTIVE": "Active",
+    "INACTIVE": "Inactive",
     "APPROVED": "Approved",
     "ARCHIVED": "Archived",
     "ASSIGNED": "Assigned",
