@@ -1,9 +1,9 @@
 import { z } from "zod";
 
 export const researchTypeSchema = z.object({
-  code: z.string().min(1, "Code is required").max(20, "Code must be at most 20 characters"),
-  name: z.string().min(1, "Name is required"),
-  maxBudgetCap: z.number().min(0, "Must be a positive amount"),
+  code: z.string().min(1, "Phải nhập mã.").max(20, "Mã tối đa 20 ký tự."),
+  name: z.string().min(1, "Phải nhập tên."),
+  maxBudgetCap: z.number().min(0, "Số tiền phải lớn hơn 0."),
   requireOrderingUnit: z.boolean(),
 });
 

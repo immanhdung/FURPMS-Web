@@ -173,7 +173,9 @@ export function CreateContractSheet({ open, onOpenChange, contract = null }: Cre
         <label htmlFor="contract-number" className="mb-1.5 block text-sm font-medium text-foreground">
           {t("contract.numberLabel")}
         </label>
-        <Input id="contract-number" {...register("contractNumber")} />
+        {/* Ô trống trơn không nói gì thì người dùng phải đoán định dạng. Chữ mờ nêu ví dụ,
+            KHÔNG phải giá trị mặc định — gõ vào là nó biến mất. */}
+        <Input id="contract-number" placeholder={t("contract.numberPlaceholder")} {...register("contractNumber")} />
       </div>
 
       {/* Đã bỏ ô "Phạm vi ký" (08/08): rà hết mẫu BM05 của QĐ543 thì KHÔNG có mục nào như vậy —
@@ -223,7 +225,12 @@ export function CreateContractSheet({ open, onOpenChange, contract = null }: Cre
         <label htmlFor="contract-representative" className="mb-1.5 block text-sm font-medium text-foreground">
           {t("contract.sideARep")}
         </label>
-        <Input id="contract-representative" {...register("sideARepresentative")} />
+        <Input
+          id="contract-representative"
+          placeholder={t("contract.representativePlaceholder")}
+          {...register("sideARepresentative")}
+        />
+        <p className="mt-1 text-xs text-muted-foreground">{t("contract.representativeHint")}</p>
       </div>
 
       {/* Thầy 29/07: bỏ ô dán URL hợp đồng — file thật upload sau khi tạo, ở tab "Hồ sơ hợp đồng

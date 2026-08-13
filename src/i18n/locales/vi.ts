@@ -203,6 +203,12 @@ export const vi = {
     roundRubricSaved: "Đã lưu bộ tiêu chí cho vòng.",
     roundRubricFailed: "Không lưu được bộ cho vòng.",
   },
+  time: {
+    justNow: "vừa xong",
+    minutesAgo: "{{n}} phút trước",
+    hoursAgo: "{{n}} giờ trước",
+    daysAgo: "{{n}} ngày trước",
+  },
   common: {
     save: "Lưu",
     cancel: "Hủy",
@@ -1207,6 +1213,9 @@ export const vi = {
   contract: {
     extensionCapHint: "Đề tài {{duration}} tháng → gia hạn tối đa {{cap}} tháng (QĐ543 Điều 10.4: tối đa 1/2 thời gian thực hiện).",
     alreadyContracted: "Đã ẩn {{n}} đề tài vì đã có hợp đồng.",
+    numberPlaceholder: "VD: HĐ-2026-001",
+    representativePlaceholder: "Để trống = dùng người đại diện mặc định",
+    representativeHint: "Bỏ trống thì hệ thống tự điền người đại diện Bên A đã cấu hình trong Cài đặt — không phải gõ lại mỗi lần.",
     startDate: "Ngày bắt đầu",
     endDate: "Ngày kết thúc",
     editTitle: "Sửa hợp đồng",

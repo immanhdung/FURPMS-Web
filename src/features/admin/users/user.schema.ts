@@ -1,17 +1,17 @@
 import { z } from "zod";
 
 const baseUserFields = {
-  fullName: z.string().min(1, "Full name is required"),
+  fullName: z.string().min(1, "Phải nhập họ và tên."),
   phoneNumber: z.string().optional(),
   department: z.string().optional(),
   academicDegree: z.number().int().optional(),
-  roles: z.array(z.string()).min(1, "Select at least one role"),
+  roles: z.array(z.string()).min(1, "Phải chọn ít nhất một vai trò."),
 };
 
 export const createUserSchema = z.object({
-  email: z.string().min(1, "Email is required").email("Enter a valid email address"),
+  email: z.string().min(1, "Phải nhập email.").email("Enter a valid email address"),
   ...baseUserFields,
-  temporaryPassword: z.string().min(8, "Temporary password must be at least 8 characters"),
+  temporaryPassword: z.string().min(8, "Mật khẩu tạm phải có ít nhất 8 ký tự."),
 });
 
 export const editUserSchema = z.object(baseUserFields);

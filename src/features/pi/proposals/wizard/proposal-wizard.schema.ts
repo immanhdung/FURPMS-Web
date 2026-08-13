@@ -1,27 +1,27 @@
 import { z } from "zod";
 
 export const proposalMemberSchema = z.object({
-  fullName: z.string().min(1, "Name is required"),
-  email: z.string().min(1, "Email is required").email("Enter a valid email"),
+  fullName: z.string().min(1, "Phải nhập tên."),
+  email: z.string().min(1, "Phải nhập email.").email("Enter a valid email"),
   department: z.string().optional(),
   role: z.string().optional(),
-  workMonths: z.number().min(0, "Must be 0 or greater"),
+  workMonths: z.number().min(0, "Phải từ 0 trở lên."),
   academicTitle: z.string().optional(),
   memberRoleCode: z.string().optional(),
   isSecretary: z.boolean(),
 });
 
 export const proposalWizardSchema = z.object({
-  cycleId: z.number().min(1, "Select a research cycle"),
-  trackId: z.string().min(1, "Select a research field"),
-  researchType: z.number().min(1, "Select a research type"),
+  cycleId: z.number().min(1, "Phải chọn đợt nghiên cứu."),
+  trackId: z.string().min(1, "Phải chọn lĩnh vực nghiên cứu."),
+  researchType: z.number().min(1, "Phải chọn loại đề tài."),
   orderId: z.number().optional(),
 
   // Backend requires titleVI + objectives (CreateProposalRequest); titleEN/abstract are optional there.
-  titleVI: z.string().min(1, "Vietnamese title is required"),
+  titleVI: z.string().min(1, "Phải nhập tên đề tài tiếng Việt."),
   titleEN: z.string().optional(),
   abstractEN: z.string().optional(),
-  objectives: z.string().min(1, "Objectives are required"),
+  objectives: z.string().min(1, "Phải nêu mục tiêu nghiên cứu."),
   methodology: z.string().optional(),
   expectedOutput: z.string().optional(),
   urgency: z.string().optional(),
@@ -41,7 +41,7 @@ export const proposalWizardSchema = z.object({
       })
     )
     .optional(),
-  durationMonths: z.number().min(1, "Duration is required"),
+  durationMonths: z.number().min(1, "Phải nhập thời gian thực hiện."),
 
   members: z.array(proposalMemberSchema),
 });

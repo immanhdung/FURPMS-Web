@@ -1,12 +1,12 @@
 import { z } from "zod";
 
 export const contractSchema = z.object({
-  proposalId: z.string().min(1, "Select an approved proposal"),
+  proposalId: z.string().min(1, "Phải chọn đề tài đã được duyệt."),
   contractNumber: z.string().optional(),
   scopeTitle: z.string().optional(),
-  startDate: z.string().min(1, "Start date is required"),
-  endDate: z.string().min(1, "End date is required"),
-  maxExtensionMonths: z.number().min(0, "Must be 0 or greater"),
+  startDate: z.string().min(1, "Phải chọn ngày bắt đầu."),
+  endDate: z.string().min(1, "Phải chọn ngày kết thúc."),
+  maxExtensionMonths: z.number().min(0, "Phải từ 0 trở lên."),
   sideARepresentative: z.string().optional(),
   econtractUrl: z.string().optional(),
 })
@@ -14,7 +14,7 @@ export const contractSchema = z.object({
   // dưới đúng ô, khỏi phải bấm gửi mới biết.
   .refine((v) => !v.startDate || !v.endDate || v.endDate > v.startDate, {
     path: ["endDate"],
-    message: "End date must be after start date",
+    message: "Ngày kết thúc phải sau ngày bắt đầu.",
   });
 
 export type ContractFormValues = z.infer<typeof contractSchema>;

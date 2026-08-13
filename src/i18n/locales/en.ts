@@ -199,6 +199,12 @@ export const en = {
     roundRubricSaved: "Round criteria set saved.",
     roundRubricFailed: "Could not save the set for this round.",
   },
+  time: {
+    justNow: "just now",
+    minutesAgo: "{{n}}m ago",
+    hoursAgo: "{{n}}h ago",
+    daysAgo: "{{n}}d ago",
+  },
   common: {
     save: "Save",
     cancel: "Cancel",
@@ -1198,6 +1204,9 @@ export const en = {
   contract: {
     extensionCapHint: "{{duration}}-month project → extension capped at {{cap}} months (Decision 543, Article 10.4: at most half the project duration).",
     alreadyContracted: "{{n}} proposal(s) hidden — they already have a contract.",
+    numberPlaceholder: "e.g. HĐ-2026-001",
+    representativePlaceholder: "Leave blank to use the default representative",
+    representativeHint: "Leave blank and the system fills in the Party A representative configured in Settings — no need to retype it every time.",
     startDate: "Start date",
     endDate: "End date",
     editTitle: "Edit contract",

@@ -2,16 +2,16 @@ import { z } from "zod";
 
 export const changePasswordSchema = z
   .object({
-    currentPassword: z.string().min(1, "Current password is required"),
-    newPassword: z.string().min(8, "New password must be at least 8 characters"),
-    confirmPassword: z.string().min(1, "Please confirm your new password"),
+    currentPassword: z.string().min(1, "Phải nhập mật khẩu hiện tại."),
+    newPassword: z.string().min(8, "Mật khẩu mới phải có ít nhất 8 ký tự."),
+    confirmPassword: z.string().min(1, "Phải nhập lại mật khẩu mới để xác nhận."),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "Passwords do not match",
+    message: "Hai lần nhập mật khẩu không khớp.",
     path: ["confirmPassword"],
   })
   .refine((data) => data.currentPassword !== data.newPassword, {
-    message: "New password must be different from the current password",
+    message: "Mật khẩu mới phải khác mật khẩu hiện tại.",
     path: ["newPassword"],
   });
 

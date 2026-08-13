@@ -1,10 +1,10 @@
 import { z } from "zod";
 
 export const rubricCriterionSchema = z.object({
-  roundType: z.string().min(1, "Select a round type"),
-  orderIndex: z.number().min(0, "Order must be 0 or greater"),
-  name: z.string().min(1, "Name is required"),
-  maxScore: z.number().min(0, "Must be a positive score"),
+  roundType: z.string().min(1, "Phải chọn loại vòng chấm."),
+  orderIndex: z.number().min(0, "Thứ tự phải từ 0 trở lên."),
+  name: z.string().min(1, "Phải nhập tên."),
+  maxScore: z.number().min(0, "Điểm tối đa phải lớn hơn 0."),
   isActive: z.boolean(),
 });
 
