@@ -43,3 +43,18 @@ export function useApproveMinutesMutation(councilId: string, projectId?: string)
     onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.minutesApproveFailed")),
   });
 }
+
+/**
+ * Chủ tịch trả biên bản cho Thư ký sửa. KHÔNG khoá biên bản — chỉ ghi yêu cầu và báo Thư ký.
+ */
+export function useRequestMinutesRevisionMutation(councilId: string, projectId?: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (note: string) => decisionService.requestRevision(councilId, note, projectId),
+    onSuccess: () => {
+      toast.success(i18n.t("toast.minutesRevisionRequested"));
+      queryClient.invalidateQueries({ queryKey: queryKeys.decision.detail(councilId) });
+    },
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("common.error")),
+  });
+}

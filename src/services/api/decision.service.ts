@@ -25,4 +25,20 @@ export const decisionService = {
         { params: projectId ? { projectId } : undefined }
       )
       .then((res) => res.data.data),
+
+  /**
+   * Chủ tịch TRẢ biên bản cho Thư ký sửa, kèm ghi chú.
+   *
+   * QĐ543 Điều 8.3.c: Thư ký ghi biên bản, hội đồng thông qua — Chủ tịch không tự sửa chữ của
+   * Thư ký. Trước đây chỉ có "duyệt (khoá luôn)" hoặc không làm gì, nên muốn sửa một chỗ là
+   * phải liên lạc ngoài hệ thống.
+   */
+  requestRevision: (councilId: string, note: string, projectId?: string) =>
+    axiosClient
+      .post<ApiResponse<DecisionResponse>>(
+        `/review-scoring/councils/${councilId}/minutes/request-revision`,
+        { note },
+        { params: projectId ? { projectId } : undefined }
+      )
+      .then((res) => res.data.data),
 };

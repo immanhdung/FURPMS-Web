@@ -17,6 +17,9 @@ export interface DecisionResponse {
   secretaryUserId?: string | null;
   /** Có giá trị = Chủ tịch đã duyệt & KHÓA biên bản */
   finalizedAt?: string | null;
+  /** Chủ tịch yêu cầu sửa gì — có giá trị nghĩa là biên bản đang bị trả lại. */
+  revisionRequestNote?: string | null;
+  revisionRequestedAt?: string | null;
   /** BM04 II.1 — biên bản dạng hỏi–đáp (cách 1) */
   qaEntries?: QaEntry[];
   /** BM04 II.1 — ý kiến từng thành viên (chuyên môn / kinh phí) */

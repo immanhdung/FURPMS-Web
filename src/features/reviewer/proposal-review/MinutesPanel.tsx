@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FileText, Gavel, Loader2, Lock, MessagesSquare, Plus, Save, ShieldCheck, Trash2, Users } from "lucide-react";
+import { AlertTriangle, FileText, Gavel, Loader2, Lock, MessagesSquare, Plus, Save, ShieldCheck, Trash2, Undo2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,7 +12,12 @@ import type { MemberOpinion, QaEntry } from "@/types/decision";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { EmptyState } from "@/components/shared/EmptyState";
-import { useApproveMinutesMutation, useDecisionQuery, useSaveMinutesMutation } from "@/hooks/useDecision";
+import {
+  useApproveMinutesMutation,
+  useDecisionQuery,
+  useRequestMinutesRevisionMutation,
+  useSaveMinutesMutation,
+} from "@/hooks/useDecision";
 import { useCouncilMembersQuery } from "@/hooks/useCouncilMembers";
 import { useCouncilMeetingsQuery, useMeetingAttendanceQuery, useSaveAttendanceMutation } from "@/hooks/useMeetings";
 import { useAllScoresQuery, useBallotTallyQuery } from "@/hooks/useReviewScoring";
@@ -54,7 +59,9 @@ export function MinutesPanel({
   const { data: decision, isLoading } = useDecisionQuery(councilId, projectId ?? undefined);
   const saveMutation = useSaveMinutesMutation(councilId);
   const approveMutation = useApproveMinutesMutation(councilId, projectId ?? undefined);
+  const revisionMutation = useRequestMinutesRevisionMutation(councilId, projectId ?? undefined);
   const [confirmApprove, setConfirmApprove] = useState(false);
+  const [revisionNote, setRevisionNote] = useState("");
 
   const { data: members } = useCouncilMembersQuery(councilId);
   const { data: scores, error: scoresError } = useAllScoresQuery(councilId, projectId ?? undefined);
@@ -158,6 +165,25 @@ export function MinutesPanel({
 
   return (
     <div className="space-y-4">
+      {/*
+        Biên bản đang bị Chủ tịch trả lại. Đặt ở TRÊN CÙNG chứ không nhét vào chuông báo:
+        Thư ký mở màn soạn ra là phải thấy ngay cần sửa gì, không phải nhớ lại thông báo đọc lúc nào.
+      */}
+      {decision?.revisionRequestNote && !locked && (
+        <div className="flex items-start gap-2.5 rounded-xl border border-warning/40 bg-warning/10 p-3.5">
+          <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-foreground">{t("minutes.revisionRequestedTitle")}</p>
+            <p className="mt-0.5 text-sm whitespace-pre-line text-foreground">{decision.revisionRequestNote}</p>
+            {decision.revisionRequestedAt && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                {t("minutes.revisionRequestedAt", { date: formatDateTime(decision.revisionRequestedAt) })}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Thông tin chung — Danh sách hội đồng (BM04 mục I.6), auto lấy từ hội đồng */}
       <Card>
         <CardContent className="p-4">
@@ -660,6 +686,35 @@ export function MinutesPanel({
               {approveMutation.isPending ? <Loader2 className="animate-spin" /> : <ShieldCheck />}
               {t("minutes.approveAndLock")}
             </Button>
+
+            {/*
+              Đường thứ HAI cho Chủ tịch. QĐ543 Điều 8.3.c: Thư ký GHI biên bản, hội đồng THÔNG
+              QUA — Chủ tịch không tự sửa chữ của Thư ký. Trước đây hệ thống chỉ có "duyệt (khoá
+              luôn)" hoặc không làm gì, nên thấy sai một chỗ là phải nhắn tin ngoài hệ thống và
+              biên bản chẳng lưu dấu vết gì.
+            */}
+            <div className="border-t border-border pt-3">
+              <p className="text-xs text-muted-foreground">{t("minutes.requestRevisionHint")}</p>
+              <Textarea
+                className="mt-2"
+                rows={2}
+                value={revisionNote}
+                placeholder={t("minutes.requestRevisionPlaceholder")}
+                onChange={(e) => setRevisionNote(e.target.value)}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                className="mt-2"
+                disabled={revisionMutation.isPending || !revisionNote.trim()}
+                onClick={() =>
+                  revisionMutation.mutate(revisionNote.trim(), { onSuccess: () => setRevisionNote("") })
+                }
+              >
+                {revisionMutation.isPending ? <Loader2 className="animate-spin" /> : <Undo2 />}
+                {t("minutes.requestRevision")}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )}
