@@ -150,6 +150,7 @@ export const vi = {
     attendanceSaved: "Đã lưu điểm danh.",
     attendanceFailed: "Không lưu được điểm danh.",
     confirmOnBehalfFailed: "Không thể xác nhận thay.",
+    memberDeclinedOnBehalf: "Đã ghi nhận thành viên từ chối.",
     memberConfirmedOnBehalf: "Đã xác nhận thay thành viên.",
     contractDocSaved: "Đã lưu bản hợp đồng đã ký.",
     downloadFailed: "Tải file thất bại.",

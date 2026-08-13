@@ -146,6 +146,7 @@ export const en = {
     attendanceSaved: "Attendance saved.",
     attendanceFailed: "Could not save attendance.",
     confirmOnBehalfFailed: "Could not confirm on behalf.",
+    memberDeclinedOnBehalf: "Recorded the member as declined.",
     memberConfirmedOnBehalf: "Member confirmed on their behalf.",
     contractDocSaved: "Signed contract file saved.",
     downloadFailed: "Download failed.",

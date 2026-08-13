@@ -16,10 +16,16 @@ export const councilMemberService = {
       .patch<ApiResponse<CouncilMember>>(`/council-members/${memberId}/respond`, payload)
       .then((res) => res.data.data),
 
-  // Staff/Admin xác nhận thay (reviewer đồng ý ngoài hệ thống / tiện demo).
-  confirmOnBehalf: (memberId: string) =>
+  /**
+   * Staff/Admin ghi nhận trả lời thư mời THAY thành viên (họ đồng ý/từ chối ngoài hệ thống).
+   *
+   * Trước đây chỉ có nhánh XÁC NHẬN dùng endpoint riêng, còn nút "Đánh dấu từ chối" gọi nhầm sang
+   * `respond` — endpoint dành cho CHÍNH thành viên — nên chuyên viên luôn nhận 403 "Bạn chỉ trả
+   * lời được thư mời gửi cho chính mình".
+   */
+  respondOnBehalf: (memberId: string, payload: RespondMembershipPayload) =>
     axiosClient
-      .post<ApiResponse<CouncilMember>>(`/council-members/${memberId}/confirm-on-behalf`)
+      .post<ApiResponse<CouncilMember>>(`/council-members/${memberId}/respond-on-behalf`, payload)
       .then((res) => res.data.data),
 
   remove: (memberId: string) =>

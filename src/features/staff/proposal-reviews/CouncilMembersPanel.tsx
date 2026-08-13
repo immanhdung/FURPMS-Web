@@ -7,10 +7,9 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import {
-  useConfirmOnBehalfMutation,
+  useRespondOnBehalfMutation,
   useCouncilMembersQuery,
   useRemoveCouncilMemberMutation,
-  useRespondMembershipMutation,
 } from "@/hooks/useCouncilMembers";
 import { useSendInvitationsMutation } from "@/hooks/useCouncils";
 import { AddCouncilMemberDialog } from "@/features/staff/proposal-reviews/AddCouncilMemberDialog";
@@ -26,8 +25,7 @@ export function CouncilMembersPanel({ councilId, trackId }: CouncilMembersPanelP
   const { t } = useTranslation();
   const { data: members, isLoading } = useCouncilMembersQuery(councilId);
   const sendInvitationsMutation = useSendInvitationsMutation(councilId);
-  const respondMutation = useRespondMembershipMutation(councilId);
-  const confirmOnBehalfMutation = useConfirmOnBehalfMutation(councilId);
+  const respondOnBehalfMutation = useRespondOnBehalfMutation(councilId);
   const removeMutation = useRemoveCouncilMemberMutation(councilId);
 
   const [addOpen, setAddOpen] = useState(false);
@@ -100,25 +98,32 @@ export function CouncilMembersPanel({ councilId, trackId }: CouncilMembersPanelP
                 {/* "Xác nhận thay": Staff bấm hộ (reviewer đồng ý ngoài hệ thống / tiện demo).
                     Trước đây nút này gọi /respond → BE chặn 403 vì Staff không phải chính reviewer;
                     giờ dùng endpoint confirm-on-behalf. Hiện cả khi ASSIGNED lẫn INVITED. */}
-                {["assigned", "invited"].includes(member.status?.toLowerCase() ?? "") && (
+                {/* CHỈ hiện khi đã GỬI thư mời. Trước đây hiện cả lúc mới gán người (ASSIGNED) —
+                    ghi nhận "đã trả lời" khi chưa có thư nào để trả lời là hồ sơ tự mâu thuẫn,
+                    và máy chủ nay chặn hẳn. */}
+                {member.status?.toLowerCase() === "invited" && (
                   <Button
                     variant="ghost"
                     size="icon-sm"
                     title={t("reviewBoard.confirmOnBehalf")}
                     aria-label={t("reviewBoard.confirmOnBehalf")}
-                    disabled={confirmOnBehalfMutation.isPending}
-                    onClick={() => confirmOnBehalfMutation.mutate(member.id)}
+                    disabled={respondOnBehalfMutation.isPending}
+                    onClick={() => respondOnBehalfMutation.mutate({ memberId: member.id, accept: true })}
                   >
                     <CheckCircle2 className="text-success" />
                   </Button>
                 )}
+                {/* Nút này TỪNG GỌI NHẦM endpoint dành cho chính thành viên (`PATCH /respond`)
+                    nên chuyên viên luôn ăn 403 "Bạn chỉ trả lời được thư mời gửi cho chính mình".
+                    Nhánh xác nhận đã chuyển sang endpoint riêng từ trước, nhánh từ chối bị bỏ sót. */}
                 {member.status?.toLowerCase() === "invited" && (
                   <Button
                     variant="ghost"
                     size="icon-sm"
                     title={t("reviewBoard.markDeclined")}
                     aria-label={t("reviewBoard.markDeclined")}
-                    onClick={() => respondMutation.mutate({ memberId: member.id, payload: { accept: false } })}
+                    disabled={respondOnBehalfMutation.isPending}
+                    onClick={() => respondOnBehalfMutation.mutate({ memberId: member.id, accept: false })}
                   >
                     <XCircle className="text-danger" />
                   </Button>
