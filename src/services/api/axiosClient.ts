@@ -1,6 +1,7 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { API_BASE_URL } from "@/constants/env";
 import { tokenStorage } from "@/utils/storage";
+import i18n from "@/i18n";
 import type { ApiError } from "@/types/common";
 
 /**
@@ -40,17 +41,50 @@ export function onUnauthorized(listener: UnauthorizedListener) {
   unauthorizedListener = listener;
 }
 
+interface ServerError {
+  message?: string | null;
+  errors?: string[] | null;
+  errorCode?: string | null;
+  details?: Record<string, unknown> | null;
+}
+
+/**
+ * Chọn câu chữ hiện cho người dùng, theo thứ tự ưu tiên:
+ *
+ * 1. **Bảng dịch theo `errorCode`** — ngôn ngữ thuộc về giao diện, không thuộc máy chủ. Người dùng
+ *    bật tiếng Anh thì lỗi cũng phải ra tiếng Anh.
+ * 2. **Câu chữ máy chủ gửi kèm** — phương án dự phòng cho mã chưa dịch. Nhờ nó mà chuyển sang mã
+ *    lỗi được làm **từng phần**, không phải dịch xong 71 mã mới dám bật.
+ * 3. Câu chung theo mã HTTP — khi máy chủ chết hẳn, không trả nổi thân phản hồi.
+ */
+function resolveMessage(status: number, data?: ServerError): string {
+  if (data?.errorCode) {
+    const translated = i18n.t(`errors.${data.errorCode}`, {
+      defaultValue: "",
+      ...(data.details ?? {}),
+    });
+    if (translated) return translated;
+  }
+  return data?.message || data?.errors?.[0] || mapStatusToMessage(status);
+}
+
 axiosClient.interceptors.response.use(
   (response) => response,
-  (error: AxiosError<{ message?: string | null; errors?: string[] | null }>) => {
+  (error: AxiosError<ServerError>) => {
     const status = error.response?.status ?? 0;
+    const data = error.response?.data;
 
     const apiError: ApiError = {
       status,
-      message: error.response?.data?.message || error.response?.data?.errors?.[0] || mapStatusToMessage(status),
-      errors: error.response?.data?.errors ?? undefined,
+      message: resolveMessage(status, data),
+      errors: data?.errors ?? undefined,
+      errorCode: data?.errorCode ?? undefined,
+      details: data?.details ?? undefined,
     };
 
+    // 401 = chưa/hết đăng nhập ⇒ đá về màn đăng nhập. Đây là lý do máy chủ KHÔNG được dùng 401 cho
+    // lỗi "sai mật khẩu hiện tại" khi đổi mật khẩu: người dùng đang đăng nhập hợp lệ, gõ nhầm một
+    // ô mà bị đăng xuất thì vô lý (đã từng xảy ra thật, nay máy chủ trả 400 cho ca đó).
     if (status === 401) {
       tokenStorage.clear();
       unauthorizedListener?.();
@@ -63,16 +97,16 @@ axiosClient.interceptors.response.use(
 function mapStatusToMessage(status: number): string {
   switch (status) {
     case 400:
-      return "The request could not be processed. Please check your input.";
+      return i18n.t("errors.HTTP_400");
     case 401:
-      return "Your session has expired. Please sign in again.";
+      return i18n.t("errors.HTTP_401");
     case 403:
-      return "You do not have permission to perform this action.";
+      return i18n.t("errors.HTTP_403");
     case 404:
-      return "The requested resource was not found.";
+      return i18n.t("errors.HTTP_404");
     case 0:
-      return "Unable to reach the server. Please check your connection.";
+      return i18n.t("errors.HTTP_0");
     default:
-      return "Something went wrong. Please try again.";
+      return i18n.t("errors.HTTP_UNKNOWN");
   }
 }

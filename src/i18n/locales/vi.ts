@@ -203,6 +203,34 @@ export const vi = {
     roundRubricSaved: "Đã lưu bộ tiêu chí cho vòng.",
     roundRubricFailed: "Không lưu được bộ cho vòng.",
   },
+  // Bảng dịch MÃ LỖI của máy chủ. Máy chủ trả `errorCode` ổn định, giao diện quyết định câu chữ —
+  // nhờ vậy đổi ngôn ngữ không phải sửa máy chủ, và sửa câu chữ không làm gãy chỗ nào.
+  // Mã chưa có ở đây thì tự động rơi về câu tiếng Việt máy chủ gửi kèm.
+  errors: {
+    HTTP_0: "Không kết nối được máy chủ. Kiểm tra lại mạng rồi thử lại.",
+    HTTP_400: "Dữ liệu gửi lên chưa hợp lệ. Kiểm tra lại các ô đã nhập.",
+    HTTP_401: "Phiên đăng nhập đã hết hạn. Hãy đăng nhập lại.",
+    HTTP_403: "Bạn không có quyền thực hiện thao tác này.",
+    HTTP_404: "Không tìm thấy dữ liệu bạn đang mở. Có thể nó vừa bị xoá.",
+    HTTP_UNKNOWN: "Có lỗi xảy ra. Vui lòng thử lại.",
+
+    AUTH_INVALID_CREDENTIALS: "Email hoặc mật khẩu không đúng.",
+    AUTH_SESSION_INVALID: "Phiên đăng nhập không hợp lệ. Hãy đăng nhập lại.",
+    AUTH_ACCOUNT_INACTIVE: "Tài khoản đang bị khoá. Liên hệ quản trị viên để mở lại.",
+    AUTH_PASSWORD_INCORRECT: "Mật khẩu hiện tại không đúng.",
+    AUTH_RESET_TOKEN_INVALID: "Mã đặt lại không đúng hoặc đã hết hạn. Hãy yêu cầu gửi lại mã mới.",
+
+    PERM_FORBIDDEN: "Bạn không có quyền với mục này.",
+    PERM_NOT_OWNER: "Đây không phải dữ liệu của bạn.",
+    PERM_NOT_COUNCIL_MEMBER: "Bạn không thuộc hội đồng này.",
+    PERM_CHAIR_ONLY: "Chỉ Chủ tịch hội đồng làm được việc này.",
+    PERM_SECRETARY_ONLY: "Chỉ Thư ký hội đồng làm được việc này.",
+
+    NOT_FOUND: "Không tìm thấy dữ liệu bạn đang mở.",
+    VALIDATION_FAILED: "Dữ liệu chưa hợp lệ. Kiểm tra lại các ô đã nhập.",
+    CONFLICT: "Thao tác không thực hiện được ở trạng thái hiện tại.",
+    UNEXPECTED: "Hệ thống gặp sự cố ngoài dự kiến. Vui lòng thử lại; nếu vẫn lỗi hãy báo quản trị viên.",
+  },
   time: {
     justNow: "vừa xong",
     minutesAgo: "{{n}} phút trước",

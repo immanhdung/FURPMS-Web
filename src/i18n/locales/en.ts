@@ -199,6 +199,31 @@ export const en = {
     roundRubricSaved: "Round criteria set saved.",
     roundRubricFailed: "Could not save the set for this round.",
   },
+  errors: {
+    HTTP_0: "Cannot reach the server. Check your connection and try again.",
+    HTTP_400: "The data sent is not valid. Please review the fields.",
+    HTTP_401: "Your session has expired. Please sign in again.",
+    HTTP_403: "You do not have permission to perform this action.",
+    HTTP_404: "The item you opened was not found — it may have just been deleted.",
+    HTTP_UNKNOWN: "Something went wrong. Please try again.",
+
+    AUTH_INVALID_CREDENTIALS: "Incorrect email or password.",
+    AUTH_SESSION_INVALID: "Your session is not valid. Please sign in again.",
+    AUTH_ACCOUNT_INACTIVE: "This account is locked. Contact an administrator to unlock it.",
+    AUTH_PASSWORD_INCORRECT: "Your current password is incorrect.",
+    AUTH_RESET_TOKEN_INVALID: "The reset code is wrong or expired. Request a new one.",
+
+    PERM_FORBIDDEN: "You do not have permission for this item.",
+    PERM_NOT_OWNER: "This is not your data.",
+    PERM_NOT_COUNCIL_MEMBER: "You are not a member of this council.",
+    PERM_CHAIR_ONLY: "Only the council chair can do this.",
+    PERM_SECRETARY_ONLY: "Only the council secretary can do this.",
+
+    NOT_FOUND: "The item you opened was not found.",
+    VALIDATION_FAILED: "The data is not valid. Please review the fields.",
+    CONFLICT: "This action is not possible in the current state.",
+    UNEXPECTED: "The system hit an unexpected problem. Please try again; if it persists, contact an administrator.",
+  },
   time: {
     justNow: "just now",
     minutesAgo: "{{n}}m ago",
