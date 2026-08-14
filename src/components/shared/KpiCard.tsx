@@ -58,8 +58,12 @@ export function KpiCard({ datum, icon: Icon, index = 0 }: KpiCardProps) {
       transition={{ duration: 0.2, delay: index * 0.04 }}
       whileHover={{ y: -2 }}
     >
-      <Card variant="glass" className="transition-shadow duration-200 hover:shadow-soft-lg">
-        <CardContent className="flex items-start justify-between gap-3 p-4">
+      <Card
+        variant="glass"
+        className="relative overflow-hidden transition-all duration-300 hover:shadow-soft-lg"
+        style={{ borderLeft: `4px solid ${ringColor}` }}
+      >
+        <CardContent className="relative flex items-start justify-between gap-3 p-4">
           <div className="min-w-0">
             <p className="text-xs font-medium text-muted-foreground">{datum.label}</p>
             <p className="mt-1.5 text-2xl font-semibold tracking-tight text-foreground">
@@ -74,6 +78,11 @@ export function KpiCard({ datum, icon: Icon, index = 0 }: KpiCardProps) {
               <Icon className="size-4.5" />
             </div>
           )}
+          {/* Ambient glow orb at the bottom-right matching the KPI card theme color */}
+          <div
+            className="pointer-events-none absolute -right-8 -bottom-8 size-20 rounded-full opacity-[0.07] blur-xl transition-all duration-300 group-hover/card:scale-125 group-hover/card:opacity-15"
+            style={{ backgroundColor: ringColor }}
+          />
         </CardContent>
       </Card>
     </motion.div>
