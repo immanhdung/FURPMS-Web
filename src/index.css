@@ -250,6 +250,50 @@
     background-clip: text;
     color: transparent;
   }
+
+  h1.text-2xl.font-semibold.tracking-tight.text-foreground,
+  h1.text-3xl.font-semibold.tracking-tight.text-foreground {
+    background-image: linear-gradient(135deg, var(--foreground) 50%, var(--primary) 85%, var(--brand-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent !important;
+    display: inline-block;
+  }
+
+  .glass-card {
+    position: relative;
+  }
+
+  .glass-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-image: linear-gradient(90deg, var(--primary), var(--brand-secondary), var(--brand-accent));
+    opacity: 0.85;
+    border-radius: inherit inherit 0 0;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  thead[data-slot="table-header"] tr {
+    position: relative;
+  }
+
+  thead[data-slot="table-header"] tr::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-image: linear-gradient(90deg, var(--primary), var(--brand-secondary), var(--brand-accent));
+    opacity: 0.85;
+    pointer-events: none;
+    z-index: 10;
+  }
 }
 
 /*

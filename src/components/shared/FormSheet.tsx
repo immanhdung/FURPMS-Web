@@ -22,7 +22,7 @@ interface FormSheetProps {
   isSubmitting?: boolean;
   submitLabel?: string;
   formId: string;
-  submitVariant?: "default" | "destructive" | "outline" | "secondary";
+  submitVariant?: "default" | "destructive" | "outline" | "secondary" | "gradient";
 }
 
 export function FormSheet({
@@ -35,7 +35,7 @@ export function FormSheet({
   isSubmitting = false,
   submitLabel,
   formId,
-  submitVariant = "default",
+  submitVariant = "gradient",
 }: FormSheetProps) {
   // Mặc định của hai nút này vốn là "Save"/"Cancel" — mọi sheet tạo/sửa không tự đặt nhãn đều lòi
   // tiếng Anh ra giữa giao diện tiếng Việt.

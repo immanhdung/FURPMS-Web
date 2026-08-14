@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useLoginMutation } from "@/hooks/useAuth";
 import { loginSchema, type LoginFormValues } from "@/features/auth/schemas/login.schema";
+import fptLogo from "@/assets/fpt-logo.png";
 
 export function LoginPage() {
   const loginMutation = useLoginMutation();
@@ -32,14 +33,12 @@ export function LoginPage() {
   };
 
   return (
-    <Card className="border border-white/20 bg-white/10 py-0 shadow-soft-xl backdrop-blur-xl">
+    <Card className="border border-white/10 bg-slate-950/50 py-0 shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)] backdrop-blur-2xl">
       <CardContent className="p-8">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-linear-to-br from-primary to-brand-secondary shadow-soft-md">
-            <span className="text-xl font-bold text-white">F</span>
-          </div>
-          <h1 className="text-4xl font-bold text-white">FURPMS</h1>
-          <p className="mt-2 text-slate-300">{t("auth.subtitle")}</p>
+          <img src={fptLogo} alt="FPT University Logo" className="mx-auto mb-5 h-12 w-auto object-contain" />
+          <h1 className="text-3xl font-bold tracking-tight text-white">FURPMS</h1>
+          <p className="mt-2 text-sm text-slate-300">{t("auth.subtitle")}</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
@@ -54,7 +53,7 @@ export function LoginPage() {
               autoComplete="email"
               aria-invalid={Boolean(errors.email)}
               disabled={loginMutation.isPending}
-              className="border-white/20 bg-white/10 text-white placeholder:text-slate-400"
+              className="border-white/15 bg-white/5 focus:border-primary focus:bg-white/10 text-white placeholder:text-slate-500 transition-all duration-200"
               {...register("email")}
             />
             {errors.email && <p className="mt-1.5 text-xs text-red-400">{errors.email.message}</p>}
@@ -72,7 +71,7 @@ export function LoginPage() {
                 autoComplete="current-password"
                 aria-invalid={Boolean(errors.password)}
                 disabled={loginMutation.isPending}
-                className="border-white/20 bg-white/10 pr-9 text-white placeholder:text-slate-400"
+                className="border-white/15 bg-white/5 focus:border-primary focus:bg-white/10 pr-9 text-white placeholder:text-slate-500 transition-all duration-200"
                 {...register("password")}
               />
               <button

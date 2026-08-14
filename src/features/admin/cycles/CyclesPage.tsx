@@ -88,6 +88,7 @@ export function CyclesPage() {
         <TabsContent value="cycles" className="space-y-4">
           <div className="flex justify-end">
             <Button
+              variant="gradient"
               onClick={() => {
                 setEditingCycle(null);
                 setFormOpen(true);

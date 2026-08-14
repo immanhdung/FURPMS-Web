@@ -59,15 +59,24 @@ export function DataTableToolbar<TData>({
       </div>
 
       <div className="flex items-center gap-2">
-        <Button variant="outline" size="sm" onClick={handleExport}>
-          <Download />
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleExport}
+          className="border-emerald-600/20 hover:border-emerald-600 hover:bg-emerald-50/50 hover:text-emerald-700 dark:border-emerald-950/30 dark:hover:bg-emerald-950/20 dark:hover:text-emerald-400 cursor-pointer transition-all duration-200"
+        >
+          <Download className="text-emerald-600 dark:text-emerald-400" />
           {t("common.export")}
         </Button>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm">
-              <SlidersHorizontal />
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-primary/20 hover:border-primary hover:bg-primary/5 hover:text-primary dark:border-primary/30 dark:hover:bg-primary/10 dark:hover:text-primary cursor-pointer transition-all duration-200"
+            >
+              <SlidersHorizontal className="text-primary dark:text-blue-400" />
               {t("common.columns")}
             </Button>
           </DropdownMenuTrigger>

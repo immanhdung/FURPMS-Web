@@ -14,7 +14,7 @@ function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
   return (
     <thead
       data-slot="table-header"
-      className={cn("sticky top-0 z-10 bg-card/95 backdrop-blur-sm [&_tr]:border-b", className)}
+      className={cn("sticky top-0 z-10 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-sm [&_tr]:border-none", className)}
       {...props}
     />
   );
@@ -47,12 +47,13 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
   );
 }
 
+// Thăng tiến khoảng đệm px-3 giúp các ô tiêu đề cột thoáng đãng, thẳng thớm hơn.
 function TableHead({ className, ...props }: React.ComponentProps<"th">) {
   return (
     <th
       data-slot="table-head"
       className={cn(
-        "h-10 px-2 text-left align-middle text-xs font-medium tracking-wide whitespace-nowrap text-muted-foreground uppercase [&:has([role=checkbox])]:pr-0",
+        "h-10 px-3 text-left align-middle text-[11px] font-bold tracking-wide whitespace-nowrap text-slate-800 dark:text-slate-100 uppercase [&:has([role=checkbox])]:pr-0",
         className
       )}
       {...props}

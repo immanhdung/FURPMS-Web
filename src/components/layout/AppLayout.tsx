@@ -9,7 +9,7 @@ export function AppLayout() {
   const location = useLocation();
 
   return (
-    <div className="relative flex min-h-screen w-full overflow-hidden">
+    <div className="relative flex h-screen w-full overflow-hidden">
       {/* Nền aurora — để TĨNH (không animate vô hạn). Mỗi orb có filter: blur(64px); nếu animate
           liên tục (nhất là scale) trình duyệt phải vẽ lại blur MỖI KHUNG HÌNH trên mọi trang → lag.
           Tĩnh thì blur chỉ raster 1 lần rồi cache; nhìn gần như y hệt vì orb vốn nhích rất chậm. */}
@@ -25,7 +25,7 @@ export function AppLayout() {
       {/* min-w-0 BẮT BUỘC: flex item mặc định có min-width:auto nên cột này không co được
           dưới bề rộng nội dung ⇒ ở màn hẹp (sidebar vẫn hiện từ md) nội dung bị đẩy tràn
           ra ngoài, breadcrumb xuống 3 dòng, chữ lòi khỏi khung. */}
-      <div className="relative z-10 flex min-h-screen min-w-0 flex-1 flex-col">
+      <div className="relative z-10 flex h-screen min-w-0 flex-1 flex-col overflow-y-auto">
         <Header />
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
