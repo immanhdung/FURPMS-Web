@@ -1,3 +1,4 @@
+import { ChartEmpty } from "@/components/charts/ChartEmpty";
 import { memo } from "react";
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { CHART_AXIS_STYLE, CHART_COLORS, CHART_PALETTE, CHART_TOOLTIP_STYLE } from "@/components/charts/chart-theme";
@@ -17,6 +18,9 @@ function BarChartCardBodyImpl<T extends object>({
   layout = "horizontal",
   colorful = false,
 }: BarChartCardProps<T>) {
+  // Không có gì để vẽ thì nói ra, đừng để lại một khung trắng trơn (xem ChartEmpty).
+  if (!data || data.length === 0) return <ChartEmpty />;
+
   const isVertical = layout === "vertical";
 
   return (

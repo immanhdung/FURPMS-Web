@@ -1,3 +1,4 @@
+import { ChartEmpty } from "@/components/charts/ChartEmpty";
 import { memo } from "react";
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { CHART_PALETTE, CHART_TOOLTIP_STYLE } from "@/components/charts/chart-theme";
@@ -9,6 +10,9 @@ interface PieChartCardProps<T> {
 }
 
 function PieChartCardBodyImpl<T extends object>({ data, nameKey, valueKey }: PieChartCardProps<T>) {
+  // Không có gì để vẽ thì nói ra, đừng để lại một khung trắng trơn (xem ChartEmpty).
+  if (!data || data.length === 0) return <ChartEmpty />;
+
   return (
     <ResponsiveContainer width="100%" height="100%">
       <PieChart>

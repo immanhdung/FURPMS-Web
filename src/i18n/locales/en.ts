@@ -273,6 +273,7 @@ export const en = {
     budgetTotal: "Budget {{amount}}",
     search: "Search",
     loading: "Loading...",
+    noChartData: "No data to chart yet.",
     noData: "No data yet",
     actions: "Actions",
     view: "View",

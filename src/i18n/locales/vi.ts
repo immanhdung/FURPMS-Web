@@ -280,6 +280,7 @@ export const vi = {
     budgetTotal: "Kinh phí {{amount}}",
     search: "Tìm kiếm",
     loading: "Đang tải...",
+    noChartData: "Chưa có dữ liệu để vẽ biểu đồ.",
     noData: "Chưa có dữ liệu",
     actions: "Thao tác",
     view: "Xem",
