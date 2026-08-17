@@ -15,9 +15,10 @@ import { useResearchTypesQuery } from "@/hooks/useResearchTypes";
 import { ProposalStatusTimeline } from "@/features/pi/proposals/ProposalStatusTimeline";
 import { ProposalSummaryView } from "@/features/pi/proposals/ProposalSummaryView";
 import { SubmitProposalDialog } from "@/features/pi/proposals/SubmitProposalDialog";
-import { AiSummaryCard } from "@/features/pi/proposals/AiSummaryCard";
-import { AiConsistencyCard } from "@/features/pi/proposals/AiConsistencyCard";
-import { AiFeedbackCard } from "@/features/pi/proposals/AiFeedbackCard";
+// AI bên PI tạm ẩn 17/08 — mở lại thì bỏ chú thích ở đây VÀ ở khối render bên dưới.
+// import { AiSummaryCard } from "@/features/pi/proposals/AiSummaryCard";
+// import { AiConsistencyCard } from "@/features/pi/proposals/AiConsistencyCard";
+// import { AiFeedbackCard } from "@/features/pi/proposals/AiFeedbackCard";
 import { ExpectedProductsCard } from "@/features/pi/proposals/ExpectedProductsCard";
 import { ProposalDocumentsCard } from "@/features/pi/proposals/ProposalDocumentsCard";
 import { ChangeRequestsPanel } from "@/features/pi/proposals/ChangeRequestsPanel";
@@ -26,6 +27,7 @@ import { PROPOSAL_STATUS } from "@/constants/statuses";
 import { ROUTES } from "@/constants/routes";
 
 
+import { proposalTitle } from "@/utils/format";
 export function ProposalDetailPage() {
   const { proposalId } = useParams<{ proposalId: string }>();
   const navigate = useNavigate();
@@ -67,7 +69,7 @@ export function ProposalDetailPage() {
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-              {proposal.titleVI || proposal.titleEN || t("proposal.untitled")}
+              {proposalTitle(proposal, t("proposal.untitled"))}
             </h1>
             <StatusBadge status={status} />
           </div>
@@ -96,7 +98,7 @@ export function ProposalDetailPage() {
           {!isDraft && (
             <ProposalExportMenu
               proposalId={proposal.id}
-              titleSlug={makeSlug(proposal.titleVI || proposal.titleEN || proposal.id)}
+              titleSlug={makeSlug(proposalTitle(proposal, proposal.id))}
             />
           )}
         </div>
@@ -118,13 +120,25 @@ export function ProposalDetailPage() {
       {/* Tài liệu đính kèm — gỡ/thêm được khi còn nháp; nộp xong chỉ tải về. */}
       <ProposalDocumentsCard proposalId={proposal.id} editable={isDraft} />
 
-      {/* Đối chiếu form ↔ file để full-width: mỗi dòng lệch là 1 việc PI phải sửa. */}
+      {/*
+        ── AI bên PI: TẠM ẨN 17/08 ────────────────────────────────────────────────────────
+        Ba thẻ AI (Đối chiếu form↔file · Tóm tắt · Góp ý) đã gỡ khỏi màn chi tiết đề cương
+        của chủ nhiệm. Lý do: qua các đợt thử chưa lần nào thấy chúng giúp PI ra quyết định
+        gì — PI đã biết rõ đề tài của mình, một bản tóm tắt do máy viết lại không thêm thông
+        tin. AI vẫn CHẠY và vẫn có ích ở màn NGƯỜI CHẤM (`ProposalReviewWorkspace` dùng
+        `AiSummaryCard` với `councilId` + `autoGenerate`) — ở đó người đọc chưa từng thấy đề
+        tài nên bản tóm tắt là thứ rút ngắn thời gian thật.
+
+        Endpoint, hook và component đều giữ nguyên — bật lại chỉ cần bỏ chú thích này.
+        Ghi chú đầy đủ: docs/README.md §"Đã tạm ẩn".
+
       <AiConsistencyCard proposalId={proposal.id} />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <AiSummaryCard proposalId={proposal.id} />
         <AiFeedbackCard proposalId={proposal.id} />
       </div>
+      */}
 
       {/* Yêu cầu thay đổi — chỉ hiển thị sau khi đã nộp đề xuất (không còn nháp). */}
       {!isDraft && (

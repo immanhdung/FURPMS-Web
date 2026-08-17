@@ -4,7 +4,7 @@ import { Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTableColumnHeader } from "@/components/tables/DataTableColumnHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { formatDate } from "@/utils/format";
+import { proposalTitle, formatDate } from "@/utils/format";
 import type { ProposalSummary } from "@/types/proposal-summary";
 
 interface GetProposalColumnsOptions {
@@ -18,7 +18,7 @@ export function getProposalColumns({ t, cycleNames, trackNames, onOpen }: GetPro
   return [
     {
       id: "title",
-      accessorFn: (row) => row.titleEN || row.titleVI || t("common.untitledProposal"),
+      accessorFn: (row) => proposalTitle(row, t("common.untitledProposal")),
       header: ({ column }) => <DataTableColumnHeader column={column} title={t("staff.title")} />,
     },
     {

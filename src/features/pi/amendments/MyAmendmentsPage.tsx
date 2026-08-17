@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
-import { FilePenLine, Loader2, Plus } from "lucide-react";
+import { FileDown, FilePenLine, Loader2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,6 +20,10 @@ import {
 } from "@/hooks/useAmendments";
 import { formatDate } from "@/utils/format";
 
+import { amendmentService } from "@/services/api/amendment.service";
+import { contractService } from "@/services/api/contract.service";
+import { toast } from "sonner";
+import { AMENDMENT_STATUS } from "@/types/amendment";
 /**
  * PI gửi yêu cầu ĐIỀU CHỈNH hợp đồng — đổi phạm vi / kinh phí / thời gian / nhân sự,
  * trong đó có **xin gia hạn** (QĐ543: gia hạn tối đa 6 tháng).
@@ -32,6 +36,52 @@ export function MyAmendmentsPage() {
   const { t } = useTranslation();
   const { data: contracts, proposalTitleById, isLoading: isContractsLoading } = useMyContractsQuery();
   const [selectedContractId, setSelectedContractId] = useState<string | null>(null);
+  const [exportingId, setExportingId] = useState<string | null>(null);
+
+  const download = (blob: Blob, name: string) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = name;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  /** Biên bản thanh lý (BM13) — chủ nhiệm là Bên B ký, nên cũng phải tự tải được. */
+  const handleExportSettlement = async () => {
+    if (!contractId) return;
+    setExportingId("settlement");
+    try {
+      download(await contractService.exportSettlementWord(contractId), `BienBanThanhLy-${contractId.slice(0, 8)}.docx`);
+    } catch {
+      toast.error(t("contract.exportWordError"));
+    } finally {
+      setExportingId(null);
+    }
+  };
+
+  const handleExportAmendment = async (id: string) => {
+    setExportingId(id);
+    try {
+      download(await amendmentService.exportWord(id), `PhuLucHopDong-${id.slice(0, 8)}.docx`);
+    } catch {
+      toast.error(t("contract.amendment.exportWordError"));
+    } finally {
+      setExportingId(null);
+    }
+  };
+
+  const handleExportContract = async () => {
+    if (!contractId) return;
+    setExportingId("contract");
+    try {
+      download(await contractService.exportWord(contractId), `HopDong-${contractId.slice(0, 8)}.docx`);
+    } catch {
+      toast.error(t("contract.exportWordError"));
+    } finally {
+      setExportingId(null);
+    }
+  };
   const [open, setOpen] = useState(false);
 
   const contractId = selectedContractId ?? contracts?.[0]?.id ?? null;
@@ -91,6 +141,39 @@ export function MyAmendmentsPage() {
                 })}
               </SelectContent>
             </Select>
+
+            {/*
+              Chủ nhiệm là BÊN B ký hợp đồng — phải tự tải được bản Word của chính mình.
+              Trước 17/08 endpoint xuất chặn cứng `Roles = "Admin,Staff"` nên PI muốn xem lại
+              hợp đồng của mình cũng phải nhắn chuyên viên gửi hộ. Nay máy chủ kiểm QUYỀN SỞ HỮU:
+              PI khác hoặc người chấm gọi vào vẫn nhận 403.
+            */}
+            {contractId && (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="mt-2"
+                disabled={exportingId === "contract"}
+                onClick={handleExportContract}
+              >
+                {exportingId === "contract" ? <Loader2 className="animate-spin" /> : <FileDown />}
+                {t("contract.exportWord")}
+              </Button>
+            )}
+            {contractId && (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="mt-2 ml-2"
+                disabled={exportingId === "settlement"}
+                onClick={handleExportSettlement}
+              >
+                {exportingId === "settlement" ? <Loader2 className="animate-spin" /> : <FileDown />}
+                {t("contract.exportSettlementWord")}
+              </Button>
+            )}
           </div>
 
           {isLoading ? (
@@ -117,6 +200,24 @@ export function MyAmendmentsPage() {
                     <p className="text-xs text-foreground">
                       {t("amendments.reviewNotes")}: {a.reviewerComments}
                     </p>
+                  )}
+
+                  {/*
+                    Chủ nhiệm chính là BÊN KÝ phụ lục (BM05 Điều 6.1) nên phải tự tải được, không
+                    phải nhắn chuyên viên gửi hộ. Chỉ hiện khi ĐÃ DUYỆT — khớp với chặn 409 của
+                    máy chủ; bày nút rồi báo lỗi chỉ làm người dùng tưởng hệ thống hỏng.
+                  */}
+                  {a.status === AMENDMENT_STATUS.APPROVED && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      disabled={exportingId === a.id}
+                      onClick={() => handleExportAmendment(a.id)}
+                    >
+                      {exportingId === a.id ? <Loader2 className="animate-spin" /> : <FileDown />}
+                      {t("contract.amendment.exportWord")}
+                    </Button>
                   )}
                 </li>
               ))}

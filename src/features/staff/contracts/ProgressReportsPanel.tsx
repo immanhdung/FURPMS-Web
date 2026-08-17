@@ -6,12 +6,16 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { useGenerateProgressRoundsMutation, useProgressReportsQuery } from "@/hooks/useProgressReports";
+import { useGenerateProgressRoundsMutation, useProgressReportQuery, useProgressReportsQuery } from "@/hooks/useProgressReports";
 import { ScheduleProgressReportDialog } from "@/features/staff/contracts/ScheduleProgressReportDialog";
 import { EvaluateProgressReportDialog } from "@/features/staff/contracts/EvaluateProgressReportDialog";
-import { formatDate, formatDateTime } from "@/utils/format";
+import { externalUrl, formatDate, formatDateTime } from "@/utils/format";
+import { ProgressReportDetailSheet } from "@/components/shared/DossierDetailSheet";
 
 export function ProgressReportsPanel({ contractId }: { contractId: string }) {
+  // Chi tiết nạp riêng: danh sách chỉ trả bản tóm tắt, không có nội dung PI đã gõ.
+  const [openReportId, setOpenReportId] = useState<string | null>(null);
+  const { data: openReport } = useProgressReportQuery(openReportId);
   const { t } = useTranslation();
   const { data: reports, isLoading } = useProgressReportsQuery(contractId);
   const generateMutation = useGenerateProgressRoundsMutation(contractId);
@@ -66,6 +70,13 @@ export function ProgressReportsPanel({ contractId }: { contractId: string }) {
         <ul className="space-y-2">
           {reports.map((report) => (
             <li key={report.id} className="space-y-2 rounded-lg border border-border p-3">
+              <button
+                type="button"
+                onClick={() => setOpenReportId(report.id)}
+                className="text-xs font-medium text-primary hover:underline"
+              >
+                {t("dossier.viewDetail")}
+              </button>
               <div className="flex items-center justify-between gap-2">
                 <p className="text-sm font-medium text-foreground">
                   {/* Tên đợt Staff đặt; chưa đặt thì hiện "Kỳ {số}". */}
@@ -92,7 +103,7 @@ export function ProgressReportsPanel({ contractId }: { contractId: string }) {
 
               {report.meetingLink && (
                 <a
-                  href={report.meetingLink}
+                  href={externalUrl(report.meetingLink)}
                   target="_blank"
                   rel="noreferrer"
                   className="flex items-center gap-1 text-xs font-medium text-primary hover:underline"
@@ -135,6 +146,11 @@ export function ProgressReportsPanel({ contractId }: { contractId: string }) {
         onOpenChange={(open) => !open && setEvaluatingReportId(null)}
         contractId={contractId}
         reportId={evaluatingReportId}
+      />
+      <ProgressReportDetailSheet
+        item={openReport ?? null}
+        open={Boolean(openReportId)}
+        onOpenChange={(o) => !o && setOpenReportId(null)}
       />
     </div>
   );

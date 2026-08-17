@@ -13,6 +13,7 @@ import { EvaluateDeliverableDialog } from "@/features/staff/contracts/EvaluateDe
 import { ACCEPTANCE_STATUS, type Deliverable } from "@/types/deliverable";
 import { formatDate, formatDateTime } from "@/utils/format";
 
+import { DeliverableDetailSheet } from "@/components/shared/DossierDetailSheet";
 /**
  * Sản phẩm phải nộp của hợp đồng.
  * PI nộp file → Staff nghiệm thu. Nghiệm thu ĐẠT sẽ mở điều kiện chi tiền cho đợt giải ngân tương ứng.
@@ -34,6 +35,7 @@ export function DeliverablesPanel({
   canManage: boolean;
   canSubmit?: boolean;
 }) {
+  const [openDeliverable, setOpenDeliverable] = useState<Deliverable | null>(null);
   const { t } = useTranslation();
   const { data: deliverables, isLoading } = useDeliverablesQuery(contractId);
   const [submitting, setSubmitting] = useState<Deliverable | null>(null);
@@ -115,7 +117,13 @@ export function DeliverablesPanel({
           <div key={d.id} className="space-y-2 rounded-lg border border-border p-3">
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div className="min-w-0">
-                <p className="text-sm font-medium text-foreground">{d.productName}</p>
+                <button
+                  type="button"
+                  onClick={() => setOpenDeliverable(d)}
+                  className="text-left text-sm font-medium text-foreground hover:text-primary hover:underline"
+                >
+                  {d.productName}
+                </button>
                 <p className="mt-0.5 text-xs text-muted-foreground">
                   {d.categoryName && <span>{d.categoryName} · </span>}
                   {d.dueDate ? t("contract.deliverable.due", { date: formatDate(d.dueDate) }) : t("contract.deliverable.noDueDate")}
@@ -157,10 +165,19 @@ export function DeliverablesPanel({
                   {isSubmitted ? t("contract.deliverable.resubmit") : t("contract.deliverable.submit")}
                 </Button>
               )}
-              {canManage && isSubmitted && !isPassed && (
-                <Button size="sm" onClick={() => setEvaluating(d)}>
+              {/*
+                Trước 17/08 nút này BIẾN MẤT khi sản phẩm đã Đạt, nên chuyên viên chấm nhầm là kẹt:
+                không xem lại được nhận xét mình đã ghi, cũng không sửa được. Mà máy chủ **không hề
+                chặn** — `DeliverableService.EvaluateAsync` cho ghi đè kết quả bất kỳ lúc nào. Đây
+                là khoá do giao diện tự đặt ra, không có quy định nào đứng sau: QĐ543 chỉ khoá BIÊN
+                BẢN hội đồng sau khi Chủ tịch chốt (rule #12), không khoá kết quả từng sản phẩm.
+              */}
+              {canManage && isSubmitted && (
+                <Button size="sm" variant={isPassed ? "outline" : "default"} onClick={() => setEvaluating(d)}>
                   <ClipboardCheck />
-                  {t("contract.deliverable.evaluate")}
+                  {isPassed || isFailed
+                    ? t("contract.deliverable.editEvaluation")
+                    : t("contract.deliverable.evaluate")}
                 </Button>
               )}
             </div>
@@ -181,6 +198,11 @@ export function DeliverablesPanel({
         onOpenChange={(open) => !open && setEvaluating(null)}
         contractId={contractId}
         deliverable={evaluating}
+      />
+      <DeliverableDetailSheet
+        item={openDeliverable}
+        open={Boolean(openDeliverable)}
+        onOpenChange={(o) => !o && setOpenDeliverable(null)}
       />
     </div>
   );

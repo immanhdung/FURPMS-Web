@@ -25,4 +25,12 @@ export const amendmentService = {
     axiosClient
       .get<ApiResponse<AmendmentCategory[]>>("/amendment-categories", { params: { activeOnly: true } })
       .then((res) => res.data.data),
+
+  /**
+   * Xuất **phụ lục hợp đồng** ra Word để ký ngoài.
+   * BM05 Điều 6.1: sửa đổi phải "lập thành văn bản phụ lục có đầy đủ chữ ký của các bên" —
+   * KHÔNG sinh lại hợp đồng gốc. Máy chủ trả 409 nếu đề nghị chưa được duyệt.
+   */
+  exportWord: (id: string) =>
+    axiosClient.get<Blob>(`/amendments/${id}/export-word`, { responseType: "blob" }).then((res) => res.data),
 };

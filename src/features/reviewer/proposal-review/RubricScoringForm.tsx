@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useScoringPolicyQuery } from "@/hooks/useSystemSettings";
-import { ClipboardList, Loader2, Save, Sparkles } from "lucide-react";
+import { ClipboardList, Loader2, Save, Sparkles, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -141,6 +141,30 @@ export function RubricScoringForm({ councilId, proposalId, projectId }: RubricSc
 
   const scorePct = maxTotal > 0 ? Math.min(100, (totalScore / maxTotal) * 100) : 0;
 
+  /**
+   * Điền nhanh cả phiếu — CHỈ để demo/thử.
+   *
+   * Chấm tay một phiếu 5 tiêu chí mất cả phút; muốn xem luồng "5 người chấm → thư ký soạn biên bản
+   * → chủ tịch chốt" thì phải làm lại năm lần. Nút này đổ sẵn mức KHÁ (~80% thang mỗi mục) kèm
+   * nhận xét mẫu, người dùng sửa lại ô nào cũng được trước khi nộp.
+   *
+   * Không tự nộp — vẫn phải bấm nút nộp, để không ai lỡ tay gửi phiếu chưa xem.
+   */
+  const fillAll = () => {
+    const filled: Record<number, { givenScore: number; comments: string }> = {};
+    for (const c of activeCriteria) {
+      const max = Number(c.maxScore) || 0;
+      // Làm tròn 0.5 cho thang nhỏ (BM10 thang 5 ⇒ 4), số nguyên cho thang lớn (BM03 ⇒ 8/16/32…).
+      const raw = max * 0.8;
+      filled[c.id] = {
+        givenScore: max <= 5 ? Math.round(raw * 2) / 2 : Math.round(raw),
+        comments: t("review.quickFillCriterionNote"),
+      };
+    }
+    setScores(filled);
+    if (!generalComments.trim()) setGeneralComments(t("review.quickFillGeneralNote"));
+  };
+
   return (
     <div className="space-y-4">
       <div className="space-y-2 rounded-xl border border-primary/15 bg-linear-to-r from-primary/8 to-brand-secondary/8 px-4 py-3">
@@ -157,6 +181,15 @@ export function RubricScoringForm({ councilId, proposalId, projectId }: RubricSc
           />
         </div>
       </div>
+
+      {activeCriteria.length > 0 && (
+        <div className="flex justify-end">
+          <Button type="button" variant="outline" size="sm" onClick={fillAll}>
+            <Wand2 />
+            {t("review.quickFill")}
+          </Button>
+        </div>
+      )}
 
       {proposalId && !suggestionById.size && (
         <div className="flex items-start gap-2 rounded-lg border border-primary/15 bg-primary/4 px-3 py-2">

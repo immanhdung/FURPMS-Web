@@ -11,6 +11,7 @@ import { PROPOSAL_STATUS } from "@/constants/statuses";
 import { contractSchema, type ContractFormValues } from "@/features/staff/contracts/contract.schema";
 import type { Contract } from "@/types/contract";
 
+import { proposalTitle } from "@/utils/format";
 interface CreateContractSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -151,7 +152,7 @@ export function CreateContractSheet({ open, onOpenChange, contract = null }: Cre
               <SelectContent>
                 {approvedProposals.map((proposal) => (
                   <SelectItem key={proposal.id} value={proposal.id}>
-                    {proposal.titleEN || proposal.titleVI || proposal.id}
+                    {proposalTitle(proposal, proposal.id)}
                   </SelectItem>
                 ))}
               </SelectContent>

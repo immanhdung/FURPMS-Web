@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { CheckCircle2, FileText, Package, XCircle } from "lucide-react";
@@ -8,6 +9,12 @@ import { axiosClient } from "@/services/api/axiosClient";
 import { formatDate, formatDateTime } from "@/utils/format";
 import type { ApiResponse } from "@/types/common";
 import type { AcceptanceDossier } from "@/types/acceptance-dossier";
+import {
+  DeliverableDetailSheet,
+  ProgressReportDetailSheet,
+  type DeliverableDetail,
+  type ProgressReportDetail,
+} from "@/components/shared/DossierDetailSheet";
 
 /**
  * Hồ sơ để hội đồng NGHIỆM THU chấm.
@@ -25,6 +32,9 @@ export function AcceptanceDossierPanel({
   proposalId: string;
 }) {
   const { t } = useTranslation();
+  // Chỉ XEM — panel không đổi trạng thái gì, nên giữ ở state cục bộ là đủ.
+  const [openReport, setOpenReport] = useState<ProgressReportDetail | null>(null);
+  const [openDeliverable, setOpenDeliverable] = useState<DeliverableDetail | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["acceptance-dossier", councilId, proposalId],
@@ -69,7 +79,12 @@ export function AcceptanceDossierPanel({
         ) : (
           <ul className="divide-y divide-border rounded-lg border border-border">
             {data.progressReports.map((r) => (
-              <li key={r.reportRound} className="space-y-1 px-3 py-2 text-xs">
+              <li key={r.reportRound}>
+                <button
+                  type="button"
+                  onClick={() => setOpenReport(r)}
+                  className="w-full space-y-1 px-3 py-2 text-left text-xs transition-colors hover:bg-muted/50"
+                >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="font-medium text-foreground">
                     {r.roundName || t("reports.roundN", { n: r.reportRound })}
@@ -87,7 +102,9 @@ export function AcceptanceDossierPanel({
                   {formatDate(r.reportingPeriodStart)} – {formatDate(r.reportingPeriodEnd)}
                   {r.submittedAt && ` · ${t("dossier.submittedAt", { date: formatDateTime(r.submittedAt) })}`}
                 </p>
-                {r.evaluationComments && <p className="text-foreground">{r.evaluationComments}</p>}
+                  {r.evaluationComments && <p className="text-foreground">{r.evaluationComments}</p>}
+                  <p className="font-medium text-primary">{t("dossier.viewDetail")}</p>
+                </button>
               </li>
             ))}
           </ul>
@@ -105,7 +122,12 @@ export function AcceptanceDossierPanel({
         ) : (
           <ul className="divide-y divide-border rounded-lg border border-border">
             {data.deliverables.map((d) => (
-              <li key={d.id} className="space-y-1 px-3 py-2 text-xs">
+              <li key={d.id}>
+                <button
+                  type="button"
+                  onClick={() => setOpenDeliverable(d)}
+                  className="w-full space-y-1 px-3 py-2 text-left text-xs transition-colors hover:bg-muted/50"
+                >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="flex items-center gap-1.5 font-medium text-foreground">
                     {d.acceptanceStatus === "PASSED" ? (
@@ -124,7 +146,9 @@ export function AcceptanceDossierPanel({
                     : t("dossier.notSubmitted")}
                   {!d.hasFile && ` · ${t("dossier.noFile")}`}
                 </p>
-                {d.qualityAssessment && <p className="text-foreground">{d.qualityAssessment}</p>}
+                  {d.qualityAssessment && <p className="text-foreground">{d.qualityAssessment}</p>}
+                  <p className="font-medium text-primary">{t("dossier.viewDetail")}</p>
+                </button>
               </li>
             ))}
           </ul>
@@ -151,6 +175,17 @@ export function AcceptanceDossierPanel({
           <p className="text-xs text-muted-foreground">{t("dossier.noFinalReport")}</p>
         )}
       </section>
+
+      <ProgressReportDetailSheet
+        item={openReport}
+        open={Boolean(openReport)}
+        onOpenChange={(o) => !o && setOpenReport(null)}
+      />
+      <DeliverableDetailSheet
+        item={openDeliverable}
+        open={Boolean(openDeliverable)}
+        onOpenChange={(o) => !o && setOpenDeliverable(null)}
+      />
     </div>
   );
 }

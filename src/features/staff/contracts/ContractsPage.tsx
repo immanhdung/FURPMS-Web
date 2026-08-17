@@ -14,6 +14,7 @@ import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { sortByDateDesc } from "@/utils/sort";
 import type { Contract } from "@/types/contract";
 
+import { proposalTitle } from "@/utils/format";
 export function ContractsPage() {
   const { t } = useTranslation();
   const { data, isLoading, isError, refetch, isRefetching } = useContractsQuery();
@@ -28,7 +29,7 @@ export function ContractsPage() {
   const deleteMutation = useDeleteContractMutation();
 
   const proposalTitles = useMemo(
-    () => Object.fromEntries((proposals ?? []).map((p) => [p.id, p.titleEN || p.titleVI || p.id])),
+    () => Object.fromEntries((proposals ?? []).map((p) => [p.id, proposalTitle(p, p.id)])),
     [proposals]
   );
 

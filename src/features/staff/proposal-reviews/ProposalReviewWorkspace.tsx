@@ -15,6 +15,7 @@ import { RoundDetailSheet } from "@/features/staff/proposal-reviews/RoundDetailS
 import { CreateReviewRoundSheet } from "@/features/staff/proposal-reviews/CreateReviewRoundSheet";
 import { ROUTES } from "@/constants/routes";
 
+import { proposalTitle } from "@/utils/format";
 type ViewMode = "kanban" | "timeline";
 
 export function ProposalReviewWorkspace() {
@@ -48,7 +49,7 @@ export function ProposalReviewWorkspace() {
             <>
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-                  {proposal?.titleEN || proposal?.titleVI || t("staff.proposalFallback")}
+                  {proposalTitle(proposal, t("staff.proposalFallback"))}
                 </h1>
                 {proposal?.status && <StatusBadge status={proposal.status} />}
               </div>

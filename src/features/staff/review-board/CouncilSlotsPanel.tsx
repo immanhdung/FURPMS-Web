@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { useCouncilSlotsQuery, useSaveSlotsMutation } from "@/hooks/useCouncilSlots";
+import { fromDateTimeLocalInput, toDateTimeLocalInput } from "@/utils/format";
 
 interface Row {
   projectId: string;
@@ -28,7 +29,7 @@ export function CouncilSlotsPanel({ councilId }: { councilId: string }) {
       slots.map((s) => ({
         projectId: s.projectId,
         projectTitle: s.projectTitle,
-        start: s.slotStartAt ? s.slotStartAt.slice(0, 16) : "",
+        start: toDateTimeLocalInput(s.slotStartAt),
         duration: s.slotDurationMinutes ?? 60,
       }))
     );
@@ -41,7 +42,7 @@ export function CouncilSlotsPanel({ councilId }: { councilId: string }) {
     save.mutate(
       rows.map((r, i) => ({
         projectId: r.projectId,
-        slotStartAt: r.start || undefined,
+        slotStartAt: fromDateTimeLocalInput(r.start),
         slotDurationMinutes: r.duration || undefined,
         slotOrder: i,
       }))

@@ -11,7 +11,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAddCouncilMemberMutation } from "@/hooks/useCouncilMembers";
@@ -36,13 +35,11 @@ export function AddCouncilMemberDialog({ open, onOpenChange, councilId, trackId 
   const [userId, setUserId] = useState<string | undefined>();
   const [suggestedName, setSuggestedName] = useState<string | undefined>();
   const [memberRole, setMemberRole] = useState<string>(COUNCIL_MEMBER_ROLES[2]);
-  const [isExternal, setIsExternal] = useState(false);
 
   const reset = () => {
     setUserId(undefined);
     setSuggestedName(undefined);
     setMemberRole(COUNCIL_MEMBER_ROLES[2]);
-    setIsExternal(false);
   };
 
   return (
@@ -129,10 +126,12 @@ export function AddCouncilMemberDialog({ open, onOpenChange, councilId, trackId 
             </Select>
           </div>
 
-          <label className="flex items-center gap-2 text-sm text-foreground">
-            <Checkbox checked={isExternal} onCheckedChange={(checked) => setIsExternal(Boolean(checked))} />
-            {t("staff.externalReviewer")}
-          </label>
+          {/*
+            Ô "Phản biện ngoài" đã gỡ (17/08). Cờ `isExternal` chỉ được lưu rồi trả về, KHÔNG
+            luồng nào rẽ nhánh theo nó: mức thù lao riêng cho người ngoài trường đã bỏ cùng
+            toàn bộ phần tính tiền (rule #15). Bày một ô mà tích hay không cũng như nhau chỉ
+            khiến Staff phân vân. Cột trong DB giữ nguyên, vẫn gửi false.
+          */}
         </div>
 
         <DialogFooter>
@@ -145,7 +144,7 @@ export function AddCouncilMemberDialog({ open, onOpenChange, councilId, trackId 
             onClick={() =>
               userId &&
               addMutation.mutate(
-                { userId, memberRole, isExternal },
+                { userId, memberRole, isExternal: false },
                 {
                   onSuccess: () => {
                     reset();

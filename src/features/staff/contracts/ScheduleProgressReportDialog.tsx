@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { useScheduleProgressReportMutation,
   useProgressReportQuery,
 } from "@/hooks/useProgressReports";
+import { fromDateTimeLocalInput, toDateTimeLocalInput } from "@/utils/format";
 
 interface ScheduleProgressReportDialogProps {
   open: boolean;
@@ -45,8 +46,8 @@ export function ScheduleProgressReportDialog({
     if (!open || !report) return;
     setRoundName(report.roundName ?? "");
     setDueDate(report.dueDate ? report.dueDate.slice(0, 10) : "");
-    // input datetime-local cần dạng yyyy-MM-ddTHH:mm
-    setScheduledMeetingAt(report.scheduledMeetingAt ? report.scheduledMeetingAt.slice(0, 16) : "");
+    // API trả mốc UTC; ô datetime-local chạy theo giờ máy — quy đổi, không cắt chuỗi.
+    setScheduledMeetingAt(toDateTimeLocalInput(report.scheduledMeetingAt));
     setMeetingLink(report.meetingLink ?? "");
   }, [open, report]);
 
@@ -104,7 +105,7 @@ export function ScheduleProgressReportDialog({
                   id: reportId,
                   payload: {
                     dueDate: dueDate || undefined,
-                    scheduledMeetingAt: scheduledMeetingAt || undefined,
+                    scheduledMeetingAt: fromDateTimeLocalInput(scheduledMeetingAt),
                     meetingLink: meetingLink || undefined,
                     roundName: roundName.trim() || undefined,
                   },

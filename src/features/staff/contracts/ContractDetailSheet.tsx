@@ -21,7 +21,7 @@ import { FinalReportPanel } from "@/features/staff/contracts/FinalReportPanel";
 import { AmendmentsPanel } from "@/features/staff/contracts/AmendmentsPanel";
 import { SettlementPanel } from "@/features/staff/contracts/SettlementPanel";
 import { useIsManaging } from "@/hooks/useActiveRole";
-import { formatDate } from "@/utils/format";
+import { proposalTitle, formatDate } from "@/utils/format";
 
 interface ContractDetailSheetProps {
   open: boolean;
@@ -84,7 +84,7 @@ export function ContractDetailSheet({ open, onOpenChange, contractId }: Contract
       <SheetContent resizable defaultWidth={820} className="flex w-full flex-col sm:max-w-4xl">
         <SheetHeader>
           <SheetTitle>{contract?.contractNumber || contract?.scopeTitle || t("contract.detailTitle")}</SheetTitle>
-          <SheetDescription>{proposal?.titleEN || proposal?.titleVI || t("contract.loadingProposal")}</SheetDescription>
+          <SheetDescription>{proposalTitle(proposal, t("contract.loadingProposal"))}</SheetDescription>
         </SheetHeader>
 
         {isLoading ? (

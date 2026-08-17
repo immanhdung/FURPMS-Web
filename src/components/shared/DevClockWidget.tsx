@@ -14,6 +14,9 @@ import {
 
 const FORMAT = "DD MMM YYYY, HH:mm:ss";
 
+/** Bước tua (ngày). Cộng dồn vào offset hiện tại — bấm +90 ba lần là gần một năm. */
+const STEPS = [1, 7, 30, 90] as const;
+
 export function DevClockWidget() {
   const { t } = useTranslation();
   const isAdmin = useIsAdmin();
@@ -75,25 +78,23 @@ export function DevClockWidget() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              className="flex-1"
-              disabled={isBusy}
-              onClick={() => adjustClock.mutate(1)}
-            >
-              {t("devClock.plus1")}
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              className="flex-1"
-              disabled={isBusy}
-              onClick={() => adjustClock.mutate(7)}
-            >
-              {t("devClock.plus7")}
-            </Button>
+          {/*
+            Mốc nghiệp vụ dài nhất tính bằng THÁNG chứ không phải ngày: hợp đồng 12–24 tháng, hạn
+            nghiệm thu, nhắc hạn 30 ngày. Trước đây chỉ có +1 và +7 nên muốn tới ngày nghiệm thu
+            phải bấm +7 vài chục lần. Máy chủ vốn nhận tới 3650 ngày — cái chặn nằm ở đây.
+          */}
+          <div className="grid grid-cols-4 gap-2">
+            {STEPS.map((d) => (
+              <Button
+                key={d}
+                size="sm"
+                variant="outline"
+                disabled={isBusy}
+                onClick={() => adjustClock.mutate(d)}
+              >
+                {t("devClock.plusDays", { n: d })}
+              </Button>
+            ))}
           </div>
 
           {isOffset && (

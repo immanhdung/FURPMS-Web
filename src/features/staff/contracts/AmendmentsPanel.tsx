@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { CircleCheck, CircleX, FilePenLine, Loader2, Plus } from "lucide-react";
+import { CircleCheck, CircleX, FileDown, FilePenLine, Loader2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,8 @@ import {
 import { AMENDMENT_STATUS } from "@/types/amendment";
 import { formatDateTime } from "@/utils/format";
 
+import { amendmentService } from "@/services/api/amendment.service";
+import { toast } from "sonner";
 /** Điều chỉnh hợp đồng: PI mô tả thay đổi + lý do → Staff duyệt hoặc từ chối. */
 /**
  * Yêu cầu điều chỉnh hợp đồng.
@@ -51,6 +53,25 @@ export function AmendmentsPanel({
   const [oldValue, setOldValue] = useState("");
   const [newValue, setNewValue] = useState("");
   const [comments, setComments] = useState<Record<string, string>>({});
+  const [exportingId, setExportingId] = useState<string | null>(null);
+
+  /** Tải phụ lục về máy để ký ngoài — cùng khuôn với xuất hợp đồng BM05 và thanh lý BM13. */
+  const handleExport = async (id: string) => {
+    setExportingId(id);
+    try {
+      const blob = await amendmentService.exportWord(id);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `PhuLucHopDong-${id.slice(0, 8)}.docx`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      toast.error(t("contract.amendment.exportWordError"));
+    } finally {
+      setExportingId(null);
+    }
+  };
 
   const resetForm = () => {
     setCategoryId("");
@@ -199,6 +220,25 @@ export function AmendmentsPanel({
               )}
 
               {a.reviewerComments && <p className="text-xs text-muted-foreground">{t("contract.amendment.reviewer")} {a.reviewerComments}</p>}
+
+              {/*
+                BM05 Điều 6.1: sửa đổi hợp đồng phải "lập thành văn bản phụ lục có đầy đủ chữ ký
+                của các bên" — hợp đồng gốc KHÔNG bị viết đè. Máy chủ đã có endpoint xuất từ lâu
+                nhưng giao diện chưa hề gọi, nên duyệt xong không có gì đem đi ký.
+                Chỉ hiện khi ĐÃ DUYỆT — in bản còn chờ duyệt ra là tạo giấy tờ khống (BE trả 409).
+              */}
+              {canManage && a.status === AMENDMENT_STATUS.APPROVED && (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={exportingId === a.id}
+                  onClick={() => handleExport(a.id)}
+                >
+                  {exportingId === a.id ? <Loader2 className="animate-spin" /> : <FileDown />}
+                  {t("contract.amendment.exportWord")}
+                </Button>
+              )}
 
               {canManage && isPending && (
                 <div className="space-y-2 border-t border-border pt-2">

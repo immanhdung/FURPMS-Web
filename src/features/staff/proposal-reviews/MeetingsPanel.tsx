@@ -5,24 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import {
-  useCouncilMeetingsQuery,
-  useDeleteMeetingMutation,
-  useEndMeetingMutation,
-  useScheduleConflictsQuery,
-  useStartMeetingMutation,
-} from "@/hooks/useMeetings";
+import { useCouncilMeetingsQuery, useDeleteMeetingMutation, useScheduleConflictsQuery } from "@/hooks/useMeetings";
 import { ScheduleMeetingSheet } from "@/features/staff/proposal-reviews/ScheduleMeetingSheet";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
-import { formatDateTime } from "@/utils/format";
+import { externalUrl, formatDateTime } from "@/utils/format";
 import type { Meeting } from "@/types/meeting";
 
 export function MeetingsPanel({ councilId }: { councilId: string }) {
   const { t } = useTranslation();
   const { data: meetings, isLoading } = useCouncilMeetingsQuery(councilId);
   const { data: conflicts } = useScheduleConflictsQuery(councilId);
-  const startMutation = useStartMeetingMutation();
-  const endMutation = useEndMeetingMutation();
   const deleteMutation = useDeleteMeetingMutation(councilId);
   const [scheduleOpen, setScheduleOpen] = useState(false);
   // Cùng một sheet dùng cho đặt lịch và sửa — có `editing` là chế độ sửa.
@@ -83,7 +75,7 @@ export function MeetingsPanel({ councilId }: { councilId: string }) {
               )}
               {meeting.meetingLink && (
                 <a
-                  href={meeting.meetingLink}
+                  href={externalUrl(meeting.meetingLink)}
                   target="_blank"
                   rel="noreferrer"
                   className="flex items-center gap-1 text-xs font-medium text-primary hover:underline"
@@ -93,12 +85,7 @@ export function MeetingsPanel({ councilId }: { councilId: string }) {
                 </a>
               )}
               <div className="flex flex-wrap gap-2 pt-1">
-                <Button variant="outline" size="sm" onClick={() => startMutation.mutate(meeting.id)} disabled={startMutation.isPending}>
-                  {t("staff.startMeeting")}
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => endMutation.mutate(meeting.id)} disabled={endMutation.isPending}>
-                  {t("staff.endMeeting")}
-                </Button>
+                {/* Nút Bắt đầu/Kết thúc họp đã bỏ (17/08) — xem chú thích ở meetings/columns.tsx. */}
                 {/* Rule #17: đổi lịch được BẤT KỲ LÚC NÀO, nên nút Sửa luôn hiện. */}
                 <Button variant="ghost" size="sm" onClick={() => setEditing(meeting)}>
                   <Pencil />

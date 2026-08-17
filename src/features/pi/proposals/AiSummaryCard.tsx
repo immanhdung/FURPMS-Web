@@ -105,13 +105,18 @@ export function AiSummaryCard({
           </div>
         ) : text ? (
           <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
-            {summary?.title && (
-              <p className="text-sm font-medium text-foreground">{summary.title}</p>
-            )}
-            <p className="whitespace-pre-line text-sm text-foreground">{text}</p>
+            {/*
+              ĐOẠN TÓM TẮT ĐÃ BỎ KHỎI MÀN (17/08) — chỉ giữ Ưu điểm / Nhược điểm.
 
-            {/* Prompt v2 tách ưu/nhược — hội đồng cần thấy ngay điểm mạnh yếu, không phải đọc
-                một khối văn xuôi rồi tự rút ra. */}
+              Ngay cạnh thẻ này là tab "Thông tin đề tài" với đầy đủ mục tiêu, phương pháp, sản
+              phẩm dự kiến do chủ nhiệm nhập. Đoạn tóm tắt chỉ diễn đạt lại đúng những thứ đó bằng
+              văn xuôi — người chấm đọc hai lần cùng một nội dung, mà bản của máy còn kém tin cậy
+              hơn bản gốc. Phần thực sự thêm giá trị là ưu/nhược: đó là NHẬN ĐỊNH, và là chỗ AI
+              đối chiếu file đính kèm với biểu mẫu rồi chỉ ra điểm vênh.
+
+              `summaryText` vẫn được sinh và lưu ở máy chủ (biên bản/xuất Word còn dùng), chỉ là
+              không bày ở đây nữa.
+            */}
             {summary?.strengths && summary.strengths.length > 0 && (
               <div>
                 <p className="text-xs font-medium text-success">{t("proposal.aiStrengths")}</p>

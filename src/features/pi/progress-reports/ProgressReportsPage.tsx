@@ -11,7 +11,7 @@ import { useMyContractsQuery } from "@/hooks/useMyContracts";
 import { useProgressReportsQuery } from "@/hooks/useProgressReports";
 import { CreateProgressReportSheet } from "@/features/pi/progress-reports/CreateProgressReportSheet";
 import { ProgressReportDetailView } from "@/components/shared/ProgressReportDetailView";
-import { formatDate, formatDateTime } from "@/utils/format";
+import { externalUrl, formatDate, formatDateTime } from "@/utils/format";
 import type { ProgressReport } from "@/types/progress-report";
 
 export function ProgressReportsPage() {
@@ -120,7 +120,7 @@ export function ProgressReportsPage() {
 
                     {report.meetingLink && (
                       <a
-                        href={report.meetingLink}
+                        href={externalUrl(report.meetingLink)}
                         target="_blank"
                         rel="noreferrer"
                         className="flex items-center gap-1 text-xs font-medium text-primary hover:underline"

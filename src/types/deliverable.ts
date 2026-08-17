@@ -11,6 +11,8 @@ export interface Deliverable {
   categoryName?: string | null;
   productName: string;
   description?: string | null;
+  scientificRequirements?: string | null;
+  notes?: string | null;
   dueDate?: string | null;
   acceptanceStatus?: string | null;
   isCompleted: boolean;

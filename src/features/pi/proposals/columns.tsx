@@ -4,7 +4,7 @@ import { DataTableColumnHeader } from "@/components/tables/DataTableColumnHeader
 import { DataTableRowActions } from "@/components/tables/DataTableRowActions";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { PROPOSAL_STATUS } from "@/constants/statuses";
-import { formatDate } from "@/utils/format";
+import { proposalTitle, formatDate } from "@/utils/format";
 import type { ProposalSummary } from "@/types/proposal-summary";
 
 import type { TFunction } from "i18next";
@@ -31,7 +31,7 @@ export function getMyProposalColumns({
   return [
     {
       id: "title",
-      accessorFn: (row) => row.titleVI || row.titleEN || t("proposal.untitled"),
+      accessorFn: (row) => proposalTitle(row, t("proposal.untitled")),
       header: ({ column }) => <DataTableColumnHeader column={column} title={t("proposal.title")} />,
     },
     {

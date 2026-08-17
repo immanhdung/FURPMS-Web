@@ -4,7 +4,7 @@ import { CalendarClock, ExternalLink, MapPin, Video } from "lucide-react";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { cn } from "@/lib/utils";
-import { formatDate } from "@/utils/format";
+import { externalUrl, formatDate } from "@/utils/format";
 import type { Meeting } from "@/types/meeting";
 
 const dayKey = (iso: string) => iso.slice(0, 10);
@@ -59,7 +59,7 @@ export function MeetingsAgenda({ meetings }: { meetings: Meeting[] }) {
                     </div>
                     {m.meetingLink ? (
                       <a
-                        href={m.meetingLink}
+                        href={externalUrl(m.meetingLink)}
                         target="_blank"
                         rel="noreferrer"
                         className="flex items-center gap-1 text-xs font-medium text-primary hover:underline"

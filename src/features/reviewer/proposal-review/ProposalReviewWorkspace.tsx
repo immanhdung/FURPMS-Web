@@ -19,7 +19,7 @@ import { MinutesPanel } from "@/features/reviewer/proposal-review/MinutesPanel";
 import { ProposalDocumentViewer } from "@/features/reviewer/proposal-review/ProposalDocumentViewer";
 import { REVIEW_ROUND_TYPE, ROUND_STATUS } from "@/constants/statuses";
 import { ROUTES } from "@/constants/routes";
-import { formatDateTime } from "@/utils/format";
+import { externalUrl, formatDateTime } from "@/utils/format";
 
 export function ProposalReviewWorkspace() {
   const { t } = useTranslation();
@@ -54,6 +54,16 @@ export function ProposalReviewWorkspace() {
   // Staff must open the round before reviewers can score/evaluate it.
   const isRoundOpen = membership.roundStatus?.toUpperCase() === ROUND_STATUS.OPEN;
 
+  /**
+   * QĐ543 Điều 12.3.b phân vai rất rõ ở vòng NGHIỆM THU:
+   *   · **Phản biện** phải nhận xét bằng văn bản theo **BM10** — 4 nội dung, thang 1–5.
+   *   · **Mọi thành viên có mặt** bỏ phiếu theo **BM11** — chỉ Đạt / Không đạt, không điểm.
+   * Nên phiếu chấm điểm ở vòng 2 chỉ dành cho phản biện; thành viên khác dùng tab "Nghiệm thu".
+   * Vòng XÉT DUYỆT thì ngược lại — Điều 8.3.b: **mọi** thành viên dự họp đều chấm (BM03).
+   */
+  const isOpponent = membership.memberRole?.trim().toLowerCase() === "opponent";
+  const canScore = isAcceptanceRound ? isOpponent : true;
+
   return (
     <div className="mx-auto max-w-7xl space-y-5">
       <Button variant="ghost" size="sm" className="-ml-2" onClick={() => navigate(ROUTES.ASSIGNED_REVIEWS)}>
@@ -81,8 +91,33 @@ export function ProposalReviewWorkspace() {
           {/* Màn CHẤM ĐIỂM: tóm tắt tự chạy sẵn, người chấm mở ra là có (thầy 05/08). */}
           {/* Có councilId ⇒ một lần bấm ra CẢ tóm tắt lẫn gợi ý điểm, thay vì bắt người chấm
               chờ hai lượt 30–60 giây liên tiếp ngay lúc hội đồng đang ngồi nhìn. */}
-          <AiSummaryCard proposalId={membership.proposalId} councilId={councilId} autoGenerate />
-          <ProposalDocumentViewer proposalId={membership.proposalId} />
+          {/*
+            CHỈ Ở VÒNG XÉT DUYỆT (17/08).
+
+            Hai thẻ này đều xoay quanh ĐỀ CƯƠNG: `ProposalDocumentViewer` mở file thuyết minh PI
+            nộp lúc đăng ký, còn `AiSummaryCard` tóm tắt/chấm thử chính bản đề cương đó
+            (`AiAdvisorService.SuggestScoresAsync` đọc `Proposals` + file đề cương, không hề đọc
+            sản phẩm hay báo cáo tổng kết).
+
+            Ở vòng NGHIỆM THU chúng vừa thừa vừa sai hướng: hội đồng đang phải kết luận đề tài
+            LÀM RA ĐƯỢC GÌ, mà màn hình lại chìa ra bản kế hoạch viết từ đầu kỳ — và AI thì chấm
+            cái kế hoạch ấy. Hồ sơ đúng của vòng 2 (sản phẩm · báo cáo tiến độ · BM09, kèm file
+            và link mở được) nằm ở tab "Hồ sơ nghiệm thu".
+          */}
+          {isAcceptanceRound ? (
+            /*
+              Cột trái = TÀI LIỆU ĐỂ ĐỌC khi chấm. Vòng 1 là đề cương; vòng 2 phải là hồ sơ
+              nghiệm thu (sản phẩm · báo cáo tiến độ · BM09), vì đó mới là thứ hội đồng căn cứ
+              để kết luận. Trước đó hồ sơ nằm trong một tab bên phải, nên khi ẩn hai thẻ đề cương
+              đi thì nửa màn hình bên trái trống trơn.
+            */
+            <AcceptanceDossierPanel councilId={councilId} proposalId={membership.proposalId} />
+          ) : (
+            <>
+              <AiSummaryCard proposalId={membership.proposalId} councilId={councilId} autoGenerate />
+              <ProposalDocumentViewer proposalId={membership.proposalId} />
+            </>
+          )}
         </div>
 
         <div className="space-y-5">
@@ -105,7 +140,7 @@ export function ProposalReviewWorkspace() {
                     {meeting.status && <StatusBadge status={meeting.status} />}
                     {meeting.meetingLink && (
                       <Button size="sm" variant="outline" asChild>
-                        <a href={meeting.meetingLink} target="_blank" rel="noreferrer">
+                        <a href={externalUrl(meeting.meetingLink)} target="_blank" rel="noreferrer">
                           <ExternalLink />
                           {t("reviewWorkspace.joinMeeting")}
                         </a>
@@ -121,8 +156,15 @@ export function ProposalReviewWorkspace() {
             <TabsList>
               <TabsTrigger value="info">{t("reviewWorkspace.tabInfo")}</TabsTrigger>
               {/* Nghiệm thu phải nhìn được đề tài ĐÃ LÀM RA GÌ, không chỉ đề cương như vòng 1. */}
-              {isAcceptanceRound && <TabsTrigger value="dossier">{t("reviewWorkspace.tabDossier")}</TabsTrigger>}
-              <TabsTrigger value="scoring">{t("reviewWorkspace.tabScoring")}</TabsTrigger>
+              {/* Tab "Hồ sơ nghiệm thu" đã chuyển sang CỘT TRÁI (17/08) — để ở cả hai là hai chỗ cùng nội dung. */}
+              {/*
+                Vòng NGHIỆM THU không có thang điểm — QĐ543 Biểu mẫu 11 ("Phiếu đánh giá nghiệm
+                thu") chỉ có ĐẠT / KHÔNG ĐẠT + lý do, không một tiêu chí hay con số nào; Biểu mẫu
+                12 cũng chỉ đếm số phiếu Đạt/Không đạt/Xuất sắc. Chấm theo thang 100 là thứ quy
+                định KHÔNG có. Tab "Nghiệm thu" bên cạnh đã làm đúng BM11 rồi.
+                Bày tab này ở vòng nghiệm thu chỉ dẫn tới ô trống "Chưa cấu hình tiêu chí chấm".
+              */}
+              {canScore && <TabsTrigger value="scoring">{t("reviewWorkspace.tabScoring")}</TabsTrigger>}
               {isAcceptanceRound && <TabsTrigger value="acceptance">{t("reviewWorkspace.tabAcceptance")}</TabsTrigger>}
               <TabsTrigger value="minutes">{t("reviewWorkspace.tabMinutes")}</TabsTrigger>
             </TabsList>
@@ -135,12 +177,7 @@ export function ProposalReviewWorkspace() {
               )}
             </TabsContent>
 
-            {isAcceptanceRound && (
-              <TabsContent value="dossier">
-                <AcceptanceDossierPanel councilId={councilId} proposalId={membership.proposalId} />
-              </TabsContent>
-            )}
-
+            {canScore && (
             <TabsContent value="scoring">
               {isRoundOpen ? (
                 <RubricScoringForm councilId={councilId} proposalId={membership.proposalId} projectId={membership.projectId} />
@@ -152,6 +189,7 @@ export function ProposalReviewWorkspace() {
                 />
               )}
             </TabsContent>
+            )}
 
             {isAcceptanceRound && (
               <TabsContent value="acceptance">

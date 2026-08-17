@@ -73,7 +73,14 @@ function ToggleRow({ setting }: { setting: SystemSetting }) {
   );
 }
 
-const BOOLEAN_KEYS = ["EMAIL_ENABLED"];
+/**
+ * Cấu hình chỉ có bật/tắt — hiện công tắc thay vì ô nhập.
+ *
+ * Thiếu tên ở đây thì cấu hình rơi vào ô nhập chữ và Admin phải **gõ tay "true"/"false"**: gõ sai
+ * một chữ là tắt nhầm tính năng mà không có gì cản. Đã xảy ra với `COUNCIL_ALLOW_RESPOND_ON_BEHALF`
+ * và `DEMO_DATA_ENABLED` — cả hai đều là bật/tắt nhưng bày ra như ô chữ tự do.
+ */
+const BOOLEAN_KEYS = ["EMAIL_ENABLED", "COUNCIL_ALLOW_RESPOND_ON_BEHALF", "DEMO_DATA_ENABLED"];
 
 /** Nhóm cấu hình vận hành (trừ phần upload đã có card riêng). */
 export function SystemSettingsCard({

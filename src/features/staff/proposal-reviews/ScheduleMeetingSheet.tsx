@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useScheduleMeetingMutation, useUpdateMeetingMutation } from "@/hooks/useMeetings";
 import { MEETING_MODES, IN_PERSON, type Meeting } from "@/types/meeting";
+import { fromDateTimeLocalInput, toDateTimeLocalInput } from "@/utils/format";
 
 const schema = z
   .object({
@@ -74,8 +75,8 @@ export function ScheduleMeetingSheet({ open, onOpenChange, councilId, meeting = 
             platform: meeting.platform ?? MEETING_MODES[0].value,
             meetingLink: meeting.meetingLink ?? "",
             location: meeting.location ?? "",
-            // <input type="datetime-local"> chỉ nhận "yyyy-MM-ddTHH:mm", cắt phần giây/timezone.
-            scheduledAt: meeting.scheduledAt ? meeting.scheduledAt.slice(0, 16) : "",
+            // API trả mốc UTC; ô datetime-local hiển thị theo giờ máy — phải quy đổi, không cắt chuỗi.
+            scheduledAt: toDateTimeLocalInput(meeting.scheduledAt),
             durationMinutes: meeting.durationMinutes ?? 60,
             agenda: meeting.agenda ?? "",
           }
@@ -86,6 +87,8 @@ export function ScheduleMeetingSheet({ open, onOpenChange, councilId, meeting = 
   const onSubmit = (values: FormValues) => {
     const payload = {
       ...values,
+      // Ô datetime-local không kèm múi giờ; gửi thẳng thì máy chủ không ghi được (500).
+      scheduledAt: fromDateTimeLocalInput(values.scheduledAt) ?? values.scheduledAt,
       agenda: values.agenda || undefined,
       meetingLink: isOffline ? undefined : values.meetingLink || undefined,
       location: isOffline ? values.location || undefined : undefined,

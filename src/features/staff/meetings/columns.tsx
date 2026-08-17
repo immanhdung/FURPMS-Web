@@ -1,20 +1,17 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import type { TFunction } from "i18next";
-import { ExternalLink, Play, Square, Undo2 } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTableColumnHeader } from "@/components/tables/DataTableColumnHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { formatDateTime } from "@/utils/format";
+import { externalUrl, formatDateTime } from "@/utils/format";
 import type { Meeting } from "@/types/meeting";
 
 interface GetMeetingColumnsOptions {
   t: TFunction;
-  onStart: (meeting: Meeting) => void;
-  onEnd: (meeting: Meeting) => void;
-  onUndoStart: (meeting: Meeting) => void;
 }
 
-export function getMeetingColumns({ t, onStart, onEnd, onUndoStart }: GetMeetingColumnsOptions): ColumnDef<Meeting>[] {
+export function getMeetingColumns({ t }: GetMeetingColumnsOptions): ColumnDef<Meeting>[] {
   return [
     {
       id: "title",
@@ -48,31 +45,20 @@ export function getMeetingColumns({ t, onStart, onEnd, onUndoStart }: GetMeeting
         <div className="flex justify-end gap-1">
           {row.original.meetingLink && (
             <Button variant="ghost" size="icon-sm" asChild title={t("staff.join")} aria-label={t("staff.join")}>
-              <a href={row.original.meetingLink} target="_blank" rel="noreferrer">
+              <a href={externalUrl(row.original.meetingLink)} target="_blank" rel="noreferrer">
                 <ExternalLink />
               </a>
             </Button>
           )}
           {/*
-            Chỉ hiện nút HỢP LỆ với trạng thái hiện tại. Trước đây luôn hiện cả Bắt đầu lẫn Kết
-            thúc, bấm sai thì ăn lỗi 409 — mà buổi họp đã "Đang diễn ra" thì không có đường lui,
-            kẹt luôn.
+            KHÔNG còn nút Bắt đầu / Kết thúc họp (bỏ 17/08).
+            Không ai bấm chúng trong thực tế: tới giờ họp thì Thư ký ghi biên bản, chẳng ai mở
+            phần mềm ra bấm "Bắt đầu". Chúng cũng không gánh gì cả — không luồng nào chờ trạng
+            thái ĐANG DIỄN RA (điểm danh, chấm điểm, biên bản đều không kiểm), mà Chủ tịch chốt
+            biên bản thì `ReviewScoringService` đã tự đóng mọi buổi họp của hội đồng. Giữ lại chỉ
+            tạo bẫy: bấm Bắt đầu rồi Kết thúc là buổi họp "xong" trước cả khi họp.
+            Endpoint start/end/undo-start ở máy chủ vẫn còn, chỉ gỡ khỏi giao diện.
           */}
-          {row.original.status === "SCHEDULED" && (
-            <Button variant="ghost" size="icon-sm" title={t("staff.startMeeting")} aria-label={t("staff.startMeeting")} onClick={() => onStart(row.original)}>
-              <Play />
-            </Button>
-          )}
-          {row.original.status === "IN_PROGRESS" && (
-            <>
-              <Button variant="ghost" size="icon-sm" title={t("staff.undoStartMeeting")} aria-label={t("staff.undoStartMeeting")} onClick={() => onUndoStart(row.original)}>
-                <Undo2 />
-              </Button>
-              <Button variant="ghost" size="icon-sm" title={t("staff.endMeeting")} aria-label={t("staff.endMeeting")} onClick={() => onEnd(row.original)}>
-                <Square />
-              </Button>
-            </>
-          )}
         </div>
       ),
     },
