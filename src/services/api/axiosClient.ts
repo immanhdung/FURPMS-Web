@@ -49,23 +49,45 @@ interface ServerError {
 }
 
 /**
+ * Bốn mã này không phải *loại lỗi*, chỉ là **thùng chứa** máy chủ đổ vào khi ánh xạ kiểu ngoại lệ
+ * sang mã HTTP. Mọi `InvalidOperationException` trong toàn hệ thống đều ra `CONFLICT`, mọi
+ * `ArgumentException` đều ra `VALIDATION_FAILED`. Bản dịch của chúng vì thế bắt buộc phải chung
+ * chung, và chung chung thì vô dụng: "Thao tác không thực hiện được ở trạng thái hiện tại" không
+ * nói cho người dùng biết vướng cái gì hay phải làm gì.
+ */
+const GENERIC_CODES = new Set(["CONFLICT", "VALIDATION_FAILED", "NOT_FOUND", "UNEXPECTED"]);
+
+/**
  * Chọn câu chữ hiện cho người dùng, theo thứ tự ưu tiên:
  *
- * 1. **Bảng dịch theo `errorCode`** — ngôn ngữ thuộc về giao diện, không thuộc máy chủ. Người dùng
- *    bật tiếng Anh thì lỗi cũng phải ra tiếng Anh.
- * 2. **Câu chữ máy chủ gửi kèm** — phương án dự phòng cho mã chưa dịch. Nhờ nó mà chuyển sang mã
- *    lỗi được làm **từng phần**, không phải dịch xong 71 mã mới dám bật.
+ * 1. **Bảng dịch theo `errorCode`** — nhưng CHỈ với mã cụ thể (`PERM_CHAIR_ONLY`,
+ *    `AUTH_PASSWORD_INCORRECT`…). Ngôn ngữ thuộc về giao diện, không thuộc máy chủ: người dùng bật
+ *    tiếng Anh thì lỗi cũng phải ra tiếng Anh.
+ * 2. **Câu chữ máy chủ gửi kèm** — dùng khi mã chưa dịch, *hoặc* khi mã chỉ là thùng chứa chung.
  * 3. Câu chung theo mã HTTP — khi máy chủ chết hẳn, không trả nổi thân phản hồi.
+ *
+ * ⚠ Trước 17/08 bước 1 nuốt luôn cả thùng chứa chung, nên **mọi lỗi 409 và 400 trong toàn ứng
+ * dụng** đều hiện đúng một câu vô nghĩa — kể cả những câu máy chủ viết rất kỹ ("đợt này đã có 2
+ * đề tài nên không xoá được", "gia hạn tối đa 1/2 thời gian theo QĐ543 Điều 10.4"). Người dùng
+ * không có cách nào biết mình vướng gì. Nay thùng chứa chung nhường chỗ cho câu của máy chủ.
  */
 function resolveMessage(status: number, data?: ServerError): string {
-  if (data?.errorCode) {
+  if (data?.errorCode && !GENERIC_CODES.has(data.errorCode)) {
     const translated = i18n.t(`errors.${data.errorCode}`, {
       defaultValue: "",
       ...(data.details ?? {}),
     });
     if (translated) return translated;
   }
-  return data?.message || data?.errors?.[0] || mapStatusToMessage(status);
+
+  if (data?.message || data?.errors?.[0]) return (data.message || data.errors?.[0])!;
+
+  // Không có câu nào từ máy chủ thì mới rơi về bản dịch của thùng chứa.
+  if (data?.errorCode) {
+    const translated = i18n.t(`errors.${data.errorCode}`, { defaultValue: "" });
+    if (translated) return translated;
+  }
+  return mapStatusToMessage(status);
 }
 
 axiosClient.interceptors.response.use(
