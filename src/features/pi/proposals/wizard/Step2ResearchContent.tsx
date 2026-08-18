@@ -109,6 +109,45 @@ export function Step2ResearchContent({ form, file, onFileChange, proposalId }: S
       }
     }
 
+    if (result.budgetItems?.length) {
+      const label = t("wizard.step2.fieldBudget");
+      const current = getValues("budgetItems") ?? [];
+      if (getFieldState("budgetItems").isDirty || current.length > 0) preserved.push(label);
+      else {
+        setValue(
+          "budgetItems",
+          result.budgetItems
+            .filter((item) => item.amount > 0)
+            .map((item) => ({ category: item.category, amount: item.amount })),
+          { shouldValidate: true, shouldDirty: true }
+        );
+        applied.push(label);
+      }
+    }
+
+    if (result.teamMembers?.length) {
+      const label = t("wizard.step2.fieldMembers");
+      const current = getValues("members") ?? [];
+      if (getFieldState("members").isDirty || current.length > 0) preserved.push(label);
+      else {
+        setValue(
+          "members",
+          result.teamMembers.map((member) => ({
+            fullName: member.fullName,
+            email: member.email?.trim() ?? "",
+            department: member.department ?? "",
+            academicTitle: member.academicTitle ?? "",
+            role: member.role ?? "",
+            workMonths: member.workMonths ?? 0,
+            memberRoleCode: "",
+            isSecretary: member.isSecretary,
+          })),
+          { shouldValidate: true, shouldDirty: true }
+        );
+        applied.push(label);
+      }
+    }
+
     setExtraction({ result, applied, preserved });
   };
 
@@ -224,7 +263,9 @@ export function Step2ResearchContent({ form, file, onFileChange, proposalId }: S
                 <p className="text-xs text-warning">{extraction.result.warning}</p>
               ) : extraction.applied.length === 0 &&
                 extraction.preserved.length === 0 &&
-                !(extraction.result.totalBudget && extraction.result.totalBudget > 0) ? (
+                !(extraction.result.totalBudget && extraction.result.totalBudget > 0) &&
+                !extraction.result.budgetItems?.length &&
+                !extraction.result.teamMembers?.length ? (
                 <p className="text-xs text-muted-foreground">{t("wizard.step2.nothingExtracted")}</p>
               ) : (
                 <>
@@ -251,7 +292,7 @@ export function Step2ResearchContent({ form, file, onFileChange, proposalId }: S
                       </div>
                     </div>
                   )}
-                  {extraction.result.totalBudget && extraction.result.totalBudget > 0 && (
+                  {extraction.result.totalBudget && extraction.result.totalBudget > 0 && !extraction.result.budgetItems?.length && (
                     <p className="text-xs text-muted-foreground">
                       {t("wizard.step2.budgetDetected", {
                         amount: new Intl.NumberFormat(undefined).format(extraction.result.totalBudget),

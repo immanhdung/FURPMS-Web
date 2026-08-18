@@ -18,11 +18,13 @@ export function getContractColumns({ t, proposalTitles, onView, onEdit, onDelete
   return [
     {
       accessorKey: "contractNumber",
+      meta: { label: t("staff.contractNo") },
       header: ({ column }) => <DataTableColumnHeader column={column} title={t("staff.contractNo")} />,
       cell: ({ row }) => row.original.contractNumber ?? "-",
     },
     {
       id: "proposal",
+      meta: { label: t("staff.proposal") },
       // Ưu tiên tên BE trả kèm hợp đồng; bảng tra `proposalTitles` chỉ chứa các đề cương đang
       // tải trên trang nên hợp đồng của đề cương ngoài trang từng hiện trơ ra GUID.
       accessorFn: (row) => row.proposalTitle || proposalTitles[row.proposalId] || "-",
@@ -30,11 +32,13 @@ export function getContractColumns({ t, proposalTitles, onView, onEdit, onDelete
     },
     {
       id: "pi",
+      meta: { label: t("staff.pi") },
       accessorFn: (row) => row.piName || "-",
       header: ({ column }) => <DataTableColumnHeader column={column} title={t("staff.pi")} />,
     },
     {
       id: "researchType",
+      meta: { label: t("staff.researchType") },
       accessorFn: (row) => row.researchTypeName || row.researchTypeCode || "-",
       header: ({ column }) => <DataTableColumnHeader column={column} title={t("staff.researchType")} />,
       cell: ({ row }) => (
@@ -45,6 +49,7 @@ export function getContractColumns({ t, proposalTitles, onView, onEdit, onDelete
     },
     {
       id: "classification",
+      meta: { label: t("staff.cycleAndTrack") },
       accessorFn: (row) => `${row.cycleCode ?? ""} ${row.trackName ?? row.trackCode ?? ""}`,
       header: ({ column }) => <DataTableColumnHeader column={column} title={t("staff.cycleAndTrack")} />,
       cell: ({ row }) => (
@@ -58,16 +63,19 @@ export function getContractColumns({ t, proposalTitles, onView, onEdit, onDelete
     },
     {
       accessorKey: "startDate",
+      meta: { label: t("staff.start") },
       header: ({ column }) => <DataTableColumnHeader column={column} title={t("staff.start")} />,
       cell: ({ row }) => formatDate(row.original.startDate),
     },
     {
       accessorKey: "endDate",
+      meta: { label: t("staff.end") },
       header: ({ column }) => <DataTableColumnHeader column={column} title={t("staff.end")} />,
       cell: ({ row }) => formatDate(row.original.endDate),
     },
     {
       accessorKey: "status",
+      meta: { label: t("common.status") },
       header: ({ column }) => <DataTableColumnHeader column={column} title={t("common.status")} />,
       cell: ({ row }) => (row.original.status ? <StatusBadge status={row.original.status} /> : "-"),
     },

@@ -1701,6 +1701,8 @@ export const vi = {
       fieldTransferPotential: "Khả năng chuyển giao",
       fieldFacilities: "Cơ sở vật chất",
       fieldDuration: "Thời gian thực hiện",
+      fieldBudget: "Dự toán kinh phí",
+      fieldMembers: "Thành viên nhóm",
     },
     step3: {
       title: "Chi tiết đề cương",

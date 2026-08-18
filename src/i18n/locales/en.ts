@@ -1684,6 +1684,8 @@ export const en = {
       fieldTransferPotential: "Transfer potential",
       fieldFacilities: "Facilities",
       fieldDuration: "Duration",
+      fieldBudget: "Budget breakdown",
+      fieldMembers: "Team members",
     },
     step3: {
       title: "Proposal Details",

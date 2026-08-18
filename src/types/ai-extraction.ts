@@ -21,6 +21,19 @@ export interface AiExtractionResult {
   facilities?: string | null;
   durationMonths?: number | null;
   totalBudget?: number | null;
+  budgetItems?: Array<{
+    category: string;
+    amount: number;
+  }>;
+  teamMembers?: Array<{
+    fullName: string;
+    email?: string | null;
+    department?: string | null;
+    academicTitle?: string | null;
+    role?: string | null;
+    workMonths?: number | null;
+    isSecretary: boolean;
+  }>;
   /** BE báo lại khi chưa cấu hình AI hoặc đọc file không ra gì — vẫn cho nhập tay (rule #20). */
   warning?: string | null;
 }
