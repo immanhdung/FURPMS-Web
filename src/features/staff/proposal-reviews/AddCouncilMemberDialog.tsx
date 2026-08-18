@@ -19,7 +19,7 @@ import { useSuggestReviewersMutation } from "@/hooks/useProposalAi";
 import { eligibleCouncilCandidates } from "@/utils/council-eligibility";
 
 /*
- * Chức danh trong hội đồng — PHẢI khớp `CreateCouncilSheet` và các chỗ BE so chuỗi:
+ * Chức danh trong hội đồng — PHẢI khớp `review-board/CreateCouncilSheet` và các chỗ BE so chuỗi:
  * gửi thư mời kiểm "Chair"/"Secretary", màn chấm nghiệm thu kiểm "Opponent" (chỉ phản biện mới
  * viết BM10 — QĐ543 Điều 12.3.b).
  *

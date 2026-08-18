@@ -94,7 +94,10 @@ export function DataTableToolbar<TData>({
                   onCheckedChange={(value) => column.toggleVisibility(Boolean(value))}
                   onSelect={(e) => e.preventDefault()}
                 >
-                  {column.id}
+                  {/* Nhãn lấy từ `meta.label` của cột. Trước đây in thẳng `column.id` nên menu hiện
+                      "Title / Cycle / Pi / CreatedAt" — tiếng Anh lẫn giữa màn tiếng Việt. Bảng nào
+                      chưa khai `meta.label` thì vẫn rơi về id (lộ ra để còn biết mà bổ sung). */}
+                  {(column.columnDef.meta as { label?: string } | undefined)?.label ?? column.id}
                 </DropdownMenuCheckboxItem>
               ))}
           </DropdownMenuContent>

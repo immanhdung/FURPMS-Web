@@ -93,6 +93,26 @@ src/features/
 Màn hình về hội đồng nằm ở `staff/review-board/` và `reviewer/proposal-review/`, không có thư mục
 `council/`. Thư mục thật còn có `src/i18n/` và `src/lib/` (bản thiết kế không liệt kê).
 
+### 2.5 Hai màn Staff dễ nhầm — ai làm việc gì (dọn 18/08)
+
+| Màn | Thư mục | Làm gì |
+|---|---|---|
+| **Đề cương** (`/proposal-reviews`) | `staff/proposal-reviews/` | **Đọc**: danh sách đề cương đã nộp, lọc theo đợt · lĩnh vực · trạng thái, mở ra xem nội dung + file thuyết minh. Không thao tác vòng chấm |
+| **Hội đồng & Chấm** (`/review-board`) | `staff/review-board/` | **Làm**: chọn đợt + lĩnh vực → tạo vòng, lập hội đồng, gán rubric, thêm đề tài vào vòng, lịch họp |
+
+Trước 18/08 màn Đề cương là bảng **Kanban + dòng thời gian quản lý vòng chấm của riêng một đề tài**
+— trùng việc với Hội đồng & Chấm nhưng yếu hơn, và mở chi tiết một đề cương ra thì **không thấy một
+dòng nội dung nào** của chính đề cương đó. Đã bỏ hẳn: xoá `RoundKanbanBoard` · `RoundTimeline` ·
+`round-utils` · `RoundDetailSheet` · `CreateReviewRoundSheet` · `proposal-reviews/CreateCouncilSheet`
+(bản của `review-board/` mới là bản dùng).
+
+**Không mất chức năng nào:** tạo vòng ở cấp lĩnh vực + `AddProjectToRoundDialog` phủ hết việc mà
+`CreateReviewRoundSheet` từng làm. Màn chi tiết đề cương vẫn liệt kê gọn các vòng của đề tài đó và
+có nút sang `/review-board?cycle=…&track=…` (đã lọc sẵn) để thao tác.
+
+> Nhân tiện: nhãn menu "Bật/tắt cột" của `DataTable` lấy từ `meta.label` của từng cột. Bảng nào
+> quên khai thì menu hiện `id` thô (`Title`, `CreatedAt`) — tiếng Anh lẫn giữa màn tiếng Việt.
+
 ---
 
 ## 3. Bẫy đã cắn thật
