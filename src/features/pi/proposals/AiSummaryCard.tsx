@@ -11,6 +11,7 @@ import {
   useSummarizeProposalMutation,
 } from "@/hooks/useProposalAi";
 import { formatDateTime } from "@/utils/format";
+import { useAiCooldown } from "@/hooks/useAiCooldown";
 
 /**
  * Tóm tắt AI của đề cương.
@@ -42,11 +43,15 @@ export function AiSummaryCard({
   const { data: cached, isLoading } = useProposalSummaryQuery(proposalId);
   const summarizeMutation = useSummarizeProposalMutation();
   const reviewKitMutation = useReviewKitMutation(councilId ?? "");
+  const aiCooldown = useAiCooldown();
 
   const isCouncilMode = Boolean(councilId);
   const isWorking = isCouncilMode ? reviewKitMutation.isPending : summarizeMutation.isPending;
-  const run = () =>
-    isCouncilMode ? reviewKitMutation.mutate(proposalId) : summarizeMutation.mutate(proposalId);
+  const run = () => {
+    const options = { onSettled: () => aiCooldown.start() };
+    if (isCouncilMode) reviewKitMutation.mutate(proposalId, options);
+    else summarizeMutation.mutate(proposalId, options);
+  };
 
   const summary = reviewKitMutation.data?.summary ?? summarizeMutation.data ?? cached ?? null;
 
@@ -78,9 +83,11 @@ export function AiSummaryCard({
               {isCouncilMode ? t("proposal.aiReviewKit") : t("proposal.aiSummary")}
             </CardTitle>
           </div>
-          <Button variant="outline" size="sm" onClick={run} disabled={isWorking}>
+          <Button variant="outline" size="sm" onClick={run} disabled={isWorking || aiCooldown.seconds > 0}>
             {isWorking ? <Loader2 className="animate-spin" /> : <Sparkles />}
-            {isCouncilMode
+            {aiCooldown.seconds > 0
+              ? t("proposal.aiCooldown", { seconds: aiCooldown.seconds })
+              : isCouncilMode
               ? text
                 ? t("proposal.aiReviewKitAgain")
                 : t("proposal.aiReviewKitRun")

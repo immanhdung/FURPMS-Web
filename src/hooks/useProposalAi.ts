@@ -4,11 +4,25 @@ import { toast } from "sonner";
 import { aiService } from "@/services/api/ai.service";
 import type { ApiError } from "@/types/common";
 
+export function isAiOverloadError(error: unknown) {
+  const apiError = error as Partial<ApiError> | undefined;
+  return apiError?.status === 429 || apiError?.status === 503
+    || /429|503|quá tải|high demand|rate limit|quota/i.test(apiError?.message ?? "");
+}
+
+function showAiError(error: unknown, fallback: string) {
+  if (isAiOverloadError(error)) {
+    toast.warning("Hệ thống AI đang quá tải. Vui lòng chờ 10 giây rồi thử lại; dữ liệu đã nhập không bị mất.");
+    return;
+  }
+  toast.error((error as Partial<ApiError> | undefined)?.message || fallback);
+}
+
 export function useExtractProposalMutation() {
   const { t } = useTranslation();
   return useMutation({
     mutationFn: (file: File) => aiService.extractFromFile(file),
-    onError: (error: ApiError) => toast.error(error.message || t("wizard.step2.extractFailed")),
+    onError: (error: ApiError) => showAiError(error, t("wizard.step2.extractFailed")),
   });
 }
 
@@ -22,6 +36,7 @@ export function useSimilarityCheckMutation() {
 export function useSummarizeProposalMutation() {
   return useMutation({
     mutationFn: (proposalId: string) => aiService.summarizeProposal(proposalId),
+    onError: (error) => showAiError(error, "Không tạo được tóm tắt AI."),
   });
 }
 
@@ -96,10 +111,10 @@ export function useReviewKitMutation(councilId: string) {
       queryClient.setQueryData(scoreSuggestionKey(councilId, proposalId), kit.suggestions);
 
       // Hỏng một phần thì nói rõ phần nào — phần còn lại vẫn hiện bình thường.
-      if (kit.summaryError) toast.error(`Tóm tắt AI lỗi: ${kit.summaryError}`);
-      if (kit.suggestionsError) toast.error(`Gợi ý điểm AI lỗi: ${kit.suggestionsError}`);
+      if (kit.summaryError) showAiError({ message: kit.summaryError }, "Không tạo được tóm tắt AI.");
+      if (kit.suggestionsError) showAiError({ message: kit.suggestionsError }, "Không tạo được gợi ý điểm AI.");
     },
-    onError: () => toast.error("Không chạy được AI hỗ trợ chấm."),
+    onError: (error) => showAiError(error, "Không chạy được AI hỗ trợ chấm."),
   });
 }
 
@@ -110,7 +125,7 @@ export function useReviewKitMutation(councilId: string) {
 export function useScoreSuggestionsQuery(councilId: string, proposalId: string | null) {
   return useQuery({
     queryKey: scoreSuggestionKey(councilId, proposalId ?? ""),
-    queryFn: () => Promise.resolve([] as never[]),
-    enabled: false,
+    queryFn: () => aiService.getScoreSuggestions(councilId, proposalId as string),
+    enabled: Boolean(councilId && proposalId),
   });
 }

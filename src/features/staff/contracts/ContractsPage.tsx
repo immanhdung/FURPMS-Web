@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
-import { FileSignature, Plus } from "lucide-react";
+import { FileSignature, Filter, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/tables/DataTable";
 import { ErrorState } from "@/components/shared/ErrorState";
@@ -11,6 +11,7 @@ import { getContractColumns } from "@/features/staff/contracts/columns";
 import { CreateContractSheet } from "@/features/staff/contracts/CreateContractSheet";
 import { ContractDetailSheet } from "@/features/staff/contracts/ContractDetailSheet";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { sortByDateDesc } from "@/utils/sort";
 import type { Contract } from "@/types/contract";
 
@@ -20,6 +21,21 @@ export function ContractsPage() {
   const { data, isLoading, isError, refetch, isRefetching } = useContractsQuery();
   const { data: proposals } = useProposalsQuery();
   const sortedData = useMemo(() => sortByDateDesc(data, (c) => c.createdAt), [data]);
+  const [researchType, setResearchType] = useState("all");
+  const [cycle, setCycle] = useState("all");
+  const [track, setTrack] = useState("all");
+
+  const options = useMemo(() => ({
+    researchTypes: Array.from(new Map((data ?? []).filter((x) => x.researchTypeId).map((x) => [x.researchTypeId, x.researchTypeName || x.researchTypeCode || "-"])).entries()),
+    cycles: Array.from(new Map((data ?? []).filter((x) => x.cycleId).map((x) => [x.cycleId, x.cycleCode || "-"])).entries()),
+    tracks: Array.from(new Map((data ?? []).filter((x) => x.trackId).map((x) => [x.trackId, x.trackName || x.trackCode || "-"])).entries()),
+  }), [data]);
+
+  const filteredData = useMemo(() => sortedData.filter((contract) =>
+    (researchType === "all" || String(contract.researchTypeId) === researchType) &&
+    (cycle === "all" || String(contract.cycleId) === cycle) &&
+    (track === "all" || String(contract.trackId) === track)
+  ), [sortedData, researchType, cycle, track]);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [detailContractId, setDetailContractId] = useState<string | null>(null);
@@ -73,15 +89,41 @@ export function ContractsPage() {
       {isError ? (
         <ErrorState onRetry={() => refetch()} isRetrying={isRefetching} />
       ) : (
-        <DataTable
-          columns={columns}
-          data={sortedData}
-          isLoading={isLoading}
-          searchPlaceholder={t("staff.contractsSearch")}
-          exportFileName="contracts"
-          emptyTitle={t("staff.noContracts")}
-          emptyDescription={t("staff.noContractsDesc")}
-        />
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <Filter className="size-4 text-muted-foreground" />
+            <Select value={researchType} onValueChange={setResearchType}>
+              <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t("staff.contractAllResearchTypes")}</SelectItem>
+                {options.researchTypes.map(([id, name]) => <SelectItem key={id} value={String(id)}>{name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Select value={cycle} onValueChange={setCycle}>
+              <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t("staff.contractAllCycles")}</SelectItem>
+                {options.cycles.map(([id, name]) => <SelectItem key={id} value={String(id)}>{name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Select value={track} onValueChange={setTrack}>
+              <SelectTrigger className="w-52"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t("staff.contractAllTracks")}</SelectItem>
+                {options.tracks.map(([id, name]) => <SelectItem key={id} value={String(id)}>{name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <DataTable
+            columns={columns}
+            data={filteredData}
+            isLoading={isLoading}
+            searchPlaceholder={t("staff.contractsSearch")}
+            exportFileName="contracts"
+            emptyTitle={t("staff.noContracts")}
+            emptyDescription={t("staff.noContractsDesc")}
+          />
+        </div>
       )}
 
       <CreateContractSheet open={createOpen} onOpenChange={setCreateOpen} />

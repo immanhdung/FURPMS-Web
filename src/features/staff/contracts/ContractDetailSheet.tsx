@@ -215,7 +215,7 @@ export function ContractDetailSheet({ open, onOpenChange, contractId }: Contract
                     <Button variant="outline" onClick={() => setTerminateOpen(false)}>{t("common.cancel")}</Button>
                     <Button
                       variant="destructive"
-                      disabled={!terminateReason.trim() || terminateMutation.isPending}
+                      disabled={terminateReason.trim().length < 20 || terminateMutation.isPending}
                       onClick={() => terminateMutation.mutate(
                         { id: contract.id, reason: terminateReason.trim() },
                         { onSuccess: () => { setTerminateReason(""); setTerminateOpen(false); } }

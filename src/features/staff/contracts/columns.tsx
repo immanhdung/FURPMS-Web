@@ -34,6 +34,29 @@ export function getContractColumns({ t, proposalTitles, onView, onEdit, onDelete
       header: ({ column }) => <DataTableColumnHeader column={column} title={t("staff.pi")} />,
     },
     {
+      id: "researchType",
+      accessorFn: (row) => row.researchTypeName || row.researchTypeCode || "-",
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t("staff.researchType")} />,
+      cell: ({ row }) => (
+        <span className="inline-flex rounded-full border border-border bg-muted/50 px-2 py-0.5 text-xs font-medium">
+          {row.original.researchTypeName || row.original.researchTypeCode || "-"}
+        </span>
+      ),
+    },
+    {
+      id: "classification",
+      accessorFn: (row) => `${row.cycleCode ?? ""} ${row.trackName ?? row.trackCode ?? ""}`,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t("staff.cycleAndTrack")} />,
+      cell: ({ row }) => (
+        <div className="min-w-32 text-sm">
+          <div className="font-medium">{row.original.cycleCode || "-"}</div>
+          <div className="max-w-48 truncate text-xs text-muted-foreground" title={row.original.trackName ?? undefined}>
+            {row.original.trackName || row.original.trackCode || "-"}
+          </div>
+        </div>
+      ),
+    },
+    {
       accessorKey: "startDate",
       header: ({ column }) => <DataTableColumnHeader column={column} title={t("staff.start")} />,
       cell: ({ row }) => formatDate(row.original.startDate),

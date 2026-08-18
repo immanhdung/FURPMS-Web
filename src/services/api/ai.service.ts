@@ -79,6 +79,13 @@ export const aiService = {
       )
       .then((res) => res.data.data),
 
+  getScoreSuggestions: (councilId: string, proposalId: string) =>
+    axiosClient
+      .get<ApiResponse<AiScoreSuggestion[] | null>>(
+        `/ai/councils/${councilId}/proposals/${proposalId}/score-suggestion`,
+      )
+      .then((res) => res.data.data),
+
   /**
    * Một lần gọi ra CẢ tóm tắt lẫn gợi ý điểm.
    *

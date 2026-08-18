@@ -4,6 +4,14 @@ export interface Contract {
   /** Tên đề tài do BE trả kèm — dùng thẳng, đừng tra ngược từ danh sách đề cương. */
   proposalTitle?: string | null;
   piName?: string | null;
+  researchTypeId?: number;
+  researchTypeCode?: string | null;
+  researchTypeName?: string | null;
+  cycleId?: number;
+  cycleCode?: string | null;
+  trackId?: number;
+  trackCode?: string | null;
+  trackName?: string | null;
   contractNumber?: string | null;
   scopeTitle?: string | null;
   startDate?: string | null;

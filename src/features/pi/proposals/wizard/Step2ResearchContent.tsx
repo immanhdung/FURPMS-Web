@@ -15,6 +15,7 @@ import { IndeterminateProgressBar } from "@/components/shared/ProgressBar";
 import { useResearchTypesQuery } from "@/hooks/useResearchTypes";
 import { useResearchOrdersQuery } from "@/hooks/useResearchOrders";
 import { useExtractProposalMutation } from "@/hooks/useProposalAi";
+import { useAiCooldown } from "@/hooks/useAiCooldown";
 import type { ProposalWizardValues } from "@/features/pi/proposals/wizard/proposal-wizard.schema";
 import type { AiExtractionResult } from "@/types/ai-extraction";
 
@@ -50,6 +51,7 @@ export function Step2ResearchContent({ form, file, onFileChange, proposalId }: S
   const { data: cycleOrders } = useResearchOrdersQuery(cycleId ? { cycleId } : undefined);
 
   const extractMutation = useExtractProposalMutation();
+  const aiCooldown = useAiCooldown();
   const { data: uploadPolicy } = useUploadPolicyQuery();
 
   const [extraction, setExtraction] = useState<{
@@ -112,7 +114,10 @@ export function Step2ResearchContent({ form, file, onFileChange, proposalId }: S
 
   const runExtraction = () => {
     if (!file) return;
-    extractMutation.mutate(file, { onSuccess: applyExtraction });
+    extractMutation.mutate(file, {
+      onSuccess: applyExtraction,
+      onSettled: () => aiCooldown.start(),
+    });
   };
 
   const maxFileSizeMb = uploadPolicy?.maxFileSizeMb ?? 10;
@@ -200,9 +205,11 @@ export function Step2ResearchContent({ form, file, onFileChange, proposalId }: S
         Nay bỏ nhánh, ai cũng dùng chung một đường.
       */}
         <div className="space-y-3">
-          <Button type="button" variant="outline" disabled={!file || extractMutation.isPending} onClick={runExtraction}>
+          <Button type="button" variant="outline" disabled={!file || extractMutation.isPending || aiCooldown.seconds > 0} onClick={runExtraction}>
             {extractMutation.isPending ? <Loader2 className="animate-spin" /> : <Sparkles />}
-            {t("wizard.step2.analyzeAi")}
+            {aiCooldown.seconds > 0
+              ? t("proposal.aiCooldown", { seconds: aiCooldown.seconds })
+              : t("wizard.step2.analyzeAi")}
           </Button>
 
           {extractMutation.isPending && <IndeterminateProgressBar label={t("wizard.step2.extracting")} />}
