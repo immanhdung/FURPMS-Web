@@ -1,11 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { aiService } from "@/services/api/ai.service";
+import type { ApiError } from "@/types/common";
 
 export function useExtractProposalMutation() {
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: (file: File) => aiService.extractFromFile(file),
-    onError: () => toast.error("AI extraction failed. Please fill in the details manually."),
+    onError: (error: ApiError) => toast.error(error.message || t("wizard.step2.extractFailed")),
   });
 }
 

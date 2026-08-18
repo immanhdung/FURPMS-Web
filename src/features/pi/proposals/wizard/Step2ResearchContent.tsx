@@ -2,13 +2,14 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { UseFormReturn } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import { Loader2, Sparkles } from "lucide-react";
+import { CircleAlert, Loader2, Sparkles } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FileDropzone } from "@/components/shared/FileDropzone";
 import { useProposalDocumentsQuery } from "@/hooks/useProposalDocuments";
+import { useUploadPolicyQuery } from "@/hooks/useSystemSettings";
 import { formatDateTime } from "@/utils/format";
 import { IndeterminateProgressBar } from "@/components/shared/ProgressBar";
 import { useResearchTypesQuery } from "@/hooks/useResearchTypes";
@@ -27,7 +28,7 @@ interface Step2Props {
 
 export function Step2ResearchContent({ form, file, onFileChange, proposalId }: Step2Props) {
   const { t } = useTranslation();
-  const { control, watch, setValue } = form;
+  const { control, watch, setValue, getValues, getFieldState } = form;
   const researchTypeId = watch("researchType");
   const cycleId = watch("cycleId");
 
@@ -49,42 +50,72 @@ export function Step2ResearchContent({ form, file, onFileChange, proposalId }: S
   const { data: cycleOrders } = useResearchOrdersQuery(cycleId ? { cycleId } : undefined);
 
   const extractMutation = useExtractProposalMutation();
+  const { data: uploadPolicy } = useUploadPolicyQuery();
 
-  const [extraction, setExtraction] = useState<AiExtractionResult | null>(null);
+  const [extraction, setExtraction] = useState<{
+    result: AiExtractionResult;
+    applied: string[];
+    preserved: string[];
+  } | null>(null);
 
   const applyExtraction = (result: AiExtractionResult) => {
-    setExtraction(result);
-    // Chỉ ghi đè field AI thật sự đọc được — không xoá trắng thứ PI đã gõ tay.
-    const fill = (field: "titleVI" | "titleEN" | "abstractEN" | "objectives" | "methodology" | "expectedOutput",
-                  value?: string | null) => {
-      if (value?.trim()) setValue(field, value.trim(), { shouldValidate: true });
+    const applied: string[] = [];
+    const preserved: string[] = [];
+    type TextField =
+      | "titleVI"
+      | "titleEN"
+      | "abstractEN"
+      | "objectives"
+      | "methodology"
+      | "expectedOutput"
+      | "urgency"
+      | "novelty"
+      | "applicationPotential"
+      | "transferPotential"
+      | "facilities";
+
+    // AI chỉ điền ô trống. Với bản nháp đã có nội dung, dữ liệu người dùng là nguồn ưu tiên và
+    // được giữ nguyên; card kết quả nói rõ ô nào đã được bảo vệ để họ tự đối chiếu nếu cần.
+    const fill = (field: TextField, value: string | null | undefined, label: string) => {
+      if (!value?.trim()) return;
+      if (getValues(field)?.trim()) {
+        preserved.push(label);
+        return;
+      }
+      setValue(field, value.trim(), { shouldValidate: true, shouldDirty: true });
+      applied.push(label);
     };
 
-    fill("titleVI", result.titleVi);
-    fill("titleEN", result.titleEn);
-    fill("abstractEN", result.abstractVi);
-    fill("objectives", result.researchObjectives);
-    fill("methodology", result.methodology);
-    fill("expectedOutput", result.expectedOutput);
-    if (result.durationMonths) setValue("durationMonths", result.durationMonths, { shouldValidate: true });
-  };
+    fill("titleVI", result.titleVi, t("wizard.step2.fieldTitleVI"));
+    fill("titleEN", result.titleEn, t("wizard.step2.fieldTitleEN"));
+    fill("abstractEN", result.abstractVi, t("wizard.step2.fieldAbstract"));
+    fill("objectives", result.researchObjectives, t("wizard.step2.fieldObjectives"));
+    fill("methodology", result.methodology, t("wizard.step2.fieldMethodology"));
+    fill("expectedOutput", result.expectedOutput, t("wizard.step2.fieldExpectedOutput"));
+    fill("urgency", result.urgency, t("wizard.step2.fieldUrgency"));
+    fill("novelty", result.novelty, t("wizard.step2.fieldNovelty"));
+    fill("applicationPotential", result.applicationPotential, t("wizard.step2.fieldApplicationPotential"));
+    fill("transferPotential", result.transferPotential, t("wizard.step2.fieldTransferPotential"));
+    fill("facilities", result.facilities, t("wizard.step2.fieldFacilities"));
 
-  /** Nhãn các trường AI đã điền, để PI biết cần soát lại chỗ nào (rule #10: AI chỉ prefill, PI vẫn duyệt). */
-  const filledFields = (result: AiExtractionResult) =>
-    [
-      result.titleVi && t("wizard.step2.fieldTitleVI"),
-      result.titleEn && t("wizard.step2.fieldTitleEN"),
-      result.abstractVi && t("wizard.step2.fieldAbstract"),
-      result.researchObjectives && t("wizard.step2.fieldObjectives"),
-      result.methodology && t("wizard.step2.fieldMethodology"),
-      result.expectedOutput && t("wizard.step2.fieldExpectedOutput"),
-      result.durationMonths && t("wizard.step2.fieldDuration"),
-    ].filter(Boolean) as string[];
+    if (result.durationMonths && result.durationMonths > 0) {
+      const label = t("wizard.step2.fieldDuration");
+      if (getFieldState("durationMonths").isDirty) preserved.push(label);
+      else {
+        setValue("durationMonths", result.durationMonths, { shouldValidate: true, shouldDirty: true });
+        applied.push(label);
+      }
+    }
+
+    setExtraction({ result, applied, preserved });
+  };
 
   const runExtraction = () => {
     if (!file) return;
     extractMutation.mutate(file, { onSuccess: applyExtraction });
   };
+
+  const maxFileSizeMb = uploadPolicy?.maxFileSizeMb ?? 10;
 
 
   if (!selectedType) {
@@ -155,7 +186,9 @@ export function Step2ResearchContent({ form, file, onFileChange, proposalId }: S
             setExtraction(null);
           }}
           label={isApplied ? t("wizard.step2.uploadApplied") : t("wizard.step2.uploadBasic")}
-          hint={t("wizard.step2.dropHint")}
+          hint={t("wizard.step2.dropHint", { max: maxFileSizeMb })}
+          accept=".pdf,.docx"
+          maxSizeMb={maxFileSizeMb}
         />
       </div>
 
@@ -180,20 +213,44 @@ export function Step2ResearchContent({ form, file, onFileChange, proposalId }: S
               animate={{ opacity: 1, y: 0 }}
               className="space-y-2 rounded-lg border border-border p-3 text-sm"
             >
-              {extraction.warning ? (
-                <p className="text-xs text-warning">{extraction.warning}</p>
-              ) : filledFields(extraction).length === 0 ? (
+              {extraction.result.warning ? (
+                <p className="text-xs text-warning">{extraction.result.warning}</p>
+              ) : extraction.applied.length === 0 &&
+                extraction.preserved.length === 0 &&
+                !(extraction.result.totalBudget && extraction.result.totalBudget > 0) ? (
                 <p className="text-xs text-muted-foreground">{t("wizard.step2.nothingExtracted")}</p>
               ) : (
                 <>
-                  <p className="text-xs font-medium text-muted-foreground">{t("wizard.step2.filledFields")}</p>
-                  <div className="flex flex-wrap gap-1">
-                    {filledFields(extraction).map((label) => (
-                      <Badge key={label} variant="outline">
-                        {label}
-                      </Badge>
-                    ))}
-                  </div>
+                  {extraction.applied.length > 0 && (
+                    <div className="space-y-1.5">
+                      <p className="text-xs font-medium text-muted-foreground">{t("wizard.step2.filledFields")}</p>
+                      <div className="flex flex-wrap gap-1">
+                        {extraction.applied.map((label) => (
+                          <Badge key={label} variant="outline">{label}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {extraction.preserved.length > 0 && (
+                    <div className="space-y-1.5">
+                      <p className="flex items-center gap-1 text-xs font-medium text-warning">
+                        <CircleAlert className="size-3.5" />
+                        {t("wizard.step2.preservedFields")}
+                      </p>
+                      <div className="flex flex-wrap gap-1">
+                        {extraction.preserved.map((label) => (
+                          <Badge key={label} variant="outline">{label}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {extraction.result.totalBudget && extraction.result.totalBudget > 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      {t("wizard.step2.budgetDetected", {
+                        amount: new Intl.NumberFormat(undefined).format(extraction.result.totalBudget),
+                      })}
+                    </p>
+                  )}
                   <p className="pt-1 text-xs text-muted-foreground">{t("wizard.step2.autoFilled")}</p>
                 </>
               )}

@@ -14,6 +14,11 @@ export interface AiExtractionResult {
   researchObjectives?: string | null;
   methodology?: string | null;
   expectedOutput?: string | null;
+  urgency?: string | null;
+  novelty?: string | null;
+  applicationPotential?: string | null;
+  transferPotential?: string | null;
+  facilities?: string | null;
   durationMonths?: number | null;
   totalBudget?: number | null;
   /** BE báo lại khi chưa cấu hình AI hoặc đọc file không ra gì — vẫn cho nhập tay (rule #20). */
