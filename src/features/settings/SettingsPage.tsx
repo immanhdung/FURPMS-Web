@@ -23,12 +23,14 @@ export function SettingsPage() {
   const setTheme = useUiStore((state) => state.setTheme);
   const sampleFillEnabled = useUiStore((state) => state.sampleFillEnabled);
   const setSampleFillEnabled = useUiStore((state) => state.setSampleFillEnabled);
+  const quickScoreFillEnabled = useUiStore((state) => state.quickScoreFillEnabled);
+  const setQuickScoreFillEnabled = useUiStore((state) => state.setQuickScoreFillEnabled);
   const isAdmin = useIsAdmin();
   const { data: systemSettings } = useSystemSettingsQuery(isAdmin);
 
   // Upload có card riêng (kèm danh sách đuôi file) nên tách ra khỏi nhóm chung.
   const byKeys = (keys: string[]) => (systemSettings ?? []).filter((s) => keys.includes(s.key));
-  const councilSettings = byKeys(["COUNCIL_INVITE_DEADLINE_DAYS"]);
+  const councilSettings = byKeys(["COUNCIL_INVITE_DEADLINE_DAYS", "COUNCIL_ALLOW_RESPOND_ON_BEHALF"]);
   const notificationSettings = byKeys(["DEADLINE_REMINDER_DAYS", "EMAIL_ENABLED"]);
   const financeSettings = byKeys(["DISBURSEMENT_WHOLE_TRANCHES", "CONTRACT_SIDE_A_REPRESENTATIVE"]);
 
@@ -57,7 +59,7 @@ export function SettingsPage() {
           <CardTitle>{t("settings.appearance")}</CardTitle>
           <CardDescription>{t("settings.appearanceDesc")}</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-3">
           <div className="flex gap-2">
             {THEME_OPTIONS.map(({ value, labelKey, icon: Icon }) => (
               <Button
@@ -93,6 +95,19 @@ export function SettingsPage() {
               checked={sampleFillEnabled}
               onCheckedChange={setSampleFillEnabled}
               aria-label={t("settings.toggleSampleFill")}
+            />
+          </label>
+          <label className="flex items-start justify-between gap-4 rounded-lg border border-border bg-muted/30 p-3">
+            <span>
+              <span className="block text-sm font-medium text-foreground">{t("settings.quickScoreFill")}</span>
+              <span className="mt-0.5 block text-xs text-muted-foreground">
+                {t("settings.quickScoreFillDesc")}
+              </span>
+            </span>
+            <Switch
+              checked={quickScoreFillEnabled}
+              onCheckedChange={setQuickScoreFillEnabled}
+              aria-label={t("settings.toggleQuickScoreFill")}
             />
           </label>
         </CardContent>

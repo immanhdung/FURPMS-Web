@@ -18,7 +18,7 @@ export function CouncilMembershipsPage() {
   const sortedData = useMemo(() => [...(data ?? [])].reverse(), [data]);
 
   const columns = useMemo(
-    () => getMembershipColumns(t, (membership) => navigate(`${ROUTES.ASSIGNED_REVIEWS}/${membership.councilId}`)),
+    () => getMembershipColumns(t, (membership) => navigate(`${ROUTES.ASSIGNED_REVIEWS}/${membership.councilId}?projectId=${membership.projectId}`)),
     [t, navigate]
   );
 

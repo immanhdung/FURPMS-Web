@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, CalendarClock, ExternalLink, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -24,11 +24,15 @@ import { externalUrl, formatDateTime } from "@/utils/format";
 export function ProposalReviewWorkspace() {
   const { t } = useTranslation();
   const { councilId } = useParams<{ councilId: string }>();
+  const [searchParams] = useSearchParams();
+  const projectId = searchParams.get("projectId");
   const navigate = useNavigate();
   const { data: memberships, isLoading } = useMyMembershipsQuery();
   const { data: meetings } = useCouncilMeetingsQuery(councilId ?? null);
 
-  const membership = memberships?.find((m) => m.councilId === councilId);
+  const membership = memberships?.find((m) =>
+    m.councilId === councilId && (!projectId || m.projectId === projectId)
+  );
   // Thông tin đề tài PI nhập (rule tuần 10 — reviewer cần đọc, không chỉ file đính kèm).
   const { data: proposal } = useProposalQuery(membership?.proposalId ?? null);
 
@@ -205,7 +209,7 @@ export function ProposalReviewWorkspace() {
             {isAcceptanceRound && (
               <TabsContent value="acceptance">
                 {isRoundOpen ? (
-                  <AcceptanceEvaluationForm councilId={councilId} />
+                  <AcceptanceEvaluationForm councilId={councilId} projectId={membership.projectId} />
                 ) : (
                   <EmptyState
                     icon={Lock}

@@ -1,4 +1,4 @@
-import { CalendarClock, Gavel, LayoutDashboard, Mail, TrendingUp, UserPlus, type LucideIcon } from "lucide-react";
+import { CalendarClock, Gavel, LayoutDashboard, Mail, Scale, TrendingUp, type LucideIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
 import { KpiCard, KpiCardSkeleton } from "@/components/shared/KpiCard";
@@ -22,7 +22,7 @@ const KPI_ICONS: Record<string, LucideIcon> = {
 const QUICK_ACTIONS: QuickAction[] = [
   { labelKey: "dashboard.actions.createCouncil", path: ROUTES.COUNCILS, icon: Gavel },
   { labelKey: "dashboard.actions.scheduleMeeting", path: ROUTES.MEETINGS, icon: CalendarClock },
-  { labelKey: "dashboard.actions.inviteReviewer", path: ROUTES.ASSIGNMENTS, icon: UserPlus },
+  { labelKey: "nav.reviewBoard", path: ROUTES.REVIEW_BOARD, icon: Scale },
   { labelKey: "nav.proposalReviews", path: ROUTES.PROPOSAL_REVIEWS, icon: TrendingUp },
 ];
 

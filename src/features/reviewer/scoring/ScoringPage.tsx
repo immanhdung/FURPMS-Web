@@ -19,7 +19,7 @@ export function ScoringPage() {
       emptyDescription={t("reviewer.nothingToScoreDesc")}
       filter={(m) => isAcceptedInvitation(m.status) && m.roundStatus?.toUpperCase() === "OPEN"}
       renderActions={(membership) => (
-        <Button size="sm" onClick={() => navigate(`${ROUTES.ASSIGNED_REVIEWS}/${membership.councilId}`)}>
+        <Button size="sm" onClick={() => navigate(`${ROUTES.ASSIGNED_REVIEWS}/${membership.councilId}?projectId=${membership.projectId}`)}>
           <Star />
           {t("reviewer.scoreNow")}
         </Button>

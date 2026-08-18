@@ -1,6 +1,6 @@
 import { axiosClient } from "@/services/api/axiosClient";
 import type { ApiResponse } from "@/types/common";
-import type { SystemSetting, UploadPolicy } from "@/types/system-setting";
+import type { CouncilPolicy, SystemSetting, UploadPolicy } from "@/types/system-setting";
 
 export const systemSettingService = {
   /** Admin only. */
@@ -14,6 +14,12 @@ export const systemSettingService = {
   scoringPolicy: () =>
     axiosClient
       .get<ApiResponse<{ scoreDecimalPlaces: number }>>("/system-settings/scoring-policy")
+      .then((res) => res.data.data),
+
+  /** Staff đọc để ẩn thao tác trả lời thay khi Admin đã tắt chính sách này. */
+  councilPolicy: () =>
+    axiosClient
+      .get<ApiResponse<CouncilPolicy>>("/system-settings/council-policy")
       .then((res) => res.data.data),
 
   update: (key: string, value: string) =>

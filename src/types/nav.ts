@@ -7,4 +7,6 @@ export interface NavItem {
   path: string;
   icon: LucideIcon;
   roles: Role[];
+  /** Giữ route và phân quyền nhưng không bày thêm một mục trùng chức năng trên sidebar. */
+  hidden?: boolean;
 }

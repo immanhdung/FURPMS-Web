@@ -15,6 +15,7 @@ import { useSendInvitationsMutation } from "@/hooks/useCouncils";
 import { AddCouncilMemberDialog } from "@/features/staff/proposal-reviews/AddCouncilMemberDialog";
 import { formatDateTime } from "@/utils/format";
 import type { CouncilMember } from "@/types/council-member";
+import { useCouncilPolicyQuery } from "@/hooks/useSystemSettings";
 
 interface CouncilMembersPanelProps {
   councilId: string;
@@ -26,6 +27,7 @@ export function CouncilMembersPanel({ councilId, trackId }: CouncilMembersPanelP
   const { data: members, isLoading } = useCouncilMembersQuery(councilId);
   const sendInvitationsMutation = useSendInvitationsMutation(councilId);
   const respondOnBehalfMutation = useRespondOnBehalfMutation(councilId);
+  const { data: councilPolicy } = useCouncilPolicyQuery();
   const removeMutation = useRemoveCouncilMemberMutation(councilId);
 
   const [addOpen, setAddOpen] = useState(false);
@@ -101,7 +103,7 @@ export function CouncilMembersPanel({ councilId, trackId }: CouncilMembersPanelP
                 {/* CHỈ hiện khi đã GỬI thư mời. Trước đây hiện cả lúc mới gán người (ASSIGNED) —
                     ghi nhận "đã trả lời" khi chưa có thư nào để trả lời là hồ sơ tự mâu thuẫn,
                     và máy chủ nay chặn hẳn. */}
-                {member.status?.toLowerCase() === "invited" && (
+                {councilPolicy?.allowRespondOnBehalf && member.status?.toLowerCase() === "invited" && (
                   <Button
                     variant="ghost"
                     size="icon-sm"
@@ -116,7 +118,7 @@ export function CouncilMembersPanel({ councilId, trackId }: CouncilMembersPanelP
                 {/* Nút này TỪNG GỌI NHẦM endpoint dành cho chính thành viên (`PATCH /respond`)
                     nên chuyên viên luôn ăn 403 "Bạn chỉ trả lời được thư mời gửi cho chính mình".
                     Nhánh xác nhận đã chuyển sang endpoint riêng từ trước, nhánh từ chối bị bỏ sót. */}
-                {member.status?.toLowerCase() === "invited" && (
+                {councilPolicy?.allowRespondOnBehalf && member.status?.toLowerCase() === "invited" && (
                   <Button
                     variant="ghost"
                     size="icon-sm"

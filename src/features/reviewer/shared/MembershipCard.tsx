@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
-import { CalendarClock, FolderKanban, User } from "lucide-react";
+import { CalendarClock, CalendarRange, FolderKanban, User } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { MemberRoleBadge, RoundTypeBadge } from "@/components/shared/RoleBadge";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -12,9 +12,10 @@ interface MembershipCardProps {
   membership: MyMembership;
   actions?: ReactNode;
   index?: number;
+  wrapTitle?: boolean;
 }
 
-export function MembershipCard({ membership, actions, index = 0 }: MembershipCardProps) {
+export function MembershipCard({ membership, actions, index = 0, wrapTitle = false }: MembershipCardProps) {
   const { t } = useTranslation();
   return (
     <motion.div
@@ -25,7 +26,7 @@ export function MembershipCard({ membership, actions, index = 0 }: MembershipCar
       <Card className="transition-shadow duration-200 hover:shadow-soft-md">
         <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-foreground">
+            <p className={wrapTitle ? "text-sm font-medium leading-6 text-foreground" : "truncate text-sm font-medium text-foreground"}>
               {membership.proposalTitleVI || t("common.untitledProposal")}
             </p>
             <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
@@ -45,6 +46,11 @@ export function MembershipCard({ membership, actions, index = 0 }: MembershipCar
               {membership.trackName && (
                 <span className="inline-flex items-center gap-1">
                   <FolderKanban className="size-3" /> {membership.trackName}
+                </span>
+              )}
+              {membership.cycleCode && (
+                <span className="inline-flex items-center gap-1">
+                  <CalendarRange className="size-3" /> {membership.cycleCode}
                 </span>
               )}
               {membership.nextMeetingAt && (

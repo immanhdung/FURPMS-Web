@@ -12,6 +12,9 @@ export interface MyMembership {
   proposalTitleVI?: string | null;
   proposalStatus?: string | null;
   piName?: string | null;
+  cycleId?: number | null;
+  cycleCode?: string | null;
+  trackId?: number | null;
   trackName?: string | null;
   createdAt?: string | null;
   nextMeetingAt?: string | null;

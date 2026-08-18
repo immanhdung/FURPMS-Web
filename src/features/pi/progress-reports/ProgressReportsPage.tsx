@@ -22,6 +22,10 @@ export function ProgressReportsPage() {
   const [viewingId, setViewingId] = useState<string | null>(null);
 
   const contractId = selectedContractId ?? contracts?.[0]?.id ?? null;
+  const selectedContract = contracts?.find((contract) => contract.id === contractId);
+  const selectedContractTitle = selectedContract
+    ? proposalTitleById.get(selectedContract.proposalId)
+    : undefined;
   const { data: reports, isLoading: isReportsLoading } = useProgressReportsQuery(contractId);
 
   return (
@@ -53,17 +57,22 @@ export function ProgressReportsPage() {
               {t("reports.contractLabel")}
             </label>
             <Select value={contractId ?? undefined} onValueChange={setSelectedContractId}>
-              <SelectTrigger className="w-full sm:w-96">
+              <SelectTrigger
+                className="w-full max-w-xl overflow-hidden sm:w-96 [&_[data-slot=select-value]]:block [&_[data-slot=select-value]]:min-w-0 [&_[data-slot=select-value]]:truncate"
+                title={selectedContractTitle}
+              >
                 <SelectValue placeholder={t("reports.selectContract")} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-w-[min(36rem,calc(100vw-2rem))]">
                 {contracts.map((contract) => {
                   const title = proposalTitleById.get(contract.proposalId);
                   return (
-                    <SelectItem key={contract.id} value={contract.id}>
-                      {contract.contractNumber
-                        ? `${t("reports.contractNo", { no: contract.contractNumber })}${title ? ` — ${title}` : ""}`
-                        : title || contract.id}
+                    <SelectItem key={contract.id} value={contract.id} className="items-start">
+                      <span className="block max-w-[32rem] whitespace-normal break-words pr-1 leading-5">
+                        {contract.contractNumber
+                          ? `${t("reports.contractNo", { no: contract.contractNumber })}${title ? ` — ${title}` : ""}`
+                          : title || contract.id}
+                      </span>
                     </SelectItem>
                   );
                 })}

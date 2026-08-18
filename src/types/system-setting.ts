@@ -18,6 +18,10 @@ export interface UploadPolicy {
   allowedExtensions: string[];
 }
 
+export interface CouncilPolicy {
+  allowRespondOnBehalf: boolean;
+}
+
 export const SYSTEM_SETTING_KEYS = {
   UPLOAD_MAX_FILE_SIZE_MB: "UPLOAD_MAX_FILE_SIZE_MB",
   UPLOAD_ALLOWED_EXTENSIONS: "UPLOAD_ALLOWED_EXTENSIONS",

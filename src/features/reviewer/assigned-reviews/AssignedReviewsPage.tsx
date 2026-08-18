@@ -19,7 +19,7 @@ export function AssignedReviewsPage() {
       emptyDescription={t("reviewer.noAssignedDesc")}
       filter={(m) => isAcceptedInvitation(m.status)}
       renderActions={(membership) => (
-        <Button size="sm" variant="outline" onClick={() => navigate(`${ROUTES.ASSIGNED_REVIEWS}/${membership.councilId}`)}>
+        <Button size="sm" variant="outline" onClick={() => navigate(`${ROUTES.ASSIGNED_REVIEWS}/${membership.councilId}?projectId=${membership.projectId}`)}>
           <Eye />
           {t("reviewer.reviewBtn")}
         </Button>

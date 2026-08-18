@@ -21,11 +21,15 @@ export function RoundProposalsPanel({ round, cycleId, trackId, trackProjects }: 
   const inRound = new Set(round.projects.map((p) => p.projectId));
   // Đề tài ĐÃ NỘP trong lĩnh vực nhưng chưa vào vòng này (kể cả nộp trễ sau khi vòng chạy).
   // Với vòng XÉT DUYỆT: chỉ hiện đề tài CHƯA qua duyệt (PROPOSED/UNDER_REVIEW) — bỏ đề tài đã
-  // APPROVED/đang nghiệm thu (vd abc2) khỏi lỡ tay xét lại. Vòng khác (nghiệm thu) giữ nguyên.
+  // APPROVED/đang nghiệm thu khỏi lỡ tay xét lại. Với vòng NGHIỆM THU chỉ hiện đề tài đã chuyển sang
+  // trạng thái ACCEPTANCE; backend còn kiểm tra vòng 1 đã Đạt và báo cáo tổng kết đã được Staff duyệt.
   const isReview = round.roundType?.toUpperCase() === "REVIEW";
+  const isAcceptance = round.roundType?.toUpperCase() === "ACCEPTANCE";
   const reviewable = ["PROPOSED", "UNDER_REVIEW"];
   const available = trackProjects.filter(
-    (p) => !inRound.has(p.projectId) && (!isReview || reviewable.includes((p.projectStatus ?? "").toUpperCase()))
+    (p) => !inRound.has(p.projectId)
+      && (!isReview || reviewable.includes((p.projectStatus ?? "").toUpperCase()))
+      && (!isAcceptance || (p.projectStatus ?? "").toUpperCase() === "ACCEPTANCE")
   );
   // Chỉ thêm được vào vòng còn PENDING/OPEN (rule #17). Vòng đã PASSED/CLOSED → chỉ hiện để biết.
   const status = round.status?.toUpperCase();

@@ -14,6 +14,7 @@ import { useRubricForCouncilQuery } from "@/hooks/useRubricTemplates";
 import { useScoreSuggestionsQuery } from "@/hooks/useProposalAi";
 import type { AiScoreSuggestion } from "@/types/ai-tools";
 import type { ScoreDetailPayload } from "@/types/review-scoring";
+import { useUiStore } from "@/store/ui.store";
 
 interface RubricScoringFormProps {
   councilId: string;
@@ -29,6 +30,7 @@ interface RubricScoringFormProps {
 
 export function RubricScoringForm({ councilId, proposalId, projectId }: RubricScoringFormProps) {
   const { t } = useTranslation();
+  const quickScoreFillEnabled = useUiStore((state) => state.quickScoreFillEnabled);
 
   /**
    * Bước nhảy ô điểm do Admin quy định (`SCORE_DECIMAL_PLACES`, mặc định 0 = số nguyên).
@@ -182,7 +184,7 @@ export function RubricScoringForm({ councilId, proposalId, projectId }: RubricSc
         </div>
       </div>
 
-      {activeCriteria.length > 0 && (
+      {quickScoreFillEnabled && activeCriteria.length > 0 && (
         <div className="flex justify-end">
           <Button type="button" variant="outline" size="sm" onClick={fillAll}>
             <Wand2 />

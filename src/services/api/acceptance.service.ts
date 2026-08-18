@@ -7,9 +7,11 @@ export const acceptanceService = {
    * Phiếu nghiệm thu của CHÍNH mình (null nếu chưa chấm). Trước đây gọi `/acceptance` — endpoint đó
    * trả MẢNG mọi phiếu và chỉ cho Admin/Staff → reviewer bị 403 + form seed sai.
    */
-  get: (councilId: string) =>
+  get: (councilId: string, projectId: string) =>
     axiosClient
-      .get<ApiResponse<AcceptanceResponse | null>>(`/councils/${councilId}/acceptance/my`)
+      .get<ApiResponse<AcceptanceResponse | null>>(`/councils/${councilId}/acceptance/my`, {
+        params: { projectId },
+      })
       .then((res) => res.data.data),
 
   submit: (councilId: string, payload: AcceptancePayload) =>

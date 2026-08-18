@@ -54,7 +54,8 @@ const PRIMARY_NAV_ITEMS: NavItem[] = [
   { labelKey: "nav.reviewBoard", path: ROUTES.REVIEW_BOARD, icon: Scale, roles: [ROLES.ADMIN, ROLES.STAFF] },
   { labelKey: "nav.councils", path: ROUTES.COUNCILS, icon: Gavel, roles: [ROLES.STAFF] },
   { labelKey: "nav.meetings", path: ROUTES.MEETINGS, icon: CalendarClock, roles: [ROLES.STAFF, ROLES.REVIEW_COMMITTEE] },
-  { labelKey: "nav.assignments", path: ROUTES.ASSIGNMENTS, icon: UserCheck, roles: [ROLES.STAFF] },
+  // Phân công đã được gom vào Hội đồng & Chấm. Giữ route cũ để bookmark/link cũ không 404.
+  { labelKey: "nav.assignments", path: ROUTES.ASSIGNMENTS, icon: UserCheck, roles: [ROLES.STAFF], hidden: true },
   { labelKey: "nav.contracts", path: ROUTES.CONTRACTS, icon: FileSignature, roles: [ROLES.STAFF] },
   { labelKey: "nav.changeRequests", path: ROUTES.CHANGE_REQUESTS, icon: FileEdit, roles: [ROLES.STAFF] },
   // Tạm ẩn: chưa dùng tới, để khỏi rối menu demo — route/page vẫn còn, bật lại chỉ cần bỏ comment.
@@ -119,6 +120,7 @@ export const NAV_ITEMS: NavItem[] = [...PRIMARY_NAV_ITEMS, ...BOTTOM_NAV_ITEMS];
 export function getNavItemsForRoles(roles: Role[]): NavItem[] {
   const seen = new Set<string>();
   return NAV_ITEMS.filter((item) => {
+    if (item.hidden) return false;
     if (!item.roles.some((role) => roles.includes(role))) return false;
     const key = `${item.labelKey}:${item.path}`;
     if (seen.has(key)) return false;

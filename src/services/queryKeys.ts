@@ -102,7 +102,7 @@ export const queryKeys = {
     list: (councilId: string) => ["feedback", "list", councilId] as const,
   },
   acceptance: {
-    detail: (councilId: string) => ["acceptance", "detail", councilId] as const,
+    detail: (councilId: string, projectId: string) => ["acceptance", "detail", councilId, projectId] as const,
   },
   decision: {
     detail: (councilId: string) => ["decision", "detail", councilId] as const,

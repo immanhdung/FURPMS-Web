@@ -8,14 +8,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAcceptanceQuery, useSubmitAcceptanceMutation } from "@/hooks/useAcceptance";
 import { ACCEPTANCE_RESULTS } from "@/types/acceptance";
 
-export function AcceptanceEvaluationForm({ councilId }: { councilId: string }) {
+export function AcceptanceEvaluationForm({ councilId, projectId }: { councilId: string; projectId: string }) {
   const { t } = useTranslation();
-  const { data: existing, isLoading } = useAcceptanceQuery(councilId);
-  const submitMutation = useSubmitAcceptanceMutation(councilId);
+  const { data: existing, isLoading } = useAcceptanceQuery(councilId, projectId);
+  const submitMutation = useSubmitAcceptanceMutation(councilId, projectId);
 
   const [result, setResult] = useState<string>(ACCEPTANCE_RESULTS[0]);
   const [failReason, setFailReason] = useState("");
-  const [seededFor, setSeededFor] = useState<string | null>(null);
+  const [seededFor, setSeededFor] = useState<number | null>(null);
 
   if (existing && existing.id !== seededFor) {
     setSeededFor(existing.id);
@@ -62,7 +62,7 @@ export function AcceptanceEvaluationForm({ councilId }: { councilId: string }) {
 
       <div className="flex justify-end">
         <Button
-          onClick={() => submitMutation.mutate({ result, failReason: result === "FAIL" ? failReason || undefined : undefined })}
+          onClick={() => submitMutation.mutate({ projectId, result, failReason: result === "FAIL" ? failReason || undefined : undefined })}
           disabled={submitMutation.isPending}
         >
           {submitMutation.isPending ? <Loader2 className="animate-spin" /> : <Save />}

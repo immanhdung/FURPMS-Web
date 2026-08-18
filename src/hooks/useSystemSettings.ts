@@ -18,6 +18,14 @@ export function useScoringPolicyQuery() {
   });
 }
 
+export function useCouncilPolicyQuery() {
+  return useQuery({
+    queryKey: ["system-settings", "council-policy"],
+    queryFn: systemSettingService.councilPolicy,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
 export function useSystemSettingsQuery(enabled = true) {
   return useQuery({
     queryKey: queryKeys.systemSettings.list(),

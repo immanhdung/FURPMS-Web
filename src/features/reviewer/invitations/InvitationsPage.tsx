@@ -10,6 +10,7 @@ import { useMyMembershipsQuery, useRespondToInvitationMutation } from "@/hooks/u
 import { MembershipCard } from "@/features/reviewer/shared/MembershipCard";
 import { DeclineInvitationDialog } from "@/features/reviewer/invitations/DeclineInvitationDialog";
 import { INVITATION_STATUS } from "@/constants/statuses";
+import type { MyMembership } from "@/types/membership";
 
 export function InvitationsPage() {
   const { t } = useTranslation();
@@ -20,7 +21,19 @@ export function InvitationsPage() {
   // MyMembershipDto has no invitedAt/sentAt timestamp to sort by — the backend returns rows in
   // creation order (oldest first), so reversing approximates "newest first" until it exposes a
   // real timestamp field (same gap as CouncilMemberResponse.invitationSentAt, just missing here).
-  const pending = (data ?? []).filter((m) => m.status?.toUpperCase() === INVITATION_STATUS.PENDING).reverse();
+  const pendingByMember = new Map<string, MyMembership[]>();
+  for (const membership of data ?? []) {
+    if (membership.status?.toUpperCase() !== INVITATION_STATUS.PENDING) continue;
+    const group = pendingByMember.get(membership.memberId) ?? [];
+    group.push(membership);
+    pendingByMember.set(membership.memberId, group);
+  }
+  // Một lời mời xác nhận tư cách trong HỘI ĐỒNG, không phải từng đề tài. API trả một dòng/đề tài để
+  // màn chấm không làm mất bài thứ hai, nên tại đây gộp lại thành đúng một thẻ lời mời và liệt kê phạm vi.
+  const pending = Array.from(pendingByMember.values()).map((group) => ({
+    ...group[0],
+    proposalTitleVI: group.map((m) => m.proposalTitleVI).filter(Boolean).join("; "),
+  })).reverse();
 
   return (
     <div className="space-y-6">
@@ -51,6 +64,7 @@ export function InvitationsPage() {
               key={membership.memberId}
               membership={membership}
               index={index}
+              wrapTitle
               actions={
                 <>
                   <Button
