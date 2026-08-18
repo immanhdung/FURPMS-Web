@@ -173,7 +173,23 @@ export function AppRouter() {
   useBootstrapAuth();
 
   return (
-    <BrowserRouter>
+    /*
+     * `useTransitions={false}` — đổi địa chỉ phải commit ĐỒNG BỘ, không đi qua `startTransition`.
+     *
+     * Lỗi thật: đang ở `/contracts` với vai Cán bộ, bấm đổi sang Giảng viên ở menu avatar → văng
+     * ra màn "Bạn không có quyền truy cập trang này" thay vì về bảng điều khiển. `switchRole` chạy
+     * hai việc liền nhau: ghi `activeRole` rồi `navigate("/dashboard")`. Từ React Router v7, mặc
+     * định mọi thay đổi địa chỉ được bọc trong `React.startTransition` — trong khi store zustand
+     * đọc qua `useSyncExternalStore` thì **không hoãn được**, luôn render đồng bộ. Kết quả là React
+     * commit một lượt với *(vai MỚI, địa chỉ CŨ)*: `RoleGuard` của trang cũ thấy vai không hợp lệ
+     * và bắn `<Navigate to="/unauthorized" replace>`, đè luôn điều hướng về dashboard đang chờ.
+     *
+     * Toàn bộ code trong app viết theo giả định "đổi state rồi navigate" là một lượt — đây là chỗ
+     * duy nhất sửa lại cho đúng giả định đó, thay vì đi vá từng chỗ gọi navigate.
+     * Đánh đổi: vào một route lần đầu (route nào cũng `lazy`) sẽ hiện `PageLoader` thay vì giữ màn
+     * cũ trong lúc tải chunk. Đổi lại là điều hướng không còn tự ý đá người dùng đi chỗ khác.
+     */
+    <BrowserRouter useTransitions={false}>
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route element={<PublicOnlyRoute />}>

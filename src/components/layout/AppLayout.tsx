@@ -1,9 +1,11 @@
+import { Suspense } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { CommandPalette } from "@/components/command/CommandPalette";
 import { DevClockWidget } from "@/components/shared/DevClockWidget";
+import { PageLoader } from "@/components/shared/PageLoader";
 
 export function AppLayout() {
   const location = useLocation();
@@ -37,7 +39,14 @@ export function AppLayout() {
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
             >
-              <Outlet />
+              {/* Ranh giới Suspense nằm ở ĐÂY, không phải ngoài <Routes>: mọi trang đều `lazy`,
+                  nên lần đầu mở một trang là phải tải chunk. Bọc ngoài thì cả sidebar lẫn header
+                  biến mất trong lúc chờ — nhìn như app khởi động lại. Bọc trong thì chỉ vùng nội
+                  dung hiện loader, khung điều hướng đứng yên. Chỉ tốn một lần cho mỗi trang mỗi
+                  phiên: `React.lazy` nhớ module đã tải, vào lại là dựng thẳng, không chờ nữa. */}
+              <Suspense fallback={<PageLoader />}>
+                <Outlet />
+              </Suspense>
             </motion.div>
           </AnimatePresence>
         </main>

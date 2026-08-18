@@ -13,9 +13,13 @@
 
 | Thư mục | Repo | Trạng thái |
 |---|---|---|
-| `D:\Downloads\doc\9 đồ án\core\FURPMS-Web` | `immanhdung/FURPMS-Web` | ✅ **FE — chính là repo này** |
-| `D:\capstone\FURPMS_BEv2` | `trunghq54/FURPMS_BEv2` | ✅ **BE đang dùng** |
+| `D:\capstone\newroot\furpms-web` | `immanhdung/FURPMS-Web` | ✅ **FE — chính là repo này** |
+| `D:\capstone\newroot\FURPMS_BEv2` | `trunghq54/FURPMS_BEv2` | ✅ **BE đang dùng** |
 | `D:\Downloads\doc\9 đồ án\FURPMS\FURPMS_BE` | `trunghq54/FURPMS_BE` | ❌ **BE CŨ, chết từ 02/08/2026** |
+
+> Cập nhật 18/08: hai repo đang dùng đã gom về **`D:\capstone\newroot\`** (mở chung một workspace
+> VS Code). Đường dẫn cũ `D:\Downloads\doc\9 đồ án\core\FURPMS-Web` ghi ở các bản doc khác **không
+> còn đúng** — kể cả câu `cd core/FURPMS-Web` trong doc của repo BE.
 
 Có một repo FE cũ đuôi `v0` **đã bỏ hẳn** — không bao giờ đụng tới.
 
@@ -122,6 +126,24 @@ nút "Vào họp" điều hướng vào đường dẫn tương đối) và `pro
 `axiosClient.resolveMessage` cố ý **ưu tiên `message` cụ thể** của máy chủ hơn bản dịch theo mã,
 vì mã của 400/409 chỉ là thùng chứa chung (`VALIDATION_FAILED`/`CONFLICT`). Câu máy chủ trả về
 thường đã nêu luôn cách xử lý — nuốt nó rồi in câu chung chung là người dùng không biết làm gì tiếp.
+
+### 3.5 `<BrowserRouter useTransitions={false}>` — ĐỪNG gỡ prop này (18/08)
+
+Từ **react-router v7**, mặc định mọi thay đổi địa chỉ được bọc trong `React.startTransition`. Còn
+store zustand đọc qua `useSyncExternalStore` thì **không hoãn được, luôn render đồng bộ**. Hệ quả
+cho mọi đoạn code kiểu *"đổi state rồi `navigate`"*: React commit một lượt trung gian với
+**(state MỚI, địa chỉ CŨ)**.
+
+Lỗi thật đã cắn: `UserMenu.switchRole` ghi `activeRole` rồi `navigate("/dashboard")`. Đang ở
+`/contracts` với vai Cán bộ mà đổi sang Giảng viên → lượt trung gian đó khiến `RoleGuard` của
+trang cũ bắn `<Navigate to="/unauthorized">`, **đè luôn** điều hướng về dashboard ⇒ người dùng
+văng ra màn "Bạn không có quyền truy cập trang này". Tái hiện 100%, không phải ngẫu nhiên.
+
+Đã thử `useDeferredValue` trong `RoleGuard` — **không ăn thua** (external store không hoãn được).
+Cách đúng là trả điều hướng về đồng bộ ở `AppRouter.tsx`. Đổi lại, ranh giới `<Suspense>` phải nằm
+**trong `AppLayout`** (quanh `<Outlet/>`), không phải ngoài `<Routes>` — không thì lần đầu mở mỗi
+trang là cả sidebar lẫn header biến mất trong lúc tải chunk. Chỉ tốn một lần mỗi trang mỗi phiên
+(`React.lazy` nhớ module đã tải) — đã đo bằng `MutationObserver`, vào lại lần hai không hiện loader.
 
 ---
 
