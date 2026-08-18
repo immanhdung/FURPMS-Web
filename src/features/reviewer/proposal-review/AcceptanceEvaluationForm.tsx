@@ -42,9 +42,11 @@ export function AcceptanceEvaluationForm({ councilId }: { councilId: string }) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
+            {/* PASS/FAIL là mã gửi lên máy chủ, không phải chữ cho người đọc — bảng dịch
+                `status.*` đã có sẵn "Đạt"/"Không đạt", dùng lại cho khớp các màn khác. */}
             {ACCEPTANCE_RESULTS.map((value) => (
               <SelectItem key={value} value={value}>
-                {value}
+                {t(`status.${value}`, { defaultValue: value })}
               </SelectItem>
             ))}
           </SelectContent>

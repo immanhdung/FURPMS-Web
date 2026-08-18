@@ -23,6 +23,14 @@ export function getRoundBucket(round: ReviewRound): RoundBucket {
   return "not_started";
 }
 
+/**
+ * "Vòng 2 · Nghiệm thu" — KHÔNG phải "Vòng 2 · ACCEPTANCE".
+ * `roundType` là enum của BE; bảng dịch nằm ở `reviewBoard.type.*` (đổi nhãn hiển thị ở đó, mã bên trái
+ * là cố định vì vòng đời đề tài dựa vào ACCEPTANCE để chuyển sang COMPLETED).
+ */
 export function roundTitle(round: ReviewRound, t: TFunction) {
-  return `${t("staff.round", { num: round.roundNumber })}${round.roundType ? ` · ${round.roundType}` : ""}`;
+  const type = round.roundType
+    ? ` · ${t(`reviewBoard.type.${round.roundType}`, { defaultValue: round.roundType })}`
+    : "";
+  return `${t("staff.round", { num: round.roundNumber })}${type}`;
 }

@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { CheckCircle2, FileText, Package, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusBadge } from "@/components/shared/StatusBadge";
+import { DocumentViewer } from "@/components/shared/DocumentViewer";
 import { axiosClient } from "@/services/api/axiosClient";
+import { fetchFileBlob } from "@/services/api/fileDownload";
 import { formatDate, formatDateTime } from "@/utils/format";
 import type { ApiResponse } from "@/types/common";
 import type { AcceptanceDossier } from "@/types/acceptance-dossier";
@@ -44,6 +46,23 @@ export function AcceptanceDossierPanel({
         .then((res) => res.data.data),
     enabled: Boolean(councilId && proposalId),
   });
+
+  /*
+   * Tra ngược file theo id: `DocumentViewer` chỉ cầm id, còn mỗi file lại có `downloadUrl` riêng
+   * (báo cáo tổng kết đi qua /final-reports/…, không phải endpoint tài liệu đề cương).
+   *
+   * `useMemo`/`useCallback` ở đây KHÔNG phải để tối ưu: `DocumentViewer` để `fetchBlob` trong deps
+   * của effect tải file, nên hàm mới mỗi lần render là tải file vô tận.
+   */
+  const finalReportFiles = useMemo(() => data?.finalReport?.files ?? [], [data?.finalReport?.files]);
+  const fetchFinalReportBlob = useCallback(
+    (documentId: string) => {
+      const file = finalReportFiles.find((f) => f.id === documentId);
+      if (!file) return Promise.reject(new Error("Không tìm thấy file"));
+      return fetchFileBlob(file.downloadUrl);
+    },
+    [finalReportFiles]
+  );
 
   if (isLoading) return <Skeleton className="h-56 w-full rounded-xl" />;
   if (!data) return null;
@@ -162,14 +181,27 @@ export function AcceptanceDossierPanel({
           {t("dossier.finalReport")}
         </h3>
         {data.finalReport ? (
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border border-border px-3 py-2 text-xs">
-            <StatusBadge status={data.finalReport.status} />
-            <span className="text-muted-foreground">
-              {data.finalReport.submittedAt
-                ? t("dossier.submittedAt", { date: formatDateTime(data.finalReport.submittedAt) })
-                : t("dossier.notSubmitted")}
-            </span>
-            {!data.finalReport.hasFile && <span className="text-warning">{t("dossier.noFile")}</span>}
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border border-border px-3 py-2 text-xs">
+              <StatusBadge status={data.finalReport.status} />
+              <span className="text-muted-foreground">
+                {data.finalReport.submittedAt
+                  ? t("dossier.submittedAt", { date: formatDateTime(data.finalReport.submittedAt) })
+                  : t("dossier.notSubmitted")}
+              </span>
+              {!data.finalReport.hasFile && <span className="text-warning">{t("dossier.noFile")}</span>}
+            </div>
+
+            {/* Đọc được NỘI DUNG báo cáo, không chỉ biết là "đã tiếp nhận" — hội đồng nghiệm thu
+                kết luận đạt/không đạt dựa vào chính file này. Dùng đúng bộ xem của vòng xét duyệt
+                để hai vòng thao tác giống nhau; nhiều file thì chọn ở ô trên đầu khung. */}
+            {finalReportFiles.length > 0 && (
+              <DocumentViewer
+                documents={finalReportFiles}
+                fetchBlob={fetchFinalReportBlob}
+                className="h-[60vh]"
+              />
+            )}
           </div>
         ) : (
           <p className="text-xs text-muted-foreground">{t("dossier.noFinalReport")}</p>

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/tables/DataTable";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { useGlobalDocumentsQuery } from "@/hooks/useGlobalDocuments";
+import { saveFile } from "@/services/api/fileDownload";
 import { formatDateTime } from "@/utils/format";
 import type { GlobalDocument } from "@/services/api/global-document.service";
 
@@ -82,15 +83,11 @@ export function DocumentRepositoryPage() {
           const url = doc.downloadUrl;
           if (!url) return null;
           return (
-            <Button
-              size="sm"
-              variant="ghost"
-              asChild
-            >
-              <a href={url} target="_blank" rel="noopener noreferrer" download={doc.fileName}>
-                <Download className="size-4" />
-                {t("documents.downloadBtn")}
-              </a>
+            // Tải qua axios để kèm được Authorization — <a href> trần luôn 401 (xem
+            // `services/api/fileDownload.ts`).
+            <Button size="sm" variant="ghost" onClick={() => void saveFile(url, doc.fileName)}>
+              <Download className="size-4" />
+              {t("documents.downloadBtn")}
             </Button>
           );
         },

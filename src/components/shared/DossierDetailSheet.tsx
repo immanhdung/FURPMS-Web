@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { ExternalLink, FileText, Paperclip } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { StatusBadge } from "@/components/shared/StatusBadge";
+import { openFileInNewTab } from "@/services/api/fileDownload";
 import { externalUrl, formatDateTime } from "@/utils/format";
 
 /**
@@ -85,18 +86,20 @@ function FileList({ title, files }: { title: string; files?: DossierFile[] | nul
           const size = formatSize(f.sizeBytes);
           return (
             <li key={f.id}>
-              <a
-                href={f.downloadUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-start gap-1.5 text-sm text-primary hover:underline"
+              {/* Nút chứ KHÔNG phải <a href>: endpoint tải file có [Authorize] mà token nằm ở
+                  localStorage, thẻ <a> không gửi header nên luôn ăn 401 — đúng lỗi "bấm vào cũng
+                  không xem được" (18/08). Chi tiết ở `services/api/fileDownload.ts`. */}
+              <button
+                type="button"
+                onClick={() => void openFileInNewTab(f.downloadUrl)}
+                className="flex items-start gap-1.5 text-left text-sm text-primary hover:underline"
               >
                 <FileText className="mt-0.5 size-3.5 shrink-0" />
                 <span className="break-all">
                   {f.fileName}
                   {size && <span className="ml-1 text-xs text-muted-foreground">({size})</span>}
                 </span>
-              </a>
+              </button>
             </li>
           );
         })}

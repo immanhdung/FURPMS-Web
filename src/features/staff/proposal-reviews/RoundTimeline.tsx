@@ -2,8 +2,8 @@ import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
 import { CheckCircle2, CircleDot, Circle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { formatDateTime } from "@/utils/format";
+import { StatusBadge } from "@/components/shared/StatusBadge";
 import { getRoundBucket, roundTitle } from "@/features/staff/proposal-reviews/round-utils";
 import type { ReviewRound } from "@/types/review-round";
 
@@ -48,13 +48,26 @@ export function RoundTimeline({ rounds, onSelect }: RoundTimelineProps) {
               <CardContent className="space-y-1.5 p-3.5">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-sm font-medium text-foreground">{roundTitle(round, t)}</p>
-                  {round.status && <Badge variant="secondary">{round.status}</Badge>}
+                  {/* Enum thô: dòng thời gian từng hiện "OPEN"/"PASSED" giữa màn tiếng Việt. */}
+                  {round.status && <StatusBadge status={round.status} />}
                 </div>
-                {round.dimension && <p className="text-xs text-muted-foreground">{t("staff.dimension", { value: round.dimension })}</p>}
+                {round.dimension && (
+                  <p className="text-xs text-muted-foreground">
+                    {t("staff.dimension", {
+                      value: t(`reviewBoard.dim.${round.dimension}`, { defaultValue: round.dimension }),
+                    })}
+                  </p>
+                )}
                 <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                   {round.openedAt && <span>{t("staff.opened", { at: formatDateTime(round.openedAt) })}</span>}
                   {round.closedAt && <span>{t("staff.closed", { at: formatDateTime(round.closedAt) })}</span>}
-                  {round.result && <span>{t("staff.resultLabel", { value: round.result })}</span>}
+                  {round.result && (
+                    <span>
+                      {t("staff.resultLabel", {
+                        value: t(`status.${round.result}`, { defaultValue: round.result }),
+                      })}
+                    </span>
+                  )}
                 </div>
               </CardContent>
             </Card>

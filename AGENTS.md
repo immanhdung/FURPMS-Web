@@ -145,6 +145,25 @@ Cách đúng là trả điều hướng về đồng bộ ở `AppRouter.tsx`. �
 trang là cả sidebar lẫn header biến mất trong lúc tải chunk. Chỉ tốn một lần mỗi trang mỗi phiên
 (`React.lazy` nhớ module đã tải) — đã đo bằng `MutationObserver`, vào lại lần hai không hiện loader.
 
+### 3.6 Tải file: KHÔNG bao giờ dùng `<a href={downloadUrl}>` (18/08)
+
+Mọi endpoint tải file của BE đều có `[Authorize]`, mà token nằm ở `localStorage` chứ không phải
+cookie ⇒ thẻ `<a>` không gửi header `Authorization` nên **luôn ăn 401**. Chạy `npm run dev` còn
+hỏng sớm hơn: `downloadUrl` là đường dẫn tương đối `/api/...`, trỏ vào `localhost:5173` (máy chủ
+Vite) chứ không phải BE ⇒ 404.
+
+Đã cắn **ba lần** ở ba màn khác nhau (sản phẩm bàn giao → hồ sơ nghiệm thu → kho tài liệu). Dùng
+`services/api/fileDownload.ts`: `fetchFileBlob` · `openFileInNewTab` · `saveFile`.
+
+### 3.7 Xem tài liệu: dùng `components/shared/DocumentViewer` (18/08)
+
+Một bộ xem duy nhất cho **mọi** loại hồ sơ (đề cương, báo cáo tổng kết…): xem trước PDF + .docx,
+thu/phóng, tải về, mở tab mới, và tự hiện ô chọn khi có nhiều hơn một file. Nhận `documents` +
+`fetchBlob` từ ngoài nên không dính vào một endpoint nào.
+
+> ⚠️ `fetchBlob` **phải** bọc `useCallback` (và danh sách file bọc `useMemo`). Nó nằm trong deps
+> của effect tải file — truyền hàm mới mỗi lần render là tải file vô tận.
+
 ---
 
 ## 4. Thế nào là "xong"

@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import { CalendarClock, Gavel, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/shared/StatusBadge";
 import { formatDate } from "@/utils/format";
 import { ROUND_BUCKETS, getRoundBucket, roundTitle } from "@/features/staff/proposal-reviews/round-utils";
 import type { ReviewRound } from "@/types/review-round";
@@ -45,12 +46,16 @@ export function RoundKanbanBoard({ rounds, onSelect }: RoundKanbanBoardProps) {
                         <p className="text-sm font-medium text-foreground">{roundTitle(round, t)}</p>
                         {round.dimension && (
                           <Badge variant="secondary" className="shrink-0">
-                            {round.dimension}
+                            {/* Enum của BE (SCIENCE/FINANCE) — render thẳng là lòi tiếng Anh ra
+                                giữa giao diện tiếng Việt. Khoá chưa có thì vẫn hiện mã để lộ mà bổ sung. */}
+                            {t(`reviewBoard.dim.${round.dimension}`, { defaultValue: round.dimension })}
                           </Badge>
                         )}
                       </div>
 
-                      {round.status && <p className="text-xs text-muted-foreground">{round.status}</p>}
+                      {/* Trước đây in thẳng enum: thẻ vòng hiện "OPEN"/"PASSED" giữa màn tiếng Việt.
+                          StatusBadge đã có sẵn bảng dịch `status.*` — dùng lại cho khớp mọi màn khác. */}
+                      {round.status && <StatusBadge status={round.status} />}
 
                       <div className="flex flex-wrap items-center gap-3 pt-1 text-xs text-muted-foreground">
                         {round.councilId && (
