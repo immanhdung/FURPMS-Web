@@ -7,6 +7,7 @@ import { queryKeys } from "@/services/queryKeys";
 import { useAuthStore } from "@/store/auth.store";
 import { tokenStorage } from "@/utils/storage";
 import { ROUTES } from "@/constants/routes";
+import { canRoleAccessPath } from "@/app/router/routes";
 import type { ApiError } from "@/types/common";
 import type { ChangePasswordRequest } from "@/types/auth";
 import type { LoginFormValues } from "@/features/auth/schemas/login.schema";
@@ -48,8 +49,6 @@ export function useLoginMutation() {
   const queryClient = useQueryClient();
 
   const redirectTo = (location.state as { from?: Location } | null)?.from;
-  const redirectPath = redirectTo ? `${redirectTo.pathname}${redirectTo.search}` : ROUTES.DASHBOARD;
-
   return useMutation({
     mutationFn: (payload: LoginFormValues) => authService.login({ email: payload.email, password: payload.password }),
     onSuccess: (data, variables) => {
@@ -57,6 +56,14 @@ export function useLoginMutation() {
       setUser(data.user);
       queryClient.setQueryData(queryKeys.auth.me(), data.user);
       toast.success(`Welcome back, ${data.user.fullName}`);
+
+      // Trang `from` có thể thuộc tài khoản/vai trước trên cùng tab. Chỉ khôi phục khi vai vừa
+      // được resolve thật sự có quyền; nếu không reviewer sẽ đăng nhập xong rồi rơi vào /unauthorized.
+      const activeRole = useAuthStore.getState().activeRole;
+      const redirectPath =
+        redirectTo && canRoleAccessPath(redirectTo.pathname, activeRole)
+          ? `${redirectTo.pathname}${redirectTo.search}${redirectTo.hash}`
+          : ROUTES.DASHBOARD;
       navigate(redirectPath, { replace: true });
     },
     onError: (error: ApiError) => {
