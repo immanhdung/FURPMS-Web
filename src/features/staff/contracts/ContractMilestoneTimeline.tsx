@@ -69,11 +69,22 @@ export function ContractMilestoneTimeline({ contract }: { contract: Contract }) 
     },
     ...middle,
     {
+      key: "acceptance",
+      icon: CheckCircle2,
+      title: t("contract.timelineAcceptance"),
+      stage: contract.projectStatus === "COMPLETED"
+        ? t("contract.mAcceptancePassed")
+        : t("contract.mAcceptancePending"),
+      badge: contract.projectStatus === "COMPLETED" ? "COMPLETED" : null,
+      done: contract.projectStatus === "COMPLETED" || contract.status === "SETTLED",
+    },
+    {
       key: "end",
       icon: Flag,
       title: t("contract.timelineEnd"),
-      date: contract.endDate,
-      done: false,
+      date: contract.status === "SETTLED" ? undefined : contract.endDate,
+      badge: contract.status === "SETTLED" || contract.status === "TERMINATED" ? contract.status : null,
+      done: contract.status === "SETTLED" || contract.status === "TERMINATED",
     },
   ];
 

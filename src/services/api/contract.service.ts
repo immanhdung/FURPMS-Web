@@ -1,6 +1,6 @@
 import { axiosClient } from "@/services/api/axiosClient";
 import type { ApiResponse } from "@/types/common";
-import type { Contract, CreateContractPayload, UpdateContractPayload } from "@/types/contract";
+import type { Contract, CreateContractPayload, TerminateContractPayload, UpdateContractPayload } from "@/types/contract";
 
 export const contractService = {
   // mine=true → chỉ HĐ mình là PI (dùng cho trang PI: báo cáo tiến độ/sản phẩm/tổng kết).
@@ -24,6 +24,10 @@ export const contractService = {
     axiosClient
       .post<ApiResponse<Contract>>(`/contracts/${id}/sign`, null, { params: signedOn ? { signedOn } : undefined })
       .then((res) => res.data.data),
+
+  /** Chấm dứt bất thường; bắt buộc lý do và không có nút hoàn tác trực tiếp. */
+  terminate: (id: string, payload: TerminateContractPayload) =>
+    axiosClient.post<ApiResponse<Contract>>(`/contracts/${id}/terminate`, payload).then((res) => res.data.data),
 
   // BM05 — tự sinh Word hợp đồng (rule tuần 10). Tải qua axios (kèm token) rồi lưu file.
   exportWord: (id: string) =>

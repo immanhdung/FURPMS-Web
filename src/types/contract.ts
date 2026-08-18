@@ -14,7 +14,15 @@ export interface Contract {
   sideARepresentative?: string | null;
   econtractUrl?: string | null;
   status?: string | null;
+  /** Trạng thái đề tài: nghiệm thu Đạt = COMPLETED, tách biệt với thanh lý hợp đồng. */
+  projectStatus?: string | null;
+  terminatedAt?: string | null;
+  terminatedReason?: string | null;
   createdAt?: string | null;
+}
+
+export interface TerminateContractPayload {
+  reason: string;
 }
 
 export type UpdateContractPayload = Omit<CreateContractPayload, "proposalId">;

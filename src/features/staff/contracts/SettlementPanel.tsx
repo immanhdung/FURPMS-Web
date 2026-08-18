@@ -19,7 +19,7 @@ import { useAuthStore } from "@/store/auth.store";
 import { formatCurrency, formatDate } from "@/utils/format";
 
 /**
- * Quyết toán hợp đồng: lập bảng số liệu → Chủ tài khoản ký → kế toán xác nhận → tài sản xác nhận.
+ * Quyết toán hợp đồng: lập bảng số liệu → kế toán/tài sản xác nhận → ký BM13 để chốt sổ.
  * Số liệu lấy sẵn từ lịch giải ngân để Staff khỏi cộng tay.
  */
 export function SettlementPanel({ contractId, canManage }: { contractId: string; canManage: boolean }) {
@@ -143,17 +143,6 @@ export function SettlementPanel({ contractId, canManage }: { contractId: string;
 
   const steps = [
     {
-      key: "sign",
-      label: t("contract.settlement.signed"),
-      at: settlement.settlementSignedAt,
-      by: settlement.sideASigneeName,
-      icon: PenLine,
-      action: () =>
-        currentUserId && signMutation.mutate({ id: settlement.id, sideASigneeId: currentUserId }),
-      pending: signMutation.isPending,
-      cta: t("contract.settlement.signAsSideA"),
-    },
-    {
       key: "accounting",
       label: t("contract.settlement.accountingCleared"),
       at: settlement.accountingClearedAt,
@@ -161,6 +150,7 @@ export function SettlementPanel({ contractId, canManage }: { contractId: string;
       action: () => accountingMutation.mutate({ id: settlement.id }),
       pending: accountingMutation.isPending,
       cta: t("contract.settlement.markCleared"),
+      blocked: false,
     },
     {
       key: "assets",
@@ -170,6 +160,19 @@ export function SettlementPanel({ contractId, canManage }: { contractId: string;
       action: () => assetsMutation.mutate({ id: settlement.id }),
       pending: assetsMutation.isPending,
       cta: t("contract.settlement.markCleared"),
+      blocked: false,
+    },
+    {
+      key: "sign",
+      label: t("contract.settlement.signed"),
+      at: settlement.settlementSignedAt,
+      by: settlement.sideASigneeName,
+      icon: PenLine,
+      action: () =>
+        currentUserId && signMutation.mutate({ id: settlement.id, sideASigneeId: currentUserId }),
+      pending: signMutation.isPending,
+      cta: t("contract.settlement.signAsSideA"),
+      blocked: !settlement.accountingClearedAt || !settlement.assetsClearedAt,
     },
   ];
 
@@ -197,7 +200,7 @@ export function SettlementPanel({ contractId, canManage }: { contractId: string;
         </CardContent>
       </Card>
 
-      {steps.map(({ key, label, at, by, icon: Icon, action, pending, cta }) => (
+      {steps.map(({ key, label, at, by, icon: Icon, action, pending, cta, blocked }) => (
         <div key={key} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border p-3">
           <div className="flex items-center gap-2">
             {at ? <CircleCheck className="size-4 text-success" /> : <Icon className="size-4 text-muted-foreground" />}
@@ -209,10 +212,13 @@ export function SettlementPanel({ contractId, canManage }: { contractId: string;
             </div>
           </div>
           {canManage && !at && (
-            <Button type="button" size="sm" variant="outline" disabled={pending} onClick={action}>
+            <Button type="button" size="sm" variant="outline" disabled={pending || blocked} onClick={action}>
               {pending && <Loader2 className="animate-spin" />}
               {cta}
             </Button>
+          )}
+          {key === "sign" && blocked && (
+            <p className="w-full text-xs text-warning">{t("contract.settlement.signBlocked")}</p>
           )}
         </div>
       ))}

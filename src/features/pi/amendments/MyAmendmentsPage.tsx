@@ -25,8 +25,8 @@ import { contractService } from "@/services/api/contract.service";
 import { toast } from "sonner";
 import { AMENDMENT_STATUS } from "@/types/amendment";
 /**
- * PI gửi yêu cầu ĐIỀU CHỈNH hợp đồng — đổi phạm vi / kinh phí / thời gian / nhân sự,
- * trong đó có **xin gia hạn** (QĐ543: gia hạn tối đa 6 tháng).
+ * PI gửi yêu cầu điều chỉnh theo đúng 4 nhóm của BM07. Chỉ gia hạn cần một giá trị cấu trúc
+ * (số tháng); các nhóm còn lại là nội dung đề nghị + lý do, không ép thành cặp old/new giả tạo.
  *
  * BE **đã cho phép PI tạo** từ trước (`POST /contracts/{id}/amendments` chỉ cần là chủ
  * hợp đồng; chỉ duyệt/từ chối mới giới hạn Staff/Admin) — nhưng FE chỉ có màn bên
@@ -85,6 +85,7 @@ export function MyAmendmentsPage() {
   const [open, setOpen] = useState(false);
 
   const contractId = selectedContractId ?? contracts?.[0]?.id ?? null;
+  const selectedContract = contracts?.find((c) => c.id === contractId);
   const { data: amendments, isLoading } = useAmendmentsQuery(contractId);
 
   return (
@@ -125,17 +126,18 @@ export function MyAmendmentsPage() {
           <div>
             <label className="mb-1.5 block text-sm font-medium text-foreground">{t("reports.contractLabel")}</label>
             <Select value={contractId ?? undefined} onValueChange={setSelectedContractId}>
-              <SelectTrigger className="w-full sm:w-96">
+              <SelectTrigger className="w-full max-w-2xl [&>span]:min-w-0 [&>span]:truncate">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl">
                 {contracts.map((c) => {
                   const title = proposalTitleById.get(c.proposalId);
+                  const label = c.contractNumber
+                    ? `${t("reports.contractNo", { no: c.contractNumber })}${title ? ` — ${title}` : ""}`
+                    : title || c.id;
                   return (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.contractNumber
-                        ? `${t("reports.contractNo", { no: c.contractNumber })}${title ? ` — ${title}` : ""}`
-                        : title || c.id}
+                    <SelectItem key={c.id} value={c.id} className="max-w-[calc(100vw-3rem)] sm:max-w-[40rem]">
+                      <span className="block truncate" title={label}>{label}</span>
                     </SelectItem>
                   );
                 })}
@@ -227,7 +229,12 @@ export function MyAmendmentsPage() {
       )}
 
       {contractId && (
-        <CreateAmendmentDialog open={open} onOpenChange={setOpen} contractId={contractId} />
+        <CreateAmendmentDialog
+          open={open}
+          onOpenChange={setOpen}
+          contractId={contractId}
+          extensionCapMonths={selectedContract?.maxExtensionMonths ?? undefined}
+        />
       )}
     </div>
   );
@@ -237,10 +244,12 @@ function CreateAmendmentDialog({
   open,
   onOpenChange,
   contractId,
+  extensionCapMonths,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   contractId: string;
+  extensionCapMonths?: number;
 }) {
   const { t } = useTranslation();
   const { data: categories } = useAmendmentCategoriesQuery();
@@ -249,7 +258,6 @@ function CreateAmendmentDialog({
   const [categoryId, setCategoryId] = useState<string>("");
   const [changeDescription, setChangeDescription] = useState("");
   const [justification, setJustification] = useState("");
-  const [oldValue, setOldValue] = useState("");
   const [newValue, setNewValue] = useState("");
 
   // Loại "Gia hạn thời gian thực hiện" (code EXTENSION) là loại duy nhất BE tự áp dụng.
@@ -311,24 +319,15 @@ function CreateAmendmentDialog({
               <Input
                 type="number"
                 min={1}
-                max={6}
+                max={extensionCapMonths}
                 value={newValue}
                 onChange={(e) => setNewValue(e.target.value)}
               />
-              <p className="mt-1 text-xs text-muted-foreground">{t("amendments.extensionMonthsHint")}</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {t("amendments.extensionMonthsHint", { n: extensionCapMonths ?? "—" })}
+              </p>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-foreground">{t("amendments.oldValue")}</label>
-                <Input value={oldValue} onChange={(e) => setOldValue(e.target.value)} />
-              </div>
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-foreground">{t("amendments.newValue")}</label>
-                <Input value={newValue} onChange={(e) => setNewValue(e.target.value)} />
-              </div>
-            </div>
-          )}
+          ) : null}
 
           <div>
             <label className="mb-1.5 block text-sm font-medium text-foreground">
@@ -355,7 +354,6 @@ function CreateAmendmentDialog({
                   categoryId: Number(categoryId),
                   changeDescription: changeDescription.trim(),
                   justification: justification.trim(),
-                  oldValue: oldValue.trim() || undefined,
                   newValue: newValue.trim() || undefined,
                   requiresRectorApproval: false,
                 },
@@ -363,7 +361,6 @@ function CreateAmendmentDialog({
                   onSuccess: () => {
                     setChangeDescription("");
                     setJustification("");
-                    setOldValue("");
                     setNewValue("");
                     onOpenChange(false);
                   },

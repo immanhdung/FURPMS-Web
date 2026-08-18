@@ -50,7 +50,6 @@ export function AmendmentsPanel({
   const [categoryId, setCategoryId] = useState("");
   const [changeDescription, setChangeDescription] = useState("");
   const [justification, setJustification] = useState("");
-  const [oldValue, setOldValue] = useState("");
   const [newValue, setNewValue] = useState("");
   const [comments, setComments] = useState<Record<string, string>>({});
   const [exportingId, setExportingId] = useState<string | null>(null);
@@ -77,12 +76,13 @@ export function AmendmentsPanel({
     setCategoryId("");
     setChangeDescription("");
     setJustification("");
-    setOldValue("");
     setNewValue("");
     setShowForm(false);
   };
 
-  const canCreate = categoryId && changeDescription.trim() && justification.trim() && !createMutation.isPending;
+  const isExtension = categories?.find((c) => String(c.id) === categoryId)?.code === "EXTENSION";
+  const canCreate = categoryId && changeDescription.trim() && justification.trim()
+    && (!isExtension || Number(newValue) > 0) && !createMutation.isPending;
 
   return (
     <div className="space-y-3">
@@ -137,20 +137,14 @@ export function AmendmentsPanel({
               <Textarea id="a-just" rows={2} value={justification} onChange={(e) => setJustification(e.target.value)} />
             </div>
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div>
-                <label htmlFor="a-old" className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                  {t("contract.amendment.from")}
-                </label>
-                <Input id="a-old" value={oldValue} onChange={(e) => setOldValue(e.target.value)} />
-              </div>
+            {isExtension && (
               <div>
                 <label htmlFor="a-new" className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                  {t("contract.amendment.to")}
+                  {t("amendments.extensionMonths")} <span className="text-destructive">*</span>
                 </label>
-                <Input id="a-new" value={newValue} onChange={(e) => setNewValue(e.target.value)} />
+                <Input id="a-new" type="number" min={1} value={newValue} onChange={(e) => setNewValue(e.target.value)} />
               </div>
-            </div>
+            )}
 
             <div className="flex justify-end gap-2">
               <Button type="button" size="sm" variant="outline" onClick={resetForm}>
@@ -166,7 +160,6 @@ export function AmendmentsPanel({
                       categoryId: Number(categoryId),
                       changeDescription: changeDescription.trim(),
                       justification: justification.trim(),
-                      oldValue: oldValue.trim() || undefined,
                       newValue: newValue.trim() || undefined,
                       requiresRectorApproval: false,
                     },

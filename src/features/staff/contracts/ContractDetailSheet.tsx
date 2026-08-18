@@ -1,15 +1,19 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { FileDown, FileSignature, Loader2 } from "lucide-react";
+import { CircleCheckBig, FileDown, FileSignature, Loader2, OctagonX } from "lucide-react";
 import { contractService } from "@/services/api/contract.service";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { PageLoader } from "@/components/shared/PageLoader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useContractQuery } from "@/hooks/useContracts";
+import { useContractQuery, useTerminateContractMutation } from "@/hooks/useContracts";
 import { useProposalQuery } from "@/hooks/useProposals";
 import { ContractMilestoneTimeline } from "@/features/staff/contracts/ContractMilestoneTimeline";
 import { ContractSignedDocs } from "@/features/staff/contracts/ContractSignedDocs";
@@ -34,6 +38,9 @@ export function ContractDetailSheet({ open, onOpenChange, contractId }: Contract
   const { data: contract, isLoading } = useContractQuery(contractId);
   const { data: proposal } = useProposalQuery(contract?.proposalId ?? null);
   const [signOpen, setSignOpen] = useState(false);
+  const [terminateOpen, setTerminateOpen] = useState(false);
+  const [terminateReason, setTerminateReason] = useState("");
+  const terminateMutation = useTerminateContractMutation();
   const [exporting, setExporting] = useState(false);
 
   const [exportingSettlement, setExportingSettlement] = useState(false);
@@ -111,6 +118,25 @@ export function ContractDetailSheet({ open, onOpenChange, contractId }: Contract
                 )}
               </div>
 
+              {/* Kết quả nghiệm thu thuộc ĐỀ TÀI, không phải trạng thái thanh lý HỢP ĐỒNG.
+                  Hiện riêng hai mốc để tránh chữ "Hoàn thành" bị hiểu là đã ký BM13. */}
+              {contract.projectStatus === "COMPLETED" && contract.status !== "SETTLED" && (
+                <div className="flex items-start gap-2 rounded-lg border border-success/30 bg-success/5 p-3">
+                  <CircleCheckBig className="mt-0.5 size-4 shrink-0 text-success" />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{t("contract.acceptanceCompleted")}</p>
+                    <p className="text-xs text-muted-foreground">{t("contract.acceptanceCompletedHint")}</p>
+                  </div>
+                </div>
+              )}
+
+              {contract.status === "TERMINATED" && contract.terminatedReason && (
+                <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
+                  <p className="text-sm font-medium text-destructive">{t("contract.terminatedReason")}</p>
+                  <p className="mt-1 text-sm text-foreground whitespace-pre-wrap break-words">{contract.terminatedReason}</p>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
                   <p className="text-xs font-medium text-muted-foreground">{t("contract.sideARep")}</p>
@@ -149,10 +175,17 @@ export function ContractDetailSheet({ open, onOpenChange, contractId }: Contract
                   </Button>
                 )}
                 {/* BM13 — biên bản thanh lý (QĐ543 Điều 13.2), chỉ có nghĩa khi hợp đồng đã ký. */}
-                {canManage && contract.status !== "PENDING_SIGNATURE" && (
+                {canManage && contract.status !== "PENDING_SIGNATURE" && contract.status !== "TERMINATED" && (
                   <Button size="sm" variant="outline" onClick={handleExportSettlement} disabled={exportingSettlement}>
                     {exportingSettlement ? <Loader2 className="animate-spin" /> : <FileDown />}
                     {t("contract.exportSettlementWord")}
+                  </Button>
+                )}
+                {canManage && contract.projectStatus !== "COMPLETED"
+                  && (contract.status === "ACTIVE" || contract.status === "UNDER_REVIEW") && (
+                  <Button size="sm" variant="destructive" onClick={() => setTerminateOpen(true)}>
+                    <OctagonX />
+                    {t("contract.terminate")}
                   </Button>
                 )}
               </div>
@@ -160,6 +193,40 @@ export function ContractDetailSheet({ open, onOpenChange, contractId }: Contract
               {canManage && <ContractSignedDocs contractId={contract.id} />}
 
       <SignContractDialog open={signOpen} onOpenChange={setSignOpen} contractId={contractId} />
+
+              <Dialog open={terminateOpen} onOpenChange={setTerminateOpen}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>{t("contract.terminateTitle")}</DialogTitle>
+                    <DialogDescription>{t("contract.terminateDesc")}</DialogDescription>
+                  </DialogHeader>
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-foreground">
+                      {t("contract.terminateReason")} <span className="text-destructive">*</span>
+                    </label>
+                    <Textarea
+                      rows={4}
+                      value={terminateReason}
+                      onChange={(event) => setTerminateReason(event.target.value)}
+                      placeholder={t("contract.terminateReasonPlaceholder")}
+                    />
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setTerminateOpen(false)}>{t("common.cancel")}</Button>
+                    <Button
+                      variant="destructive"
+                      disabled={!terminateReason.trim() || terminateMutation.isPending}
+                      onClick={() => terminateMutation.mutate(
+                        { id: contract.id, reason: terminateReason.trim() },
+                        { onSuccess: () => { setTerminateReason(""); setTerminateOpen(false); } }
+                      )}
+                    >
+                      {terminateMutation.isPending ? <Loader2 className="animate-spin" /> : <OctagonX />}
+                      {t("contract.terminateConfirm")}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
 
               {/* Thứ tự tab theo đúng dòng đời hợp đồng: tiền → sản phẩm → báo cáo → tổng kết → điều chỉnh → chốt sổ */}
               <Tabs defaultValue="timeline">

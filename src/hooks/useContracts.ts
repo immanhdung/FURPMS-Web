@@ -72,3 +72,16 @@ export function useSignContractMutation() {
     onError: (error: ApiError) => toast.error(error.message || "Không ghi nhận được hợp đồng đã ký."),
   });
 }
+
+export function useTerminateContractMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason: string }) => contractService.terminate(id, { reason }),
+    onSuccess: (_data, { id }) => {
+      toast.success("Đã ghi nhận chấm dứt hợp đồng.");
+      queryClient.invalidateQueries({ queryKey: queryKeys.contracts.detail(id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.contracts.all() });
+    },
+    onError: (error: ApiError) => toast.error(error.message || "Không thể chấm dứt hợp đồng."),
+  });
+}

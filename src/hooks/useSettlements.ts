@@ -26,6 +26,9 @@ function useSettlementAction<TArgs>(
     onSuccess: () => {
       toast.success(successMessage);
       queryClient.invalidateQueries({ queryKey: queryKeys.settlements.detail(contractId) });
+      // Ký BM13 đổi trạng thái hợp đồng sang SETTLED; nạp lại cả header và danh sách.
+      queryClient.invalidateQueries({ queryKey: queryKeys.contracts.detail(contractId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.contracts.all() });
     },
     onError: (error: ApiError) => toast.error(error.message || errorMessage),
   });
