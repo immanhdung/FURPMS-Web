@@ -1040,7 +1040,12 @@ export const en = {
     viewDetail: "View details",
     allTracks: "All fields",
     allCycles: "All cycles",
-    proposalDetailSubtitle: "What the principal investigator submitted.",
+    proposalDetailSubtitle: "The submitted proposal and its implementation progress.",
+    proposalContentsTab: "Proposal contents",
+    projectProgressTab: "Project progress",
+    reviewProgressSection: "Review progress",
+    contractProgressSection: "Implementation progress",
+    noContractProgress: "Contract, progress-report and disbursement milestones will appear after the proposal is approved and a contract is created.",
     attachedDocuments: "Attached documents",
     roundsSection: "Review rounds",
     openReviewBoard: "Open Councils & Scoring",
@@ -2027,5 +2032,4 @@ export const en = {
     downloadBtn: "Download",
   },
 } as const;
-
 

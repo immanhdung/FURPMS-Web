@@ -1051,7 +1051,12 @@ export const vi = {
     viewDetail: "Xem chi tiết",
     allTracks: "Tất cả lĩnh vực",
     allCycles: "Tất cả đợt",
-    proposalDetailSubtitle: "Nội dung đề cương chủ nhiệm đã nộp.",
+    proposalDetailSubtitle: "Nội dung đề cương và tiến trình thực hiện của đề tài.",
+    proposalContentsTab: "Nội dung đề cương",
+    projectProgressTab: "Tiến trình đề tài",
+    reviewProgressSection: "Tiến trình xét duyệt",
+    contractProgressSection: "Tiến trình thực hiện",
+    noContractProgress: "Các mốc hợp đồng, báo cáo tiến độ và giải ngân sẽ xuất hiện sau khi đề tài được duyệt và lập hợp đồng.",
     attachedDocuments: "Tài liệu đính kèm",
     roundsSection: "Vòng chấm",
     openReviewBoard: "Mở Hội đồng & Chấm",
@@ -2046,5 +2051,4 @@ export const vi = {
     downloadBtn: "Tải về",
   },
 } as const;
-
 

@@ -1,7 +1,9 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, ExternalLink, Gavel } from "lucide-react";
+import { ArrowLeft, ExternalLink, FileText, Gavel, Route } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { PageLoader } from "@/components/shared/PageLoader";
 import { ErrorState } from "@/components/shared/ErrorState";
@@ -10,9 +12,12 @@ import { useReviewRoundsQuery } from "@/hooks/useReviewRounds";
 import { useCyclesQuery } from "@/hooks/useCycles";
 import { useTracksQuery } from "@/hooks/useTracks";
 import { useResearchTypesQuery } from "@/hooks/useResearchTypes";
+import { useContractsQuery } from "@/hooks/useContracts";
 import { ProposalSummaryView } from "@/features/pi/proposals/ProposalSummaryView";
 import { ExpectedProductsCard } from "@/features/pi/proposals/ExpectedProductsCard";
 import { ProposalDocumentViewer } from "@/features/reviewer/proposal-review/ProposalDocumentViewer";
+import { ContractMilestoneTimeline } from "@/features/staff/contracts/ContractMilestoneTimeline";
+import { RoundTimeline } from "@/features/staff/proposal-reviews/RoundTimeline";
 import { ROUTES } from "@/constants/routes";
 import { proposalTitle } from "@/utils/format";
 
@@ -25,9 +30,9 @@ import { proposalTitle } from "@/utils/format";
  * hơn (chọn đợt + lĩnh vực, tạo vòng cấp lĩnh vực, lập hội đồng, gán rubric, thêm đề tài vào vòng)
  * ⇒ hai chỗ làm cùng một việc, chỗ này là bản cũ và yếu hơn.</p>
  *
- * <p>Nay: bày đúng thứ người xem cần — thông tin đề cương, sản phẩm cam kết, và **file thuyết minh
- * đọc được ngay tại chỗ**. Vòng chấm chỉ còn liệt kê gọn để biết đề tài đang ở đâu, kèm đường dẫn
- * sang màn Hội đồng & Chấm để thao tác.</p>
+ * <p>Nay: tab Nội dung bày đúng thứ người xem cần — thông tin đề cương, sản phẩm cam kết, và
+ * **file thuyết minh đọc được ngay tại chỗ**. Tab Tiến trình giữ timeline vòng chấm và dùng lại
+ * timeline hợp đồng của PI để Staff theo dõi trọn mạch mà không tạo thêm nơi thao tác.</p>
  */
 export function ProposalReviewWorkspace() {
   const { proposalId } = useParams<{ proposalId: string }>();
@@ -39,6 +44,7 @@ export function ProposalReviewWorkspace() {
   const { data: cycles } = useCyclesQuery();
   const { data: tracks } = useTracksQuery();
   const { data: researchTypes } = useResearchTypesQuery();
+  const { data: contracts, isLoading: isContractsLoading } = useContractsQuery();
 
   if (!proposalId) return null;
   if (isLoading) return <PageLoader label={t("staff.loadingProposal")} />;
@@ -47,6 +53,7 @@ export function ProposalReviewWorkspace() {
   const cycleName = cycles?.find((c) => c.id === proposal.cycleId)?.name;
   const trackName = tracks?.find((tr) => tr.id.toString() === proposal.trackId)?.name;
   const researchTypeName = researchTypes?.find((rt) => rt.id === proposal.researchType)?.name;
+  const proposalContracts = (contracts ?? []).filter((contract) => contract.proposalId === proposal.id);
 
   // Sang màn Hội đồng & Chấm đã lọc sẵn đúng đợt + lĩnh vực của đề tài này (màn đó đọc bộ lọc
   // từ query string), khỏi phải chọn lại bằng tay.
@@ -79,56 +86,77 @@ export function ProposalReviewWorkspace() {
         </Button>
       </div>
 
-      <ProposalSummaryView
-        data={proposal}
-        cycleName={cycleName}
-        trackName={trackName}
-        researchTypeName={researchTypeName}
-      />
+      <Tabs defaultValue="contents" className="gap-5">
+        <TabsList>
+          <TabsTrigger value="contents">
+            <FileText className="size-3.5" />
+            {t("staff.proposalContentsTab")}
+          </TabsTrigger>
+          <TabsTrigger value="progress">
+            <Route className="size-3.5" />
+            {t("staff.projectProgressTab")}
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Chỉ XEM: đề cương nộp rồi là khoá, Phòng QLKH không sửa hộ chủ nhiệm. */}
-      <ExpectedProductsCard proposalId={proposal.id} editable={false} fundingMethod={proposal.fundingMethod} />
+        <TabsContent value="contents" className="space-y-4">
+          <ProposalSummaryView
+            data={proposal}
+            cycleName={cycleName}
+            trackName={trackName}
+            researchTypeName={researchTypeName}
+          />
 
-      <section className="space-y-2">
-        <h2 className="text-sm font-medium text-foreground">{t("staff.attachedDocuments")}</h2>
-        {/* Đọc thẳng bản thuyết minh tại đây — cùng bộ xem hội đồng dùng, nên không phải tải file
-            về máy rồi mở bằng Word chỉ để xem chủ nhiệm viết gì. */}
-        <ProposalDocumentViewer proposalId={proposal.id} />
-      </section>
+          {/* Chỉ XEM: đề cương nộp rồi là khoá, Phòng QLKH không sửa hộ chủ nhiệm. */}
+          <ExpectedProductsCard proposalId={proposal.id} editable={false} fundingMethod={proposal.fundingMethod} />
 
-      <section className="space-y-2">
-        <h2 className="text-sm font-medium text-foreground">{t("staff.roundsSection")}</h2>
-        {!rounds || rounds.length === 0 ? (
-          <p className="rounded-lg border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground">
-            {t("staff.noRounds")}
-          </p>
-        ) : (
-          <ul className="divide-y divide-border rounded-lg border border-border">
-            {rounds.map((round) => (
-              <li key={round.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-sm">
-                <span className="font-medium text-foreground">
-                  {t("staff.round", { num: round.roundNumber })}
-                  {round.roundType
-                    ? ` · ${t(`reviewBoard.type.${round.roundType}`, { defaultValue: round.roundType })}`
-                    : ""}
-                </span>
-                <span className="flex items-center gap-2">
-                  {round.dimension && (
-                    <span className="text-xs text-muted-foreground">
-                      {t(`reviewBoard.dim.${round.dimension}`, { defaultValue: round.dimension })}
-                    </span>
-                  )}
-                  {round.status && <StatusBadge status={round.status} />}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-        <Button variant="link" size="sm" className="px-0" onClick={() => navigate(boardHref)}>
-          {t("staff.manageRoundsLink")}
-          <ExternalLink />
-        </Button>
-      </section>
+          <section className="space-y-2">
+            <h2 className="text-sm font-medium text-foreground">{t("staff.attachedDocuments")}</h2>
+            {/* Đọc thẳng bản thuyết minh tại đây — cùng bộ xem hội đồng dùng, nên không phải tải file
+                về máy rồi mở bằng Word chỉ để xem chủ nhiệm viết gì. */}
+            <ProposalDocumentViewer proposalId={proposal.id} />
+          </section>
+        </TabsContent>
+
+        <TabsContent value="progress" className="space-y-6">
+          <section className="space-y-3">
+            <h2 className="text-sm font-medium text-foreground">{t("staff.reviewProgressSection")}</h2>
+            <RoundTimeline rounds={rounds ?? []} />
+            <Button variant="link" size="sm" className="px-0" onClick={() => navigate(boardHref)}>
+              {t("staff.manageRoundsLink")}
+              <ExternalLink />
+            </Button>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-sm font-medium text-foreground">{t("staff.contractProgressSection")}</h2>
+            {isContractsLoading ? (
+              <Skeleton className="h-56 w-full rounded-xl" />
+            ) : proposalContracts.length === 0 ? (
+              <p className="rounded-lg border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
+                {t("staff.noContractProgress")}
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {proposalContracts.map((contract) => (
+                  <article key={contract.id} className="rounded-xl border border-border bg-card/95 p-4">
+                    <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-sm font-medium text-foreground">
+                        {contract.contractNumber
+                          ? t("reports.contractNo", { no: contract.contractNumber })
+                          : t("staff.contractProgressSection")}
+                      </p>
+                      {contract.status && <StatusBadge status={contract.status} />}
+                    </div>
+                    {/* Dùng đúng timeline đang phục vụ cả Staff ở màn Hợp đồng và PI ở màn Tiến trình:
+                        một nguồn dữ liệu, không sinh thêm cách hiểu thứ ba về các mốc thực hiện. */}
+                    <ContractMilestoneTimeline contract={contract} />
+                  </article>
+                ))}
+              </div>
+            )}
+          </section>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
