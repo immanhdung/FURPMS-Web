@@ -633,7 +633,7 @@ export const vi = {
     backToDashboard: "Về bảng điều khiển",
     unauthorized: "Bạn không có quyền truy cập trang này",
     unauthorizedDesc: "Vai trò của bạn không có quyền xem tài nguyên này. Nếu bạn cho rằng đây là nhầm lẫn, hãy liên hệ quản trị viên.",
-    unauthorizedRoleHint: "Bạn đang xem hệ thống với vai **{{role}}** — trang này thuộc vai khác. Đổi vai để vào, hoặc dùng dropdown ở góc trên bên phải.",
+    unauthorizedRoleHint: "Bạn đang xem hệ thống với vai “{{role}}” — trang này thuộc vai khác. Đổi vai để vào, hoặc dùng dropdown ở góc trên bên phải.",
     switchToRole: "Chuyển sang vai {{role}}",
   },
   dossierDetail: {
