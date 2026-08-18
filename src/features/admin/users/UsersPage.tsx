@@ -5,7 +5,9 @@ import { Users, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/tables/DataTable";
 import { ErrorState } from "@/components/shared/ErrorState";
-import { useUsersQuery } from "@/hooks/useUsers";
+import { useUsersQuery, useDeleteUserMutation, useToggleUserActiveMutation } from "@/hooks/useUsers";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { useAuthStore } from "@/store/auth.store";
 import { getUserColumns } from "@/features/admin/users/columns";
 import { CreateUserSheet } from "@/features/admin/users/CreateUserSheet";
 import { EditUserSheet } from "@/features/admin/users/EditUserSheet";
@@ -46,6 +48,11 @@ export function UsersPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [editUser, setEditUser] = useState<AdminUser | null>(null);
   const [detailUserId, setDetailUserId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<AdminUser | null>(null);
+
+  const currentUser = useAuthStore((state) => state.user);
+  const deleteMutation = useDeleteUserMutation();
+  const toggleMutation = useToggleUserActiveMutation();
 
   /*
    * Danh sách người dùng trước đây chỉ sắp theo tên nên nhìn rối: Quản trị, Giảng viên, Hội đồng
@@ -78,8 +85,13 @@ export function UsersPage() {
         t,
         onView: (user) => setDetailUserId(user.id),
         onEdit: (user) => setEditUser(user),
+        onDelete: (user) => setDeleteTarget(user),
+        onToggleActive: (user) => toggleMutation.mutate(user.id),
+        currentUserId: currentUser?.id,
       }),
-    [t]
+    // toggleMutation ổn định giữa các lần render nên không đưa vào deps.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [t, currentUser?.id]
   );
 
   return (
@@ -150,6 +162,21 @@ export function UsersPage() {
         open={Boolean(detailUserId)}
         onOpenChange={(open) => !open && setDetailUserId(null)}
         userId={detailUserId}
+      />
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        variant="destructive"
+        title={t("users.deleteTitle")}
+        description={t("users.deleteDesc", { name: deleteTarget?.fullName ?? "" })}
+        confirmLabel={t("common.delete")}
+        isLoading={deleteMutation.isPending}
+        onConfirm={() => {
+          if (!deleteTarget) return;
+          // Đóng hộp thoại ngay cả khi BE từ chối: lý do từ chối hiện ở toast, giữ hộp thoại mở
+          // chỉ che mất thông báo đó.
+          deleteMutation.mutate(deleteTarget.id, { onSettled: () => setDeleteTarget(null) });
+        }}
       />
     </div>
   );

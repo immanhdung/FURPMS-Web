@@ -16,9 +16,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAddCouncilMemberMutation } from "@/hooks/useCouncilMembers";
 import { useUsersQuery } from "@/hooks/useUsers";
 import { useSuggestReviewersMutation } from "@/hooks/useProposalAi";
-import { COUNCIL_MEMBER_ROLE } from "@/constants/statuses";
+import { eligibleCouncilCandidates } from "@/utils/council-eligibility";
 
-const COUNCIL_MEMBER_ROLES = Object.values(COUNCIL_MEMBER_ROLE);
+/*
+ * Chức danh trong hội đồng — PHẢI khớp `CreateCouncilSheet` và các chỗ BE so chuỗi:
+ * gửi thư mời kiểm "Chair"/"Secretary", màn chấm nghiệm thu kiểm "Opponent" (chỉ phản biện mới
+ * viết BM10 — QĐ543 Điều 12.3.b).
+ *
+ * Trước 18/08 hộp thoại này dùng `COUNCIL_MEMBER_ROLE` với "Chairman" và KHÔNG có "Opponent":
+ * thêm phản biện cho vòng nghiệm thu bằng đường này là bất khả, mà chức danh in ra cũng là mã
+ * tiếng Anh thô giữa giao diện đã dịch.
+ */
+const COUNCIL_MEMBER_ROLES = ["Chair", "Secretary", "Member", "Opponent"];
 
 interface AddCouncilMemberDialogProps {
   open: boolean;
@@ -30,6 +39,9 @@ interface AddCouncilMemberDialogProps {
 export function AddCouncilMemberDialog({ open, onOpenChange, councilId, trackId }: AddCouncilMemberDialogProps) {
   const { t } = useTranslation();
   const { data: users } = useUsersQuery();
+  // Chỉ người đủ tư cách hội đồng (giảng viên/hội đồng, còn hoạt động). COI theo từng đề tài vẫn do
+  // BE chặn — hộp thoại này không biết hội đồng đang chấm những đề tài nào.
+  const candidates = eligibleCouncilCandidates(users);
   const addMutation = useAddCouncilMemberMutation(councilId);
   const suggestMutation = useSuggestReviewersMutation();
   const [userId, setUserId] = useState<string | undefined>();
@@ -73,7 +85,7 @@ export function AddCouncilMemberDialog({ open, onOpenChange, councilId, trackId 
                 <SelectValue placeholder={t("staff.selectReviewer")} />
               </SelectTrigger>
               <SelectContent>
-                {users?.map((user) => (
+                {candidates.map((user) => (
                   <SelectItem key={user.id} value={user.id}>
                     {user.fullName}
                   </SelectItem>
@@ -119,7 +131,7 @@ export function AddCouncilMemberDialog({ open, onOpenChange, councilId, trackId 
               <SelectContent>
                 {COUNCIL_MEMBER_ROLES.map((role) => (
                   <SelectItem key={role} value={role}>
-                    {role}
+                    {t(`reviewBoard.role.${role}`)}
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -52,7 +52,18 @@ export function ProposalReviewWorkspace() {
    * Ngoài ra quorum 2/3 đếm theo số phiếu — loại Thư ký ra là hội đồng nhỏ khó đủ phiếu.
    */
   // Staff must open the round before reviewers can score/evaluate it.
-  const isRoundOpen = membership.roundStatus?.toUpperCase() === ROUND_STATUS.OPEN;
+  const roundStatus = membership.roundStatus?.toUpperCase();
+  const isRoundOpen = roundStatus === ROUND_STATUS.OPEN;
+
+  /**
+   * Vòng CHƯA mở và vòng ĐÃ XONG là hai chuyện khác hẳn nhau.
+   *
+   * Trước 17/08 màn này chỉ hỏi `status === OPEN`; mọi giá trị khác đều rơi vào cùng một ô trống
+   * ghi "Phòng QLKH chưa mở vòng chấm này — quay lại sau khi vòng được mở". Với đề tài ĐÃ NGHIỆM
+   * THU XONG (vòng PASSED) thì câu đó vừa sai vừa vô lý: hội đồng đã họp, đã chốt biên bản, kết
+   * quả hiện ngay trên đầu trang là "Đạt" — mà bên dưới lại bảo chờ mở vòng.
+   */
+  const isRoundFinished = Boolean(roundStatus) && roundStatus !== ROUND_STATUS.OPEN && roundStatus !== ROUND_STATUS.PENDING;
 
   /**
    * QĐ543 Điều 12.3.b phân vai rất rõ ở vòng NGHIỆM THU:
@@ -184,8 +195,8 @@ export function ProposalReviewWorkspace() {
               ) : (
                 <EmptyState
                   icon={Lock}
-                  title={t("reviewWorkspace.roundNotOpen")}
-                  description={t("reviewWorkspace.roundNotOpenDesc")}
+                  title={t(isRoundFinished ? "reviewWorkspace.roundFinished" : "reviewWorkspace.roundNotOpen")}
+                  description={t(isRoundFinished ? "reviewWorkspace.roundFinishedDesc" : "reviewWorkspace.roundNotOpenDesc")}
                 />
               )}
             </TabsContent>
@@ -198,8 +209,8 @@ export function ProposalReviewWorkspace() {
                 ) : (
                   <EmptyState
                     icon={Lock}
-                    title={t("reviewWorkspace.roundNotOpen")}
-                    description={t("reviewWorkspace.roundNotOpenDesc")}
+                    title={t(isRoundFinished ? "reviewWorkspace.roundFinished" : "reviewWorkspace.roundNotOpen")}
+                    description={t(isRoundFinished ? "reviewWorkspace.roundFinishedDesc" : "reviewWorkspace.roundNotOpenDesc")}
                   />
                 )}
               </TabsContent>

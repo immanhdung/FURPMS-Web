@@ -6,6 +6,8 @@ export interface ReviewBoardProject {
   proposalId: string;
   titleVi: string;
   projectStatus: string;
+  /** Chủ nhiệm — dùng để loại khỏi danh sách chọn ủy viên hội đồng (COI, rule #5). */
+  piUserId: string;
 }
 
 export interface ReviewBoardProjectRound {
@@ -13,6 +15,8 @@ export interface ReviewBoardProjectRound {
   titleVi: string;
   status: string;
   result?: string | null;
+  /** Chủ nhiệm — dùng để loại khỏi danh sách chọn ủy viên hội đồng (COI, rule #5). */
+  piUserId: string;
 }
 
 export interface ReviewBoardCouncil {

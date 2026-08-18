@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { DataTableColumnHeader } from "@/components/tables/DataTableColumnHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { DataTableRowActions } from "@/components/tables/DataTableRowActions";
+import { Lock, Unlock } from "lucide-react";
 import type { AdminUser } from "@/types/user";
 
 function initials(name: string) {
@@ -20,9 +21,20 @@ interface GetUserColumnsOptions {
   t: TFunction;
   onView: (user: AdminUser) => void;
   onEdit: (user: AdminUser) => void;
+  onDelete: (user: AdminUser) => void;
+  onToggleActive: (user: AdminUser) => void;
+  /** Tài khoản đang đăng nhập — không cho tự xoá chính mình (BE cũng chặn, đây là chặn sớm cho đỡ bực). */
+  currentUserId?: string;
 }
 
-export function getUserColumns({ t, onView, onEdit }: GetUserColumnsOptions): ColumnDef<AdminUser>[] {
+export function getUserColumns({
+  t,
+  onView,
+  onEdit,
+  onDelete,
+  onToggleActive,
+  currentUserId,
+}: GetUserColumnsOptions): ColumnDef<AdminUser>[] {
   return [
     {
       accessorKey: "fullName",
@@ -72,11 +84,28 @@ export function getUserColumns({ t, onView, onEdit }: GetUserColumnsOptions): Co
     {
       id: "actions",
       enableHiding: false,
-      cell: ({ row }) => (
-        <div className="flex justify-end">
-          <DataTableRowActions onView={() => onView(row.original)} onEdit={() => onEdit(row.original)} />
-        </div>
-      ),
+      cell: ({ row }) => {
+        const user = row.original;
+        const isSelf = Boolean(currentUserId) && user.id === currentUserId;
+        const isLocked = user.isActive === false;
+        return (
+          <div className="flex justify-end">
+            <DataTableRowActions
+              onView={() => onView(user)}
+              onEdit={() => onEdit(user)}
+              extraActions={[
+                {
+                  label: isLocked ? t("users.unlock") : t("users.lock"),
+                  icon: isLocked ? Unlock : Lock,
+                  onSelect: () => onToggleActive(user),
+                },
+              ]}
+              // Tự xoá mình thì phiên đang dùng thành tài khoản không tồn tại — ẩn luôn cho khỏi bấm nhầm.
+              onDelete={isSelf ? undefined : () => onDelete(user)}
+            />
+          </div>
+        );
+      },
     },
   ];
 }

@@ -1,6 +1,8 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import type { TFunction } from "i18next";
-import { PowerOff } from "lucide-react";
+import { PowerOff, AlertTriangle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { DataTableColumnHeader } from "@/components/tables/DataTableColumnHeader";
 import { DataTableRowActions } from "@/components/tables/DataTableRowActions";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -32,6 +34,30 @@ export function getTrackColumns({
     // QĐ543 cũng không có khái niệm này. Giữ lại cột trong DB (chưa xoá) phòng khi sau này nối
     // thật (vd: nộp đề cương vào lĩnh vực thì báo cho người phụ trách), nhưng KHÔNG bày ra giao
     // diện một chức năng bấm vào không dẫn tới đâu.
+    /*
+     * Cột "Đợt đang mở" — lĩnh vực là dữ liệu DÙNG CHUNG, tạo xong chưa thuộc đợt nào; PI chỉ chọn
+     * được lĩnh vực đã gắn vào đợt. Không có cột này thì màn hình không hề nói ra điều đó: người
+     * tạo thấy lĩnh vực nằm trong danh sách là yên tâm, rồi bên PI trống trơn (lỗi báo 18/08).
+     */
+    {
+      accessorKey: "cycleCount",
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t("staff.cyclesUsing")} />,
+      cell: ({ row }) => {
+        const count = row.original.cycleCount ?? 0;
+        if (count > 0) return <Badge variant="secondary">{t("staff.cycleCount", { count })}</Badge>;
+        return (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="inline-flex cursor-help items-center gap-1 text-xs font-medium text-warning">
+                <AlertTriangle className="size-3.5" />
+                {t("staff.notInAnyCycle")}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-72">{t("staff.notInAnyCycleHint")}</TooltipContent>
+          </Tooltip>
+        );
+      },
+    },
     {
       accessorKey: "isActive",
       header: ({ column }) => <DataTableColumnHeader column={column} title={t("common.status")} />,

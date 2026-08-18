@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useUsersQuery } from "@/hooks/useUsers";
 import { useCreateCouncilPackageMutation, useReviewBoardQuery } from "@/hooks/useReviewBoard";
 import type { CouncilPackageMember } from "@/types/review-board";
+import { eligibleCouncilCandidates } from "@/utils/council-eligibility";
 
 // Chuỗi role KHỚP CHÍNH XÁC với BE (check "Chair"/"Secretary") — KHÔNG dùng "Chairman".
 const ROLES = ["Chair", "Secretary", "Member", "Opponent"];
@@ -32,6 +33,16 @@ export function CreateCouncilSheet({ open, onOpenChange, cycleId, trackId, round
   const { data: users } = useUsersQuery();
   const { data: board } = useReviewBoardQuery(cycleId, trackId);
   const createMutation = useCreateCouncilPackageMutation(cycleId, trackId);
+
+  // Danh sách chọn ủy viên: chỉ người đủ tư cách (giảng viên/hội đồng), trừ chủ nhiệm những đề tài
+  // ĐANG NẰM TRONG VÒNG này — hội đồng lập ra là để chấm đúng nhóm đề tài đó (COI, rule #5).
+  // Trước 18/08 chỗ này đổ thẳng toàn bộ `users`, nên Staff thấy cả tài khoản quản trị lẫn chính
+  // chủ nhiệm đề tài, chọn xong mới bị BE trả lỗi.
+  const roundPiIds = (board?.rounds ?? [])
+    .filter((r) => r.id === roundId)
+    .flatMap((r) => r.projects.map((p) => p.piUserId))
+    .filter(Boolean);
+  const candidates = eligibleCouncilCandidates(users, roundPiIds);
 
   const [rows, setRows] = useState<CouncilPackageMember[]>(() => [
     { userId: "", memberRole: "Chair", isExternal: false },
@@ -133,11 +144,14 @@ export function CreateCouncilSheet({ open, onOpenChange, cycleId, trackId, round
                   <SelectValue placeholder={t("reviewBoard.selectReviewer")} />
                 </SelectTrigger>
                 <SelectContent>
-                  {users?.map((u) => (
+                  {candidates.map((u) => (
                     <SelectItem key={u.id} value={u.id}>
                       {u.fullName}
                     </SelectItem>
                   ))}
+                  {candidates.length === 0 && (
+                    <p className="px-2 py-3 text-xs text-muted-foreground">{t("reviewBoard.noEligibleReviewer")}</p>
+                  )}
                 </SelectContent>
               </Select>
               <Select value={row.memberRole} onValueChange={(v) => updateRow(index, { memberRole: v })}>
