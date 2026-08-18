@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { Archive, CircleCheck, ExternalLink, FileCheck2, Loader2, RotateCcw, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -16,6 +17,7 @@ import {
   useSubmitFinalReportMutation,
 } from "@/hooks/useFinalReports";
 import { finalReportDocumentService } from "@/services/api/final-report-document.service";
+import { openDocumentLocation } from "@/services/api/fileDownload";
 import { FINAL_REPORT_STATUS } from "@/types/final-report";
 import { formatDateTime } from "@/utils/format";
 
@@ -78,6 +80,14 @@ export function FinalReportPanel({
     }
   };
 
+  const openDocument = async (location: string) => {
+    try {
+      await openDocumentLocation(location);
+    } catch {
+      toast.error(t("reports.openFileFailed"));
+    }
+  };
+
   useEffect(() => {
     if (report) {
       setReportFileUrl(report.reportFileUrl ?? "");
@@ -114,26 +124,24 @@ export function FinalReportPanel({
 
             <div className="flex flex-wrap gap-3">
               {report.reportFileUrl && (
-                <a
-                  href={report.reportFileUrl}
-                  target="_blank"
-                  rel="noreferrer"
+                <button
+                  type="button"
+                  onClick={() => void openDocument(report.reportFileUrl!)}
                   className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
                 >
                   <ExternalLink className="size-3.5" />
                   {t("contract.finalReport.fullReport")}
-                </a>
+                </button>
               )}
               {report.summaryFileUrl && (
-                <a
-                  href={report.summaryFileUrl}
-                  target="_blank"
-                  rel="noreferrer"
+                <button
+                  type="button"
+                  onClick={() => void openDocument(report.summaryFileUrl!)}
                   className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
                 >
                   <ExternalLink className="size-3.5" />
                   {t("contract.finalReport.summary")}
-                </a>
+                </button>
               )}
             </div>
 
@@ -153,8 +161,8 @@ export function FinalReportPanel({
             <p className="text-sm font-medium text-foreground">
               {needsRevision ? t("contract.finalReport.submitRevised") : t("contract.finalReport.submitTitle")}
             </p>
-            {/* Thầy 29/07: upload file PDF thay vì dán URL. Upload xong lấy downloadUrl của hệ
-                thống làm reportFileUrl → PI không phải tự đi host file ở đâu khác. */}
+            {/* Ưu tiên upload để file đi qua kho có phân quyền; vẫn nhận link ngoài khi tài liệu
+                đã nằm trên Drive/kho cơ quan để PI không phải tải xuống rồi tải lên lại. */}
             <div>
               <label className="mb-1.5 block text-sm font-medium text-foreground">
                 {t("contract.finalReport.reportFile")} <span className="text-destructive">*</span>
@@ -168,6 +176,13 @@ export function FinalReportPanel({
               </div>
               <input ref={reportInputRef} type="file" accept=".pdf,.doc,.docx" className="hidden"
                 onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadFile(f, "report"); e.target.value = ""; }} />
+              <p className="my-1 text-center text-xs text-muted-foreground">{t("reports.orPasteLink")}</p>
+              <Input
+                type="url"
+                placeholder="https://drive.google.com/..."
+                value={reportFileUrl.startsWith("/api/") ? "" : reportFileUrl}
+                onChange={(event) => setReportFileUrl(event.target.value)}
+              />
             </div>
             <div>
               <label className="mb-1.5 block text-sm font-medium text-foreground">
@@ -182,6 +197,13 @@ export function FinalReportPanel({
               </div>
               <input ref={summaryInputRef} type="file" accept=".pdf,.doc,.docx" className="hidden"
                 onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadFile(f, "summary"); e.target.value = ""; }} />
+              <p className="my-1 text-center text-xs text-muted-foreground">{t("reports.orPasteLink")}</p>
+              <Input
+                type="url"
+                placeholder="https://drive.google.com/..."
+                value={summaryFileUrl.startsWith("/api/") ? "" : summaryFileUrl}
+                onChange={(event) => setSummaryFileUrl(event.target.value)}
+              />
             </div>
             <div>
               <label className="mb-1.5 block text-sm font-medium text-foreground">{t("contract.finalReport.language")}</label>

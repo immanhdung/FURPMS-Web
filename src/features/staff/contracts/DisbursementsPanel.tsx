@@ -70,6 +70,7 @@ export function DisbursementsPanel({ contractId, canManage }: { contractId: stri
         // Có gắn sản phẩm mà sản phẩm chưa nghiệm thu Đạt ⇒ BE sẽ chặn (409).
         // Khoá nút ngay ở FE để Staff không bấm rồi mới ăn lỗi.
         const isBlocked = !isDisbursed && Boolean(d.isBlockedByDeliverable);
+        const isMissingEvidence = !isDisbursed && !d.hasEvidence;
         const isReady = !isDisbursed && !isBlocked && Boolean(d.conditionMetAt);
 
         return (
@@ -107,8 +108,12 @@ export function DisbursementsPanel({ contractId, canManage }: { contractId: stri
                   <Button
                     size="sm"
                     variant={isReady ? "default" : "outline"}
-                    disabled={isBlocked}
-                    title={isBlocked ? t("contract.disbursement.blockedByProduct") : undefined}
+                    disabled={isBlocked || isMissingEvidence}
+                    title={isBlocked
+                      ? t("contract.disbursement.blockedByProduct")
+                      : isMissingEvidence
+                        ? t("contract.disbursement.evidenceRequired")
+                        : undefined}
                     onClick={() => setConfirming(d)}
                   >
                     <BanknoteArrowUp />

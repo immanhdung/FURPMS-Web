@@ -21,6 +21,8 @@ interface ScheduleProgressReportDialogProps {
   onOpenChange: (open: boolean) => void;
   contractId: string;
   reportId: string | null;
+  contractStartDate?: string | null;
+  contractEndDate?: string | null;
 }
 
 export function ScheduleProgressReportDialog({
@@ -28,6 +30,8 @@ export function ScheduleProgressReportDialog({
   onOpenChange,
   contractId,
   reportId,
+  contractStartDate,
+  contractEndDate,
 }: ScheduleProgressReportDialogProps) {
   const { t } = useTranslation();
   const scheduleMutation = useScheduleProgressReportMutation(contractId);
@@ -41,6 +45,14 @@ export function ScheduleProgressReportDialog({
    * giờ họp, link họp đang đặt là gì. Lưu lại là ghi đè mất giá trị cũ mà không ai biết.
    */
   const { data: report } = useProgressReportQuery(open ? reportId : null);
+  const today = new Date().toLocaleDateString("en-CA");
+  const minDueDate = [today, contractStartDate?.slice(0, 10), report?.reportingPeriodStart?.slice(0, 10)]
+    .filter((value): value is string => Boolean(value))
+    .sort()
+    .at(-1);
+  const maxDueDate = contractEndDate?.slice(0, 10);
+  const nowLocal = toDateTimeLocalInput(new Date());
+  const maxMeetingAt = maxDueDate ? `${maxDueDate}T23:59` : undefined;
 
   useEffect(() => {
     if (!open || !report) return;
@@ -77,13 +89,33 @@ export function ScheduleProgressReportDialog({
           </div>
           <div>
             <label className="mb-1.5 block text-sm font-medium text-foreground">{t("contract.dueDate")}</label>
-            <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+            <Input
+              type="date"
+              min={minDueDate}
+              max={maxDueDate}
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+            />
             {/* Đặt lại ngày ở đây = GIA HẠN hạn nộp (thầy 29/07: đánh giá trúng ngày cuối thì gia hạn được). */}
             <p className="mt-1 text-xs text-muted-foreground">{t("contract.dueDateExtendHint")}</p>
           </div>
           <div>
             <label className="mb-1.5 block text-sm font-medium text-foreground">{t("contract.meetingDateTime")}</label>
-            <Input type="datetime-local" value={scheduledMeetingAt} onChange={(e) => setScheduledMeetingAt(e.target.value)} />
+            <Input
+              type="datetime-local"
+              min={nowLocal}
+              max={maxMeetingAt}
+              value={scheduledMeetingAt}
+              onChange={(e) => setScheduledMeetingAt(e.target.value)}
+            />
+            {contractStartDate && contractEndDate && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                {t("contract.scheduleWithinContract", {
+                  start: contractStartDate.slice(0, 10),
+                  end: contractEndDate.slice(0, 10),
+                })}
+              </p>
+            )}
           </div>
           <div>
             <label className="mb-1.5 block text-sm font-medium text-foreground">{t("contract.meetingLink")}</label>

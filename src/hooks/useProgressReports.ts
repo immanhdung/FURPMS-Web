@@ -128,6 +128,18 @@ export function useSubmitProgressReportMutation(contractId: string) {
   });
 }
 
+export function useDeleteProgressReportMutation(contractId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => progressReportService.delete(id),
+    onSuccess: () => {
+      toast.success(i18n.t("toast.progressRoundDeleted"));
+      queryClient.invalidateQueries({ queryKey: queryKeys.progressReports.list(contractId) });
+    },
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.progressRoundDeleteFailed")),
+  });
+}
+
 /**
  * Hoạt động đã cam kết trong đề cương — nguồn cho BẢNG TIẾN ĐỘ THEO HOẠT ĐỘNG của BM06.
  * PI báo % hoàn thành từng hoạt động thay vì chỉ viết văn xuôi.

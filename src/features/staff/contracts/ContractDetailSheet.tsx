@@ -183,7 +183,11 @@ export function ContractDetailSheet({ open, onOpenChange, contractId }: Contract
                   <DeliverablesPanel contractId={contract.id} canManage={canManage} />
                 </TabsContent>
                 <TabsContent value="progress">
-                  <ProgressReportsPanel contractId={contract.id} />
+                  <ProgressReportsPanel
+                    contractId={contract.id}
+                    contractStartDate={contract.startDate}
+                    contractEndDate={contract.endDate}
+                  />
                 </TabsContent>
                 <TabsContent value="final">
                   <FinalReportPanel contractId={contract.id} canManage={canManage} />

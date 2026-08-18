@@ -19,6 +19,7 @@ import {
 } from "@/hooks/useProgressReports";
 import { ProgressReportDetailView } from "@/components/shared/ProgressReportDetailView";
 import { progressReportDocumentService } from "@/services/api/progress-report-document.service";
+import { externalUrl } from "@/utils/format";
 
 /** QĐ543 Điều 10 / BM06 — kết quả đánh giá tiến độ (khớp giá trị BE nhận). */
 const PROGRESS_EVAL = { PASS: "PASS", CONDITIONAL: "CONDITIONAL", FAIL: "FAIL" } as const;
@@ -80,34 +81,39 @@ export function EvaluateProgressReportDialog({
           <ProgressReportDetailView reportId={open ? reportId : null} />
 
           {/* File PI nộp — bấm mở xem trước khi chấm. Chưa có file thì khoá nút lưu. */}
-          <div className="rounded-lg border border-border p-3">
-            <p className="text-sm font-medium text-foreground">{t("contract.reportFiles")}</p>
+          <div className="space-y-3 rounded-lg border border-border p-3">
             {reportLink && (
-              <a
-                href={/^https?:\/\//i.test(reportLink) ? reportLink : `https://${reportLink}`}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
-              >
-                <FileText className="size-3.5 shrink-0" />
-                <span className="truncate">{reportLink}</span>
-              </a>
+              <div>
+                <p className="text-sm font-medium text-foreground">{t("contract.reportExternalLink")}</p>
+                <a
+                  href={externalUrl(reportLink)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
+                >
+                  <FileText className="size-3.5 shrink-0" />
+                  <span className="truncate">{reportLink}</span>
+                </a>
+              </div>
             )}
             {docs && docs.length > 0 ? (
-              <ul className="mt-1.5 space-y-1">
-                {docs.map((d) => (
-                  <li key={d.id}>
-                    <button
-                      type="button"
-                      onClick={() => openDoc(d.id)}
-                      className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
-                    >
-                      <FileText className="size-3.5" />
-                      {d.fileName}
-                    </button>
-                  </li>
-                ))}
-              </ul>
+              <div>
+                <p className="text-sm font-medium text-foreground">{t("contract.reportUploadedFiles")}</p>
+                <ul className="mt-1.5 space-y-1">
+                  {docs.map((d) => (
+                    <li key={d.id}>
+                      <button
+                        type="button"
+                        onClick={() => openDoc(d.id)}
+                        className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
+                      >
+                        <FileText className="size-3.5" />
+                        {d.fileName}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ) : reportLink ? null : (
               <p className="mt-1 text-xs text-destructive">{t("contract.noReportFile")}</p>
             )}

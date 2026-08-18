@@ -28,6 +28,23 @@ export async function openFileInNewTab(downloadUrl: string): Promise<void> {
   window.open(URL.createObjectURL(blob), "_blank", "noopener");
 }
 
+/** Mở được cả file nội bộ có JWT lẫn liên kết ngoài do PI cung cấp. */
+export async function openDocumentLocation(location: string): Promise<void> {
+  const value = location.trim();
+  if (value.startsWith("/api/")) {
+    await openFileInNewTab(value);
+    return;
+  }
+
+  const external = /^https?:\/\//i.test(value) ? value : `https://${value}`;
+  const parsed = new URL(external);
+  if (!["http:", "https:"].includes(parsed.protocol)
+      || (!parsed.hostname.includes(".") && parsed.hostname !== "localhost")) {
+    throw new Error("Invalid document URL");
+  }
+  window.open(parsed.toString(), "_blank", "noopener,noreferrer");
+}
+
 /** Tải hẳn về máy, giữ đúng tên file BE trả về. */
 export async function saveFile(downloadUrl: string, fileName: string): Promise<void> {
   const blob = await fetchFileBlob(downloadUrl);

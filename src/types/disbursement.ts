@@ -30,6 +30,8 @@ export interface Disbursement {
   deliverableSubmittedAt?: string | null;
   /** Có gắn sản phẩm nhưng sản phẩm chưa nghiệm thu Đạt ⇒ BE chặn đánh dấu giải ngân. */
   isBlockedByDeliverable?: boolean;
+  /** Có ít nhất một file hợp đồng/chứng từ; bắt buộc trước khi xác nhận đã giải ngân. */
+  hasEvidence?: boolean;
 }
 
 /** Gắn sản phẩm minh chứng cho đợt; `null` = gỡ. */

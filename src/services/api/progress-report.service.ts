@@ -48,4 +48,6 @@ export const progressReportService = {
 
   submit: (id: string) =>
     axiosClient.post<ApiResponse<ProgressReport>>(`/progress-reports/${id}/submit`).then((res) => res.data.data),
+
+  delete: (id: string) => axiosClient.delete(`/progress-reports/${id}`),
 };

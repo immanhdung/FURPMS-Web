@@ -5,6 +5,7 @@ import { ClipboardList, Loader2, Save, Sparkles, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -108,6 +109,13 @@ export function RubricScoringForm({ councilId, proposalId, projectId }: RubricSc
 
   const totalScore = Object.values(scores).reduce((sum, s) => sum + (s.givenScore || 0), 0);
   const maxTotal = activeCriteria.reduce((sum, c) => sum + c.maxScore, 0);
+  const isAcceptanceRubric = matchingTemplate?.templateType === "ACCEPTANCE";
+  const ratingWeight = (maxScore: number) => maxScore / 5;
+  const toStoredAcceptanceScore = (rating: number, maxScore: number) => rating * ratingWeight(maxScore);
+  const toAcceptanceRating = (storedScore: number, maxScore: number) => {
+    const weight = ratingWeight(maxScore);
+    return weight > 0 && storedScore > 0 ? Math.min(5, Math.max(1, Math.round(storedScore / weight))) : 0;
+  };
 
   const handleSubmit = () => {
     if (!matchingTemplate) {
@@ -117,10 +125,12 @@ export function RubricScoringForm({ councilId, proposalId, projectId }: RubricSc
     // Validate rõ criterion nào vượt thang điểm — trước đây để BE trả 400 chung, reviewer phải tự mò.
     const invalid = activeCriteria.find((c) => {
       const v = scores[c.id]?.givenScore ?? 0;
-      return v < 0 || v > c.maxScore;
+      return v < 0 || v > c.maxScore || (isAcceptanceRubric && v === 0);
     });
     if (invalid) {
-      toast.error(t("review.scoreRange", { name: invalid.criterionName, max: invalid.maxScore }));
+      toast.error(isAcceptanceRubric
+        ? t("review.acceptanceRatingRequired", { name: invalid.criterionName })
+        : t("review.scoreRange", { name: invalid.criterionName, max: invalid.maxScore }));
       return;
     }
     const scoreDetails: ScoreDetailPayload[] = activeCriteria.map((criterion) => ({
@@ -156,10 +166,10 @@ export function RubricScoringForm({ councilId, proposalId, projectId }: RubricSc
     const filled: Record<number, { givenScore: number; comments: string }> = {};
     for (const c of activeCriteria) {
       const max = Number(c.maxScore) || 0;
-      // Làm tròn 0.5 cho thang nhỏ (BM10 thang 5 ⇒ 4), số nguyên cho thang lớn (BM03 ⇒ 8/16/32…).
+      // BM10 hiển thị mức 1-5 nhưng lưu theo trọng số để tổng phiếu luôn ở thang 100.
       const raw = max * 0.8;
       filled[c.id] = {
-        givenScore: max <= 5 ? Math.round(raw * 2) / 2 : Math.round(raw),
+        givenScore: isAcceptanceRubric ? toStoredAcceptanceScore(4, max) : Math.round(raw),
         comments: t("review.quickFillCriterionNote"),
       };
     }
@@ -212,12 +222,46 @@ export function RubricScoringForm({ councilId, proposalId, projectId }: RubricSc
                   {criterion.criterionName}
                 </p>
                 <div className="flex shrink-0 items-center gap-1.5">
-                  <Input
-                    type="number"
-                    min={0}
-                    max={criterion.maxScore}
-                    step={scoreStep}
-                    className="w-20"
+                  {isAcceptanceRubric ? (
+                    <>
+                      <Select
+                        value={(() => {
+                          const rating = toAcceptanceRating(scores[criterion.id]?.givenScore ?? 0, criterion.maxScore);
+                          return rating ? String(rating) : undefined;
+                        })()}
+                        onValueChange={(value) =>
+                          setScores((prev) => ({
+                            ...prev,
+                            [criterion.id]: {
+                              ...prev[criterion.id],
+                              givenScore: toStoredAcceptanceScore(Number(value), criterion.maxScore),
+                            },
+                          }))
+                        }
+                      >
+                        <SelectTrigger className="w-32">
+                          <SelectValue placeholder={t("review.acceptanceRating")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {[1, 2, 3, 4, 5].map((rating) => (
+                            <SelectItem key={rating} value={String(rating)}>
+                              {rating}/5
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <span className="text-xs text-muted-foreground">
+                        = {scores[criterion.id]?.givenScore || 0}/{criterion.maxScore}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <Input
+                        type="number"
+                        min={0}
+                        max={criterion.maxScore}
+                        step={scoreStep}
+                        className="w-20"
                     // Hiện rỗng khi 0 (thay vì "0" dính đầu gây "05" khó chịu khi gõ tay); rỗng = 0 lúc nộp.
                     value={scores[criterion.id]?.givenScore || ""}
                     onChange={(e) => {
@@ -245,8 +289,10 @@ export function RubricScoringForm({ councilId, proposalId, projectId }: RubricSc
                         [criterion.id]: { ...prev[criterion.id], givenScore: v },
                       }));
                     }}
-                  />
-                  <span className="text-xs text-muted-foreground">/ {criterion.maxScore}</span>
+                      />
+                      <span className="text-xs text-muted-foreground">/ {criterion.maxScore}</span>
+                    </>
+                  )}
                 </div>
               </div>
               <Textarea
@@ -283,7 +329,12 @@ export function RubricScoringForm({ councilId, proposalId, projectId }: RubricSc
                       setScores((prev) => ({
                         ...prev,
                         [criterion.id]: {
-                          givenScore: s.suggestedScore,
+                          givenScore: isAcceptanceRubric
+                            ? toStoredAcceptanceScore(
+                                toAcceptanceRating(s.suggestedScore, criterion.maxScore),
+                                criterion.maxScore,
+                              )
+                            : s.suggestedScore,
                           comments: prev[criterion.id]?.comments || s.comment,
                         },
                       }));

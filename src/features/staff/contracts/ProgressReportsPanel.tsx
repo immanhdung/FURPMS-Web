@@ -1,28 +1,40 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { CalendarClock, ClipboardCheck, ExternalLink, FileBarChart, CalendarPlus } from "lucide-react";
+import { CalendarClock, ClipboardCheck, ExternalLink, FileBarChart, CalendarPlus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { useGenerateProgressRoundsMutation, useProgressReportQuery, useProgressReportsQuery } from "@/hooks/useProgressReports";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { useDeleteProgressReportMutation, useGenerateProgressRoundsMutation, useProgressReportQuery, useProgressReportsQuery } from "@/hooks/useProgressReports";
 import { ScheduleProgressReportDialog } from "@/features/staff/contracts/ScheduleProgressReportDialog";
 import { EvaluateProgressReportDialog } from "@/features/staff/contracts/EvaluateProgressReportDialog";
 import { externalUrl, formatDate, formatDateTime } from "@/utils/format";
 import { ProgressReportDetailSheet } from "@/components/shared/DossierDetailSheet";
 
-export function ProgressReportsPanel({ contractId }: { contractId: string }) {
+export function ProgressReportsPanel({
+  contractId,
+  contractStartDate,
+  contractEndDate,
+}: {
+  contractId: string;
+  contractStartDate?: string | null;
+  contractEndDate?: string | null;
+}) {
   // Chi tiết nạp riêng: danh sách chỉ trả bản tóm tắt, không có nội dung PI đã gõ.
   const [openReportId, setOpenReportId] = useState<string | null>(null);
   const { data: openReport } = useProgressReportQuery(openReportId);
   const { t } = useTranslation();
   const { data: reports, isLoading } = useProgressReportsQuery(contractId);
   const generateMutation = useGenerateProgressRoundsMutation(contractId);
+  const deleteMutation = useDeleteProgressReportMutation(contractId);
 
   const [schedulingReportId, setSchedulingReportId] = useState<string | null>(null);
   const [evaluatingReportId, setEvaluatingReportId] = useState<string | null>(null);
   const [roundCount, setRoundCount] = useState("");
+  const [deletingReportId, setDeletingReportId] = useState<string | null>(null);
+  const [confirmGenerate, setConfirmGenerate] = useState(false);
 
   return (
     <div className="space-y-3">
@@ -45,7 +57,7 @@ export function ProgressReportsPanel({ contractId }: { contractId: string }) {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => generateMutation.mutate(roundCount ? Number(roundCount) : undefined)}
+          onClick={() => setConfirmGenerate(true)}
           disabled={generateMutation.isPending}
         >
           <CalendarPlus />
@@ -129,6 +141,12 @@ export function ProgressReportsPanel({ contractId }: { contractId: string }) {
                   <ClipboardCheck />
                   {t("reports.evaluateReport")}
                 </Button>
+                {report.status === "DRAFT" && (
+                  <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => setDeletingReportId(report.id)}>
+                    <Trash2 />
+                    {t("common.delete")}
+                  </Button>
+                )}
               </div>
             </li>
           ))}
@@ -140,6 +158,8 @@ export function ProgressReportsPanel({ contractId }: { contractId: string }) {
         onOpenChange={(open) => !open && setSchedulingReportId(null)}
         contractId={contractId}
         reportId={schedulingReportId}
+        contractStartDate={contractStartDate}
+        contractEndDate={contractEndDate}
       />
       <EvaluateProgressReportDialog
         open={Boolean(evaluatingReportId)}
@@ -151,6 +171,31 @@ export function ProgressReportsPanel({ contractId }: { contractId: string }) {
         item={openReport ?? null}
         open={Boolean(openReportId)}
         onOpenChange={(o) => !o && setOpenReportId(null)}
+      />
+      <ConfirmDialog
+        open={confirmGenerate}
+        onOpenChange={setConfirmGenerate}
+        title={t("reports.generateRoundsTitle")}
+        description={t("reports.generateRoundsDescription", {
+          count: roundCount || t("reports.auto"),
+        })}
+        confirmLabel={t("reports.generateRounds")}
+        isLoading={generateMutation.isPending}
+        onConfirm={() => generateMutation.mutate(roundCount ? Number(roundCount) : undefined, {
+          onSuccess: () => setConfirmGenerate(false),
+        })}
+      />
+      <ConfirmDialog
+        open={Boolean(deletingReportId)}
+        onOpenChange={(open) => !open && setDeletingReportId(null)}
+        title={t("reports.deleteRoundTitle")}
+        description={t("reports.deleteRoundDescription")}
+        confirmLabel={t("common.delete")}
+        variant="destructive"
+        isLoading={deleteMutation.isPending}
+        onConfirm={() => deletingReportId && deleteMutation.mutate(deletingReportId, {
+          onSuccess: () => setDeletingReportId(null),
+        })}
       />
     </div>
   );
