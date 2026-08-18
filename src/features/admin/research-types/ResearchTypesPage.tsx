@@ -10,6 +10,7 @@ import { useDeleteResearchTypeMutation, useResearchTypesQuery } from "@/hooks/us
 import { getResearchTypeColumns } from "@/features/admin/research-types/columns";
 import { ResearchTypeFormSheet } from "@/features/admin/research-types/ResearchTypeFormSheet";
 import { sortByIdDesc } from "@/utils/sort";
+import { researchTypeDisplayName } from "@/utils/research-type";
 import type { ResearchType } from "@/types/research-type";
 
 export function ResearchTypesPage() {
@@ -85,7 +86,7 @@ export function ResearchTypesPage() {
         open={Boolean(deletingType)}
         onOpenChange={(open) => !open && setDeletingType(null)}
         title={t("researchTypes.deleteTitle")}
-        description={t("researchTypes.deleteDesc", { name: deletingType?.name ?? "" })}
+        description={t("researchTypes.deleteDesc", { name: researchTypeDisplayName(deletingType, t) })}
         variant="destructive"
         confirmLabel={t("common.delete")}
         isLoading={deleteMutation.isPending}

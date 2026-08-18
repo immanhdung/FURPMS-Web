@@ -19,7 +19,7 @@ interface ResearchTypeFormSheetProps {
 }
 
 export function ResearchTypeFormSheet({ open, onOpenChange, researchType }: ResearchTypeFormSheetProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const isEdit = Boolean(researchType);
   const createMutation = useCreateResearchTypeMutation();
   const updateMutation = useUpdateResearchTypeMutation();
@@ -100,14 +100,43 @@ export function ResearchTypeFormSheet({ open, onOpenChange, researchType }: Rese
         <label htmlFor="rt-budget" className="mb-1.5 block text-sm font-medium text-foreground">
           {t("researchTypes.maxBudgetCap")}
         </label>
-        <Input
-          id="rt-budget"
-          type="number"
-          step="1"
-          aria-invalid={Boolean(errors.maxBudgetCap)}
-          {...register("maxBudgetCap", { valueAsNumber: true })}
+        <Controller
+          control={control}
+          name="maxBudgetCap"
+          render={({ field }) => {
+            const locale = i18n.resolvedLanguage?.startsWith("en") ? "en-US" : "vi-VN";
+            const formatted = field.value
+              ? new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(field.value)
+              : "";
+
+            return (
+              <div className="relative">
+                <Input
+                  {...field}
+                  id="rt-budget"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  value={formatted}
+                  className="pr-14 font-medium tracking-wide tabular-nums"
+                  aria-invalid={Boolean(errors.maxBudgetCap)}
+                  aria-describedby="rt-budget-hint"
+                  onChange={(event) => {
+                    const digits = event.target.value.replace(/\D/g, "");
+                    field.onChange(digits ? Number(digits) : 0);
+                  }}
+                />
+                <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-medium text-muted-foreground">
+                  VND
+                </span>
+              </div>
+            );
+          }}
         />
         {errors.maxBudgetCap && <p className="mt-1 text-xs text-destructive">{errors.maxBudgetCap.message}</p>}
+        <p id="rt-budget-hint" className="mt-1 text-xs text-muted-foreground">
+          {t("researchTypes.maxBudgetCapHint")}
+        </p>
       </div>
 
       <Controller

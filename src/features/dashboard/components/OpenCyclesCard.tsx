@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { CalendarRange, ArrowRight } from "lucide-react";
@@ -9,6 +10,7 @@ import { useResearchTypesQuery } from "@/hooks/useResearchTypes";
 import { CYCLE_STATUS } from "@/constants/statuses";
 import { ROUTES } from "@/constants/routes";
 import { formatDate } from "@/utils/format";
+import { researchTypeDisplayName } from "@/utils/research-type";
 
 /**
  * Đợt đang MỞ nhận đề cương (thầy 29/07: dashboard PI phải thấy "những đợt nào đang mở,
@@ -19,13 +21,15 @@ export function OpenCyclesCard() {
   const { t } = useTranslation();
   const { data: cycles, isLoading } = useCyclesQuery();
   const { data: researchTypes } = useResearchTypesQuery();
+  const [referenceTime] = useState(() => Date.now());
 
   const open = (cycles ?? []).filter((c) => c.status?.toUpperCase() === CYCLE_STATUS.OPEN);
-  const typeName = (id?: number | null) => researchTypes?.find((rt) => Number(rt.id) === Number(id))?.name;
+  const typeName = (id?: number | null) =>
+    researchTypeDisplayName(researchTypes?.find((rt) => Number(rt.id) === Number(id)), t);
 
   const daysLeft = (deadline?: string | null) => {
     if (!deadline) return null;
-    const diff = Math.ceil((new Date(deadline).getTime() - Date.now()) / 86_400_000);
+    const diff = Math.ceil((new Date(deadline).getTime() - referenceTime) / 86_400_000);
     return Number.isFinite(diff) ? diff : null;
   };
 

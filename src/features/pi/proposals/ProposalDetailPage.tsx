@@ -25,9 +25,8 @@ import { ChangeRequestsPanel } from "@/features/pi/proposals/ChangeRequestsPanel
 import { ProposalExportMenu, makeSlug } from "@/features/pi/proposals/ProposalExportMenu";
 import { PROPOSAL_STATUS } from "@/constants/statuses";
 import { ROUTES } from "@/constants/routes";
-
-
 import { proposalTitle } from "@/utils/format";
+import { researchTypeDisplayName } from "@/utils/research-type";
 export function ProposalDetailPage() {
   const { proposalId } = useParams<{ proposalId: string }>();
   const navigate = useNavigate();
@@ -51,7 +50,10 @@ export function ProposalDetailPage() {
 
   const cycleName = cycles?.find((c) => c.id === proposal.cycleId)?.name;
   const trackName = tracks?.find((t) => t.id.toString() === proposal.trackId)?.name;
-  const researchTypeName = researchTypes?.find((rt) => rt.id === proposal.researchType)?.name;
+  const researchTypeName = researchTypeDisplayName(
+    researchTypes?.find((rt) => rt.id === proposal.researchType),
+    t
+  );
 
   return (
     <div className="mx-auto max-w-3xl space-y-5">

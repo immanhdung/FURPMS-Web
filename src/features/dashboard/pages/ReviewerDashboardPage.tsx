@@ -14,10 +14,10 @@ import { useReviewerDashboardQuery } from "@/hooks/useDashboard";
 import { ROUTES } from "@/constants/routes";
 
 const KPI_ICONS: Record<string, LucideIcon> = {
-  "pending-reviews": ClipboardCheck,
-  "assigned-councils": Gavel,
-  "completion-rate": TrendingUp,
-  "upcoming-meetings": CalendarClock,
+  memberships: Gavel,
+  invited: Mail,
+  scored: ClipboardCheck,
+  deciding: TrendingUp,
 };
 
 const QUICK_ACTIONS: QuickAction[] = [
@@ -55,9 +55,23 @@ export function ReviewerDashboardPage() {
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {isLoading
           ? Array.from({ length: 4 }).map((_, index) => <KpiCardSkeleton key={index} />)
-          : data?.kpis.map((kpi, index) => (
-              <KpiCard key={kpi.id} datum={kpi} icon={KPI_ICONS[kpi.id] ?? ClipboardCheck} index={index} />
-            ))}
+          : data?.kpis.map((kpi, index) => {
+              // BE trả nhãn KPI bằng tiếng Việt. ID mới là hợp đồng ổn định để giao diện tự dịch
+              // theo ngôn ngữ đang chọn, không phải gọi lại API khi người dùng đổi Việt/Anh.
+              const localizedKpi = {
+                ...kpi,
+                label: t(`dashboard.reviewer.kpis.${kpi.id}`, { defaultValue: kpi.label }),
+              };
+
+              return (
+                <KpiCard
+                  key={kpi.id}
+                  datum={localizedKpi}
+                  icon={KPI_ICONS[kpi.id] ?? ClipboardCheck}
+                  index={index}
+                />
+              );
+            })}
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">

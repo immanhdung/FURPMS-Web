@@ -17,6 +17,7 @@ import { TracksTabContent } from "@/features/staff/tracks/TracksTabContent";
 import { ManageCycleFieldsDialog } from "@/features/admin/cycles/ManageCycleFieldsDialog";
 import { ExtendDeadlineDialog } from "@/features/admin/cycles/ExtendDeadlineDialog";
 import { sortByIdDesc } from "@/utils/sort";
+import { researchTypeDisplayName } from "@/utils/research-type";
 import type { Cycle } from "@/types/cycle";
 
 export function CyclesPage() {
@@ -36,8 +37,8 @@ export function CyclesPage() {
   const [extendingCycle, setExtendingCycle] = useState<Cycle | null>(null);
 
   const researchTypeNames = useMemo(
-    () => Object.fromEntries((researchTypes ?? []).map((rt) => [rt.id, rt.name])),
-    [researchTypes]
+    () => Object.fromEntries((researchTypes ?? []).map((rt) => [rt.id, researchTypeDisplayName(rt, t)])),
+    [researchTypes, t]
   );
   const sortedData = useMemo(() => sortByIdDesc(data), [data]);
 

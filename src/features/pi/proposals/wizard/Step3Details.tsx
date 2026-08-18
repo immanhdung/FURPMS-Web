@@ -7,6 +7,7 @@ import { useResearchTypesQuery } from "@/hooks/useResearchTypes";
 import { BudgetBreakdownTable } from "@/features/pi/proposals/wizard/BudgetBreakdownTable";
 import { ExpectedProductsCard } from "@/features/pi/proposals/ExpectedProductsCard";
 import type { ProposalWizardValues } from "@/features/pi/proposals/wizard/proposal-wizard.schema";
+import { researchTypeDisplayName } from "@/utils/research-type";
 
 /** Small helpers so labels/sections stay consistent without repeating classes. */
 function FieldLabel({ htmlFor, required, children }: { htmlFor: string; required?: boolean; children: ReactNode }) {
@@ -50,7 +51,7 @@ export function Step3Details({
   const { data: researchTypes } = useResearchTypesQuery();
   const selectedType = researchTypes?.find((rt) => Number(rt.id) === Number(watch("researchType")));
   const cap = selectedType?.maxBudgetCap && selectedType.maxBudgetCap > 0 ? selectedType.maxBudgetCap : null;
-  const capType = selectedType?.name ?? "";
+  const capType = researchTypeDisplayName(selectedType, t);
 
   return (
     <div className="space-y-6">

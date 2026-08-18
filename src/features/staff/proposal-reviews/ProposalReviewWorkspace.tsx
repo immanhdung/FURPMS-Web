@@ -20,6 +20,7 @@ import { ContractMilestoneTimeline } from "@/features/staff/contracts/ContractMi
 import { RoundTimeline } from "@/features/staff/proposal-reviews/RoundTimeline";
 import { ROUTES } from "@/constants/routes";
 import { proposalTitle } from "@/utils/format";
+import { researchTypeDisplayName } from "@/utils/research-type";
 
 /**
  * Chi tiết một ĐỀ CƯƠNG, nhìn từ phía Phòng QLKH — **đọc được đề cương ghi những gì**.
@@ -52,7 +53,10 @@ export function ProposalReviewWorkspace() {
 
   const cycleName = cycles?.find((c) => c.id === proposal.cycleId)?.name;
   const trackName = tracks?.find((tr) => tr.id.toString() === proposal.trackId)?.name;
-  const researchTypeName = researchTypes?.find((rt) => rt.id === proposal.researchType)?.name;
+  const researchTypeName = researchTypeDisplayName(
+    researchTypes?.find((rt) => rt.id === proposal.researchType),
+    t
+  );
   const proposalContracts = (contracts ?? []).filter((contract) => contract.proposalId === proposal.id);
 
   // Sang màn Hội đồng & Chấm đã lọc sẵn đúng đợt + lĩnh vực của đề tài này (màn đó đọc bộ lọc

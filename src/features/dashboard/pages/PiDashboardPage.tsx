@@ -16,10 +16,10 @@ import { usePiDashboardQuery } from "@/hooks/useDashboard";
 import { ROUTES } from "@/constants/routes";
 
 const KPI_ICONS: Record<string, LucideIcon> = {
-  "my-proposals": FileText,
+  total: FileText,
   approved: CheckCircle2,
-  "under-review": Clock,
-  deadlines: CalendarClock,
+  active: Clock,
+  revision: CalendarClock,
 };
 
 const QUICK_ACTIONS: QuickAction[] = [
@@ -58,7 +58,15 @@ export function PiDashboardPage() {
         {isLoading
           ? Array.from({ length: 4 }).map((_, index) => <KpiCardSkeleton key={index} />)
           : data?.kpis.map((kpi, index) => (
-              <KpiCard key={kpi.id} datum={kpi} icon={KPI_ICONS[kpi.id] ?? FileText} index={index} />
+              <KpiCard
+                key={kpi.id}
+                datum={{
+                  ...kpi,
+                  label: t(`dashboard.pi.kpis.${kpi.id}`, { defaultValue: kpi.label }),
+                }}
+                icon={KPI_ICONS[kpi.id] ?? FileText}
+                index={index}
+              />
             ))}
       </div>
 

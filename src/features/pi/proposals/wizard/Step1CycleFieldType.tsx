@@ -8,6 +8,7 @@ import { useCyclesQuery } from "@/hooks/useCycles";
 import { useTracksByCycleQuery } from "@/hooks/useTracks";
 import { useResearchTypesQuery } from "@/hooks/useResearchTypes";
 import { CYCLE_STATUS } from "@/constants/statuses";
+import { researchTypeDisplayName } from "@/utils/research-type";
 import type { ProposalWizardValues } from "@/features/pi/proposals/wizard/proposal-wizard.schema";
 
 export function Step1CycleFieldType({ form }: { form: UseFormReturn<ProposalWizardValues> }) {
@@ -26,7 +27,8 @@ export function Step1CycleFieldType({ form }: { form: UseFormReturn<ProposalWiza
   const openCycles = (cycles ?? []).filter((c) => c.status?.toUpperCase() === CYCLE_STATUS.OPEN);
   // API có thể serialize id dạng string ⇒ so sánh phải coerce, nếu không lookup fail (loại về 0).
   const eq = (a?: number | string, b?: number | string) => Number(a) === Number(b);
-  const typeName = (id?: number) => researchTypes?.find((rt) => eq(rt.id, id))?.name;
+  const typeName = (id?: number) =>
+    researchTypeDisplayName(researchTypes?.find((rt) => eq(rt.id, id)), t);
   // Loại đề tài do ĐỢT quy định (rule #7: 1 đợt = 1 loại) — không cho PI chọn.
   // Tra trong TẤT CẢ đợt để draft mở lại (đợt có thể đã đóng) vẫn suy được loại.
   const selectedCycle = (cycles ?? []).find((c) => eq(c.id, selectedCycleId));
@@ -116,7 +118,7 @@ export function Step1CycleFieldType({ form }: { form: UseFormReturn<ProposalWiza
         {selectedType ? (
           <Card>
             <CardContent className="p-4">
-              <p className="text-sm font-medium text-foreground">{selectedType.name}</p>
+              <p className="text-sm font-medium text-foreground">{researchTypeDisplayName(selectedType, t)}</p>
               <p className="mt-1 text-xs text-muted-foreground">
                 {selectedType.requireOrderingUnit ? t("wizard.step1.appliedHint") : t("wizard.step1.basicHint")}
               </p>

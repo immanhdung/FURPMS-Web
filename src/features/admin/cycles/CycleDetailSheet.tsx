@@ -4,6 +4,7 @@ import { StatusBadge } from "@/components/shared/StatusBadge";
 import { useCycleQuery } from "@/hooks/useCycles";
 import { useResearchTypesQuery } from "@/hooks/useResearchTypes";
 import { formatDate } from "@/utils/format";
+import { researchTypeDisplayName } from "@/utils/research-type";
 
 interface CycleDetailSheetProps {
   open: boolean;
@@ -15,7 +16,8 @@ export function CycleDetailSheet({ open, onOpenChange, cycleId }: CycleDetailShe
   const { t } = useTranslation();
   const { data: cycle, isLoading } = useCycleQuery(cycleId);
   const { data: researchTypes } = useResearchTypesQuery();
-  const researchTypeName = researchTypes?.find((rt) => rt.id === cycle?.researchTypeId)?.name;
+  const researchType = researchTypes?.find((rt) => rt.id === cycle?.researchTypeId);
+  const researchTypeName = researchTypeDisplayName(researchType, t);
 
   return (
     <DetailSheet

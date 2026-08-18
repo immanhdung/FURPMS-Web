@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useCreateCycleMutation, useUpdateCycleMutation } from "@/hooks/useCycles";
 import { useResearchTypesQuery } from "@/hooks/useResearchTypes";
 import { cycleSchema, type CycleFormValues } from "@/features/admin/cycles/cycle.schema";
+import { researchTypeDisplayName } from "@/utils/research-type";
 import type { Cycle } from "@/types/cycle";
 
 interface CycleFormSheetProps {
@@ -119,7 +120,7 @@ export function CycleFormSheet({ open, onOpenChange, cycle }: CycleFormSheetProp
               <SelectContent>
                 {researchTypes?.map((rt) => (
                   <SelectItem key={rt.id} value={rt.id.toString()}>
-                    {rt.name}
+                    {researchTypeDisplayName(rt, t)}
                   </SelectItem>
                 ))}
               </SelectContent>

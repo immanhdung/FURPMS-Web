@@ -4,6 +4,7 @@ import { DataTableColumnHeader } from "@/components/tables/DataTableColumnHeader
 import { DataTableRowActions } from "@/components/tables/DataTableRowActions";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { formatCurrency } from "@/utils/format";
+import { researchTypeDisplayName } from "@/utils/research-type";
 import type { ResearchType } from "@/types/research-type";
 
 interface GetResearchTypeColumnsOptions {
@@ -21,6 +22,7 @@ export function getResearchTypeColumns({ t, onEdit, onDelete }: GetResearchTypeC
     {
       accessorKey: "name",
       header: ({ column }) => <DataTableColumnHeader column={column} title={t("researchTypes.name")} />,
+      cell: ({ row }) => researchTypeDisplayName(row.original, t),
     },
     {
       accessorKey: "maxBudgetCap",

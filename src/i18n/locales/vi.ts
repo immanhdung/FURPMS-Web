@@ -1,6 +1,16 @@
 // Bản dịch tiếng Việt. Cấu trúc key theo nhóm chức năng để dễ tra.
 // Quy ước: dùng key mô tả (nav.dashboard) chứ không dùng nguyên câu tiếng Anh làm key.
 export const vi = {
+  documentTitle: {
+    default: "FURPMS — Hệ thống quản lý đề tài nghiên cứu khoa học",
+    role: "FURPMS — {{role}}",
+    roles: {
+      Admin: "Quản trị viên",
+      Staff: "Chuyên viên",
+      Faculty: "Chủ nhiệm đề tài",
+      ReviewCommittee: "Phản biện",
+    },
+  },
   /** Nhãn trạng thái BE trả về. Thiếu key nào thì StatusBadge hiện nguyên enum — phải bổ sung. */
   status: {
     "ACCEPTANCE": "Nghiệm thu",
@@ -490,6 +500,12 @@ export const vi = {
     pi: {
       title: "Bảng điều khiển của tôi",
       subtitle: "Theo dõi đề cương, hạn nộp và phản hồi.",
+      kpis: {
+        total: "Đề tài của tôi",
+        approved: "Đã duyệt",
+        active: "Đang thực hiện",
+        revision: "Cần chỉnh sửa",
+      },
       proposalStatus: "Trạng thái đề cương",
       proposalStatusDesc: "Phân loại đề cương theo trạng thái",
       upcomingDeadlines: "Hạn sắp tới",
@@ -503,6 +519,12 @@ export const vi = {
     staff: {
       title: "Bảng điều khiển Chuyên viên",
       subtitle: "Luồng xét duyệt, hội đồng và lịch họp trong nháy mắt.",
+      kpis: {
+        proposals: "Tổng đề xuất",
+        pending: "Chờ xét duyệt",
+        councils: "Hội đồng đang lập",
+        meetings: "Cuộc họp sắp tới",
+      },
       reviewProgress: "Tiến độ xét duyệt",
       reviewProgressDesc: "Số phiếu đã chấm / còn lại theo từng vòng",
       councilPerformance: "Hiệu suất hội đồng",
@@ -511,6 +533,12 @@ export const vi = {
     reviewer: {
       title: "Bảng điều khiển Phản biện",
       subtitle: "Đề tài được phân công, hội đồng và lịch họp của bạn.",
+      kpis: {
+        memberships: "Hội đồng tham gia",
+        invited: "Lời mời chờ trả lời",
+        scored: "Phiếu đã chấm",
+        deciding: "Hội đồng chưa chốt",
+      },
       completionTrend: "Xu hướng hoàn thành",
       completionTrendDesc: "Số phiếu đã chấm / còn lại theo từng vòng",
       decisions: "Kết luận đã nộp",
@@ -1684,6 +1712,10 @@ export const vi = {
     step5: { title: "Xem lại & nộp" },
   },
   researchTypes: {
+    knownNames: {
+      BASIC: "Nghiên cứu cơ bản",
+      APPLIED: "Nghiên cứu ứng dụng",
+    },
     title: "Loại đề tài",
     subtitle: "Các loại nghiên cứu Cơ bản và Ứng dụng dùng khi mở đợt.",
     newBtn: "Thêm loại đề tài",
@@ -1698,6 +1730,7 @@ export const vi = {
     code: "Mã",
     name: "Tên",
     maxBudgetCap: "Trần kinh phí (VND)",
+    maxBudgetCapHint: "Dấu phân cách được thêm tự động, ví dụ: 100.000.000 VND.",
     requiresOrderingUnit: "Cần đơn vị đặt hàng",
     requiresOrderingUnitLabel: "Yêu cầu đơn vị đặt hàng (Nghiên cứu Ứng dụng)",
   },
@@ -2051,4 +2084,3 @@ export const vi = {
     downloadBtn: "Tải về",
   },
 } as const;
-

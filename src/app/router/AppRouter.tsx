@@ -1,5 +1,6 @@
-import { lazy, Suspense, type ComponentType } from "react";
+import { lazy, Suspense, useEffect, type ComponentType } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { ComingSoonPage } from "@/components/shared/ComingSoonPage";
@@ -15,6 +16,7 @@ import { ProtectedRoute } from "@/app/router/ProtectedRoute";
 import { PublicOnlyRoute } from "@/app/router/PublicOnlyRoute";
 import { RoleGuard } from "@/app/router/RoleGuard";
 import { NAV_ITEMS } from "@/constants/nav";
+import { useAuthStore } from "@/store/auth.store";
 
 const HomePage = lazy(() => import("@/features/home/HomePage").then((m) => ({ default: m.HomePage })));
 const LoginPage = lazy(() => import("@/features/auth/pages/LoginPage").then((m) => ({ default: m.LoginPage })));
@@ -169,6 +171,21 @@ function FeaturePage({ path }: { path: string }) {
   return Page ? <Page /> : <ComingSoonPage />;
 }
 
+function RoleAwareDocumentTitle() {
+  const { t } = useTranslation();
+  const activeRole = useAuthStore((state) => state.activeRole);
+
+  useEffect(() => {
+    document.title = activeRole
+      ? t("documentTitle.role", {
+          role: t(`documentTitle.roles.${activeRole}`, { defaultValue: activeRole }),
+        })
+      : t("documentTitle.default");
+  }, [activeRole, t]);
+
+  return null;
+}
+
 export function AppRouter() {
   useBootstrapAuth();
 
@@ -190,6 +207,7 @@ export function AppRouter() {
      * cũ trong lúc tải chunk. Đổi lại là điều hướng không còn tự ý đá người dùng đi chỗ khác.
      */
     <BrowserRouter useTransitions={false}>
+      <RoleAwareDocumentTitle />
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route element={<PublicOnlyRoute />}>

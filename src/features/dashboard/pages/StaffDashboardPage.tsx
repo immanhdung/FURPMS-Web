@@ -13,10 +13,10 @@ import { useStaffDashboardQuery } from "@/hooks/useDashboard";
 import { ROUTES } from "@/constants/routes";
 
 const KPI_ICONS: Record<string, LucideIcon> = {
-  "review-progress": TrendingUp,
-  "upcoming-meetings": CalendarClock,
-  "pending-invitations": Mail,
-  "council-performance": Gavel,
+  proposals: TrendingUp,
+  pending: Mail,
+  councils: Gavel,
+  meetings: CalendarClock,
 };
 
 const QUICK_ACTIONS: QuickAction[] = [
@@ -55,7 +55,15 @@ export function StaffDashboardPage() {
         {isLoading
           ? Array.from({ length: 4 }).map((_, index) => <KpiCardSkeleton key={index} />)
           : data?.kpis.map((kpi, index) => (
-              <KpiCard key={kpi.id} datum={kpi} icon={KPI_ICONS[kpi.id] ?? TrendingUp} index={index} />
+              <KpiCard
+                key={kpi.id}
+                datum={{
+                  ...kpi,
+                  label: t(`dashboard.staff.kpis.${kpi.id}`, { defaultValue: kpi.label }),
+                }}
+                icon={KPI_ICONS[kpi.id] ?? TrendingUp}
+                index={index}
+              />
             ))}
       </div>
 

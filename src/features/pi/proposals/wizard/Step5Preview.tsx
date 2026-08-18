@@ -4,6 +4,7 @@ import { useCyclesQuery } from "@/hooks/useCycles";
 import { useTracksQuery } from "@/hooks/useTracks";
 import { useResearchTypesQuery } from "@/hooks/useResearchTypes";
 import { ProposalSummaryView } from "@/features/pi/proposals/ProposalSummaryView";
+import { researchTypeDisplayName } from "@/utils/research-type";
 import type { ProposalWizardValues } from "@/features/pi/proposals/wizard/proposal-wizard.schema";
 
 export function Step5Preview({ form }: { form: UseFormReturn<ProposalWizardValues> }) {
@@ -15,7 +16,10 @@ export function Step5Preview({ form }: { form: UseFormReturn<ProposalWizardValue
 
   const cycleName = cycles?.find((c) => c.id === values.cycleId)?.name;
   const trackName = tracks?.find((t) => t.id.toString() === values.trackId)?.name;
-  const researchTypeName = researchTypes?.find((rt) => rt.id === values.researchType)?.name;
+  const researchTypeName = researchTypeDisplayName(
+    researchTypes?.find((rt) => rt.id === values.researchType),
+    t
+  );
 
   return (
     <div className="space-y-3">

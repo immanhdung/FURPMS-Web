@@ -1,5 +1,15 @@
 // English translations. Keys must stay in sync with vi.ts.
 export const en = {
+  documentTitle: {
+    default: "FURPMS — Research Project Management System",
+    role: "FURPMS — {{role}}",
+    roles: {
+      Admin: "Administrator",
+      Staff: "Research Officer",
+      Faculty: "Principal Investigator",
+      ReviewCommittee: "Reviewer",
+    },
+  },
   /** Nhãn trạng thái BE trả về. Thiếu key nào thì StatusBadge hiện nguyên enum — phải bổ sung. */
   status: {
     "ACCEPTANCE": "Acceptance",
@@ -483,6 +493,12 @@ export const en = {
     pi: {
       title: "My Dashboard",
       subtitle: "Track your proposals, deadlines, and feedback.",
+      kpis: {
+        total: "My Projects",
+        approved: "Approved",
+        active: "In Progress",
+        revision: "Revision Required",
+      },
       proposalStatus: "Proposal Status",
       proposalStatusDesc: "Breakdown of your proposals by status",
       upcomingDeadlines: "Upcoming Deadlines",
@@ -496,6 +512,12 @@ export const en = {
     staff: {
       title: "Staff Dashboard",
       subtitle: "Review workflow, councils, and meetings at a glance.",
+      kpis: {
+        proposals: "Total Proposals",
+        pending: "Pending Review",
+        councils: "Councils Being Formed",
+        meetings: "Upcoming Meetings",
+      },
       reviewProgress: "Review Progress",
       reviewProgressDesc: "Ballots scored / remaining per round",
       councilPerformance: "Council Performance",
@@ -504,6 +526,12 @@ export const en = {
     reviewer: {
       title: "Reviewer Dashboard",
       subtitle: "Your assigned reviews, councils, and meetings.",
+      kpis: {
+        memberships: "Council Memberships",
+        invited: "Pending Invitations",
+        scored: "Ballots Scored",
+        deciding: "Councils Awaiting Decision",
+      },
       completionTrend: "Review Completion Trend",
       completionTrendDesc: "Ballots scored / remaining per round",
       decisions: "Review Decisions",
@@ -1667,6 +1695,10 @@ export const en = {
     step5: { title: "Review & Submit" },
   },
   researchTypes: {
+    knownNames: {
+      BASIC: "Basic Research",
+      APPLIED: "Applied Research",
+    },
     title: "Research Types",
     subtitle: "Basic and Applied research categories used when opening a cycle.",
     newBtn: "New research type",
@@ -1681,6 +1713,7 @@ export const en = {
     code: "Code",
     name: "Name",
     maxBudgetCap: "Max budget cap (VND)",
+    maxBudgetCapHint: "Thousands separators are added automatically, e.g. 100,000,000 VND.",
     requiresOrderingUnit: "Requires Ordering Unit",
     requiresOrderingUnitLabel: "Requires an ordering unit (Applied Research)",
   },
@@ -2032,4 +2065,3 @@ export const en = {
     downloadBtn: "Download",
   },
 } as const;
-
