@@ -15,3 +15,22 @@ export interface AppNotification {
   createdAt: string;
   link?: string;
 }
+
+/** DTO trả về trực tiếp từ NotificationsController của backend. */
+export interface NotificationDto {
+  id: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  actionUrl?: string | null;
+  relatedEntityType?: string | null;
+  relatedEntityId?: string | null;
+  isRead: boolean;
+  priority: string;
+  createdAt: string;
+}
+
+export interface NotificationCount {
+  unread: number;
+  total: number;
+}
