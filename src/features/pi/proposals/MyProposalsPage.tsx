@@ -8,6 +8,7 @@ import { DataTable } from "@/components/tables/DataTable";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { useMyProposalsQuery, useWithdrawProposalMutation } from "@/hooks/useProposals";
+import { proposalTitle } from "@/utils/format";
 import { useCyclesQuery } from "@/hooks/useCycles";
 import { useTracksQuery } from "@/hooks/useTracks";
 import { getMyProposalColumns } from "@/features/pi/proposals/columns";
@@ -88,7 +89,12 @@ export function MyProposalsPage() {
         open={Boolean(withdrawingProposal)}
         onOpenChange={(open) => !open && setWithdrawingProposal(null)}
         title={t("proposal.withdrawConfirmTitle")}
-        description={`Are you sure you want to withdraw "${withdrawingProposal?.titleEN || withdrawingProposal?.titleVI || "this proposal"}"? This cannot be undone.`}
+        // Trước 18/08 câu này hardcode tiếng Anh giữa giao diện song ngữ, và lấy titleEN TRƯỚC —
+        // ngược với quy ước chung (`proposalTitle()`: tên tiếng Việt là tên chính thức, tiếng Anh
+        // chỉ là bản dịch và thường bỏ trống).
+        description={t("proposal.withdrawConfirmDesc", {
+          title: proposalTitle(withdrawingProposal) || t("proposal.thisProposal"),
+        })}
         variant="destructive"
         confirmLabel={t("proposal.withdraw")}
         isLoading={withdrawMutation.isPending}

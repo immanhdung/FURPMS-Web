@@ -128,7 +128,13 @@ thường đã nêu luôn cách xử lý — nuốt nó rồi in câu chung chun
 ## 4. Thế nào là "xong"
 
 1. `npm run typecheck` sạch **và** `npm run build` xanh.
-2. **vi/en cân bằng khoá** — thêm khoá thì thêm cả hai file.
+
+   > ⚠️ Phải dùng **`npm run typecheck`** (`tsc -p tsconfig.app.json`), **không** phải
+   > `npx tsc --noEmit` — lệnh sau dùng tsconfig gốc và **bỏ sót lỗi trùng khoá i18n**
+   > (`TS1117`). Đã dính thật: thêm một khoá đã tồn tại, `npx tsc` báo sạch, `npm run build` mới đỏ.
+
+2. **vi/en cân bằng khoá** — thêm khoá thì thêm cả hai file. Trước khi thêm khoá mới, **grep xem
+   nó đã tồn tại chưa**: nhiều khoá đã được khai sẵn nhưng component chưa dùng tới.
 3. Chạy thử màn vừa sửa trên trình duyệt với BE thật, đừng chỉ tin build.
 4. **KHÔNG tự commit** trừ khi chủ dự án yêu cầu trong đúng lượt đó.
 
