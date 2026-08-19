@@ -65,7 +65,7 @@ export function NotificationBell() {
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent align="end" className="w-96 p-0">
+      <PopoverContent align="end" className="w-[min(30rem,calc(100vw-1rem))] p-0">
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <p className="text-sm font-medium">{t("notifications.title")}</p>
           <Button
@@ -95,7 +95,7 @@ export function NotificationBell() {
           ))}
         </div>
 
-        <ScrollArea className="h-80">
+        <ScrollArea className="h-[min(32rem,calc(100vh-8rem))]">
           {filtered.length === 0 ? (
             <EmptyState
               icon={BellOff}
@@ -115,37 +115,34 @@ export function NotificationBell() {
                   >
                     <button
                       type="button"
-                      aria-expanded={expanded}
+                      aria-expanded={notification.link ? expanded : undefined}
                       className="flex w-full items-start gap-2 px-4 py-3 text-left"
                       onClick={() => {
-                        setExpandedId(expanded ? null : notification.id);
+                        if (notification.link) setExpandedId(expanded ? null : notification.id);
                         if (!notification.read) markAsRead.mutate(notification.id);
                       }}
                     >
                       {!notification.read && <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary" />}
                       <div className={cn("min-w-0 flex-1", notification.read && "pl-3.5")}>
-                        <p className={cn("text-sm font-medium text-foreground", !expanded && "truncate")}>
+                        <p className="break-words text-sm font-medium text-foreground">
                           {notification.title}
                         </p>
-                        <p
-                          className={cn(
-                            "break-words whitespace-pre-line text-xs text-muted-foreground",
-                            !expanded && "line-clamp-2"
-                          )}
-                        >
+                        <p className="break-words whitespace-pre-line text-xs text-muted-foreground">
                           {notification.message}
                         </p>
                         <p className="mt-1 text-[11px] text-muted-foreground">
                           {formatRelativeTime(notification.createdAt)}
                         </p>
                       </div>
-                      <ChevronDown
-                        aria-hidden
-                        className={cn(
-                          "mt-0.5 size-3.5 shrink-0 text-muted-foreground transition-transform",
-                          expanded && "rotate-180"
-                        )}
-                      />
+                      {notification.link && (
+                        <ChevronDown
+                          aria-hidden
+                          className={cn(
+                            "mt-0.5 size-3.5 shrink-0 text-muted-foreground transition-transform",
+                            expanded && "rotate-180"
+                          )}
+                        />
+                      )}
                     </button>
 
                     {expanded && notification.link && (

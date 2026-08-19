@@ -70,8 +70,8 @@ export function NotificationsPage() {
               <div className="flex items-start gap-2">
                 {!notification.read && <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary" />}
                 <div className={cn("min-w-0 flex-1", notification.read && "pl-3.5")}>
-                  <p className="text-sm font-medium text-foreground">{notification.title}</p>
-                  <p className="text-sm text-muted-foreground">{notification.message}</p>
+                  <p className="break-words text-sm font-medium text-foreground">{notification.title}</p>
+                  <p className="break-words whitespace-pre-line text-sm text-muted-foreground">{notification.message}</p>
                   <p className="mt-1 text-xs text-muted-foreground">{formatRelativeTime(notification.createdAt)}</p>
                 </div>
               </div>

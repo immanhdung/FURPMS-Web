@@ -3,7 +3,6 @@ import { z } from "zod";
 export const trackSchema = z.object({
   name: z.string().min(1, "Phải nhập tên."),
   description: z.string().optional(),
-  ownerId: z.string().optional(),
   /**
    * Only meaningful when creating without a fixed cycle already in context (the edit flow never
    * sets this, so it can't be required unconditionally here) — validated manually in the submit
