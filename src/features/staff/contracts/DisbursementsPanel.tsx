@@ -10,7 +10,7 @@ import { ConfirmDisbursementDialog } from "@/features/staff/contracts/ConfirmDis
 import { DisbursementEvidence } from "@/features/staff/contracts/DisbursementEvidence";
 import { DisbursementDeliverableLink } from "@/features/staff/contracts/DisbursementDeliverableLink";
 import { DISBURSEMENT_STATUS, type Disbursement } from "@/types/disbursement";
-import { formatDate } from "@/utils/format";
+import { formatCurrency, formatDate } from "@/utils/format";
 
 /**
  * Lịch giải ngân của hợp đồng.
@@ -79,10 +79,27 @@ export function DisbursementsPanel({ contractId, canManage }: { contractId: stri
               <div>
                 <p className="text-sm font-medium text-foreground">
                   {t("contract.disbursement.tranche")} {d.roundNumber}
+                  {/* Tỷ lệ % của đợt — BE tính sẵn từ mẫu giải ngân, trước 25/08 không hiện ở đâu. */}
+                  <span className="ml-1.5 text-xs font-normal text-muted-foreground">
+                    ({d.percentage}%)
+                  </span>
                 </p>
                 <p className="mt-0.5 text-xs text-muted-foreground">{d.conditionDescription}</p>
               </div>
-              <StatusBadge status={d.status} />
+              <div className="flex flex-col items-end gap-1">
+                <StatusBadge status={d.status} />
+                {/* Kế hoạch vs thực chi. `actualAmount` để trống nghĩa là Phòng Tài chính chưa báo
+                    lại con số — khi đó chỉ hiện số kế hoạch, KHÔNG tự suy ra đã chi đúng bằng kế
+                    hoạch (rule #15: hệ thống ghi nhận lại, không tự tính tiền). */}
+                <span className="text-sm font-semibold tabular-nums text-foreground">
+                  {formatCurrency(d.actualAmount ?? d.plannedAmount)}
+                </span>
+                {d.actualAmount != null && d.actualAmount !== d.plannedAmount && (
+                  <span className="text-[11px] text-muted-foreground">
+                    {t("contract.disbursement.planned")}: {formatCurrency(d.plannedAmount)}
+                  </span>
+                )}
+              </div>
             </div>
 
             {isDisbursed ? (

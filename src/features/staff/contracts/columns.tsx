@@ -3,7 +3,7 @@ import type { TFunction } from "i18next";
 import { DataTableColumnHeader } from "@/components/tables/DataTableColumnHeader";
 import { DataTableRowActions } from "@/components/tables/DataTableRowActions";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { formatDate } from "@/utils/format";
+import { formatCurrency, formatDate } from "@/utils/format";
 import type { Contract } from "@/types/contract";
 
 interface GetContractColumnsOptions {
@@ -72,6 +72,17 @@ export function getContractColumns({ t, proposalTitles, onView, onEdit, onDelete
       meta: { label: t("staff.end") },
       header: ({ column }) => <DataTableColumnHeader column={column} title={t("staff.end")} />,
       cell: ({ row }) => formatDate(row.original.endDate),
+    },
+    {
+      accessorKey: "totalAmount",
+      meta: { label: t("staff.contractValue") },
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t("staff.contractValue")} />,
+      // Căn PHẢI + `tabular-nums`: cột tiền phải thẳng hàng số mới so nhanh bằng mắt được.
+      cell: ({ row }) => (
+        <div className="text-right tabular-nums">
+          {row.original.totalAmount != null ? formatCurrency(row.original.totalAmount) : "-"}
+        </div>
+      ),
     },
     {
       accessorKey: "status",
