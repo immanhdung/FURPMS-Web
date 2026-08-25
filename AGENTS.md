@@ -184,6 +184,30 @@ thu/phóng, tải về, mở tab mới, và tự hiện ô chọn khi có nhiề
 > ⚠️ `fetchBlob` **phải** bọc `useCallback` (và danh sách file bọc `useMemo`). Nó nằm trong deps
 > của effect tải file — truyền hàm mới mỗi lần render là tải file vô tận.
 
+### 3.7 Trường BE trả về nhưng type FE quên khai — đã cắn HAI lần (25/08)
+
+Bẫy §3.2 (DTO chép tay) không phải lý thuyết. `ContractListResponse` trả `TotalAmount` và
+`ProjectId` từ lâu, nhưng `src/types/contract.ts` **thiếu cả hai** ⇒ `grep totalAmount` toàn `src/`
+ra **0 kết quả**, và **giá trị hợp đồng không hiện ở bất kỳ màn nào** — đúng chỗ hội đồng bảo vệ
+lần 2 bắt lỗi. Lần thứ hai: đợt sau có người thêm `projectStatus` vào type mà vẫn bỏ sót
+`totalAmount`, dù hai trường nằm cùng một DTO.
+
+TypeScript **không giúp gì ở đây**: thiếu trường thì không ai báo lỗi, màn hình chỉ lặng lẽ hiện
+`-` hoặc bỏ trắng. Nên khi đụng bất kỳ màn nào có dữ liệu từ BE:
+
+```bash
+# so field BE trả về với type FE — làm 30 giây, tránh mất cả buổi đi tìm "sao không hiện"
+curl -s localhost:5068/api/<endpoint> -H "Authorization: Bearer $TOKEN" | python -m json.tool | head -40
+```
+
+### 3.8 Số tiền: dùng `formatCurrency`, căn phải, `tabular-nums`
+
+Cột/ô tiền phải `text-right tabular-nums` thì các chữ số mới thẳng hàng để so bằng mắt. Và **luôn**
+qua `formatCurrency` (`utils/format.ts`) — đừng tự `toLocaleString`, mỗi chỗ một kiểu là lộ ngay.
+
+Thanh phần trăm dùng `components/shared/ProgressBar.tsx` (rút ra 25/08 từ khuôn lặp trong
+`RubricScoringForm.tsx`), đã tự kẹp giá trị về 0–100 — dữ liệu thật có ca chi vượt kế hoạch.
+
 ---
 
 ## 4. Thế nào là "xong"

@@ -149,4 +149,8 @@ export const queryKeys = {
     all: () => ["expected-products"] as const,
     list: (proposalId: string) => ["expected-products", "list", proposalId] as const,
   },
+  projectBudget: {
+    all: () => ["project-budget"] as const,
+    overview: (projectId: string) => ["project-budget", "overview", projectId] as const,
+  },
 } as const;

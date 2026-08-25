@@ -24,6 +24,9 @@ export function ContractsPage() {
   const [researchType, setResearchType] = useState("all");
   const [cycle, setCycle] = useState("all");
   const [track, setTrack] = useState("all");
+  // Lọc theo GIAI ĐOẠN của đề tài, không phải trạng thái hợp đồng — hai thứ khác nhau: nghiệm thu
+  // Đạt làm đề tài COMPLETED, nhưng hợp đồng chỉ SETTLED sau khi ký Biên bản thanh lý BM13.
+  const [stage, setStage] = useState("all");
 
   const options = useMemo(() => ({
     researchTypes: Array.from(new Map((data ?? []).filter((x) => x.researchTypeId).map((x) => [x.researchTypeId, x.researchTypeName || x.researchTypeCode || "-"])).entries()),
@@ -34,8 +37,12 @@ export function ContractsPage() {
   const filteredData = useMemo(() => sortedData.filter((contract) =>
     (researchType === "all" || String(contract.researchTypeId) === researchType) &&
     (cycle === "all" || String(contract.cycleId) === cycle) &&
-    (track === "all" || String(contract.trackId) === track)
-  ), [sortedData, researchType, cycle, track]);
+    (track === "all" || String(contract.trackId) === track) &&
+    (stage === "all" ||
+      (stage === "settled" && contract.status === "SETTLED") ||
+      (stage === "completed" && contract.projectStatus === "COMPLETED" && contract.status !== "SETTLED") ||
+      (stage === "running" && contract.projectStatus !== "COMPLETED" && contract.status !== "SETTLED" && contract.status !== "TERMINATED"))
+  ), [sortedData, researchType, cycle, track, stage]);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [detailContractId, setDetailContractId] = useState<string | null>(null);
@@ -104,6 +111,15 @@ export function ContractsPage() {
               <SelectContent>
                 <SelectItem value="all">{t("staff.contractAllCycles")}</SelectItem>
                 {options.cycles.map(([id, name]) => <SelectItem key={id} value={String(id)}>{name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Select value={stage} onValueChange={setStage}>
+              <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t("staff.contractAllStages")}</SelectItem>
+                <SelectItem value="running">{t("staff.contractStageRunning")}</SelectItem>
+                <SelectItem value="completed">{t("staff.contractStageCompleted")}</SelectItem>
+                <SelectItem value="settled">{t("staff.contractStageSettled")}</SelectItem>
               </SelectContent>
             </Select>
             <Select value={track} onValueChange={setTrack}>

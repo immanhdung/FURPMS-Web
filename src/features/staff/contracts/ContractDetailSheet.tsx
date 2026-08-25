@@ -16,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useContractQuery, useTerminateContractMutation } from "@/hooks/useContracts";
 import { useProposalQuery } from "@/hooks/useProposals";
 import { ContractMilestoneTimeline } from "@/features/staff/contracts/ContractMilestoneTimeline";
+import { BudgetOverviewPanel } from "@/features/staff/contracts/BudgetOverviewPanel";
 import { ContractSignedDocs } from "@/features/staff/contracts/ContractSignedDocs";
 import { SignContractDialog } from "@/features/staff/contracts/SignContractDialog";
 import { ProgressReportsPanel } from "@/features/staff/contracts/ProgressReportsPanel";
@@ -25,7 +26,7 @@ import { FinalReportPanel } from "@/features/staff/contracts/FinalReportPanel";
 import { AmendmentsPanel } from "@/features/staff/contracts/AmendmentsPanel";
 import { SettlementPanel } from "@/features/staff/contracts/SettlementPanel";
 import { useIsManaging } from "@/hooks/useActiveRole";
-import { proposalTitle, formatDate } from "@/utils/format";
+import { proposalTitle, formatCurrency, formatDate } from "@/utils/format";
 
 interface ContractDetailSheetProps {
   open: boolean;
@@ -117,6 +118,18 @@ export function ContractDetailSheet({ open, onOpenChange, contractId }: Contract
                   </span>
                 )}
               </div>
+
+              {/* Giá trị hợp đồng — con số quan trọng nhất của cả màn này mà trước 25/08 không hiện
+                  ở đâu (kiểu `Contract` thiếu `totalAmount` dù BE vẫn trả). Hội đồng bảo vệ lần 2
+                  yêu cầu "thể hiện rõ ngân sách tương ứng cho các đề tài". */}
+              {contract.totalAmount != null && (
+                <div className="flex flex-wrap items-baseline justify-between gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2">
+                  <span className="text-xs text-muted-foreground">{t("staff.contractValue")}</span>
+                  <span className="text-lg font-semibold tabular-nums text-foreground">
+                    {formatCurrency(contract.totalAmount)}
+                  </span>
+                </div>
+              )}
 
               {/* Kết quả nghiệm thu thuộc ĐỀ TÀI, không phải trạng thái thanh lý HỢP ĐỒNG.
                   Hiện riêng hai mốc để tránh chữ "Hoàn thành" bị hiểu là đã ký BM13. */}
@@ -233,6 +246,7 @@ export function ContractDetailSheet({ open, onOpenChange, contractId }: Contract
                 {/* Lưới đều 7 tab — sheet rộng thì 4/hàng, hẹp thì 2/hàng. Mọi tab hiện hết, không cắt. */}
                 <TabsList className="grid h-auto w-full grid-cols-2 gap-1 sm:grid-cols-4">
                   <TabsTrigger value="timeline" className="w-full text-xs">{t("contract.tabs.timeline")}</TabsTrigger>
+                  <TabsTrigger value="budget" className="w-full text-xs">{t("contract.tabs.budget")}</TabsTrigger>
                   <TabsTrigger value="disbursements" className="w-full text-xs">{t("contract.tabs.disbursements")}</TabsTrigger>
                   <TabsTrigger value="deliverables" className="w-full text-xs">{t("contract.tabs.deliverables")}</TabsTrigger>
                   <TabsTrigger value="progress" className="w-full text-xs">{t("contract.tabs.progressReports")}</TabsTrigger>
@@ -242,6 +256,11 @@ export function ContractDetailSheet({ open, onOpenChange, contractId }: Contract
                 </TabsList>
                 <TabsContent value="timeline">
                   <ContractMilestoneTimeline contract={contract} />
+                </TabsContent>
+                {/* Kinh phí gắn với ĐỀ TÀI, không phải hợp đồng — một đề tài có thể có nhiều hợp
+                    đồng, và dự toán thì có từ trước khi ký. */}
+                <TabsContent value="budget">
+                  <BudgetOverviewPanel projectId={contract.projectId ?? null} />
                 </TabsContent>
                 <TabsContent value="disbursements">
                   <DisbursementsPanel contractId={contract.id} canManage={canManage} />
