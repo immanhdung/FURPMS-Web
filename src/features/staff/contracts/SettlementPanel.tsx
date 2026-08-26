@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DeadlineBadge } from "@/components/shared/DeadlineBadge";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { useDisbursementsQuery } from "@/hooks/useDisbursements";
 import {
@@ -180,7 +181,18 @@ export function SettlementPanel({ contractId, canManage }: { contractId: string;
     <div className="space-y-3">
       <Card>
         <CardContent className="p-4">
-          <p className="text-sm font-medium text-foreground">{t("contract.settlement.figures")}</p>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-sm font-medium text-foreground">{t("contract.settlement.figures")}</p>
+            {/* Hạn quyết toán đã nằm sẵn trong DTO nhưng chưa màn nào đọc ra — thanh lý xong rồi
+                thì hạn hết ý nghĩa, nên chỉ hiện khi hồ sơ chưa ký. */}
+            {settlement.settlementDeadline && !settlement.settlementSignedAt && (
+              <DeadlineBadge
+                deadline={settlement.settlementDeadline}
+                daysLeft={settlement.daysLeft}
+                basis={t("contract.settlement.deadlineBasis")}
+              />
+            )}
+          </div>
           <dl className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
             {[
               { label: t("contract.settlement.contracted"), value: settlement.totalContractedAmount },

@@ -6,6 +6,7 @@ import { ChartCard, ChartCardSkeleton } from "@/components/charts/ChartCard";
 import { AreaChartCardBody } from "@/components/charts/AreaChartCard";
 import { BarChartCardBody } from "@/components/charts/BarChartCard";
 import { ActivityFeed } from "@/components/shared/ActivityFeed";
+import { UpcomingDeadlinesCard } from "@/components/shared/UpcomingDeadlinesCard";
 import { RecentNotificationsCard } from "@/components/notifications/RecentNotificationsCard";
 import { QuickActions, type QuickAction } from "@/components/shared/QuickActions";
 import { ErrorState } from "@/components/shared/ErrorState";
@@ -97,6 +98,9 @@ export function StaffDashboardPage() {
           </>
         )}
       </div>
+
+      {/* Hạn sắp tới của TOÀN hệ thống — Phòng QLKH là người phải đi nhắc, nên cần thấy trước. */}
+      <UpcomingDeadlinesCard limit={8} />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <ActivityFeed items={data?.activity ?? []} isLoading={isLoading} />

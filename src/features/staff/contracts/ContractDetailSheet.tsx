@@ -13,10 +13,12 @@ import {
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { PageLoader } from "@/components/shared/PageLoader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DecisionDossierPanel } from "@/components/shared/DecisionDossierPanel";
 import { useContractQuery, useTerminateContractMutation } from "@/hooks/useContracts";
 import { useProposalQuery } from "@/hooks/useProposals";
 import { ContractMilestoneTimeline } from "@/features/staff/contracts/ContractMilestoneTimeline";
 import { BudgetOverviewPanel } from "@/features/staff/contracts/BudgetOverviewPanel";
+import { ProjectTimelinePanel } from "@/features/staff/contracts/ProjectTimelinePanel";
 import { ContractSignedDocs } from "@/features/staff/contracts/ContractSignedDocs";
 import { SignContractDialog } from "@/features/staff/contracts/SignContractDialog";
 import { ProgressReportsPanel } from "@/features/staff/contracts/ProgressReportsPanel";
@@ -253,14 +255,23 @@ export function ContractDetailSheet({ open, onOpenChange, contractId }: Contract
                   <TabsTrigger value="final" className="w-full text-xs">{t("contract.tabs.finalReport")}</TabsTrigger>
                   <TabsTrigger value="amendments" className="w-full text-xs">{t("contract.tabs.amendments")}</TabsTrigger>
                   <TabsTrigger value="settlement" className="w-full text-xs">{t("contract.tabs.settlement")}</TabsTrigger>
+                  <TabsTrigger value="decisions" className="w-full text-xs">{t("contract.tabs.decisions")}</TabsTrigger>
                 </TabsList>
-                <TabsContent value="timeline">
+                <TabsContent value="timeline" className="space-y-4">
+                  {/* Dòng thời gian ĐỀ TÀI (do máy chủ lắp, gồm cả giai đoạn trước khi có hợp đồng)
+                      đặt trên; các mốc riêng của hợp đồng giữ bên dưới. */}
+                  <ProjectTimelinePanel projectId={contract.projectId ?? null} />
                   <ContractMilestoneTimeline contract={contract} />
                 </TabsContent>
                 {/* Kinh phí gắn với ĐỀ TÀI, không phải hợp đồng — một đề tài có thể có nhiều hợp
                     đồng, và dự toán thì có từ trước khi ký. */}
                 <TabsContent value="budget">
                   <BudgetOverviewPanel projectId={contract.projectId ?? null} />
+                </TabsContent>
+                {/* Hồ sơ quyết định cũng gắn với ĐỀ TÀI: chuỗi quyết định bắt đầu từ lúc nộp đề
+                    cương, tức là trước khi có hợp đồng này. */}
+                <TabsContent value="decisions">
+                  <DecisionDossierPanel projectId={contract.projectId ?? null} />
                 </TabsContent>
                 <TabsContent value="disbursements">
                   <DisbursementsPanel contractId={contract.id} canManage={canManage} />

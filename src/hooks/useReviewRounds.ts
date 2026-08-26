@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { reviewRoundService } from "@/services/api/review-round.service";
 import { queryKeys } from "@/services/queryKeys";
@@ -34,6 +35,22 @@ export function useOpenRoundMutation(proposalId: string) {
       queryClient.invalidateQueries({ queryKey: queryKeys.reviewRounds.list(proposalId) });
     },
     onError: (error: ApiError) => toast.error(error.message || "Unable to open round."),
+  });
+}
+
+export function useSetRoundDeadlineMutation(proposalId: string) {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+  return useMutation({
+    mutationFn: ({ roundId, payload }: { roundId: string; payload: { scoringDeadline: string; reason?: string } }) =>
+      reviewRoundService.setDeadline(roundId, payload),
+    onSuccess: () => {
+      toast.success(t("roundDeadline.saved"));
+      queryClient.invalidateQueries({ queryKey: queryKeys.reviewRounds.list(proposalId) });
+    },
+    // Câu lỗi của BE đã nêu rõ vướng gì (vd "đã có hạn — dời hạn thì phải ghi rõ lý do"),
+    // hiện nguyên văn thay vì nuốt đi rồi in câu chung chung.
+    onError: (error: ApiError) => toast.error(error.message || t("roundDeadline.saveFailed")),
   });
 }
 

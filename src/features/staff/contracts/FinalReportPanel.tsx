@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { StatusBadge } from "@/components/shared/StatusBadge";
+import { DeadlineBadge } from "@/components/shared/DeadlineBadge";
 import {
   useAcceptFinalReportMutation,
   useArchiveFinalReportMutation,
@@ -112,7 +113,27 @@ export function FinalReportPanel({
           <CardContent className="space-y-3 p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-sm font-medium text-foreground">{t("contract.finalReport.title")}</p>
-              {status && <StatusBadge status={status} />}
+              <div className="flex items-center gap-2">
+                {/* Hai hạn nối tiếp nhau, mỗi lúc chỉ một cái còn ý nghĩa:
+                    - chưa nộp bản cuối → hạn nộp (QĐ543 Điều 11.2.a, trước ngày kết thúc đề tài);
+                    - nộp rồi mà chưa lưu trữ → hạn lưu trữ hồ sơ.
+                    Trước 25/08 cả hai chỉ nằm trong DTO, không màn nào đọc ra. */}
+                {!report.finalSubmittedAt && report.deadline && (
+                  <DeadlineBadge
+                    deadline={report.deadline}
+                    daysLeft={report.daysLeft}
+                    basis={t("contract.finalReport.deadlineBasis")}
+                  />
+                )}
+                {report.finalSubmittedAt && !report.archivedAt && report.archivalDeadline && (
+                  <DeadlineBadge
+                    deadline={report.archivalDeadline}
+                    daysLeft={report.archivalDaysLeft}
+                    basis={t("contract.finalReport.archivalDeadlineBasis")}
+                  />
+                )}
+                {status && <StatusBadge status={status} />}
+              </div>
             </div>
 
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">

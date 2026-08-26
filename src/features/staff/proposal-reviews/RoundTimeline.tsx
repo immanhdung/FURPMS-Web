@@ -1,21 +1,38 @@
 import { useTranslation } from "react-i18next";
 import { motion, useReducedMotion } from "motion/react";
-import { CheckCircle2, Circle, CircleDot } from "lucide-react";
+import { CalendarClock, CheckCircle2, Circle, CircleDot } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { StatusBadge } from "@/components/shared/StatusBadge";
+import { DeadlineBadge } from "@/components/shared/DeadlineBadge";
 import { formatDateTime } from "@/utils/format";
 import { getRoundBucket, roundTitle } from "@/features/staff/proposal-reviews/round-utils";
 import type { ReviewRound } from "@/types/review-round";
 
+/**
+ * Số ngày còn lại tới hạn chấm.
+ *
+ * Chỗ này FE tự tính vì `GET /proposals/{id}/rounds` chỉ trả ngày, không trả `daysLeft` như
+ * `/timeline` — chấp nhận được vì lệch múi giờ tối đa một ngày và badge chỉ để liếc nhanh. Còn
+ * cờ quá hạn dùng để CHẶN/CẢNH BÁO thì luôn lấy `isScoringOverdue` do máy chủ tính.
+ */
+function deadlineDaysLeft(round: ReviewRound): number | null {
+  if (!round.scoringDeadline) return null;
+  const diff = Math.ceil((new Date(round.scoringDeadline).getTime() - Date.now()) / 86_400_000);
+  return Number.isFinite(diff) ? diff : null;
+}
+
 interface RoundTimelineProps {
   rounds: ReviewRound[];
+  /** Có truyền thì mỗi vòng hiện nút đặt/dời hạn chấm (chỉ Staff/Admin dùng). */
+  onSetDeadline?: (round: ReviewRound) => void;
 }
 
 /**
  * Timeline chỉ-đọc của một đề cương. Phần thao tác vòng/hội đồng nằm duy nhất ở màn
  * Hội đồng & Chấm; ở đây giữ lại tín hiệu trực quan để Staff biết đề cương đang đi tới đâu.
  */
-export function RoundTimeline({ rounds }: RoundTimelineProps) {
+export function RoundTimeline({ rounds, onSetDeadline }: RoundTimelineProps) {
   const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
   const sorted = [...rounds].sort((a, b) => a.sequence - b.sequence);
@@ -61,7 +78,18 @@ export function RoundTimeline({ rounds }: RoundTimelineProps) {
               <CardContent className="space-y-1.5 p-3.5">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-sm font-medium text-foreground">{roundTitle(round, t)}</p>
-                  {round.status && <StatusBadge status={round.status} />}
+                  <div className="flex items-center gap-2">
+                    {/* Hạn CHẤM — trước 25/08 giai đoạn chấm không có hạn nào, vòng mở ra rồi
+                        để đấy. Vòng đã chốt kết quả thì hạn hết ý nghĩa, không bày ra nữa. */}
+                    {round.status !== "PASSED" && round.status !== "FAILED" && (
+                      <DeadlineBadge
+                        deadline={round.scoringDeadline}
+                        daysLeft={deadlineDaysLeft(round)}
+                        basis={t("roundDeadline.basis")}
+                      />
+                    )}
+                    {round.status && <StatusBadge status={round.status} />}
+                  </div>
                 </div>
                 {round.dimension && (
                   <p className="text-xs text-muted-foreground">
@@ -81,6 +109,13 @@ export function RoundTimeline({ rounds }: RoundTimelineProps) {
                     </span>
                   )}
                 </div>
+
+                {onSetDeadline && round.status !== "PASSED" && round.status !== "FAILED" && (
+                  <Button variant="link" size="sm" className="h-auto px-0" onClick={() => onSetDeadline(round)}>
+                    <CalendarClock />
+                    {round.scoringDeadline ? t("roundDeadline.extendAction") : t("roundDeadline.setAction")}
+                  </Button>
+                )}
               </CardContent>
             </Card>
           </motion.li>

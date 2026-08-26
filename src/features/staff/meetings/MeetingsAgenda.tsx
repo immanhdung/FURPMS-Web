@@ -4,7 +4,7 @@ import { CalendarClock, ExternalLink, MapPin, Video } from "lucide-react";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { cn } from "@/lib/utils";
-import { externalUrl, formatDate } from "@/utils/format";
+import { daysUntil, externalUrl, formatDate } from "@/utils/format";
 import type { Meeting } from "@/types/meeting";
 
 const dayKey = (iso: string) => iso.slice(0, 10);
@@ -41,10 +41,14 @@ export function MeetingsAgenda({ meetings }: { meetings: Meeting[] }) {
           <div key={day} className={cn(past && "opacity-60")}>
             <div className="mb-2 flex items-center gap-2">
               <p className="text-sm font-semibold text-foreground">{formatDate(day)}</p>
-              {day === todayKey && (
+              {day === todayKey ? (
                 <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                   {t("staff.today")}
                 </span>
+              ) : (
+                // Buổi họp là CUỘC HẸN, không phải hạn nộp — nên ở đây chỉ đếm ngược, cố ý KHÔNG
+                // dùng DeadlineBadge: nhãn "quá hạn 3 ngày" cho một buổi họp đã diễn ra là sai nghĩa.
+                !past && <span className="text-xs text-muted-foreground">{t("deadline.daysLeft", { n: daysUntil(day) ?? 0 })}</span>
               )}
             </div>
             <ul className="space-y-2">

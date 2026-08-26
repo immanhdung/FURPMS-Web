@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, ExternalLink, FileText, Gavel, Route } from "lucide-react";
@@ -18,6 +19,8 @@ import { ExpectedProductsCard } from "@/features/pi/proposals/ExpectedProductsCa
 import { ProposalDocumentViewer } from "@/features/reviewer/proposal-review/ProposalDocumentViewer";
 import { ContractMilestoneTimeline } from "@/features/staff/contracts/ContractMilestoneTimeline";
 import { RoundTimeline } from "@/features/staff/proposal-reviews/RoundTimeline";
+import { SetRoundDeadlineDialog } from "@/features/staff/proposal-reviews/SetRoundDeadlineDialog";
+import type { ReviewRound } from "@/types/review-round";
 import { ROUTES } from "@/constants/routes";
 import { proposalTitle } from "@/utils/format";
 import { researchTypeDisplayName } from "@/utils/research-type";
@@ -39,6 +42,8 @@ export function ProposalReviewWorkspace() {
   const { proposalId } = useParams<{ proposalId: string }>();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  // Vòng đang được đặt/dời hạn chấm. `null` = hộp thoại đóng.
+  const [deadlineRound, setDeadlineRound] = useState<ReviewRound | null>(null);
 
   const { data: proposal, isLoading, isError, refetch, isRefetching } = useProposalQuery(proposalId ?? null);
   const { data: rounds } = useReviewRoundsQuery(proposalId ?? null);
@@ -124,7 +129,7 @@ export function ProposalReviewWorkspace() {
         <TabsContent value="progress" className="space-y-6">
           <section className="space-y-3">
             <h2 className="text-sm font-medium text-foreground">{t("staff.reviewProgressSection")}</h2>
-            <RoundTimeline rounds={rounds ?? []} />
+            <RoundTimeline rounds={rounds ?? []} onSetDeadline={setDeadlineRound} />
             <Button variant="link" size="sm" className="px-0" onClick={() => navigate(boardHref)}>
               {t("staff.manageRoundsLink")}
               <ExternalLink />
@@ -161,6 +166,12 @@ export function ProposalReviewWorkspace() {
           </section>
         </TabsContent>
       </Tabs>
+      <SetRoundDeadlineDialog
+        round={deadlineRound}
+        proposalId={proposalId}
+        open={Boolean(deadlineRound)}
+        onOpenChange={(open) => !open && setDeadlineRound(null)}
+      />
     </div>
   );
 }

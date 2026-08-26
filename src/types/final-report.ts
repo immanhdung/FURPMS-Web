@@ -7,11 +7,14 @@ export interface FinalReport {
   summaryFileUrl?: string | null;
   language: string;
   deadline?: string | null;
+  /** Số ngày còn lại do MÁY CHỦ tính; âm = quá hạn. */
+  daysLeft?: number | null;
   submittedAt?: string | null;
   revisionNotes?: string | null;
   revisionRequestedAt?: string | null;
   finalSubmittedAt?: string | null;
   archivalDeadline?: string | null;
+  archivalDaysLeft?: number | null;
   archivedAt?: string | null;
 }
 

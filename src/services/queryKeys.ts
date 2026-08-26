@@ -153,4 +153,16 @@ export const queryKeys = {
     all: () => ["project-budget"] as const,
     overview: (projectId: string) => ["project-budget", "overview", projectId] as const,
   },
+  projectDecisions: {
+    all: () => ["project-decisions"] as const,
+    detail: (projectId: string) => ["project-decisions", "detail", projectId] as const,
+  },
+  projectTimeline: {
+    all: () => ["project-timeline"] as const,
+    detail: (projectId: string) => ["project-timeline", "detail", projectId] as const,
+  },
+  myDeadlines: {
+    all: () => ["my-deadlines"] as const,
+    list: (days: number) => ["my-deadlines", "list", days] as const,
+  },
 } as const;

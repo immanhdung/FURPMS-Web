@@ -12,6 +12,8 @@ export interface Settlement {
   sideASigneeId?: string | null;
   sideASigneeName?: string | null;
   settlementDeadline?: string | null;
+  /** Số ngày còn lại do MÁY CHỦ tính; âm = quá hạn. */
+  daysLeft?: number | null;
   notes?: string | null;
   createdAt: string;
 }

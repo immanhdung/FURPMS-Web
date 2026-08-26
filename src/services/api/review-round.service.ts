@@ -16,4 +16,10 @@ export const reviewRoundService = {
 
   close: (roundId: string, payload: CloseRoundPayload) =>
     axiosClient.post<ApiResponse<ReviewRound>>(`/rounds/${roundId}/close`, payload).then((res) => res.data.data),
+
+  /** Đặt/dời hạn chấm. Dời hạn ĐÃ CÓ thì `reason` là bắt buộc (BE trả 400 nếu thiếu). */
+  setDeadline: (roundId: string, payload: { scoringDeadline: string; reason?: string }) =>
+    axiosClient
+      .patch<ApiResponse<ReviewRound>>(`/rounds/${roundId}/deadline`, payload)
+      .then((res) => res.data.data),
 };

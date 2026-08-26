@@ -105,3 +105,26 @@ export function formatRelativeTime(value: string | Date | undefined | null): str
 export function formatCurrency(value: number, currency = "VND"): string {
   return new Intl.NumberFormat("vi-VN", { style: "currency", currency }).format(value);
 }
+
+/**
+ * Số ngày từ hôm nay tới `deadline` theo **lịch** (âm = đã quá hạn), tính bằng giờ máy người dùng.
+ *
+ * <p><b>KHÔNG dùng cho hạn nộp.</b> Mọi hạn đều đã có `daysLeft` do máy chủ tính — dùng số đó,
+ * vì đó mới là con số bộ quét nhắc hạn qua email đang dùng, và vì hai phép tính song song thì sớm
+ * muộn cũng cho hai kết quả khác nhau trên cùng một màn hình (đã xảy ra 25/08: lệch đúng 1 ngày
+ * do máy chủ chạy UTC còn trình duyệt chạy UTC+7).</p>
+ *
+ * <p>Chỗ dùng hợp lệ duy nhất hiện nay là đếm ngược tới một <b>cuộc hẹn</b> — lịch họp hội đồng —
+ * nơi con số chỉ để người dùng ước lượng, không phải căn cứ để chặn hay nhắc.</p>
+ *
+ * <p>So theo mốc nửa đêm địa phương chứ không lấy hiệu mili-giây rồi chia: 23:00 hôm nay tới
+ * 01:00 ngày mai chỉ cách 2 tiếng nhưng vẫn là "còn 1 ngày", còn phép chia sẽ ra 0.</p>
+ */
+export function daysUntil(value: string | Date | undefined | null): number | undefined {
+  if (!value) return undefined;
+  const target = typeof value === "string" ? new Date(value) : value;
+  if (Number.isNaN(target.getTime())) return undefined;
+
+  const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  return Math.round((startOfDay(target) - startOfDay(new Date())) / 86_400_000);
+}

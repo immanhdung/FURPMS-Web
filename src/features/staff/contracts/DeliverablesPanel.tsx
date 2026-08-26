@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
+import { DeadlineBadge } from "@/components/shared/DeadlineBadge";
 import { DeliverableFiles } from "@/components/shared/DeliverableFiles";
 import { useCreateDeliverableMutation, useDeliverablesQuery } from "@/hooks/useDeliverables";
 import { SubmitDeliverableDialog } from "@/features/staff/contracts/SubmitDeliverableDialog";
@@ -129,7 +130,14 @@ export function DeliverablesPanel({
                   {d.dueDate ? t("contract.deliverable.due", { date: formatDate(d.dueDate) }) : t("contract.deliverable.noDueDate")}
                 </p>
               </div>
-              {d.acceptanceStatus && <StatusBadge status={d.acceptanceStatus} />}
+              <div className="flex items-center gap-2">
+                {/* Sản phẩm CHƯA nghiệm thu Đạt thì hạn còn ý nghĩa — nghiệm thu rồi thì thôi.
+                    Trước 25/08 chỗ này chỉ in ngày, nên hạn đã qua nhìn y hệt hạn còn xa. */}
+                {d.dueDate && d.acceptanceStatus !== "PASSED" && (
+                  <DeadlineBadge deadline={d.dueDate} daysLeft={d.daysLeft} />
+                )}
+                {d.acceptanceStatus && <StatusBadge status={d.acceptanceStatus} />}
+              </div>
             </div>
 
             {d.description && <p className="text-xs text-muted-foreground">{d.description}</p>}

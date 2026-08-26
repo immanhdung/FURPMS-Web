@@ -26,6 +26,8 @@ export interface ProgressReport {
   piRecommendations?: string | null;
   status?: string | null;
   dueDate?: string | null;
+  /** Số ngày còn lại do MÁY CHỦ tính; âm = quá hạn. */
+  daysLeft?: number | null;
   scheduledMeetingAt?: string | null;
   meetingLink?: string | null;
   /** Bảng tiến độ theo hoạt động (BM06) — CHỈ có ở endpoint chi tiết, không có ở danh sách. */

@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
+import { DeadlineBadge } from "@/components/shared/DeadlineBadge";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { useDeleteProgressReportMutation, useGenerateProgressRoundsMutation, useProgressReportQuery, useProgressReportsQuery } from "@/hooks/useProgressReports";
 import { ScheduleProgressReportDialog } from "@/features/staff/contracts/ScheduleProgressReportDialog";
@@ -108,6 +109,10 @@ export function ProgressReportsPanel({
                 <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <CalendarClock className="size-3.5" />
                   {t("reports.dueOn", { date: formatDate(report.dueDate) })}
+                  {/* Kỳ CHƯA nộp mới cần đếm ngược; nộp rồi thì hạn hết ý nghĩa. */}
+                  {!report.submittedAt && (
+                    <DeadlineBadge deadline={report.dueDate} daysLeft={report.daysLeft} />
+                  )}
                   {report.scheduledMeetingAt &&
                     ` · ${t("reports.workingSessionAt", { datetime: formatDateTime(report.scheduledMeetingAt) })}`}
                 </p>

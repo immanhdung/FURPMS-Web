@@ -14,6 +14,8 @@ export interface Deliverable {
   scientificRequirements?: string | null;
   notes?: string | null;
   dueDate?: string | null;
+  /** Số ngày còn lại do MÁY CHỦ tính; âm = quá hạn. */
+  daysLeft?: number | null;
   acceptanceStatus?: string | null;
   isCompleted: boolean;
   submittedAt?: string | null;

@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { useMyContractsQuery } from "@/hooks/useMyContracts";
 import { ContractMilestoneTimeline } from "@/features/staff/contracts/ContractMilestoneTimeline";
+import { DecisionDossierPanel } from "@/components/shared/DecisionDossierPanel";
 
 /**
  * PI xem TIẾN TRÌNH đề tài của chính mình.
@@ -96,8 +97,18 @@ export function MyProjectTimelinePage() {
 
                 {/* Tái dùng đúng timeline của màn Staff — cùng một nguồn sự thật, khỏi lệch. */}
                 {isOpen && (
-                  <div className="px-4 pb-4">
+                  <div className="space-y-5 px-4 pb-4">
                     <ContractMilestoneTimeline contract={contract} />
+
+                    {/* Chủ nhiệm phải xem được HỒ SƠ QUYẾT ĐỊNH của chính đề tài mình: trước đây
+                        họ chỉ biết kết quả cuối, không biết ai quyết gì, lúc nào, căn cứ văn bản
+                        nào — đúng thứ hội đồng bảo vệ lần 2 yêu cầu phải lưu trữ và tra được. */}
+                    <div>
+                      <p className="mb-2 text-sm font-semibold text-foreground">
+                        {t("decisions.sectionTitle")}
+                      </p>
+                      <DecisionDossierPanel projectId={contract.projectId ?? null} />
+                    </div>
                   </div>
                 )}
               </section>

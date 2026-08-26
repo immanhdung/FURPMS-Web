@@ -12,6 +12,15 @@ export interface ReviewRound {
   openedAt?: string | null;
   closedAt?: string | null;
   result?: string | null;
+  /**
+   * Hạn hội đồng phải chấm xong vòng này (thêm 25/08). `null` = chưa đặt hạn — vòng tạo trước
+   * ngày đó đều vậy, giao diện hiện "chưa đặt hạn" chứ KHÔNG bịa ra một ngày.
+   *
+   * Đây là hạn HIỆU LỰC: đã tính các lần Staff dời hạn (rule #19 — dời là ghi log, không ghi đè).
+   */
+  scoringDeadline?: string | null;
+  /** Vòng còn mở mà đã quá hạn. Chỉ gắn cờ — hệ thống KHÔNG tự đóng vòng (rule #12). */
+  isScoringOverdue?: boolean;
   councilId?: string | null;
   members?: CouncilMember[] | null;
 }
