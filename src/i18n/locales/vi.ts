@@ -1080,6 +1080,7 @@ export const vi = {
     tracksIntro: "Các lĩnh vực nghiên cứu (vd: CNTT, AI, Kinh doanh) dùng để phân loại đề cương trong một đợt.",
     cyclesUsing: "Đợt đang mở",
     cycleCount: "{{count}} đợt",
+    cycleCount_other: "{{count}} đợt",
     notInAnyCycle: "Chưa đợt nào mở",
     notInAnyCycleHint:
       "Lĩnh vực đã tạo nhưng chưa đợt nào mở, nên PI không chọn được khi nộp đề cương. Vào Đợt nghiên cứu → chọn đợt → Quản lý lĩnh vực để gắn vào.",
