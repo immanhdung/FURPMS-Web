@@ -1351,6 +1351,16 @@ export const en = {
     draftHint: "As secretary, record the council's conclusion. Saving keeps it as a draft — the chair approves it.",
     conclusion: "Council conclusion",
     conclusionPlaceholder: "Select the outcome agreed in the meeting",
+    divergeLowButPass:
+      "Average score {{score}}/{{total}} is below the pass mark {{mark}}, but the conclusion is Pass.",
+    divergeHighButFail:
+      "Average score {{score}}/{{total}} meets the pass mark {{mark}}, but the conclusion is Fail.",
+    divergeHint:
+      "The council is entitled to conclude this way — the system does not decide for it. Just record the reasoning so the record explains itself later.",
+    justificationLabel: "Reason the conclusion differs from the score",
+    justificationPlaceholder:
+      "For example: high applied value for the commissioning unit, agreed unanimously by the council.",
+    justificationRequired: "Record the reason before saving the minutes.",
     councilComments: "Council comments",
     councilCommentsPlaceholder: "Conclusion of the council: scientific merit, budget, required edits…",
     recommendations: "Recommendations",

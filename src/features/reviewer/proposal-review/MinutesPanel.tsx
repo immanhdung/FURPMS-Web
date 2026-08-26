@@ -78,6 +78,7 @@ export function MinutesPanel({
   const saveAttendance = useSaveAttendanceMutation(meetingId ?? "");
 
   const [result, setResult] = useState("");
+  const [justification, setJustification] = useState("");
   const [councilComments, setCouncilComments] = useState("");
   const [recommendations, setRecommendations] = useState("");
   const [qaEntries, setQaEntries] = useState<QaEntry[]>([]);
@@ -93,6 +94,7 @@ export function MinutesPanel({
   if (decision && !decision.finalizedAt && decision.id !== loadedDraftId) {
     setLoadedDraftId(decision.id);
     setResult(decision.result ?? "");
+    setJustification(decision.resultJustification ?? "");
     setCouncilComments(decision.councilComments ?? "");
     setRecommendations(decision.recommendations ?? "");
     const qa = decision.qaEntries ?? [];
@@ -100,6 +102,32 @@ export function MinutesPanel({
     setMinutesStyle(qa.length > 0 ? "QA" : "FREEFORM"); // mở đúng phong cách đã soạn trước đó
     setOpinions(decision.memberOpinions ?? []);
   }
+
+  // ── Cảnh báo kết luận lệch điểm ────────────────────────────────────────
+  //
+  // Máy chủ trả `resultDivergesFromScore` cho kết luận ĐÃ LƯU, nhưng Thư ký cần thấy cảnh báo
+  // ngay lúc đổi ô chọn — trước khi bấm Lưu. Nên ở đây áp lại phép so cho lựa chọn hiện tại,
+  // dùng ĐÚNG ba con số máy chủ đưa xuống (điểm trung bình, thang điểm, ngưỡng). Không tự đặt
+  // ngưỡng riêng: cảnh báo trên màn và luật chặn khi lưu phải nói cùng một điều.
+  const avgScore = tally?.averageScore ?? decision?.averageScore ?? null;
+  const rubricTotal = decision?.rubricTotal ?? null;
+  const thresholdPct = decision?.passThresholdPct ?? null;
+
+  const passMark =
+    rubricTotal != null && thresholdPct != null ? (rubricTotal * thresholdPct) / 100 : null;
+  const scoreIsLow = avgScore != null && passMark != null ? avgScore < passMark : null;
+
+  // Đối xứng hai chiều. "Yêu cầu chỉnh sửa" hợp lý ở cả hai phía ngưỡng nên không tính là lệch.
+  const diverges =
+    scoreIsLow == null
+      ? false
+      : result === REVIEW_DECISION.APPROVED
+        ? scoreIsLow
+        : result === REVIEW_DECISION.REJECTED
+          ? !scoreIsLow
+          : false;
+
+  const justificationMissing = diverges && !justification.trim();
 
   const addQa = () => setQaEntries((prev) => [...prev, { askedBy: "", question: "", answer: "", order: prev.length }]);
   const updateQa = (i: number, patch: Partial<QaEntry>) =>
@@ -284,7 +312,16 @@ export function MinutesPanel({
                     { label: t("minutes.failCount"), value: tally?.failCount },
                   ]
                 : []),
-              { label: t("minutes.averageScore"), value: tally?.averageScore ?? decision?.averageScore },
+              {
+                label: t("minutes.averageScore"),
+                // "35" một mình không nói lên gì — phải kèm thang điểm mới biết là thấp hay cao.
+                value:
+                  avgScore == null
+                    ? null
+                    : rubricTotal == null
+                      ? avgScore
+                      : `${avgScore}/${rubricTotal}`,
+              },
             ].map((item) => (
               <div key={item.label} className="rounded-lg border border-border p-2">
                 <dt className="text-xs text-muted-foreground">{item.label}</dt>
@@ -399,7 +436,10 @@ export function MinutesPanel({
                 {t("minutes.conclusion")} <span className="text-destructive">*</span>
               </label>
               <Select value={result || undefined} onValueChange={setResult}>
-                <SelectTrigger id="minutes-result" className="w-full">
+                <SelectTrigger
+                  id="minutes-result"
+                  className={cn("w-full", diverges && "border-warning ring-1 ring-warning/40")}
+                >
                   <SelectValue placeholder={t("minutes.conclusionPlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
@@ -411,6 +451,49 @@ export function MinutesPanel({
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Kết luận lệch điểm chấm → cảnh báo + bắt ghi lý do.
+                KHÔNG chặn hội đồng kết luận theo ý họ: quyền kết luận là của Chủ tịch, hệ thống
+                chỉ đòi hồ sơ giải thích được về sau. */}
+            {diverges && (
+              <div className="rounded-lg border border-warning bg-warning/10 p-3.5">
+                <p className="flex items-start gap-2 text-sm font-medium text-foreground">
+                  <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
+                  <span>
+                    {scoreIsLow
+                      ? t("minutes.divergeLowButPass", {
+                          score: avgScore,
+                          total: rubricTotal,
+                          mark: passMark,
+                        })
+                      : t("minutes.divergeHighButFail", {
+                          score: avgScore,
+                          total: rubricTotal,
+                          mark: passMark,
+                        })}
+                  </span>
+                </p>
+                <p className="mt-1.5 pl-6 text-xs text-muted-foreground">
+                  {t("minutes.divergeHint")}
+                </p>
+
+                <div className="mt-3 pl-6">
+                  <label
+                    htmlFor="minutes-justification"
+                    className="mb-1.5 block text-sm font-medium text-foreground"
+                  >
+                    {t("minutes.justificationLabel")} <span className="text-destructive">*</span>
+                  </label>
+                  <Textarea
+                    id="minutes-justification"
+                    rows={3}
+                    value={justification}
+                    onChange={(e) => setJustification(e.target.value)}
+                    placeholder={t("minutes.justificationPlaceholder")}
+                  />
+                </div>
+              </div>
+            )}
 
             {/* BM04 II.1 — Thư ký chọn phong cách: Hỏi–Đáp (Q&A) hoặc viết tự do */}
             <div>
@@ -555,13 +638,15 @@ export function MinutesPanel({
             <div className="flex justify-end">
               <Button
                 type="button"
-                disabled={!result || saveMutation.isPending}
+                disabled={!result || justificationMissing || saveMutation.isPending}
+                title={justificationMissing ? t("minutes.justificationRequired") : undefined}
                 onClick={() =>
                   saveMutation.mutate({
                     // Hội đồng chấm nhiều đề tài: thiếu projectId thì máy chủ từ chối
                     // ("cần chỉ rõ projectId") — biên bản không lưu được.
                     projectId: projectId ?? undefined,
                     result,
+                    resultJustification: diverges ? justification.trim() : undefined,
                     councilComments: councilComments || undefined,
                     recommendations: recommendations || undefined,
                     qaEntries: qaEntries

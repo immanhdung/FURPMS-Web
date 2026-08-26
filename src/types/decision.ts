@@ -17,6 +17,18 @@ export interface DecisionResponse {
   secretaryUserId?: string | null;
   /** Có giá trị = Chủ tịch đã duyệt & KHÓA biên bản */
   finalizedAt?: string | null;
+  /** Thang điểm của phiếu chấm vòng này — để hiện "35/100" chứ không phải "35". */
+  rubricTotal?: number | null;
+  /** Ngưỡng điểm đạt (phần trăm thang điểm) Quản trị đang đặt. */
+  passThresholdPct?: number | null;
+  /**
+   * Kết luận có lệch với điểm chấm không — do MÁY CHỦ tính, không tự so lại ở giao diện:
+   * màn hình và luật chặn phải dùng chung một phép so, không thì cảnh báo nói một đằng mà
+   * bấm Lưu lại bị chặn vì một lẽ khác.
+   */
+  resultDivergesFromScore?: boolean | null;
+  /** Lý do hội đồng kết luận khác điểm chấm. */
+  resultJustification?: string | null;
   /** Chủ tịch yêu cầu sửa gì — có giá trị nghĩa là biên bản đang bị trả lại. */
   revisionRequestNote?: string | null;
   revisionRequestedAt?: string | null;
@@ -50,4 +62,6 @@ export interface SaveMinutesPayload {
   recommendations?: string;
   qaEntries?: QaEntry[];
   memberOpinions?: MemberOpinion[];
+  /** Bắt buộc khi kết luận lệch với điểm chấm — thiếu thì máy chủ trả 400 kèm câu giải thích. */
+  resultJustification?: string;
 }

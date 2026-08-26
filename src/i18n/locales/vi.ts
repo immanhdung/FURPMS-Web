@@ -1362,6 +1362,16 @@ export const vi = {
     draftHint: "Với vai trò Thư ký, ghi lại kết luận của hội đồng. Lưu = giữ bản nháp — Chủ tịch duyệt.",
     conclusion: "Kết luận hội đồng",
     conclusionPlaceholder: "Chọn kết quả hội đồng thống nhất",
+    divergeLowButPass:
+      "Điểm trung bình {{score}}/{{total}} thấp hơn ngưỡng đạt {{mark}}, nhưng kết luận là Đạt.",
+    divergeHighButFail:
+      "Điểm trung bình {{score}}/{{total}} đã đạt ngưỡng {{mark}}, nhưng kết luận là Không đạt.",
+    divergeHint:
+      "Hội đồng hoàn toàn có quyền kết luận như vậy — hệ thống không quyết thay. Chỉ cần ghi rõ căn cứ để hồ sơ giải thích được về sau.",
+    justificationLabel: "Lý do kết luận khác điểm chấm",
+    justificationPlaceholder:
+      "Ví dụ: đề tài có tính ứng dụng cao cho đơn vị đặt hàng, hội đồng thống nhất thông qua.",
+    justificationRequired: "Phải ghi lý do trước khi lưu biên bản.",
     councilComments: "Nhận xét hội đồng",
     councilCommentsPlaceholder: "Kết luận: tính khoa học, kinh phí, nội dung cần sửa…",
     recommendations: "Kiến nghị",
