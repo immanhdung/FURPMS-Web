@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Loader2, Sparkles } from "lucide-react";
-import { motion } from "motion/react";
+import { AlertTriangle, Ban, CircleCheck, CircleHelp, Loader2, UserPlus } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -12,20 +11,18 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAddCouncilMemberMutation } from "@/hooks/useCouncilMembers";
-import { useUsersQuery } from "@/hooks/useUsers";
-import { useSuggestReviewersMutation } from "@/hooks/useProposalAi";
-import { eligibleCouncilCandidates } from "@/utils/council-eligibility";
+import { useCouncilCandidatesQuery } from "@/hooks/useCouncilCandidates";
+import { cn } from "@/lib/utils";
+import type { CouncilCandidate } from "@/types/council-candidate";
 
 /*
  * Chức danh trong hội đồng — PHẢI khớp `review-board/CreateCouncilSheet` và các chỗ BE so chuỗi:
  * gửi thư mời kiểm "Chair"/"Secretary", màn chấm nghiệm thu kiểm "Opponent" (chỉ phản biện mới
  * viết BM10 — QĐ543 Điều 12.3.b).
- *
- * Trước 18/08 hộp thoại này dùng `COUNCIL_MEMBER_ROLE` với "Chairman" và KHÔNG có "Opponent":
- * thêm phản biện cho vòng nghiệm thu bằng đường này là bất khả, mà chức danh in ra cũng là mã
- * tiếng Anh thô giữa giao diện đã dịch.
  */
 const COUNCIL_MEMBER_ROLES = ["Chair", "Secretary", "Member", "Opponent"];
 
@@ -36,22 +33,38 @@ interface AddCouncilMemberDialogProps {
   trackId?: string | null;
 }
 
-export function AddCouncilMemberDialog({ open, onOpenChange, councilId, trackId }: AddCouncilMemberDialogProps) {
+/**
+ * Thêm ủy viên hội đồng — danh sách **xếp hạng theo chuyên môn** (QĐ543 Điều 8.2).
+ *
+ * <p><b>Thay cho nút "Gợi ý AI" cũ (26/08).</b> Nút đó gọi `/ai/suggest-reviewers`, một endpoint
+ * <b>chưa bao giờ tồn tại ở máy chủ</b> — bấm vào là 404. Nay dùng
+ * `GET /api/councils/candidates`: một phép nối bảng người ↔ lĩnh vực rồi sắp xếp, và được gọi đúng
+ * tên như vậy chứ không dán nhãn AI cho một truy vấn SQL.</p>
+ *
+ * <p>Danh sách <b>vẫn hiện</b> người không chọn được (xung đột lợi ích, đã có tên) — giấu đi thì
+ * Phòng QLKH không hiểu vì sao tìm mãi không thấy một cái tên.</p>
+ */
+export function AddCouncilMemberDialog({ open, onOpenChange, councilId }: AddCouncilMemberDialogProps) {
   const { t } = useTranslation();
-  const { data: users } = useUsersQuery();
-  // Chỉ người đủ tư cách hội đồng (giảng viên/hội đồng, còn hoạt động). COI theo từng đề tài vẫn do
-  // BE chặn — hộp thoại này không biết hội đồng đang chấm những đề tài nào.
-  const candidates = eligibleCouncilCandidates(users);
+  const { data, isLoading } = useCouncilCandidatesQuery({ councilId }, open);
   const addMutation = useAddCouncilMemberMutation(councilId);
-  const suggestMutation = useSuggestReviewersMutation();
+
   const [userId, setUserId] = useState<string | undefined>();
-  const [suggestedName, setSuggestedName] = useState<string | undefined>();
   const [memberRole, setMemberRole] = useState<string>(COUNCIL_MEMBER_ROLES[2]);
+  const [expertiseNote, setExpertiseNote] = useState("");
+
+  const candidates = data?.candidates ?? [];
+  const selected = candidates.find((c) => c.userId === userId);
+
+  // Ngoài lĩnh vực = khác ngành HOẶC chưa khai gì. Cả hai đều cần Phòng QLKH giải trình, nhưng
+  // câu chữ phải nói đúng trường hợp nào.
+  const needsOverride = Boolean(selected && !selected.matchesTrack && data?.trackId != null);
+  const noteMissing = needsOverride && !expertiseNote.trim();
 
   const reset = () => {
     setUserId(undefined);
-    setSuggestedName(undefined);
     setMemberRole(COUNCIL_MEMBER_ROLES[2]);
+    setExpertiseNote("");
   };
 
   return (
@@ -59,73 +72,84 @@ export function AddCouncilMemberDialog({ open, onOpenChange, councilId, trackId 
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("staff.addMember")}</DialogTitle>
-          <DialogDescription>{t("staff.addMemberDesc")}</DialogDescription>
+          <DialogDescription>
+            {data?.trackName
+              ? t("staff.addMemberTrackDesc", {
+                  track: data.trackName,
+                  n: data.matchingCount,
+                })
+              : t("staff.addMemberDesc")}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div>
-            <div className="mb-1.5 flex items-center justify-between">
-              <label className="block text-sm font-medium text-foreground">{t("staff.reviewer")}</label>
-              {trackId && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 gap-1 text-xs text-primary"
-                  onClick={() => suggestMutation.mutate(trackId)}
-                  disabled={suggestMutation.isPending}
-                >
-                  {suggestMutation.isPending ? <Loader2 className="animate-spin" /> : <Sparkles />}
-                  {t("staff.suggestAi")}
-                </Button>
-              )}
-            </div>
-            <Select value={userId} onValueChange={setUserId}>
-              <SelectTrigger>
-                <SelectValue placeholder={t("staff.selectReviewer")} />
-              </SelectTrigger>
-              <SelectContent>
-                {candidates.map((user) => (
-                  <SelectItem key={user.id} value={user.id}>
-                    {user.fullName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {suggestedName && !userId && (
-              <p className="mt-1 text-xs text-muted-foreground">
-                {t("staff.aiSuggestNote", { name: suggestedName })}
-              </p>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">
+              {t("staff.reviewer")}
+            </label>
+            {isLoading ? (
+              <Skeleton className="h-9 w-full rounded-md" />
+            ) : (
+              <Select value={userId} onValueChange={setUserId}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={t("staff.selectReviewer")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {candidates.map((c) => (
+                    <SelectItem
+                      key={c.userId}
+                      value={c.userId}
+                      // Xung đột lợi ích và người đã có tên: hiện ra nhưng không chọn được — BE
+                      // cũng chặn, đây chỉ để khỏi bấm vào rồi ăn lỗi.
+                      disabled={c.hasConflictOfInterest || c.alreadyInCouncil}
+                    >
+                      <CandidateRow candidate={c} showTrack={data?.trackId != null} />
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             )}
           </div>
 
-          {suggestMutation.data && (
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">{t("staff.aiSuggested")}</p>
-              {suggestMutation.data.map((suggestion, index) => (
-                <motion.button
-                  key={suggestion.userId}
-                  type="button"
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.15, delay: index * 0.05 }}
-                  onClick={() => setSuggestedName(suggestion.fullName)}
-                  className="w-full rounded-lg border border-border p-2.5 text-left transition-colors hover:border-primary/40"
+          {/* Ngoài lĩnh vực → cảnh báo + bắt ghi lý do. KHÔNG khoá cứng: có ca cần mời chuyên gia
+              liên ngành, hoặc lĩnh vực hẹp không đủ người. */}
+          {needsOverride && selected && (
+            <div className="rounded-lg border border-warning bg-warning/10 p-3.5">
+              <p className="flex items-start gap-2 text-sm font-medium text-foreground">
+                <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
+                <span>
+                  {selected.expertiseUnknown
+                    ? t("staff.expertiseUnknownWarn", { name: selected.fullName })
+                    : t("staff.expertiseMismatchWarn", {
+                        name: selected.fullName,
+                        track: data?.trackName ?? "",
+                      })}
+                </span>
+              </p>
+              <p className="mt-1.5 pl-6 text-xs text-muted-foreground">{t("staff.expertiseHint")}</p>
+
+              <div className="mt-3 pl-6">
+                <label
+                  htmlFor="expertise-note"
+                  className="mb-1.5 block text-sm font-medium text-foreground"
                 >
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-xs font-medium text-foreground">{suggestion.fullName}</p>
-                    <Badge variant="secondary">{t("staff.matchScore", { score: suggestion.matchScore })}</Badge>
-                  </div>
-                  <p className="mt-0.5 text-[11px] text-muted-foreground">{suggestion.reason}</p>
-                </motion.button>
-              ))}
+                  {t("staff.expertiseNoteLabel")} <span className="text-destructive">*</span>
+                </label>
+                <Textarea
+                  id="expertise-note"
+                  rows={2}
+                  value={expertiseNote}
+                  onChange={(e) => setExpertiseNote(e.target.value)}
+                  placeholder={t("staff.expertiseNotePlaceholder")}
+                />
+              </div>
             </div>
           )}
 
           <div>
             <label className="mb-1.5 block text-sm font-medium text-foreground">{t("staff.role")}</label>
             <Select value={memberRole} onValueChange={setMemberRole}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -141,8 +165,7 @@ export function AddCouncilMemberDialog({ open, onOpenChange, councilId, trackId 
           {/*
             Ô "Phản biện ngoài" đã gỡ (17/08). Cờ `isExternal` chỉ được lưu rồi trả về, KHÔNG
             luồng nào rẽ nhánh theo nó: mức thù lao riêng cho người ngoài trường đã bỏ cùng
-            toàn bộ phần tính tiền (rule #15). Bày một ô mà tích hay không cũng như nhau chỉ
-            khiến Staff phân vân. Cột trong DB giữ nguyên, vẫn gửi false.
+            toàn bộ phần tính tiền (rule #15). Cột trong DB giữ nguyên, vẫn gửi false.
           */}
         </div>
 
@@ -152,11 +175,18 @@ export function AddCouncilMemberDialog({ open, onOpenChange, councilId, trackId 
           </Button>
           <Button
             type="button"
-            disabled={!userId || addMutation.isPending}
+            disabled={!userId || noteMissing || addMutation.isPending}
+            title={noteMissing ? t("staff.expertiseNoteRequired") : undefined}
             onClick={() =>
               userId &&
               addMutation.mutate(
-                { userId, memberRole, isExternal: false },
+                {
+                  userId,
+                  memberRole,
+                  isExternal: false,
+                  acceptWithoutExpertise: needsOverride,
+                  expertiseNote: needsOverride ? expertiseNote.trim() : undefined,
+                },
                 {
                   onSuccess: () => {
                     reset();
@@ -166,11 +196,57 @@ export function AddCouncilMemberDialog({ open, onOpenChange, councilId, trackId 
               )
             }
           >
-            {addMutation.isPending && <Loader2 className="animate-spin" />}
+            {addMutation.isPending ? <Loader2 className="animate-spin" /> : <UserPlus />}
             {t("staff.addMemberBtn")}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/** Một dòng ứng viên: tên + học hàm, kèm cờ cho biết vì sao nên (hoặc không thể) chọn. */
+function CandidateRow({ candidate, showTrack }: { candidate: CouncilCandidate; showTrack: boolean }) {
+  const { t } = useTranslation();
+  const blocked = candidate.hasConflictOfInterest || candidate.alreadyInCouncil;
+
+  return (
+    <span className="flex w-full flex-wrap items-center gap-x-2 gap-y-0.5">
+      <span className={cn("font-medium", blocked && "text-muted-foreground")}>
+        {candidate.fullName}
+      </span>
+      {candidate.academicTitle && (
+        <span className="text-xs text-muted-foreground">{candidate.academicTitle}</span>
+      )}
+
+      {candidate.hasConflictOfInterest ? (
+        <Badge variant="destructive" className="gap-1">
+          <Ban className="size-3" />
+          {t("staff.flagCoi")}
+        </Badge>
+      ) : candidate.alreadyInCouncil ? (
+        <Badge variant="secondary">{t("staff.flagAlreadyIn")}</Badge>
+      ) : showTrack && candidate.matchesTrack ? (
+        <Badge variant="secondary" className="gap-1 text-success">
+          <CircleCheck className="size-3" />
+          {t("staff.flagOnTrack")}
+        </Badge>
+      ) : showTrack && candidate.expertiseUnknown ? (
+        <Badge variant="outline" className="gap-1 text-muted-foreground">
+          <CircleHelp className="size-3" />
+          {t("staff.flagUnknownTrack")}
+        </Badge>
+      ) : showTrack ? (
+        <Badge variant="outline" className="text-muted-foreground">
+          {t("staff.flagOffTrack")}
+        </Badge>
+      ) : null}
+
+      {candidate.activeCouncilCount > 0 && !blocked && (
+        <span className="text-xs text-muted-foreground">
+          {t("staff.flagBusy", { n: candidate.activeCouncilCount })}
+        </span>
+      )}
+    </span>
   );
 }

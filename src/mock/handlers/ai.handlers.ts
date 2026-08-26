@@ -1,10 +1,10 @@
 import { delay, http, HttpResponse } from "msw";
 import { API_BASE_URL } from "@/constants/env";
 import { SAMPLE_AI_EXTRACTIONS } from "@/mock/data/ai-extractions";
-import { SAMPLE_FEEDBACK, SAMPLE_SEARCH_RESULTS, SAMPLE_SUMMARIES, getReviewerSuggestions } from "@/mock/data/ai-tools";
+import { SAMPLE_FEEDBACK, SAMPLE_SEARCH_RESULTS, SAMPLE_SUMMARIES } from "@/mock/data/ai-tools";
 import type { ApiResponse } from "@/types/common";
 import type { AiExtractionResult, SimilarityCheckResult } from "@/types/ai-extraction";
-import type { AiFeedbackItem, ReviewerSuggestion, SemanticSearchResult, SummaryResult } from "@/types/ai-tools";
+import type { AiFeedbackItem, SemanticSearchResult, SummaryResult } from "@/types/ai-tools";
 
 export const aiHandlers = [
   http.post(`${API_BASE_URL}/ai/extract`, async () => {
@@ -35,12 +35,6 @@ export const aiHandlers = [
       success: true,
       data: results.length > 0 ? results : SAMPLE_SEARCH_RESULTS,
     };
-    return HttpResponse.json(response);
-  }),
-
-  http.post(`${API_BASE_URL}/ai/suggest-reviewers`, async () => {
-    await delay(1200);
-    const response: ApiResponse<ReviewerSuggestion[]> = { success: true, data: getReviewerSuggestions() };
     return HttpResponse.json(response);
   }),
 

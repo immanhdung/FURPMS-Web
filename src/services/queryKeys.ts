@@ -153,6 +153,10 @@ export const queryKeys = {
     all: () => ["project-budget"] as const,
     overview: (projectId: string) => ["project-budget", "overview", projectId] as const,
   },
+  councilCandidates: {
+    all: () => ["council-candidates"] as const,
+    list: (params: Record<string, unknown>) => ["council-candidates", "list", params] as const,
+  },
   projectDecisions: {
     all: () => ["project-decisions"] as const,
     detail: (projectId: string) => ["project-decisions", "detail", projectId] as const,

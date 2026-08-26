@@ -6,7 +6,6 @@ import type {
   AiFeedbackItem,
   AiScoreSuggestion,
   ReviewKit,
-  ReviewerSuggestion,
   SemanticSearchResult,
   SummaryResult,
 } from "@/types/ai-tools";
@@ -47,10 +46,6 @@ export const aiService = {
       .post<ApiResponse<SemanticSearchResult[]>>("/ai/search", { query }, { timeout: AI_TIMEOUT_MS })
       .then((res) => res.data.data),
 
-  suggestReviewers: (trackId: string) =>
-    axiosClient
-      .post<ApiResponse<ReviewerSuggestion[]>>("/ai/suggest-reviewers", { trackId }, { timeout: AI_TIMEOUT_MS })
-      .then((res) => res.data.data),
 
   generateFeedback: (proposalId: string) =>
     axiosClient

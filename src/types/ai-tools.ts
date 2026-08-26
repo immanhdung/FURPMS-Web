@@ -28,12 +28,12 @@ export interface SemanticSearchResult {
   type: "proposal" | "topic";
 }
 
-export interface ReviewerSuggestion {
-  userId: string;
-  fullName: string;
-  matchScore: number;
-  reason: string;
-}
+/*
+ * `ReviewerSuggestion` đã gỡ (26/08). Nó phục vụ `/ai/suggest-reviewers` — một endpoint CHƯA BAO
+ * GIỜ tồn tại ở máy chủ, bấm nút "Gợi ý AI" là ăn 404. Thay bằng
+ * `GET /api/councils/candidates`: nối bảng người ↔ lĩnh vực rồi xếp hạng (xem `council-candidate.ts`),
+ * và gọi đúng tên chứ không dán nhãn AI cho một truy vấn SQL.
+ */
 
 export interface AiFeedbackItem {
   category: string;

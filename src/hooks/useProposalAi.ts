@@ -62,12 +62,6 @@ export function useSemanticSearchMutation() {
   });
 }
 
-export function useSuggestReviewersMutation() {
-  return useMutation({
-    mutationFn: (trackId: string) => aiService.suggestReviewers(trackId),
-    onError: () => toast.error("Unable to generate reviewer suggestions."),
-  });
-}
 
 export function useGenerateFeedbackMutation() {
   return useMutation({
