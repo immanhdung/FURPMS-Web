@@ -1,6 +1,6 @@
 import { AI_TIMEOUT_MS, axiosClient } from "@/services/api/axiosClient";
 import type { ApiResponse } from "@/types/common";
-import type { AiExtractionResult, SimilarityCheckResult } from "@/types/ai-extraction";
+import type { AiExtractionResult } from "@/types/ai-extraction";
 import type {
   AiConsistencyResult,
   AiFeedbackItem,
@@ -19,15 +19,6 @@ export const aiService = {
     // tức Đường B (upload + AI, rule #10/#20) chưa từng chạy.
     return axiosClient
       .post<ApiResponse<AiExtractionResult>>("/proposals/extract", formData, { timeout: AI_TIMEOUT_MS })
-      .then((res) => res.data.data);
-  },
-
-  checkSimilarity: (file: File, topicId: number) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("topicId", String(topicId));
-    return axiosClient
-      .post<ApiResponse<SimilarityCheckResult>>("/ai/similarity-check", formData, { timeout: AI_TIMEOUT_MS })
       .then((res) => res.data.data);
   },
 

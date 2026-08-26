@@ -26,13 +26,6 @@ export function useExtractProposalMutation() {
   });
 }
 
-export function useSimilarityCheckMutation() {
-  return useMutation({
-    mutationFn: ({ file, topicId }: { file: File; topicId: number }) => aiService.checkSimilarity(file, topicId),
-    onError: () => toast.error("Unable to run the similarity check."),
-  });
-}
-
 export function useSummarizeProposalMutation() {
   return useMutation({
     mutationFn: (proposalId: string) => aiService.summarizeProposal(proposalId),

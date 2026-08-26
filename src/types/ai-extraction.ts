@@ -38,7 +38,7 @@ export interface AiExtractionResult {
   warning?: string | null;
 }
 
-export interface SimilarityCheckResult {
-  score: number;
-  passed: boolean;
-}
+/*
+ * `SimilarityCheckResult` đã gỡ (26/08) — phục vụ `/ai/similarity-check`, endpoint chưa bao giờ
+ * tồn tại ở máy chủ. Rà trùng lặp thật nay ở `duplicate-check.ts` + `DuplicateCheckPanel`.
+ */

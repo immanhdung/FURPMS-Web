@@ -3,7 +3,7 @@ import { API_BASE_URL } from "@/constants/env";
 import { SAMPLE_AI_EXTRACTIONS } from "@/mock/data/ai-extractions";
 import { SAMPLE_FEEDBACK, SAMPLE_SEARCH_RESULTS, SAMPLE_SUMMARIES } from "@/mock/data/ai-tools";
 import type { ApiResponse } from "@/types/common";
-import type { AiExtractionResult, SimilarityCheckResult } from "@/types/ai-extraction";
+import type { AiExtractionResult } from "@/types/ai-extraction";
 import type { AiFeedbackItem, SemanticSearchResult, SummaryResult } from "@/types/ai-tools";
 
 export const aiHandlers = [
@@ -11,14 +11,6 @@ export const aiHandlers = [
     await delay(1300);
     const result = SAMPLE_AI_EXTRACTIONS[Math.floor(Math.random() * SAMPLE_AI_EXTRACTIONS.length)];
     const response: ApiResponse<AiExtractionResult> = { success: true, data: result };
-    return HttpResponse.json(response);
-  }),
-
-  http.post(`${API_BASE_URL}/ai/similarity-check`, async () => {
-    await delay(1100);
-    const score = Math.floor(Math.random() * 71) + 25;
-    const result: SimilarityCheckResult = { score, passed: score >= 60 };
-    const response: ApiResponse<SimilarityCheckResult> = { success: true, data: result };
     return HttpResponse.json(response);
   }),
 

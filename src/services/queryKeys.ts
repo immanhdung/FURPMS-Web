@@ -153,6 +153,10 @@ export const queryKeys = {
     all: () => ["project-budget"] as const,
     overview: (projectId: string) => ["project-budget", "overview", projectId] as const,
   },
+  duplicateCheck: {
+    all: () => ["duplicate-check"] as const,
+    detail: (proposalId: string) => ["duplicate-check", "detail", proposalId] as const,
+  },
   councilCandidates: {
     all: () => ["council-candidates"] as const,
     list: (params: Record<string, unknown>) => ["council-candidates", "list", params] as const,

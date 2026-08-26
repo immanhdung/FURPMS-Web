@@ -242,6 +242,11 @@ export function Step2ResearchContent({ form, file, onFileChange, proposalId }: S
         KHÔNG hề có endpoint đó (bấm là lỗi), và chủ nhiệm đề tài ứng dụng thì vĩnh viễn không dùng
         được AI điền hộ — trong khi đó mới là thứ chạy thật.
         Nay bỏ nhánh, ai cũng dùng chung một đường.
+
+        Cập nhật 26/08: rà trùng lặp nay CÓ THẬT, nhưng nằm ở màn xét duyệt của Phòng QLKH
+        (`DuplicateCheckPanel`) chứ không phải ở đây — nó đối chiếu đề cương với KHO ĐỀ TÀI ĐÃ CÓ
+        sau khi nộp, việc mà chủ nhiệm không tự làm được lúc đang gõ. Mã gọi `/ai/similarity-check`
+        đã gỡ hẳn.
       */}
         <div className="space-y-3">
           <Button type="button" variant="outline" disabled={!file || extractMutation.isPending || aiCooldown.seconds > 0} onClick={runExtraction}>

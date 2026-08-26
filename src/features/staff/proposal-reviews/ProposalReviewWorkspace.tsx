@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, ExternalLink, FileText, Gavel, Route } from "lucide-react";
+import { ArrowLeft, ExternalLink, FileText, Gavel, Route, ScanSearch } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DuplicateCheckPanel } from "@/components/shared/DuplicateCheckPanel";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { PageLoader } from "@/components/shared/PageLoader";
 import { ErrorState } from "@/components/shared/ErrorState";
@@ -105,6 +106,10 @@ export function ProposalReviewWorkspace() {
             <Route className="size-3.5" />
             {t("staff.projectProgressTab")}
           </TabsTrigger>
+          <TabsTrigger value="duplicate">
+            <ScanSearch className="size-3.5" />
+            {t("staff.duplicateTab")}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="contents" className="space-y-4">
@@ -124,6 +129,12 @@ export function ProposalReviewWorkspace() {
                 về máy rồi mở bằng Word chỉ để xem chủ nhiệm viết gì. */}
             <ProposalDocumentViewer proposalId={proposal.id} />
           </section>
+        </TabsContent>
+
+        {/* Rà trùng lặp đặt ở màn xét duyệt vì đây đúng là lúc Phòng QLKH cần biết: trước khi
+            xếp đề tài vào vòng chấm, chứ không phải sau khi hội đồng đã họp. */}
+        <TabsContent value="duplicate">
+          <DuplicateCheckPanel proposalId={proposal.id} canReview />
         </TabsContent>
 
         <TabsContent value="progress" className="space-y-6">
