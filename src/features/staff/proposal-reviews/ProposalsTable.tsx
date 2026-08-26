@@ -7,6 +7,7 @@ import { useCyclesQuery } from "@/hooks/useCycles";
 import { useTracksQuery } from "@/hooks/useTracks";
 import { getProposalColumns } from "@/features/staff/proposal-reviews/columns";
 import { sortByDateDesc } from "@/utils/sort";
+import { useDuplicateFlagsQuery } from "@/hooks/useDuplicateCheck";
 import type { ProposalListParams, ProposalSummary } from "@/types/proposal-summary";
 
 interface ProposalsTableProps {
@@ -28,8 +29,17 @@ export function ProposalsTable({ params, onOpen, emptyTitle, emptyDescription }:
     [tracks]
   );
 
-  const columns = useMemo(() => getProposalColumns({ t, cycleNames, trackNames, onOpen }), [t, cycleNames, trackNames, onOpen]);
   const sortedData = useMemo(() => sortByDateDesc(data, (p) => p.createdAt), [data]);
+
+  // Cờ trùng lặp cho CẢ TRANG một lần, không phải một lần cho mỗi dòng — để Phòng QLKH thấy đề tài
+  // nào cần xem trước, thay vì phải mở từng đề cương một mới biết cái nào có vấn đề.
+  const proposalIds = useMemo(() => sortedData.map((p) => p.id), [sortedData]);
+  const { data: duplicateFlags } = useDuplicateFlagsQuery(proposalIds, sortedData.length > 0);
+
+  const columns = useMemo(
+    () => getProposalColumns({ t, cycleNames, trackNames, onOpen, duplicateFlags }),
+    [t, cycleNames, trackNames, onOpen, duplicateFlags]
+  );
 
   if (isError) {
     return <ErrorState onRetry={() => refetch()} isRetrying={isRefetching} />;

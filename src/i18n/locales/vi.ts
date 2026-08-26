@@ -872,6 +872,7 @@ export const vi = {
     councilProjectCount: "{{count}} đề tài",
     countChips: "{{projects}} đề tài · {{councils}} hội đồng",
     unassigned: "— Chưa gán",
+    assignAnyway: "Vẫn gán",
     manage: "Quản lý",
     councilManageDesc: "Thành viên và lịch họp của hội đồng.",
     addCouncil: "Thêm hội đồng",
@@ -1119,6 +1120,8 @@ export const vi = {
     allTracks: "Tất cả lĩnh vực",
     allCycles: "Tất cả đợt",
     proposalDetailSubtitle: "Nội dung đề cương và tiến trình thực hiện của đề tài.",
+    decisionsTab: "Hồ sơ quyết định",
+    duplicateColumn: "Trùng lặp",
     duplicateTab: "Rà trùng lặp",
     proposalContentsTab: "Nội dung đề cương",
     projectProgressTab: "Tiến trình đề tài",
@@ -2294,5 +2297,8 @@ export const vi = {
       NEEDS_REVISION: "Cần chỉnh sửa để phân biệt",
       DUPLICATE: "Trùng lặp",
     },
+  },
+  myProposal: {
+    duplicateVerdictTitle: "Kết quả rà trùng lặp",
   },
 } as const;

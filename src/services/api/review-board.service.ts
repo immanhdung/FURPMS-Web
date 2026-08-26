@@ -39,8 +39,15 @@ export const reviewBoardService = {
     axiosClient.delete<ApiResponse>(`/councils/${councilId}`).then((res) => res.data),
 
   // Gán / gỡ 1 đề tài vào hội đồng có sẵn (dropdown ở cột đề tài).
-  assignProjectToCouncil: (councilId: string, projectId: string) =>
-    axiosClient.post<ApiResponse>(`/councils/${councilId}/projects`, { projectId }).then((res) => res.data),
+  assignProjectToCouncil: (
+    councilId: string,
+    projectId: string,
+    acceptWithoutExpertise?: boolean,
+    expertiseNote?: string
+  ) =>
+    axiosClient
+      .post<ApiResponse>(`/councils/${councilId}/projects`, { projectId, acceptWithoutExpertise, expertiseNote })
+      .then((res) => res.data),
 
   removeProjectFromCouncil: (councilId: string, projectId: string) =>
     axiosClient.delete<ApiResponse>(`/councils/${councilId}/projects/${projectId}`).then((res) => res.data),

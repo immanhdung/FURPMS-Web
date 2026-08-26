@@ -112,14 +112,19 @@ export function useDeleteCouncilMutation(cycleId?: number, trackId?: number) {
 
 export function useAssignProjectToCouncilMutation(cycleId?: number, trackId?: number) {
   const invalidate = useInvalidateBoard(cycleId, trackId);
-  return useMutation({
-    mutationFn: ({ councilId, projectId }: { councilId: string; projectId: string }) =>
-      reviewBoardService.assignProjectToCouncil(councilId, projectId),
+  return useMutation<
+    unknown,
+    ApiError,
+    { councilId: string; projectId: string; acceptWithoutExpertise?: boolean; expertiseNote?: string }
+  >({
+    mutationFn: ({ councilId, projectId, acceptWithoutExpertise, expertiseNote }) =>
+      reviewBoardService.assignProjectToCouncil(councilId, projectId, acceptWithoutExpertise, expertiseNote),
     onSuccess: () => {
       toast.success(i18n.t("toast.projectAssigned"));
       invalidate();
     },
-    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.projectAssignFailed")),
+    // Không tự bắn toast ở đây — thông báo "khác lĩnh vực" cần mở hộp thoại xin lý do ngay tại chỗ
+    // (CouncilAssignSelect) thay vì chỉ hiện chữ rồi hết, nên để component gọi tự quyết định.
   });
 }
 

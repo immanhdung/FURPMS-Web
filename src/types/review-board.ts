@@ -36,6 +36,12 @@ export interface ReviewBoardRound {
   /** Bộ tiêu chí gắn RIÊNG cho vòng này; null = dùng bộ theo (đợt + lĩnh vực). */
   rubricTemplateId?: number | null;
   canDelete: boolean;
+  /** Hạn chấm HIỆU LỰC (đã tính gia hạn) — null = chưa đặt hạn. */
+  scoringDeadline?: string | null;
+  /** Chỉ true khi vòng còn MỞ và đã quá hạn — vòng đã chốt thì hạn hết ý nghĩa. */
+  isScoringOverdue?: boolean;
+  /** Số ngày còn lại — do MÁY CHỦ tính, âm = quá hạn. */
+  scoringDaysLeft?: number | null;
   projects: ReviewBoardProjectRound[];
   councils: ReviewBoardCouncil[];
 }
@@ -58,6 +64,10 @@ export interface CouncilPackageMember {
   userId: string;
   memberRole: string;
   isExternal: boolean;
+  /** Đồng ý gán người không khai đúng lĩnh vực (QĐ543 Điều 8.2) — xem `expertiseNote`. */
+  acceptWithoutExpertise?: boolean;
+  /** Lý do gán người ngoài lĩnh vực — bắt buộc khi `acceptWithoutExpertise` = true. */
+  expertiseNote?: string;
 }
 
 export interface CreateCouncilPackagePayload {

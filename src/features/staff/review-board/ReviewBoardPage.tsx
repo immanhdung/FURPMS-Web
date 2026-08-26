@@ -17,6 +17,11 @@ import { RoundCouncilsPanel } from "@/features/staff/review-board/RoundCouncilsP
 import { RoundProposalsPanel } from "@/features/staff/review-board/RoundProposalsPanel";
 import { CreateRoundSheet } from "@/features/staff/review-board/CreateRoundSheet";
 import { RoundRubricPicker } from "@/features/staff/review-board/RoundRubricPicker";
+import { SetRoundDeadlineDialog } from "@/features/staff/proposal-reviews/SetRoundDeadlineDialog";
+import { DeadlineBadge } from "@/components/shared/DeadlineBadge";
+import { CalendarClock } from "lucide-react";
+import { queryKeys } from "@/services/queryKeys";
+import type { ReviewBoardRound } from "@/types/review-board";
 
 export function ReviewBoardPage() {
   const { t } = useTranslation();
@@ -28,6 +33,7 @@ export function ReviewBoardPage() {
   const trackId = searchParams.get("track") ? Number(searchParams.get("track")) : undefined;
   const [selectedRoundId, setSelectedRoundId] = useState<string | null>(null);
   const [createRoundOpen, setCreateRoundOpen] = useState(false);
+  const [deadlineRound, setDeadlineRound] = useState<ReviewBoardRound | null>(null);
 
   const selectCycle = (v: string) => {
     setSearchParams({ cycle: v }); // đổi đợt → bỏ lĩnh vực cũ
@@ -153,6 +159,33 @@ export function ReviewBoardPage() {
                   {t(`reviewBoard.type.${selectedRound.roundType}`)}
                 </span>
                 {selectedRound.status && <StatusBadge status={selectedRound.status} />}
+                {/* Hạn chấm — trước 27/08 màn này hoàn toàn không hiện, dù luật đã có sẵn từ
+                    25/08: phải mở đúng màn "Đề cương" của TỪNG đề tài mới đặt được, mà đây mới
+                    là màn Staff thực sự quản lý vòng chấm. */}
+                {selectedRound.status !== "PASSED" && selectedRound.status !== "FAILED" && (
+                  <div className="flex items-center gap-1.5">
+                    {selectedRound.scoringDeadline ? (
+                      <button type="button" onClick={() => setDeadlineRound(selectedRound)}>
+                        <DeadlineBadge
+                          deadline={selectedRound.scoringDeadline}
+                          daysLeft={selectedRound.scoringDaysLeft}
+                          isExtended={false}
+                          className="cursor-pointer"
+                        />
+                      </button>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1"
+                        onClick={() => setDeadlineRound(selectedRound)}
+                      >
+                        <CalendarClock className="size-3.5" />
+                        {t("roundDeadline.setTitle")}
+                      </Button>
+                    )}
+                  </div>
+                )}
                 {/* Bộ tiêu chí riêng cho vòng này — để trống thì dùng bộ theo (đợt + lĩnh vực). */}
                 <div className="ml-auto">
                   <RoundRubricPicker round={selectedRound} cycleId={cycleId as number} trackId={trackId as number} />
@@ -172,6 +205,15 @@ export function ReviewBoardPage() {
           )}
         </>
       )}
+
+      <SetRoundDeadlineDialog
+        round={deadlineRound}
+        invalidateKeys={
+          cycleId && trackId ? [queryKeys.reviewBoard.board(cycleId, trackId)] : []
+        }
+        open={Boolean(deadlineRound)}
+        onOpenChange={(open) => !open && setDeadlineRound(null)}
+      />
 
       {ready && (
         <CreateRoundSheet

@@ -1,11 +1,17 @@
 import { axiosClient } from "@/services/api/axiosClient";
 import type { ApiResponse } from "@/types/common";
-import type { DuplicateCheck, ReviewDuplicatePayload } from "@/types/duplicate-check";
+import type { DuplicateCheck, DuplicateFlag, ReviewDuplicatePayload } from "@/types/duplicate-check";
 
 /** Tầng 2 gọi Gemini nên chậm hơn hẳn — nới thời gian chờ riêng cho nó. */
 const EXPLAIN_TIMEOUT_MS = 90_000;
 
 export const duplicateCheckService = {
+  /** Cờ rút gọn cho nhiều đề cương — dùng ở màn danh sách. */
+  flags: (proposalIds: string[]) =>
+    axiosClient
+      .post<ApiResponse<Record<string, DuplicateFlag>>>("/proposals/duplicate-flags", proposalIds)
+      .then((res) => res.data.data),
+
   /** Đọc thuần — không gọi AI, không tốn quota. */
   get: (proposalId: string) =>
     axiosClient

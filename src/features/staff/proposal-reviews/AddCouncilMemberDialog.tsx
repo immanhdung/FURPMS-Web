@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AlertTriangle, Ban, CircleCheck, CircleHelp, Loader2, UserPlus } from "lucide-react";
+import { AlertTriangle, Loader2, UserPlus } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -10,14 +10,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAddCouncilMemberMutation } from "@/hooks/useCouncilMembers";
 import { useCouncilCandidatesQuery } from "@/hooks/useCouncilCandidates";
-import { cn } from "@/lib/utils";
-import type { CouncilCandidate } from "@/types/council-candidate";
+import { CouncilCandidateRow } from "@/components/shared/CouncilCandidateRow";
 
 /*
  * Chức danh trong hội đồng — PHẢI khớp `review-board/CreateCouncilSheet` và các chỗ BE so chuỗi:
@@ -103,7 +101,7 @@ export function AddCouncilMemberDialog({ open, onOpenChange, councilId }: AddCou
                       // cũng chặn, đây chỉ để khỏi bấm vào rồi ăn lỗi.
                       disabled={c.hasConflictOfInterest || c.alreadyInCouncil}
                     >
-                      <CandidateRow candidate={c} showTrack={data?.trackId != null} />
+                      <CouncilCandidateRow candidate={c} showTrack={data?.trackId != null} />
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -202,51 +200,5 @@ export function AddCouncilMemberDialog({ open, onOpenChange, councilId }: AddCou
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
-}
-
-/** Một dòng ứng viên: tên + học hàm, kèm cờ cho biết vì sao nên (hoặc không thể) chọn. */
-function CandidateRow({ candidate, showTrack }: { candidate: CouncilCandidate; showTrack: boolean }) {
-  const { t } = useTranslation();
-  const blocked = candidate.hasConflictOfInterest || candidate.alreadyInCouncil;
-
-  return (
-    <span className="flex w-full flex-wrap items-center gap-x-2 gap-y-0.5">
-      <span className={cn("font-medium", blocked && "text-muted-foreground")}>
-        {candidate.fullName}
-      </span>
-      {candidate.academicTitle && (
-        <span className="text-xs text-muted-foreground">{candidate.academicTitle}</span>
-      )}
-
-      {candidate.hasConflictOfInterest ? (
-        <Badge variant="destructive" className="gap-1">
-          <Ban className="size-3" />
-          {t("staff.flagCoi")}
-        </Badge>
-      ) : candidate.alreadyInCouncil ? (
-        <Badge variant="secondary">{t("staff.flagAlreadyIn")}</Badge>
-      ) : showTrack && candidate.matchesTrack ? (
-        <Badge variant="secondary" className="gap-1 text-success">
-          <CircleCheck className="size-3" />
-          {t("staff.flagOnTrack")}
-        </Badge>
-      ) : showTrack && candidate.expertiseUnknown ? (
-        <Badge variant="outline" className="gap-1 text-muted-foreground">
-          <CircleHelp className="size-3" />
-          {t("staff.flagUnknownTrack")}
-        </Badge>
-      ) : showTrack ? (
-        <Badge variant="outline" className="text-muted-foreground">
-          {t("staff.flagOffTrack")}
-        </Badge>
-      ) : null}
-
-      {candidate.activeCouncilCount > 0 && !blocked && (
-        <span className="text-xs text-muted-foreground">
-          {t("staff.flagBusy", { n: candidate.activeCouncilCount })}
-        </span>
-      )}
-    </span>
   );
 }

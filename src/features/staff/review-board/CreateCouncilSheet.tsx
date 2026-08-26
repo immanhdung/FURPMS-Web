@@ -1,14 +1,15 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Plus, X } from "lucide-react";
+import { AlertTriangle, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 import { FormSheet } from "@/components/shared/FormSheet";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useUsersQuery } from "@/hooks/useUsers";
+import { Textarea } from "@/components/ui/textarea";
+import { CouncilCandidateRow } from "@/components/shared/CouncilCandidateRow";
 import { useCreateCouncilPackageMutation, useReviewBoardQuery } from "@/hooks/useReviewBoard";
+import { useCouncilCandidatesQuery } from "@/hooks/useCouncilCandidates";
 import type { CouncilPackageMember } from "@/types/review-board";
-import { eligibleCouncilCandidates } from "@/utils/council-eligibility";
 
 // Chuỗi role KHỚP CHÍNH XÁC với BE (check "Chair"/"Secretary") — KHÔNG dùng "Chairman".
 const ROLES = ["Chair", "Secretary", "Member", "Opponent"];
@@ -30,25 +31,37 @@ const emptyRow = (): CouncilPackageMember => ({ userId: "", memberRole: "Member"
  */
 export function CreateCouncilSheet({ open, onOpenChange, cycleId, trackId, roundId, roundNumber }: CreateCouncilSheetProps) {
   const { t } = useTranslation();
-  const { data: users } = useUsersQuery();
   const { data: board } = useReviewBoardQuery(cycleId, trackId);
+  const { data: candidateData } = useCouncilCandidatesQuery({ trackId }, open);
   const createMutation = useCreateCouncilPackageMutation(cycleId, trackId);
 
-  // Danh sách chọn ủy viên: chỉ người đủ tư cách (giảng viên/hội đồng), trừ chủ nhiệm những đề tài
-  // ĐANG NẰM TRONG VÒNG này — hội đồng lập ra là để chấm đúng nhóm đề tài đó (COI, rule #5).
-  // Trước 18/08 chỗ này đổ thẳng toàn bộ `users`, nên Staff thấy cả tài khoản quản trị lẫn chính
-  // chủ nhiệm đề tài, chọn xong mới bị BE trả lỗi.
-  const roundPiIds = (board?.rounds ?? [])
-    .filter((r) => r.id === roundId)
-    .flatMap((r) => r.projects.map((p) => p.piUserId))
-    .filter(Boolean);
-  const candidates = eligibleCouncilCandidates(users, roundPiIds);
+  // Danh sách chọn ủy viên: xếp hạng theo chuyên môn (QĐ543 Điều 8.2, `GET /api/councils/candidates`
+  // đã tự lọc vai Giảng viên/Hội đồng), trừ chủ nhiệm những đề tài ĐANG NẰM TRONG VÒNG này — hội
+  // đồng lập ra là để chấm đúng nhóm đề tài đó (COI, rule #5). Endpoint không biết trước nhóm đề
+  // tài này (chưa có councilId lẫn projectId cụ thể lúc tạo mới), nên COI theo vòng vẫn lọc ở đây.
+  const roundPiIds = new Set(
+    (board?.rounds ?? [])
+      .filter((r) => r.id === roundId)
+      .flatMap((r) => r.projects.map((p) => p.piUserId))
+      .filter(Boolean)
+  );
+  const candidates = (candidateData?.candidates ?? []).filter((c) => !roundPiIds.has(c.userId));
+  const trackName = candidateData?.trackName ?? null;
 
   const [rows, setRows] = useState<CouncilPackageMember[]>(() => [
     { userId: "", memberRole: "Chair", isExternal: false },
     { userId: "", memberRole: "Secretary", isExternal: false },
     { userId: "", memberRole: "Member", isExternal: false },
   ]);
+
+  // Ngoài lĩnh vực (khác ngành hoặc chưa khai gì) cần Phòng QLKH ghi rõ lý do trước khi bấm tạo —
+  // cùng luật với `AddCouncilMemberDialog` (thêm 1 người vào hội đồng có sẵn), chỉ khác đây phải
+  // theo dõi lý do cho TỪNG dòng vì tạo cả gói nhiều người một lúc.
+  const rowNeedsOverride = (row: CouncilPackageMember) => {
+    const selected = candidates.find((c) => c.userId === row.userId);
+    return Boolean(selected && !selected.matchesTrack && trackName != null);
+  };
+  const hasMissingNote = rows.some((r) => rowNeedsOverride(r) && !r.expertiseNote?.trim());
 
   // Sao chép thành viên: gom mọi hội đồng đã có (kèm thành viên) của lĩnh vực này — ví dụ hội đồng
   // vòng Xét duyệt → clone sang vòng Nghiệm thu khỏi gõ lại (rule #16: 2 hội đồng riêng nhưng đỡ nhập).
@@ -89,9 +102,21 @@ export function CreateCouncilSheet({ open, onOpenChange, cycleId, trackId, round
     // 1 người chỉ 1 vị trí (khớp validate BE) — báo sớm thay vì để BE trả 400.
     const ids = members.map((m) => m.userId);
     if (new Set(ids).size !== ids.length) return toast.error(t("reviewBoard.duplicateMember"));
+    if (hasMissingNote) return toast.error(t("staff.expertiseNoteRequired"));
+
+    const payloadMembers = members.map((m) => {
+      const needsOverride = rowNeedsOverride(m);
+      return {
+        userId: m.userId,
+        memberRole: m.memberRole,
+        isExternal: m.isExternal,
+        acceptWithoutExpertise: needsOverride,
+        expertiseNote: needsOverride ? m.expertiseNote?.trim() : undefined,
+      };
+    });
 
     createMutation.mutate(
-      { roundId, payload: { projectIds: [], members } },
+      { roundId, payload: { projectIds: [], members: payloadMembers } },
       { onSuccess: () => { setRows([emptyRow()]); onOpenChange(false); } }
     );
   };
@@ -137,46 +162,83 @@ export function CreateCouncilSheet({ open, onOpenChange, cycleId, trackId, round
         <p className="mb-2 text-xs text-muted-foreground">{t("reviewBoard.needChairSecretaryHint")}</p>
 
         <div className="space-y-2">
-          {rows.map((row, index) => (
-            <div key={index} className="flex items-center gap-2">
-              <Select value={row.userId || undefined} onValueChange={(v) => updateRow(index, { userId: v })}>
-                <SelectTrigger className="flex-1">
-                  <SelectValue placeholder={t("reviewBoard.selectReviewer")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {candidates.map((u) => (
-                    <SelectItem key={u.id} value={u.id}>
-                      {u.fullName}
-                    </SelectItem>
-                  ))}
-                  {candidates.length === 0 && (
-                    <p className="px-2 py-3 text-xs text-muted-foreground">{t("reviewBoard.noEligibleReviewer")}</p>
-                  )}
-                </SelectContent>
-              </Select>
-              <Select value={row.memberRole} onValueChange={(v) => updateRow(index, { memberRole: v })}>
-                <SelectTrigger className="w-32 shrink-0">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {ROLES.map((r) => (
-                    <SelectItem key={r} value={r}>
-                      {t(`reviewBoard.role.${r}`)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                aria-label={t("common.remove")}
-                onClick={() => setRows((prev) => prev.filter((_, i) => i !== index))}
-              >
-                <X />
-              </Button>
-            </div>
-          ))}
+          {rows.map((row, index) => {
+            const selected = candidates.find((c) => c.userId === row.userId);
+            const needsOverride = rowNeedsOverride(row);
+
+            return (
+              <div key={index} className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Select value={row.userId || undefined} onValueChange={(v) => updateRow(index, { userId: v, expertiseNote: "" })}>
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder={t("reviewBoard.selectReviewer")}>
+                        {selected?.fullName}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {candidates.map((c) => (
+                        <SelectItem
+                          key={c.userId}
+                          value={c.userId}
+                          disabled={c.hasConflictOfInterest || c.alreadyInCouncil}
+                        >
+                          <CouncilCandidateRow candidate={c} showTrack={trackName != null} />
+                        </SelectItem>
+                      ))}
+                      {candidates.length === 0 && (
+                        <p className="px-2 py-3 text-xs text-muted-foreground">{t("reviewBoard.noEligibleReviewer")}</p>
+                      )}
+                    </SelectContent>
+                  </Select>
+                  <Select value={row.memberRole} onValueChange={(v) => updateRow(index, { memberRole: v })}>
+                    <SelectTrigger className="w-32 shrink-0">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ROLES.map((r) => (
+                        <SelectItem key={r} value={r}>
+                          {t(`reviewBoard.role.${r}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label={t("common.remove")}
+                    onClick={() => setRows((prev) => prev.filter((_, i) => i !== index))}
+                  >
+                    <X />
+                  </Button>
+                </div>
+
+                {/* Ngoài lĩnh vực → cảnh báo + bắt ghi lý do, cùng luật với AddCouncilMemberDialog.
+                    KHÔNG khoá cứng: có ca cần mời chuyên gia liên ngành. */}
+                {needsOverride && selected && (
+                  <div className="rounded-lg border border-warning bg-warning/10 p-3">
+                    <p className="flex items-start gap-2 text-sm font-medium text-foreground">
+                      <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
+                      <span>
+                        {selected.expertiseUnknown
+                          ? t("staff.expertiseUnknownWarn", { name: selected.fullName })
+                          : t("staff.expertiseMismatchWarn", { name: selected.fullName, track: trackName ?? "" })}
+                      </span>
+                    </p>
+                    <p className="mt-1.5 pl-6 text-xs text-muted-foreground">{t("staff.expertiseHint")}</p>
+                    <div className="mt-2 pl-6">
+                      <Textarea
+                        rows={2}
+                        value={row.expertiseNote ?? ""}
+                        onChange={(e) => updateRow(index, { expertiseNote: e.target.value })}
+                        placeholder={t("staff.expertiseNotePlaceholder")}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </FormSheet>

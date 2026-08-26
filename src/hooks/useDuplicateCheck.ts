@@ -12,6 +12,19 @@ export function useDuplicateCheckQuery(proposalId: string | null) {
   });
 }
 
+/**
+ * Cờ trùng lặp cho cả một trang danh sách — gọi MỘT lần cho toàn bộ id đang hiện, không phải một
+ * lần cho mỗi dòng. `enabled` mặc định false vì chỉ Staff/Admin cần, và chỉ khi danh sách đã có.
+ */
+export function useDuplicateFlagsQuery(proposalIds: string[], enabled: boolean) {
+  return useQuery({
+    queryKey: [...queryKeys.duplicateCheck.all(), "flags", proposalIds],
+    queryFn: () => duplicateCheckService.flags(proposalIds),
+    enabled: enabled && proposalIds.length > 0,
+    staleTime: 60_000,
+  });
+}
+
 export function useExplainDuplicateMutation(proposalId: string) {
   const qc = useQueryClient();
   return useMutation({

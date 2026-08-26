@@ -13,6 +13,8 @@ export interface ProposalBudgetItem {
 
 export interface ProposalDetail {
   id: string;
+  /** Đề tài mà đề cương này thuộc về — cần để mở hồ sơ quyết định, dòng thời gian, ngân sách của đề tài. */
+  projectId?: string | null;
   cycleId?: number | null;
   orderId?: number | null;
   trackId?: string | null;

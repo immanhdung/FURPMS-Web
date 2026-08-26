@@ -22,6 +22,7 @@ import { SubmitProposalDialog } from "@/features/pi/proposals/SubmitProposalDial
 import { ExpectedProductsCard } from "@/features/pi/proposals/ExpectedProductsCard";
 import { ProposalDocumentsCard } from "@/features/pi/proposals/ProposalDocumentsCard";
 import { ChangeRequestsPanel } from "@/features/pi/proposals/ChangeRequestsPanel";
+import { DuplicateVerdictCard } from "@/features/pi/proposals/DuplicateVerdictCard";
 import { ProposalExportMenu, makeSlug } from "@/features/pi/proposals/ProposalExportMenu";
 import { PROPOSAL_STATUS } from "@/constants/statuses";
 import { ROUTES } from "@/constants/routes";
@@ -109,6 +110,9 @@ export function ProposalDetailPage() {
       <div className="rounded-xl border border-border bg-card/95 p-4 shadow-soft-xs">
         <ProposalStatusTimeline status={status} />
       </div>
+
+      {/* Chỉ đề cương ĐÃ NỘP mới có gì để đối chiếu — bản nháp chưa vào kho rà trùng lặp. */}
+      {!isDraft && <DuplicateVerdictCard proposalId={proposal.id} />}
 
       <ProposalSummaryView data={proposal} cycleName={cycleName} trackName={trackName} researchTypeName={researchTypeName} />
 

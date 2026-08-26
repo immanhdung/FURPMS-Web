@@ -38,7 +38,15 @@ export function useOpenRoundMutation(proposalId: string) {
   });
 }
 
-export function useSetRoundDeadlineMutation(proposalId: string) {
+/**
+ * Đặt/dời hạn chấm của một vòng.
+ *
+ * `invalidateKeys` mặc định làm mới đúng danh sách vòng của MỘT đề cương (`ProposalReviewWorkspace`
+ * gọi kiểu này). Màn "Hội đồng & Chấm" chấm cả một track cùng lúc nên không có `proposalId` — nó
+ * truyền thẳng `queryKeys.reviewBoard.board(cycleId, trackId)` để làm mới đúng dữ liệu đang xem,
+ * thay vì phải giả một `proposalId` không có ý nghĩa gì ở màn đó.
+ */
+export function useSetRoundDeadlineMutation(invalidateKeys: readonly (readonly unknown[])[]) {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
   return useMutation({
@@ -46,7 +54,7 @@ export function useSetRoundDeadlineMutation(proposalId: string) {
       reviewRoundService.setDeadline(roundId, payload),
     onSuccess: () => {
       toast.success(t("roundDeadline.saved"));
-      queryClient.invalidateQueries({ queryKey: queryKeys.reviewRounds.list(proposalId) });
+      invalidateKeys.forEach((queryKey) => queryClient.invalidateQueries({ queryKey }));
     },
     // Câu lỗi của BE đã nêu rõ vướng gì (vd "đã có hạn — dời hạn thì phải ghi rõ lý do"),
     // hiện nguyên văn thay vì nuốt đi rồi in câu chung chung.

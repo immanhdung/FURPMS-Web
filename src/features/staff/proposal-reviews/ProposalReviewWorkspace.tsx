@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, ExternalLink, FileText, Gavel, Route, ScanSearch } from "lucide-react";
+import { ArrowLeft, ExternalLink, FileText, Gavel, Route, ScanSearch, ScrollText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DuplicateCheckPanel } from "@/components/shared/DuplicateCheckPanel";
+import { DecisionDossierPanel } from "@/components/shared/DecisionDossierPanel";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { PageLoader } from "@/components/shared/PageLoader";
 import { ErrorState } from "@/components/shared/ErrorState";
@@ -20,6 +21,7 @@ import { ExpectedProductsCard } from "@/features/pi/proposals/ExpectedProductsCa
 import { ProposalDocumentViewer } from "@/features/reviewer/proposal-review/ProposalDocumentViewer";
 import { ContractMilestoneTimeline } from "@/features/staff/contracts/ContractMilestoneTimeline";
 import { RoundTimeline } from "@/features/staff/proposal-reviews/RoundTimeline";
+import { queryKeys } from "@/services/queryKeys";
 import { SetRoundDeadlineDialog } from "@/features/staff/proposal-reviews/SetRoundDeadlineDialog";
 import type { ReviewRound } from "@/types/review-round";
 import { ROUTES } from "@/constants/routes";
@@ -110,6 +112,10 @@ export function ProposalReviewWorkspace() {
             <ScanSearch className="size-3.5" />
             {t("staff.duplicateTab")}
           </TabsTrigger>
+          <TabsTrigger value="decisions">
+            <ScrollText className="size-3.5" />
+            {t("staff.decisionsTab")}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="contents" className="space-y-4">
@@ -135,6 +141,13 @@ export function ProposalReviewWorkspace() {
             xếp đề tài vào vòng chấm, chứ không phải sau khi hội đồng đã họp. */}
         <TabsContent value="duplicate">
           <DuplicateCheckPanel proposalId={proposal.id} canReview />
+        </TabsContent>
+
+        {/* Hồ sơ quyết định gắn với ĐỀ TÀI, có từ mốc nộp đề cương — trước khi có hợp đồng rất
+            lâu. Trước đây panel này chỉ nằm trong tab hợp đồng, nên đề tài chưa qua vòng 1
+            (chưa có hợp đồng) không có chỗ nào xem được chuỗi quyết định của chính nó. */}
+        <TabsContent value="decisions">
+          <DecisionDossierPanel projectId={proposal.projectId ?? null} />
         </TabsContent>
 
         <TabsContent value="progress" className="space-y-6">
@@ -179,7 +192,7 @@ export function ProposalReviewWorkspace() {
       </Tabs>
       <SetRoundDeadlineDialog
         round={deadlineRound}
-        proposalId={proposalId}
+        invalidateKeys={[queryKeys.reviewRounds.list(proposalId)]}
         open={Boolean(deadlineRound)}
         onOpenChange={(open) => !open && setDeadlineRound(null)}
       />

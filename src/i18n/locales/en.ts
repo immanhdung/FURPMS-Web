@@ -861,6 +861,7 @@ export const en = {
     councilProjectCount: "{{count}} proposal(s)",
     countChips: "{{projects}} proposal(s) · {{councils}} council(s)",
     unassigned: "— Unassigned",
+    assignAnyway: "Assign anyway",
     manage: "Manage",
     councilManageDesc: "Council members and meetings.",
     addCouncil: "Add council",
@@ -1107,6 +1108,8 @@ export const en = {
     allTracks: "All fields",
     allCycles: "All cycles",
     proposalDetailSubtitle: "The submitted proposal and its implementation progress.",
+    decisionsTab: "Decision dossier",
+    duplicateColumn: "Duplicate",
     duplicateTab: "Duplicate check",
     proposalContentsTab: "Proposal contents",
     projectProgressTab: "Project progress",
@@ -2274,5 +2277,8 @@ export const en = {
       NEEDS_REVISION: "Needs revision to differentiate",
       DUPLICATE: "Duplicate",
     },
+  },
+  myProposal: {
+    duplicateVerdictTitle: "Duplicate check result",
   },
 } as const;

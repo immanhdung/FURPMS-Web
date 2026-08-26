@@ -13,7 +13,6 @@ export interface AppNotification {
   message: string;
   read: boolean;
   createdAt: string;
-  link?: string;
 }
 
 /** DTO trả về trực tiếp từ NotificationsController của backend. */

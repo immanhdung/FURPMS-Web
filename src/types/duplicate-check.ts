@@ -45,6 +45,12 @@ export interface ReviewDuplicatePayload {
   note?: string;
 }
 
+export interface DuplicateFlag {
+  indexed: boolean;
+  maxSeverity?: DuplicateSeverity | null;
+  maxSimilarity?: number | null;
+}
+
 export const DUPLICATE_VERDICTS: DuplicateVerdict[] = [
   "NOT_DUPLICATE",
   "NEEDS_REVISION",

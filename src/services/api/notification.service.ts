@@ -10,7 +10,6 @@ function toAppNotification(notification: NotificationDto): AppNotification {
     message: notification.message,
     read: notification.isRead,
     createdAt: notification.createdAt,
-    link: notification.actionUrl ?? undefined,
   };
 }
 

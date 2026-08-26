@@ -1,20 +1,30 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import type { TFunction } from "i18next";
-import { Eye } from "lucide-react";
+import { AlertTriangle, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { DataTableColumnHeader } from "@/components/tables/DataTableColumnHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { proposalTitle, formatDate } from "@/utils/format";
 import type { ProposalSummary } from "@/types/proposal-summary";
+import type { DuplicateFlag } from "@/types/duplicate-check";
 
 interface GetProposalColumnsOptions {
   t: TFunction;
   cycleNames: Record<number, string>;
   trackNames: Record<string, string>;
   onOpen: (proposal: ProposalSummary) => void;
+  /** Cờ trùng lặp theo id đề cương — cả trang tải một lần, xem `ProposalsTable`. */
+  duplicateFlags?: Record<string, DuplicateFlag>;
 }
 
-export function getProposalColumns({ t, cycleNames, trackNames, onOpen }: GetProposalColumnsOptions): ColumnDef<ProposalSummary>[] {
+export function getProposalColumns({
+  t,
+  cycleNames,
+  trackNames,
+  onOpen,
+  duplicateFlags,
+}: GetProposalColumnsOptions): ColumnDef<ProposalSummary>[] {
   return [
     {
       id: "title",
@@ -49,6 +59,26 @@ export function getProposalColumns({ t, cycleNames, trackNames, onOpen }: GetPro
       meta: { label: t("common.status") },
       header: ({ column }) => <DataTableColumnHeader column={column} title={t("common.status")} />,
       cell: ({ row }) => (row.original.status ? <StatusBadge status={row.original.status} /> : "-"),
+    },
+    {
+      id: "duplicateFlag",
+      meta: { label: t("staff.duplicateColumn") },
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t("staff.duplicateColumn")} />,
+      // Xếp theo mức nghiêm trọng để "cần xem trước" nổi lên đầu khi bấm sắp xếp cột này.
+      accessorFn: (row) => {
+        const sev = duplicateFlags?.[row.id]?.maxSeverity;
+        return sev === "HIGH" ? 2 : sev === "WARN" ? 1 : 0;
+      },
+      cell: ({ row }) => {
+        const flag = duplicateFlags?.[row.original.id];
+        if (!flag?.maxSeverity) return null;
+        return (
+          <Badge variant={flag.maxSeverity === "HIGH" ? "destructive" : "secondary"} className="gap-1">
+            <AlertTriangle className="size-3" />
+            {t(`duplicate.severity.${flag.maxSeverity}`)}
+          </Badge>
+        );
+      },
     },
     {
       accessorKey: "createdAt",

@@ -12,7 +12,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useSetRoundDeadlineMutation } from "@/hooks/useReviewRounds";
-import type { ReviewRound } from "@/types/review-round";
+
+/** Chỉ cần đúng ba trường này — dùng chung được cho cả `ReviewRound` lẫn `ReviewBoardRound`. */
+export interface DeadlineTargetRound {
+  id: string;
+  roundNumber: number;
+  scoringDeadline?: string | null;
+}
 
 /**
  * Đặt hoặc DỜI hạn chấm của một vòng.
@@ -27,17 +33,18 @@ import type { ReviewRound } from "@/types/review-round";
  */
 export function SetRoundDeadlineDialog({
   round,
-  proposalId,
+  invalidateKeys,
   open,
   onOpenChange,
 }: {
-  round: ReviewRound | null;
-  proposalId: string;
+  round: DeadlineTargetRound | null;
+  /** Xem chú thích ở `useSetRoundDeadlineMutation` — mỗi màn làm mới đúng dữ liệu nó đang xem. */
+  invalidateKeys: readonly (readonly unknown[])[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
   const { t } = useTranslation();
-  const mutation = useSetRoundDeadlineMutation(proposalId);
+  const mutation = useSetRoundDeadlineMutation(invalidateKeys);
 
   const [deadline, setDeadline] = useState("");
   const [reason, setReason] = useState("");
