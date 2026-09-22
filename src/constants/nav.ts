@@ -1,4 +1,5 @@
 import {
+  Sparkles,
   FilePenLine,
   Route,
   LayoutDashboard,
@@ -73,10 +74,9 @@ const PRIMARY_NAV_ITEMS: NavItem[] = [
   { labelKey: "nav.myAmendments", path: ROUTES.MY_AMENDMENTS, icon: FilePenLine, roles: [ROLES.FACULTY] },
   // PI xem tiến trình đề tài của chính mình — trước đây timeline chỉ có ở màn Staff.
   { labelKey: "nav.myTimeline", path: ROUTES.MY_TIMELINE, icon: Route, roles: [ROLES.FACULTY] },
-  // Tìm kiếm bằng AI: TẠM ẨN 17/08 — xem docs/README.md §A0.
-  // Lưu ý: chú thích dòng này cũng bỏ luôn ROUTE (bảng route sinh từ mảng này), nên gõ thẳng
-  // /ai-search cũng không vào được. Đúng ý "ẩn hẳn"; `SemanticSearchPage` vẫn còn trong mã nguồn.
-  // { labelKey: "nav.aiSearch", path: ROUTES.AI_SEARCH, icon: Sparkles, roles: [ROLES.FACULTY] },
+  // Tìm kiếm bằng AI: ẩn 17/08 vì chưa có endpoint BE — BẬT LẠI 22/09 khi POST /api/ai/search
+  // đã chạy thật (SemanticSearchService, dùng chung kho vector với rà trùng lặp).
+  { labelKey: "nav.aiSearch", path: ROUTES.AI_SEARCH, icon: Sparkles, roles: [ROLES.FACULTY] },
 
   // Review Committee
   { labelKey: "nav.dashboard", path: ROUTES.DASHBOARD, icon: LayoutDashboard, roles: [ROLES.REVIEW_COMMITTEE] },

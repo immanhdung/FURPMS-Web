@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AnimatePresence, motion } from "motion/react";
-import { FileText, Lightbulb, Loader2, Search, Sparkles } from "lucide-react";
+import { DatabaseZap, FileText, Lightbulb, Loader2, Search, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,6 +21,7 @@ export function SemanticSearchPage() {
   const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const searchMutation = useSemanticSearchMutation();
+  const result = searchMutation.data;
 
   const runSearch = (value: string) => {
     if (!value.trim()) return;
@@ -62,7 +63,7 @@ export function SemanticSearchPage() {
         </Button>
       </form>
 
-      {!searchMutation.data && !searchMutation.isPending && (
+      {!result && !searchMutation.isPending && (
         <div className="flex flex-wrap justify-center gap-1.5">
           {SUGGESTIONS.map((suggestion) => (
             <button
@@ -85,7 +86,7 @@ export function SemanticSearchPage() {
       )}
 
       <AnimatePresence mode="wait">
-        {searchMutation.data && !searchMutation.isPending && (
+        {result && !searchMutation.isPending && (
           <motion.div
             key="results"
             initial={{ opacity: 0 }}
@@ -93,12 +94,20 @@ export function SemanticSearchPage() {
             exit={{ opacity: 0 }}
             className="space-y-3"
           >
-            {searchMutation.data.length === 0 ? (
+            {result.indexedCount === 0 ? (
+              // Kho vector rỗng KHÔNG phải "không tìm thấy" — nói nhầm thì người dùng đổi câu hỏi
+              // mãi mà không bao giờ ra, rồi kết luận là hệ thống hỏng.
+              <EmptyState
+                icon={DatabaseZap}
+                title={t("aiSearch.notIndexed")}
+                description={t("aiSearch.notIndexedDesc")}
+              />
+            ) : result.hits.length === 0 ? (
               <EmptyState icon={Search} title={t("aiSearch.noMatches")} description={t("aiSearch.noMatchesDesc")} />
             ) : (
-              searchMutation.data.map((result, index) => (
+              result.hits.map((hit, index) => (
                 <motion.div
-                  key={result.id}
+                  key={hit.id}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.2, delay: index * 0.05 }}
@@ -108,28 +117,33 @@ export function SemanticSearchPage() {
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-start gap-2.5">
                           <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                            {result.type === "topic" ? <Lightbulb className="size-4" /> : <FileText className="size-4" />}
+                            {hit.type === "topic" ? <Lightbulb className="size-4" /> : <FileText className="size-4" />}
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-foreground">{result.title}</p>
-                            <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{result.snippet}</p>
+                            <p className="text-sm font-medium text-foreground">{hit.title}</p>
+                            <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{hit.snippet}</p>
+                            {(hit.projectCode || hit.piName || hit.cycleYear) && (
+                              <p className="mt-1 text-xs text-muted-foreground/80">
+                                {[hit.projectCode, hit.piName, hit.cycleYear].filter(Boolean).join(" · ")}
+                              </p>
+                            )}
                           </div>
                         </div>
                         <Badge variant="outline" className="shrink-0 capitalize">
-                          {result.type}
+                          {hit.type}
                         </Badge>
                       </div>
 
                       <div className="flex items-center gap-2 pl-10.5">
                         <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
                           <motion.div
-                            className={`h-full rounded-full ${relevanceColor(result.relevance)}`}
+                            className={`h-full rounded-full ${relevanceColor(hit.relevance)}`}
                             initial={{ width: 0 }}
-                            animate={{ width: `${result.relevance}%` }}
+                            animate={{ width: `${hit.relevance}%` }}
                             transition={{ duration: 0.4, delay: index * 0.05 }}
                           />
                         </div>
-                        <span className="text-xs font-medium text-muted-foreground">{t("aiSearch.match", { score: result.relevance })}</span>
+                        <span className="text-xs font-medium text-muted-foreground">{t("aiSearch.match", { score: hit.relevance })}</span>
                       </div>
                     </CardContent>
                   </Card>

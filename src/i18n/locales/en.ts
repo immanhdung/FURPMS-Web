@@ -1239,9 +1239,11 @@ export const en = {
   },
   aiSearch: {
     title: "AI Semantic Search",
-    subtitle: "Search across proposals and imported research topics by meaning, not just keywords.",
+    subtitle: "Search submitted proposals by meaning, not just keywords.",
     placeholder: "Describe what you're looking for...",
     search: "Search",
+    notIndexed: "Nothing indexed yet",
+    notIndexedDesc: "No proposal has been indexed for semantic search yet. Indexing runs in the background once proposals are submitted.",
     noMatches: "No matches found",
     noMatchesDesc: "Try a different search query.",
     match: "{{score}}% match",

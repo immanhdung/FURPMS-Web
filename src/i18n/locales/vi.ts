@@ -1251,9 +1251,11 @@ export const vi = {
   },
   aiSearch: {
     title: "Tìm kiếm ngữ nghĩa AI",
-    subtitle: "Tìm trong đề cương và danh mục đề tài đã nhập theo ý nghĩa, không chỉ từ khoá.",
+    subtitle: "Tìm trong đề cương đã nộp theo ý nghĩa, không chỉ từ khoá.",
     placeholder: "Mô tả điều bạn đang tìm...",
     search: "Tìm kiếm",
+    notIndexed: "Kho tìm kiếm còn trống",
+    notIndexedDesc: "Chưa đề cương nào được vector hoá. Việc này chạy nền sau khi có đề cương được nộp.",
     noMatches: "Không tìm thấy kết quả",
     noMatchesDesc: "Thử một truy vấn khác.",
     match: "{{score}}% khớp",

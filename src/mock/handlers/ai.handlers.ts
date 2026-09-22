@@ -4,7 +4,7 @@ import { SAMPLE_AI_EXTRACTIONS } from "@/mock/data/ai-extractions";
 import { SAMPLE_FEEDBACK, SAMPLE_SEARCH_RESULTS, SAMPLE_SUMMARIES } from "@/mock/data/ai-tools";
 import type { ApiResponse } from "@/types/common";
 import type { AiExtractionResult } from "@/types/ai-extraction";
-import type { AiFeedbackItem, SemanticSearchResult, SummaryResult } from "@/types/ai-tools";
+import type { AiFeedbackItem, SemanticSearchResponse, SummaryResult } from "@/types/ai-tools";
 
 export const aiHandlers = [
   http.post(`${API_BASE_URL}/ai/extract`, async () => {
@@ -23,9 +23,15 @@ export const aiHandlers = [
           (item) => item.title.toLowerCase().includes(query) || item.snippet.toLowerCase().includes(query)
         )
       : SAMPLE_SEARCH_RESULTS;
-    const response: ApiResponse<SemanticSearchResult[]> = {
+    const hits = results.length > 0 ? results : SAMPLE_SEARCH_RESULTS;
+    const response: ApiResponse<SemanticSearchResponse> = {
       success: true,
-      data: results.length > 0 ? results : SAMPLE_SEARCH_RESULTS,
+      data: {
+        query: body.query ?? "",
+        indexedCount: SAMPLE_SEARCH_RESULTS.length,
+        modelUsed: "mock-embedding",
+        hits,
+      },
     };
     return HttpResponse.json(response);
   }),

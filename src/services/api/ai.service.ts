@@ -6,7 +6,7 @@ import type {
   AiFeedbackItem,
   AiScoreSuggestion,
   ReviewKit,
-  SemanticSearchResult,
+  SemanticSearchResponse,
   SummaryResult,
 } from "@/types/ai-tools";
 
@@ -32,9 +32,16 @@ export const aiService = {
       .get<ApiResponse<SummaryResult>>(`/proposals/${proposalId}/summary`)
       .then((res) => res.data.data),
 
-  semanticSearch: (query: string) =>
+  /**
+   * Tìm đề cương theo ý nghĩa. Dùng chung kho vector với rà trùng lặp nên không tốn thêm quota
+   * vector hoá — mỗi lần tìm chỉ tốn một lần nhúng câu hỏi.
+   *
+   * Trả về CẢ `indexedCount`, không chỉ danh sách: kho rỗng và tìm không ra là hai chuyện khác
+   * nhau, giao diện phải phân biệt được.
+   */
+  semanticSearch: (query: string, topK?: number) =>
     axiosClient
-      .post<ApiResponse<SemanticSearchResult[]>>("/ai/search", { query }, { timeout: AI_TIMEOUT_MS })
+      .post<ApiResponse<SemanticSearchResponse>>("/ai/search", { query, topK }, { timeout: AI_TIMEOUT_MS })
       .then((res) => res.data.data),
 
 

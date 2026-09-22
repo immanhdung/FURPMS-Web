@@ -21,11 +21,40 @@ export interface SummaryResult {
 }
 
 export interface SemanticSearchResult {
+  /** Id đề cương — dùng để mở chi tiết. */
   id: string;
   title: string;
   snippet: string;
+  /**
+   * Độ liên quan trên thang 0–100 (cosine × 100).
+   *
+   * KHÔNG phải xác suất, và không so sánh được giữa hai câu hỏi khác nhau — chỉ để xếp thứ tự
+   * và tô màu trong cùng một lần tìm.
+   */
   relevance: number;
+  /**
+   * Hiện chỉ có `"proposal"`. `"topic"` (đơn đặt hàng nghiên cứu) CHƯA được vector hoá —
+   * `EmbeddingWorker` bên BE chỉ xếp hàng đề cương đã nộp. Giữ lại trong kiểu để khỏi phải sửa
+   * giao diện khi mở rộng, nhưng đừng hứa trong tài liệu khi BE chưa làm.
+   */
   type: "proposal" | "topic";
+  projectCode?: string | null;
+  piName?: string | null;
+  cycleYear?: number | null;
+}
+
+export interface SemanticSearchResponse {
+  query: string;
+  /**
+   * Số đề cương đang có vector trong kho.
+   *
+   * `0` nghĩa là **chưa có gì để tìm**, khác hẳn "tìm không ra" — giao diện phải nói khác nhau,
+   * nếu không người dùng tưởng hệ thống hỏng.
+   */
+  indexedCount: number;
+  /** Model đã sinh ra các vector đang so. */
+  modelUsed?: string | null;
+  hits: SemanticSearchResult[];
 }
 
 /*
