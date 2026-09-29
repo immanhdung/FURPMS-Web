@@ -26,12 +26,21 @@ export function useCreateUserMutation() {
 
   return useMutation({
     mutationFn: (payload: CreateUserPayload) => userService.create(payload),
-    onSuccess: () => {
-      toast.success("User created successfully.");
+    onSuccess: (_user, payload) => {
+      toast.success(i18n.t("users.created", { email: payload.email }));
       queryClient.invalidateQueries({ queryKey: queryKeys.users.all() });
     },
     onError: (error: ApiError) => {
-      toast.error(error.message || "Unable to create user.");
+      // status 0 = trình duyệt hết 15 giây chờ, KHÔNG có nghĩa máy chủ thất bại: tài khoản được ghi
+      // DB trước rồi mới gửi thư chào mừng. Báo "không kết nối được" ở đây khiến admin bấm lại và
+      // ăn ngay "Đã có tài khoản dùng email…" (gặp thật 29/09). Nói thẳng là có thể đã tạo, và
+      // tải lại danh sách để admin nhìn thấy.
+      if (error.status === 0) {
+        toast.warning(i18n.t("users.createMaybeDone"), { duration: 10_000 });
+        queryClient.invalidateQueries({ queryKey: queryKeys.users.all() });
+        return;
+      }
+      toast.error(error.message || i18n.t("users.createFailed"));
     },
   });
 }
@@ -42,11 +51,11 @@ export function useUpdateUserMutation() {
   return useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: UpdateUserPayload }) => userService.update(id, payload),
     onSuccess: () => {
-      toast.success("User updated successfully.");
+      toast.success(i18n.t("users.updated"));
       queryClient.invalidateQueries({ queryKey: queryKeys.users.all() });
     },
     onError: (error: ApiError) => {
-      toast.error(error.message || "Unable to update user.");
+      toast.error(error.message || i18n.t("users.updateFailed"));
     },
   });
 }

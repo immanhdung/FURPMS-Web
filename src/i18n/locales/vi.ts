@@ -2003,6 +2003,14 @@ export const vi = {
       "{{name}} sẽ biến mất khỏi mọi danh sách. Hồ sơ đã ký — đề tài, hội đồng, điểm chấm — vẫn giữ nguyên tên. Không hoàn tác được từ giao diện.",
     deleted: "Đã xoá người dùng.",
     deleteFailed: "Không xoá được người dùng.",
+    created: "Đã tạo tài khoản {{email}}.",
+    createFailed: "Không tạo được tài khoản.",
+    createMaybeDone:
+      "Máy chủ phản hồi chậm nên chưa rõ kết quả — tài khoản CÓ THỂ đã được tạo. Xem lại danh sách người dùng trước khi bấm tạo lần nữa.",
+    updated: "Đã lưu thông tin người dùng.",
+    updateFailed: "Không lưu được thông tin người dùng.",
+    showPassword: "Hiện mật khẩu",
+    hidePassword: "Ẩn mật khẩu",
   },
   academicProfile: {
     title: "Lý lịch khoa học",

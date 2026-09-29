@@ -1985,6 +1985,14 @@ export const en = {
       "{{name}} will be removed from every list. Records already signed — proposals, councils, scores — keep their name. This cannot be undone from the interface.",
     deleted: "User deleted.",
     deleteFailed: "Unable to delete user.",
+    created: "Account {{email}} created.",
+    createFailed: "Unable to create user.",
+    createMaybeDone:
+      "The server responded slowly, so the result is unclear — the account MAY already exist. Check the user list before creating it again.",
+    updated: "User updated.",
+    updateFailed: "Unable to update user.",
+    showPassword: "Show password",
+    hidePassword: "Hide password",
   },
   academicProfile: {
     title: "Academic Profile (Scientific CV)",
