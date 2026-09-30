@@ -11,6 +11,7 @@ import { editUserSchema, type EditUserFormValues } from "@/features/admin/users/
 import { ACADEMIC_DEGREES } from "@/types/user";
 import type { AdminUser } from "@/types/user";
 import { ALL_ROLES, ROLE_ID_MAP } from "@/constants/roles";
+import { UnitSelect } from "@/features/admin/users/UnitSelect";
 
 interface EditUserSheetProps {
   open: boolean;
@@ -93,7 +94,11 @@ export function EditUserSheet({ open, onOpenChange, user }: EditUserSheetProps) 
         <label htmlFor="edit-department" className="mb-1.5 block text-sm font-medium text-foreground">
           {t("users.department")}
         </label>
-        <Input id="edit-department" {...register("department")} />
+        <Controller
+          control={control}
+          name="department"
+          render={({ field }) => <UnitSelect id="edit-department" value={field.value} onChange={field.onChange} />}
+        />
       </div>
 
       <div>

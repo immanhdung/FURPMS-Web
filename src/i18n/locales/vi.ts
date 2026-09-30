@@ -1988,6 +1988,8 @@ export const vi = {
     roles: "Vai trò",
     academicDegree: "Học vị",
     selectDegree: "Chọn học vị",
+    selectUnit: "Chọn đơn vị",
+    noUnits: "Chưa có đơn vị nào — thêm ở mục Đơn vị tổ chức trước.",
     temporaryPassword: "Mật khẩu tạm",
     lastLogin: "Đăng nhập gần nhất",
     filterAll: "Tất cả",

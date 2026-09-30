@@ -1970,6 +1970,8 @@ export const en = {
     roles: "Roles",
     academicDegree: "Academic degree",
     selectDegree: "Select degree",
+    selectUnit: "Select a unit",
+    noUnits: "No units yet — add one under Organizational units first.",
     temporaryPassword: "Temporary password",
     lastLogin: "Last login",
     filterAll: "All",
