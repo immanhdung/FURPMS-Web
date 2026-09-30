@@ -21,7 +21,7 @@ export function DocumentRepositoryPage() {
   const { t } = useTranslation();
   const { data, isLoading, isError, refetch, isRefetching } = useGlobalDocumentsQuery();
 
-  const documents = data?.items ?? [];
+  const documents = data ?? [];
 
   const columns = useMemo<ColumnDef<GlobalDocument>[]>(
     () => [
@@ -62,8 +62,15 @@ export function DocumentRepositoryPage() {
         ),
       },
       {
+        accessorKey: "principalInvestigatorName",
+        header: t("documents.pi"),
+        cell: ({ row }) => (
+          <span className="text-sm text-muted-foreground">{row.original.principalInvestigatorName ?? "—"}</span>
+        ),
+      },
+      {
         accessorKey: "fileSizeBytes",
-        header: "Size",
+        header: t("documents.size"),
         cell: ({ row }) => (
           <span className="text-sm text-muted-foreground">{formatBytes(row.original.fileSizeBytes)}</span>
         ),

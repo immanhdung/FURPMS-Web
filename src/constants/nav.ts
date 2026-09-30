@@ -1,5 +1,6 @@
 import {
   Sparkles,
+  FolderOpen,
   FilePenLine,
   Route,
   LayoutDashboard,
@@ -20,7 +21,6 @@ import {
   FileBarChart,
   FileCheck2,
   FileSignature,
-  // Sparkles,   // dùng lại khi mở lại "Tìm kiếm bằng AI"
   Mail,
   ClipboardCheck,
   // Star,      // dùng lại khi mở lại "Chấm điểm"
@@ -59,8 +59,9 @@ const PRIMARY_NAV_ITEMS: NavItem[] = [
   { labelKey: "nav.assignments", path: ROUTES.ASSIGNMENTS, icon: UserCheck, roles: [ROLES.STAFF], hidden: true },
   { labelKey: "nav.contracts", path: ROUTES.CONTRACTS, icon: FileSignature, roles: [ROLES.STAFF] },
   { labelKey: "nav.changeRequests", path: ROUTES.CHANGE_REQUESTS, icon: FileEdit, roles: [ROLES.STAFF] },
-  // Tạm ẩn: chưa dùng tới, để khỏi rối menu demo — route/page vẫn còn, bật lại chỉ cần bỏ comment.
-  // { labelKey: "nav.documents", path: ROUTES.DOCUMENTS, icon: FolderOpen, roles: [ROLES.STAFF, ROLES.ADMIN] },
+  // Kho tài liệu: ẩn từ 17/08 vì trang luôn trống (FE đọc `data.items` trong khi BE trả mảng).
+  // BẬT LẠI 30/09 sau khi sửa khớp dữ liệu — để trả lời "kho lưu trữ hồ sơ đề tài ở đâu".
+  { labelKey: "nav.documents", path: ROUTES.DOCUMENTS, icon: FolderOpen, roles: [ROLES.STAFF, ROLES.ADMIN] },
 
   // PI (Faculty)
   { labelKey: "nav.dashboard", path: ROUTES.DASHBOARD, icon: LayoutDashboard, roles: [ROLES.FACULTY] },

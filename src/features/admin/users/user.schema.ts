@@ -6,6 +6,7 @@ const baseUserFields = {
   department: z.string().optional(),
   academicDegree: z.number().int().optional(),
   roles: z.array(z.string()).min(1, "Pick at least one role."),
+  researchTrackIds: z.array(z.number()).optional(),
 };
 
 export const createUserSchema = z.object({

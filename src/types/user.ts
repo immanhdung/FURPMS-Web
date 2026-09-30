@@ -18,6 +18,8 @@ export interface AdminUser {
   avatarUrl?: string | null;
   createdAt?: string | null;
   lastLoginAt?: string | null;
+  /** Lĩnh vực chuyên môn (id `research_tracks`) — nguồn xét người chấm đúng ngành. */
+  researchTrackIds?: number[];
 }
 
 export interface CreateUserPayload {
@@ -28,6 +30,7 @@ export interface CreateUserPayload {
   academicDegree?: number;
   roles: number[];
   temporaryPassword: string;
+  researchTrackIds?: number[];
 }
 
 export interface UpdateUserPayload {
@@ -36,6 +39,8 @@ export interface UpdateUserPayload {
   department?: string;
   academicDegree?: number;
   roles: number[];
+  /** Bỏ trống (undefined) ⇒ BE giữ nguyên; mảng rỗng ⇒ xoá hết. */
+  researchTrackIds?: number[];
 }
 
 /**

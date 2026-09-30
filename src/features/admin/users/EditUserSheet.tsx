@@ -12,6 +12,7 @@ import { ACADEMIC_DEGREES } from "@/types/user";
 import type { AdminUser } from "@/types/user";
 import { ALL_ROLES, ROLE_ID_MAP } from "@/constants/roles";
 import { UnitSelect } from "@/features/admin/users/UnitSelect";
+import { TrackCheckboxes } from "@/features/admin/users/TrackCheckboxes";
 
 interface EditUserSheetProps {
   open: boolean;
@@ -31,7 +32,7 @@ export function EditUserSheet({ open, onOpenChange, user }: EditUserSheetProps) 
     formState: { errors },
   } = useForm<EditUserFormValues>({
     resolver: zodResolver(editUserSchema),
-    defaultValues: { fullName: "", phoneNumber: "", department: "", roles: [] },
+    defaultValues: { fullName: "", phoneNumber: "", department: "", roles: [], researchTrackIds: [] },
   });
 
   useEffect(() => {
@@ -43,6 +44,7 @@ export function EditUserSheet({ open, onOpenChange, user }: EditUserSheetProps) 
         // BE trả chuỗi ("Tiến sĩ") còn form chọn theo mã số — dò ngược qua nhãn.
         academicDegree: ACADEMIC_DEGREES.find((d) => d.label === user.academicDegree)?.value,
         roles: user.roles,
+        researchTrackIds: (user.researchTrackIds ?? []).map(Number),
       });
     }
   }, [user, reset]);
@@ -58,6 +60,7 @@ export function EditUserSheet({ open, onOpenChange, user }: EditUserSheetProps) 
           department: values.department || undefined,
           academicDegree: values.academicDegree,
           roles: values.roles.map((role) => ROLE_ID_MAP[role as keyof typeof ROLE_ID_MAP]),
+          researchTrackIds: values.researchTrackIds ?? [],
         },
       },
       { onSuccess: () => onOpenChange(false) }
@@ -150,6 +153,16 @@ export function EditUserSheet({ open, onOpenChange, user }: EditUserSheetProps) 
           )}
         />
         {errors.roles && <p className="mt-1 text-xs text-destructive">{errors.roles.message}</p>}
+      </div>
+
+      <div>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("users.researchTracks")}</label>
+        <p className="mb-2 text-xs text-muted-foreground">{t("users.researchTracksHint")}</p>
+        <Controller
+          control={control}
+          name="researchTrackIds"
+          render={({ field }) => <TrackCheckboxes value={field.value} onChange={field.onChange} />}
+        />
       </div>
     </FormSheet>
   );

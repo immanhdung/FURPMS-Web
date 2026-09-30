@@ -1,9 +1,8 @@
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Eye, EyeOff } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { FormSheet } from "@/components/shared/FormSheet";
+import { PasswordInput } from "@/components/shared/PasswordInput";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,6 +11,7 @@ import { createUserSchema, type CreateUserFormValues } from "@/features/admin/us
 import { ACADEMIC_DEGREES } from "@/types/user";
 import { ALL_ROLES, ROLE_ID_MAP } from "@/constants/roles";
 import { UnitSelect } from "@/features/admin/users/UnitSelect";
+import { TrackCheckboxes } from "@/features/admin/users/TrackCheckboxes";
 
 interface CreateUserSheetProps {
   open: boolean;
@@ -21,9 +21,6 @@ interface CreateUserSheetProps {
 export function CreateUserSheet({ open, onOpenChange }: CreateUserSheetProps) {
   const { t } = useTranslation();
   const createUserMutation = useCreateUserMutation();
-  // Mật khẩu tạm do admin tự đặt rồi báo lại cho người dùng — phải xem được mình vừa gõ gì,
-  // gõ nhầm một ký tự là người kia không đăng nhập nổi.
-  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -33,7 +30,7 @@ export function CreateUserSheet({ open, onOpenChange }: CreateUserSheetProps) {
     formState: { errors },
   } = useForm<CreateUserFormValues>({
     resolver: zodResolver(createUserSchema),
-    defaultValues: { email: "", fullName: "", phoneNumber: "", department: "", roles: [], temporaryPassword: "" },
+    defaultValues: { email: "", fullName: "", phoneNumber: "", department: "", roles: [], temporaryPassword: "", researchTrackIds: [] },
   });
 
   const onSubmit = (values: CreateUserFormValues) => {
@@ -45,12 +42,12 @@ export function CreateUserSheet({ open, onOpenChange }: CreateUserSheetProps) {
         department: values.department || undefined,
         academicDegree: values.academicDegree,
         roles: values.roles.map((role) => ROLE_ID_MAP[role as keyof typeof ROLE_ID_MAP]),
+          researchTrackIds: values.researchTrackIds ?? [],
         temporaryPassword: values.temporaryPassword,
       },
       {
         onSuccess: () => {
           reset();
-          setShowPassword(false);
           onOpenChange(false);
         },
       }
@@ -154,28 +151,25 @@ export function CreateUserSheet({ open, onOpenChange }: CreateUserSheetProps) {
       </div>
 
       <div>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("users.researchTracks")}</label>
+        <p className="mb-2 text-xs text-muted-foreground">{t("users.researchTracksHint")}</p>
+        <Controller
+          control={control}
+          name="researchTrackIds"
+          render={({ field }) => <TrackCheckboxes value={field.value} onChange={field.onChange} />}
+        />
+      </div>
+
+      <div>
         <label htmlFor="temporaryPassword" className="mb-1.5 block text-sm font-medium text-foreground">
           {t("users.temporaryPassword")}
         </label>
-        <div className="relative">
-          <Input
-            id="temporaryPassword"
-            type={showPassword ? "text" : "password"}
-            autoComplete="new-password"
-            className="pr-9"
-            aria-invalid={Boolean(errors.temporaryPassword)}
-            {...register("temporaryPassword")}
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword((prev) => !prev)}
-            className="absolute top-1/2 right-2.5 -translate-y-1/2 rounded-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            aria-label={showPassword ? t("users.hidePassword") : t("users.showPassword")}
-            title={showPassword ? t("users.hidePassword") : t("users.showPassword")}
-          >
-            {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-          </button>
-        </div>
+        <PasswordInput
+          id="temporaryPassword"
+          autoComplete="new-password"
+          aria-invalid={Boolean(errors.temporaryPassword)}
+          {...register("temporaryPassword")}
+        />
         {errors.temporaryPassword && (
           <p className="mt-1 text-xs text-destructive">{errors.temporaryPassword.message}</p>
         )}

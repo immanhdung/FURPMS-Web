@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
 import { KeyRound, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/shared/PasswordInput";
 import { Button } from "@/components/ui/button";
 import { useChangePasswordMutation } from "@/hooks/useAuth";
 import {
@@ -62,9 +62,8 @@ export function ChangePasswordPage() {
               <label htmlFor="currentPassword" className="mb-1.5 block text-sm font-medium text-foreground">
                 {t("auth.currentPassword")}
               </label>
-              <Input
+              <PasswordInput
                 id="currentPassword"
-                type="password"
                 autoComplete="current-password"
                 aria-invalid={Boolean(errors.currentPassword)}
                 disabled={changePasswordMutation.isPending}
@@ -79,9 +78,8 @@ export function ChangePasswordPage() {
               <label htmlFor="newPassword" className="mb-1.5 block text-sm font-medium text-foreground">
                 {t("auth.newPassword")}
               </label>
-              <Input
+              <PasswordInput
                 id="newPassword"
-                type="password"
                 autoComplete="new-password"
                 aria-invalid={Boolean(errors.newPassword)}
                 disabled={changePasswordMutation.isPending}
@@ -94,9 +92,8 @@ export function ChangePasswordPage() {
               <label htmlFor="confirmPassword" className="mb-1.5 block text-sm font-medium text-foreground">
                 {t("auth.confirmPassword")}
               </label>
-              <Input
+              <PasswordInput
                 id="confirmPassword"
-                type="password"
                 autoComplete="new-password"
                 aria-invalid={Boolean(errors.confirmPassword)}
                 disabled={changePasswordMutation.isPending}
