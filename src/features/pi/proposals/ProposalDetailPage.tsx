@@ -23,6 +23,7 @@ import { ExpectedProductsCard } from "@/features/pi/proposals/ExpectedProductsCa
 import { ProposalDocumentsCard } from "@/features/pi/proposals/ProposalDocumentsCard";
 import { ChangeRequestsPanel } from "@/features/pi/proposals/ChangeRequestsPanel";
 import { DuplicateVerdictCard } from "@/features/pi/proposals/DuplicateVerdictCard";
+import { ProjectTimelinePanel } from "@/features/staff/contracts/ProjectTimelinePanel";
 import { ProposalExportMenu, makeSlug } from "@/features/pi/proposals/ProposalExportMenu";
 import { PROPOSAL_STATUS } from "@/constants/statuses";
 import { ROUTES } from "@/constants/routes";
@@ -113,6 +114,17 @@ export function ProposalDetailPage() {
 
       {/* Chỉ đề cương ĐÃ NỘP mới có gì để đối chiếu — bản nháp chưa vào kho rà trùng lặp. */}
       {!isDraft && <DuplicateVerdictCard proposalId={proposal.id} />}
+
+      {/* Chủ nhiệm thấy trước cả lộ trình từ lúc vừa nộp: còn những bước gì, bước nào đang tới hạn. */}
+      {!isDraft && proposal.projectId && (
+        <section className="space-y-3 rounded-xl border border-border bg-card/95 p-4 shadow-soft-xs">
+          <div>
+            <h2 className="text-sm font-semibold text-foreground">{t("projectTimeline.sectionTitle")}</h2>
+            <p className="text-xs text-muted-foreground">{t("projectTimeline.sectionDesc")}</p>
+          </div>
+          <ProjectTimelinePanel projectId={proposal.projectId} />
+        </section>
+      )}
 
       <ProposalSummaryView data={proposal} cycleName={cycleName} trackName={trackName} researchTypeName={researchTypeName} />
 

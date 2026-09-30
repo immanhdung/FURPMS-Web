@@ -59,6 +59,9 @@ function StageRow({ stage, isLast }: { stage: ProjectStage; isLast: boolean }) {
   const { t } = useTranslation();
   const done = stage.status === "DONE";
   const overdue = stage.status === "OVERDUE";
+  // Bước chưa tới: vẽ mờ + viền đứt để phân biệt với bước đang chạy — người xem thấy ngay mình đang
+  // ở đâu trên lộ trình và còn những gì phía sau.
+  const planned = stage.status === "NOT_STARTED";
 
   return (
     <li className="relative flex gap-3 pb-4 last:pb-0">
@@ -70,13 +73,14 @@ function StageRow({ stage, isLast }: { stage: ProjectStage; isLast: boolean }) {
           "relative z-10 mt-1 flex size-3.5 shrink-0 items-center justify-center rounded-full border-2 bg-background",
           done && "border-success",
           overdue && "border-destructive",
-          !done && !overdue && "border-muted-foreground/40"
+          planned && "border-muted-foreground/25",
+          !done && !overdue && !planned && "border-primary"
         )}
       >
         {done && <CircleCheck className="size-3 text-success" />}
       </span>
 
-      <div className="min-w-0 flex-1 space-y-1">
+      <div className={cn("min-w-0 flex-1 space-y-1", planned && "opacity-60")}>
         <div className="flex flex-wrap items-center gap-2">
           <span className={cn("text-sm font-medium", overdue ? "text-destructive" : "text-foreground")}>
             {t(`projectTimeline.stage.${stage.code}`, { defaultValue: stage.code })}
@@ -85,6 +89,10 @@ function StageRow({ stage, isLast }: { stage: ProjectStage; isLast: boolean }) {
           {done ? (
             <span className="text-xs text-muted-foreground">
               {t("projectTimeline.doneOn", { date: formatDate(stage.actualDate) })}
+            </span>
+          ) : planned ? (
+            <span className="rounded-full border border-dashed border-border px-2 py-0.5 text-xs text-muted-foreground">
+              {t("projectTimeline.notStarted")}
             </span>
           ) : (
             <DeadlineBadge

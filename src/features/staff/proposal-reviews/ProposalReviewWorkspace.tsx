@@ -21,6 +21,7 @@ import { ExpectedProductsCard } from "@/features/pi/proposals/ExpectedProductsCa
 import { ProposalDocumentViewer } from "@/features/reviewer/proposal-review/ProposalDocumentViewer";
 import { ContractMilestoneTimeline } from "@/features/staff/contracts/ContractMilestoneTimeline";
 import { RoundTimeline } from "@/features/staff/proposal-reviews/RoundTimeline";
+import { ProjectTimelinePanel } from "@/features/staff/contracts/ProjectTimelinePanel";
 import { queryKeys } from "@/services/queryKeys";
 import { SetRoundDeadlineDialog } from "@/features/staff/proposal-reviews/SetRoundDeadlineDialog";
 import type { ReviewRound } from "@/types/review-round";
@@ -151,6 +152,16 @@ export function ProposalReviewWorkspace() {
         </TabsContent>
 
         <TabsContent value="progress" className="space-y-6">
+          {/* Lộ trình ĐẦY ĐỦ của đề tài, có ngay từ lúc nộp — trước 30/09 thanh tiến trình này chỉ
+              nằm trong chi tiết HỢP ĐỒNG nên đề tài chưa ký hợp đồng không có chỗ nào xem. */}
+          <section className="space-y-3">
+            <div>
+              <h2 className="text-sm font-medium text-foreground">{t("projectTimeline.sectionTitle")}</h2>
+              <p className="text-xs text-muted-foreground">{t("projectTimeline.sectionDesc")}</p>
+            </div>
+            <ProjectTimelinePanel projectId={proposal.projectId ?? null} />
+          </section>
+
           <section className="space-y-3">
             <h2 className="text-sm font-medium text-foreground">{t("staff.reviewProgressSection")}</h2>
             <RoundTimeline rounds={rounds ?? []} onSetDeadline={setDeadlineRound} />

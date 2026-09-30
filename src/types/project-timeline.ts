@@ -31,6 +31,8 @@ export interface ProjectStage {
   /** BE tính, âm = quá hạn. FE KHÔNG tự tính lại (xem chú thích ở DeadlineBadge). */
   daysLeft?: number | null;
   isExtended: boolean;
+  /** Bước CHƯA TỚI, BE hiện sẵn để thấy đủ lộ trình; `deadlineBasis` ghi điều kiện để nó mở ra. */
+  isPlanned?: boolean;
   entityType?: string | null;
   entityId?: string | null;
 }
