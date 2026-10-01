@@ -1,8 +1,8 @@
 import { useTranslation } from "react-i18next";
 import type { UseFormReturn } from "react-hook-form";
-import { Input } from "@/components/ui/input";
 import { useBudgetCategoriesQuery } from "@/hooks/useBudgetCategories";
 import { formatCurrency } from "@/utils/format";
+import { MoneyInput } from "@/components/shared/MoneyInput";
 import { cn } from "@/lib/utils";
 import type { ProposalWizardValues } from "@/features/pi/proposals/wizard/proposal-wizard.schema";
 
@@ -98,15 +98,12 @@ export function BudgetBreakdownTable({
                     {c.maxPercentage != null ? `${c.maxPercentage}%` : "—"}
                   </td>
                   <td className="px-3 py-2">
-                    <Input
+                    <MoneyInput
                       id={`budget-${c.code}`}
-                      type="number"
-                      min={0}
-                      step={1_000_000}
-                      className="text-right"
+                      className="text-right tabular-nums"
                       aria-invalid={over}
-                      value={amount || ""}
-                      onChange={(e) => setAmount(c.code, e.target.value)}
+                      value={amount}
+                      onValueChange={(digits) => setAmount(c.code, digits)}
                     />
                   </td>
                   <td className={cn("px-3 py-2 text-right", over ? "font-medium text-destructive" : "text-muted-foreground")}>

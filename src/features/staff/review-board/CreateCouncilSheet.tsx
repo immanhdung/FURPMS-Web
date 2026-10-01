@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { roundLabel } from "@/utils/review-round";
 import { useTranslation } from "react-i18next";
 import { AlertTriangle, Plus, X } from "lucide-react";
 import { toast } from "sonner";
@@ -70,7 +71,7 @@ export function CreateCouncilSheet({ open, onOpenChange, cycleId, trackId, round
       .filter((c) => c.members.length > 0 && c.id !== roundId)
       .map((c, ci) => ({
         id: c.id,
-        label: `${t("staff.round", { num: r.roundNumber })} · ${t(`reviewBoard.type.${r.roundType}`)}${
+        label: `${roundLabel(t, r, board?.rounds ?? [])}${
           r.councils.length > 1 ? ` (HĐ ${ci + 1})` : ""
         }`,
         members: c.members,

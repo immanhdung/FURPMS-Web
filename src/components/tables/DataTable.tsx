@@ -38,7 +38,30 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const { t } = useTranslation();
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  // Ẩn/hiện cột NHỚ qua lần tải lại (01/10) — trước đây bỏ cột "Mô tả" xong F5 là hiện lại. Khoá theo
+  // tên file xuất (mỗi bảng một tên); bảng không đặt tên thì không nhớ. Bọc try/catch: chế độ ẩn danh
+  // hoặc chặn bộ nhớ trình duyệt không được làm hỏng bảng.
+  const storageKey = exportFileName ? `furpms.table-columns.${exportFileName}` : null;
+  const [columnVisibility, setColumnVisibilityState] = useState<VisibilityState>(() => {
+    if (!storageKey) return {};
+    try {
+      return JSON.parse(localStorage.getItem(storageKey) ?? "{}") as VisibilityState;
+    } catch {
+      return {};
+    }
+  });
+  const setColumnVisibility = (updater: VisibilityState | ((old: VisibilityState) => VisibilityState)) =>
+    setColumnVisibilityState((old) => {
+      const next = typeof updater === "function" ? updater(old) : updater;
+      if (storageKey) {
+        try {
+          localStorage.setItem(storageKey, JSON.stringify(next));
+        } catch {
+          /* bộ nhớ trình duyệt bị chặn — vẫn ẩn/hiện được trong phiên này */
+        }
+      }
+      return next;
+    });
   const [globalFilter, setGlobalFilter] = useState("");
 
   const table = useReactTable({

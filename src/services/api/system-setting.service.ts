@@ -22,6 +22,12 @@ export const systemSettingService = {
       .get<ApiResponse<CouncilPolicy>>("/system-settings/council-policy")
       .then((res) => res.data.data),
 
+  /** Mặc định khi lập hợp đồng — đại diện Bên A đang cấu hình (Staff đọc được). */
+  contractDefaults: () =>
+    axiosClient
+      .get<ApiResponse<{ sideARepresentative: string }>>("/system-settings/contract-defaults")
+      .then((res) => res.data.data),
+
   update: (key: string, value: string) =>
     axiosClient.put<ApiResponse<SystemSetting>>(`/system-settings/${key}`, { value }).then((res) => res.data.data),
 };

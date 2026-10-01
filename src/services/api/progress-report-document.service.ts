@@ -13,11 +13,14 @@ export const progressReportDocumentService = {
       .get<ApiResponse<ProposalDocument[]>>(`/progress-reports/${reportId}/documents`)
       .then((res) => res.data.data),
 
-  upload: (reportId: string, file: File) => {
+  /** `kind = "minutes"`: biên bản họp Hội đồng đánh giá tiến độ (QĐ543 Điều 10.1) — chỉ Staff/Admin. */
+  upload: (reportId: string, file: File, kind?: "minutes") => {
     const form = new FormData();
     form.append("file", file);
     return axiosClient
-      .post<ApiResponse<ProposalDocument>>(`/progress-reports/${reportId}/documents`, form)
+      .post<ApiResponse<ProposalDocument>>(`/progress-reports/${reportId}/documents`, form, {
+        params: kind ? { kind } : undefined,
+      })
       .then((res) => res.data.data);
   },
 

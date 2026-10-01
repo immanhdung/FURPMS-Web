@@ -120,8 +120,10 @@ const PiMyTimelinePage = lazy(() =>
 const PiDeliverablesPage = lazy(() =>
   import("@/features/pi/deliverables/DeliverablesPage").then((m) => ({ default: m.DeliverablesPage }))
 );
+// 01/10: menu này nay là đơn BM07 chờ duyệt. Luồng "Yêu cầu thay đổi" cũ (duyệt xong không có tác
+// dụng) bỏ khỏi giao diện; PendingChangeRequestsPanel giữ lại file để đọc dữ liệu cũ nếu cần.
 const PendingChangeRequestsPage = lazy(() =>
-  import("@/features/staff/proposal-reviews/PendingChangeRequestsPanel").then((m) => ({ default: m.PendingChangeRequestsPanel }))
+  import("@/features/staff/amendments/PendingAmendmentsPage").then((m) => ({ default: m.PendingAmendmentsPage }))
 );
 const DocumentRepositoryPage = lazy(() =>
   import("@/features/staff/documents/DocumentRepositoryPage").then((m) => ({ default: m.DocumentRepositoryPage }))

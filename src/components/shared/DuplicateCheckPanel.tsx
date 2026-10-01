@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { LiteMarkdown } from "@/components/shared/LiteMarkdown";
 import { ErrorState } from "@/components/shared/ErrorState";
 import {
   useDuplicateCheckQuery,
@@ -46,6 +47,7 @@ export function DuplicateCheckPanel({
 
   const [verdict, setVerdict] = useState<DuplicateVerdict | undefined>();
   const [note, setNote] = useState("");
+  const [confirmReject, setConfirmReject] = useState(false);
 
   if (isError) return <ErrorState onRetry={() => refetch()} isRetrying={isRefetching} />;
   if (isLoading || !data) return <Skeleton className="h-56 w-full rounded-xl" />;
@@ -62,8 +64,9 @@ export function DuplicateCheckPanel({
   }
 
   const flagged = data.matches.filter((m) => m.severity !== "LOW");
-  // Kết luận "trùng" hoặc "cần sửa" phải kèm căn cứ — BE cũng chặn, đây chỉ để khỏi ăn lỗi.
-  const noteMissing = Boolean(verdict) && verdict !== "NOT_DUPLICATE" && !note.trim();
+  // Từ chối vì trùng phải kèm lý do (PI sẽ đọc) — BE cũng chặn, đây chỉ để khỏi ăn lỗi.
+  const noteMissing = verdict === "DUPLICATE" && !note.trim();
+  const save = () => verdict && reviewMutation.mutate({ verdict, note: note.trim() || undefined });
 
   return (
     <div className="space-y-4">
@@ -119,7 +122,7 @@ export function DuplicateCheckPanel({
             {data.explanationGeneratedAt && <span>· {formatDateTime(data.explanationGeneratedAt)}</span>}
           </p>
           {/* AI viết ra để người đọc, không phải để hệ thống hành động theo. */}
-          <p className="whitespace-pre-wrap text-sm text-foreground">{data.explanation}</p>
+          <LiteMarkdown text={data.explanation} className="space-y-1 text-sm text-foreground" />
         </div>
       )}
 
@@ -142,20 +145,43 @@ export function DuplicateCheckPanel({
           <p className="mb-3 text-xs text-muted-foreground">{t("duplicate.reviewHint")}</p>
 
           <div className="space-y-3">
-            <Select value={verdict} onValueChange={(v) => setVerdict(v as DuplicateVerdict)}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder={t("duplicate.verdictPlaceholder")} />
-              </SelectTrigger>
-              <SelectContent>
-                {DUPLICATE_VERDICTS.map((v) => (
-                  <SelectItem key={v} value={v}>
-                    {t(`duplicate.verdict.${v}`)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {/* Hai lựa chọn bày thẳng ra kèm HỆ QUẢ của từng cái — trước 01/10 là ô chọn 3 mục mà
+                không mục nào tác động tới đề cương. */}
+            <div role="radiogroup" className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {DUPLICATE_VERDICTS.map((v) => {
+                const active = verdict === v;
+                const bad = v === "DUPLICATE";
+                return (
+                  <button
+                    key={v}
+                    type="button"
+                    role="radio"
+                    aria-checked={active}
+                    onClick={() => setVerdict(v)}
+                    className={cn(
+                      "flex items-start gap-2 rounded-lg border p-3 text-left transition-colors",
+                      active
+                        ? bad
+                          ? "border-destructive bg-destructive/5"
+                          : "border-success bg-success/5"
+                        : "border-border hover:border-primary/40"
+                    )}
+                  >
+                    {bad ? (
+                      <AlertTriangle className="mt-0.5 size-4 shrink-0 text-destructive" />
+                    ) : (
+                      <CircleCheck className="mt-0.5 size-4 shrink-0 text-success" />
+                    )}
+                    <span>
+                      <span className="block text-sm font-medium text-foreground">{t(`duplicate.verdict.${v}`)}</span>
+                      <span className="block text-xs text-muted-foreground">{t(`duplicate.verdictEffect.${v}`)}</span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
 
-            {verdict && verdict !== "NOT_DUPLICATE" && (
+            {verdict === "DUPLICATE" && (
               <div>
                 <label htmlFor="dup-note" className="mb-1.5 block text-sm font-medium text-foreground">
                   {t("duplicate.noteLabel")} <span className="text-destructive">*</span>
@@ -175,16 +201,27 @@ export function DuplicateCheckPanel({
                 type="button"
                 size="sm"
                 disabled={!verdict || noteMissing || reviewMutation.isPending}
-                onClick={() =>
-                  verdict &&
-                  reviewMutation.mutate({ verdict, note: note.trim() || undefined })
-                }
+                variant={verdict === "DUPLICATE" ? "destructive" : "default"}
+                onClick={() => (verdict === "DUPLICATE" ? setConfirmReject(true) : save())}
               >
                 {reviewMutation.isPending && <Loader2 className="animate-spin" />}
-                {t("duplicate.saveVerdict")}
+                {verdict === "DUPLICATE" ? t("duplicate.rejectBtn") : t("duplicate.saveVerdict")}
               </Button>
             </div>
           </div>
+          <ConfirmDialog
+            open={confirmReject}
+            onOpenChange={setConfirmReject}
+            title={t("duplicate.confirmRejectTitle")}
+            description={t("duplicate.confirmRejectDesc")}
+            confirmLabel={t("duplicate.rejectBtn")}
+            variant="destructive"
+            isLoading={reviewMutation.isPending}
+            onConfirm={() => {
+              save();
+              setConfirmReject(false);
+            }}
+          />
         </div>
       ) : null}
     </div>

@@ -11,6 +11,7 @@ import { useMyContractsQuery } from "@/hooks/useMyContracts";
 import { useProgressReportsQuery } from "@/hooks/useProgressReports";
 import { CreateProgressReportSheet } from "@/features/pi/progress-reports/CreateProgressReportSheet";
 import { ProgressReportDetailView } from "@/components/shared/ProgressReportDetailView";
+import { ProgressMinutesLinks } from "@/components/shared/ProgressMinutesLinks";
 import { externalUrl, formatDate, formatDateTime } from "@/utils/format";
 import type { ProgressReport } from "@/types/progress-report";
 
@@ -58,7 +59,7 @@ export function ProgressReportsPage() {
             </label>
             <Select value={contractId ?? undefined} onValueChange={setSelectedContractId}>
               <SelectTrigger
-                className="w-full max-w-xl overflow-hidden sm:w-96 [&_[data-slot=select-value]]:block [&_[data-slot=select-value]]:min-w-0 [&_[data-slot=select-value]]:truncate"
+                className="w-full max-w-xl overflow-hidden sm:w-96 [&_[data-slot=select-value]]:block [&_[data-slot=select-value]]:min-w-0 [&_[data-slot=select-value]]:truncate [&_[data-slot=select-value]_*]:truncate"
                 title={selectedContractTitle}
               >
                 <SelectValue placeholder={t("reports.selectContract")} />
@@ -115,7 +116,7 @@ export function ProgressReportsPage() {
 
                     {report.overallCompletionPct != null && (
                       <p className="text-xs text-muted-foreground">
-                        {t("reports.overallCompletion")}: {report.overallCompletionPct}%
+                        {t("reports.completionPct")}: {report.overallCompletionPct}%
                       </p>
                     )}
 
@@ -140,10 +141,13 @@ export function ProgressReportsPage() {
                     )}
 
                     {report.evaluationResult && (
-                      <p className="text-xs text-muted-foreground">
-                        {t("reports.evaluation")}: <StatusBadge status={report.evaluationResult} />
-                        {report.evaluationComments && ` — ${report.evaluationComments}`}
-                      </p>
+                      <div className="space-y-1">
+                        <p className="text-xs text-muted-foreground">
+                          {t("reports.evaluation")}: <StatusBadge status={report.evaluationResult} />
+                          {report.evaluationComments && ` — ${report.evaluationComments}`}
+                        </p>
+                        <ProgressMinutesLinks reportId={report.id} />
+                      </div>
                     )}
 
                     {/* Sửa được cho tới khi Staff ĐÃ đánh giá — nhất quán với sản phẩm và

@@ -3,6 +3,7 @@ import { AlertTriangle, CircleCheck, Sparkles } from "lucide-react";
 import { useDuplicateCheckQuery } from "@/hooks/useDuplicateCheck";
 import { formatDateTime } from "@/utils/format";
 import { cn } from "@/lib/utils";
+import { LiteMarkdown } from "@/components/shared/LiteMarkdown";
 
 /**
  * Kết luận rà trùng lặp — thẻ CỐ ĐỊNH trên trang chi tiết đề cương của chủ nhiệm.
@@ -20,7 +21,7 @@ import { cn } from "@/lib/utils";
  * <p>Chưa có kết luận (Phòng QLKH chưa xem, hoặc chưa vượt ngưỡng nào) thì KHÔNG hiện gì cả — im
  * lặng đúng nghĩa "chưa có gì để nói", không phải một ô trống đáng ngờ.</p>
  */
-export function DuplicateVerdictCard({ proposalId }: { proposalId: string }) {
+export function DuplicateVerdictCard({ proposalId, hideNote = false }: { proposalId: string; hideNote?: boolean }) {
   const { t } = useTranslation();
   const { data } = useDuplicateCheckQuery(proposalId);
 
@@ -46,7 +47,8 @@ export function DuplicateVerdictCard({ proposalId }: { proposalId: string }) {
         </span>
       </p>
 
-      {data.verdictNote && (
+      {/* Đề cương đã bị từ chối thì lý do đã nằm ở khung đỏ phía trên — không lặp lại. */}
+      {data.verdictNote && !hideNote && (
         <p className="mt-1.5 pl-6 text-sm text-foreground">{data.verdictNote}</p>
       )}
 
@@ -54,10 +56,10 @@ export function DuplicateVerdictCard({ proposalId }: { proposalId: string }) {
           của Phòng QLKH. Chỉ hiện khi kết luận CÓ vấn đề: nếu đã "không trùng lặp" thì phần giải
           thích trùng ở đâu không còn giá trị đọc. */}
       {!isClear && data.explanation && (
-        <p className="mt-2 flex items-start gap-1.5 pl-6 text-xs text-muted-foreground">
+        <div className="mt-2 flex items-start gap-1.5 pl-6 text-xs text-muted-foreground">
           <Sparkles className="mt-0.5 size-3 shrink-0" />
-          <span className="whitespace-pre-wrap">{data.explanation}</span>
-        </p>
+          <LiteMarkdown text={data.explanation} className="space-y-1" />
+        </div>
       )}
 
       <p className="mt-2 pl-6 text-xs text-muted-foreground">

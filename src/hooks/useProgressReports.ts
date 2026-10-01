@@ -66,6 +66,19 @@ export function useUploadProgressReportDocMutation(reportId: string) {
   });
 }
 
+/** Biên bản họp Hội đồng đánh giá tiến độ — Staff tải lên trước khi ghi nhận kết luận (QĐ543 Điều 10.1). */
+export function useUploadProgressMinutesMutation(reportId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (file: File) => progressReportDocumentService.upload(reportId, file, "minutes"),
+    onSuccess: () => {
+      toast.success(i18n.t("toast.minutesUploaded"));
+      queryClient.invalidateQueries({ queryKey: queryKeys.progressReports.documents(reportId) });
+    },
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.uploadFailed")),
+  });
+}
+
 export function useGenerateProgressRoundsMutation(contractId: string) {
   const queryClient = useQueryClient();
   return useMutation({

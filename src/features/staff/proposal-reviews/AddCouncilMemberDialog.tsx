@@ -12,10 +12,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAddCouncilMemberMutation } from "@/hooks/useCouncilMembers";
 import { useCouncilCandidatesQuery } from "@/hooks/useCouncilCandidates";
-import { CouncilCandidateRow } from "@/components/shared/CouncilCandidateRow";
+import { CouncilCandidatePicker } from "@/components/shared/CouncilCandidatePicker";
+import { cn } from "@/lib/utils";
 
 /*
  * Chức danh trong hội đồng — PHẢI khớp `review-board/CreateCouncilSheet` và các chỗ BE so chuỗi:
@@ -67,7 +67,8 @@ export function AddCouncilMemberDialog({ open, onOpenChange, councilId }: AddCou
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      {/* Rộng hơn mặc định (01/10): danh sách thẻ ứng viên cần chỗ cho tên, đơn vị, lĩnh vực và nhãn. */}
+      <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{t("staff.addMember")}</DialogTitle>
           <DialogDescription>
@@ -81,31 +82,47 @@ export function AddCouncilMemberDialog({ open, onOpenChange, councilId }: AddCou
         </DialogHeader>
 
         <div className="space-y-4">
+          {/* Vai trong hội đồng đặt LÊN ĐẦU, dạng nút bấm: trước 01/10 là dropdown nằm dưới cùng, khuất
+              sau danh sách ứng viên nên người dùng hay bỏ quên và để nguyên vai mặc định. */}
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">
-              {t("staff.reviewer")}
-            </label>
+            <p className="mb-1.5 text-sm font-medium text-foreground">{t("staff.role")}</p>
+            <div role="radiogroup" aria-label={t("staff.role")} className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {COUNCIL_MEMBER_ROLES.map((role) => (
+                <button
+                  key={role}
+                  type="button"
+                  role="radio"
+                  aria-checked={memberRole === role}
+                  onClick={() => setMemberRole(role)}
+                  className={cn(
+                    "rounded-lg border px-3 py-2 text-sm font-medium transition-colors",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    memberRole === role
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border text-foreground hover:bg-muted/50"
+                  )}
+                >
+                  {t(`reviewBoard.role.${role}`)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <p className="mb-1.5 text-sm font-medium text-foreground">{t("staff.pickPerson")}</p>
             {isLoading ? (
-              <Skeleton className="h-9 w-full rounded-md" />
+              <div className="space-y-1.5">
+                <Skeleton className="h-9 w-full rounded-md" />
+                <Skeleton className="h-14 w-full rounded-lg" />
+                <Skeleton className="h-14 w-full rounded-lg" />
+              </div>
             ) : (
-              <Select value={userId} onValueChange={setUserId}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder={t("staff.selectReviewer")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {candidates.map((c) => (
-                    <SelectItem
-                      key={c.userId}
-                      value={c.userId}
-                      // Xung đột lợi ích và người đã có tên: hiện ra nhưng không chọn được — BE
-                      // cũng chặn, đây chỉ để khỏi bấm vào rồi ăn lỗi.
-                      disabled={c.hasConflictOfInterest || c.alreadyInCouncil}
-                    >
-                      <CouncilCandidateRow candidate={c} showTrack={data?.trackId != null} />
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <CouncilCandidatePicker
+                candidates={candidates}
+                value={userId}
+                onChange={setUserId}
+                showTrack={data?.trackId != null}
+              />
             )}
           </div>
 
@@ -143,22 +160,6 @@ export function AddCouncilMemberDialog({ open, onOpenChange, councilId }: AddCou
               </div>
             </div>
           )}
-
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">{t("staff.role")}</label>
-            <Select value={memberRole} onValueChange={setMemberRole}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {COUNCIL_MEMBER_ROLES.map((role) => (
-                  <SelectItem key={role} value={role}>
-                    {t(`reviewBoard.role.${role}`)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
 
           {/*
             Ô "Phản biện ngoài" đã gỡ (17/08). Cờ `isExternal` chỉ được lưu rồi trả về, KHÔNG

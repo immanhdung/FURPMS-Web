@@ -261,7 +261,8 @@ function CreateAmendmentDialog({
   const [newValue, setNewValue] = useState("");
 
   // Loại "Gia hạn thời gian thực hiện" (code EXTENSION) là loại duy nhất BE tự áp dụng.
-  const isExtension = (categories ?? []).find((c) => String(c.id) === categoryId)?.code === "EXTENSION";
+  const categoryCode = (categories ?? []).find((c) => String(c.id) === categoryId)?.code;
+  const isExtension = categoryCode === "EXTENSION";
 
   const canSubmit =
     categoryId &&
@@ -295,6 +296,12 @@ function CreateAmendmentDialog({
                 ))}
               </SelectContent>
             </Select>
+            {/* Nói rõ chọn loại này thì chuyện gì xảy ra — 4 loại theo đúng 4 nhóm của BM07. */}
+            {categoryCode && (
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                {t(`amendments.categoryEffect.${categoryCode}`, { defaultValue: "" })}
+              </p>
+            )}
           </div>
 
           <div>

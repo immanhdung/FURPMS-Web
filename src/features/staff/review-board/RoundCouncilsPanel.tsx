@@ -8,6 +8,7 @@ import { CouncilDetailSheet } from "@/features/staff/review-board/CouncilDetailS
 import { CreateCouncilSheet } from "@/features/staff/review-board/CreateCouncilSheet";
 import { useDeleteCouncilMutation, useDeleteRoundMutation, useOpenBoardRoundMutation } from "@/hooks/useReviewBoard";
 import { ROUND_STATUS } from "@/constants/statuses";
+import { formatDate } from "@/utils/format";
 import type { ReviewBoardCouncil, ReviewBoardRound } from "@/types/review-board";
 
 interface RoundCouncilsPanelProps {
@@ -31,10 +32,15 @@ export function RoundCouncilsPanel({ round, cycleId, trackId }: RoundCouncilsPan
   const manageIndex = round.councils.findIndex((c) => c.id === manageCouncilId);
 
   return (
-    <div className="rounded-xl border border-border p-3">
-      <div className="mb-2 flex items-center justify-between">
+    <div className="flex h-full flex-col rounded-xl border border-border p-4">
+      <div className="mb-3 flex items-center justify-between gap-2">
         <p className="text-sm font-medium text-foreground">{t("reviewBoard.councils")}</p>
         <div className="flex items-center gap-1.5">
+          {/* Nút chính đặt lên đầu khung (01/10) — trước là nút viền mờ trải hết bề ngang ở đáy. */}
+          <Button size="sm" className="gap-1" onClick={() => setCreateOpen(true)}>
+            <Gavel className="size-3.5" />
+            {t("reviewBoard.createCouncil")}
+          </Button>
           {canOpen && (
             <Button size="sm" variant="outline" onClick={() => openMutation.mutate(round.id)} disabled={openMutation.isPending}>
               <Unlock />
@@ -50,11 +56,12 @@ export function RoundCouncilsPanel({ round, cycleId, trackId }: RoundCouncilsPan
       </div>
 
       {round.councils.length === 0 ? (
-        <p className="mb-2 text-xs text-muted-foreground">{t("reviewBoard.noCouncilYet")}</p>
+        <p className="text-xs text-muted-foreground">{t("reviewBoard.noCouncilYet")}</p>
       ) : (
-        <ul className="mb-2 space-y-1.5">
+        <ul className="space-y-2">
           {round.councils.map((council, index) => (
-            <li key={council.id} className="flex items-center justify-between gap-2 rounded-lg border border-border px-2.5 py-2">
+            <li key={council.id} className="flex items-center justify-between gap-2 rounded-lg border border-border px-3 py-2.5">
+              <div className="min-w-0 space-y-1">
               <div className="flex min-w-0 flex-wrap items-center gap-2">
                 <span className="text-sm font-medium text-foreground">{t("reviewBoard.councilN", { n: index + 1 })}</span>
                 {council.status && <StatusBadge status={council.status} />}
@@ -65,6 +72,17 @@ export function RoundCouncilsPanel({ round, cycleId, trackId }: RoundCouncilsPan
                 <span className="text-xs text-muted-foreground">
                   {t("reviewBoard.councilProjectCount", { count: council.projectIds.length })}
                 </span>
+              </div>
+              {(council.establishedAt || council.meetingDeadline) && (
+                <p className="text-xs text-muted-foreground">
+                  {[
+                    council.establishedAt && t("reviewBoard.ms.councilEstablished", { date: formatDate(council.establishedAt) }),
+                    council.meetingDeadline && t("reviewBoard.ms.councilMeetBy", { date: formatDate(council.meetingDeadline) }),
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </p>
+              )}
               </div>
               <div className="flex shrink-0 items-center gap-1">
                 <Button size="sm" variant="ghost" className="h-7 gap-1 text-xs" onClick={() => setManageCouncilId(council.id)}>
@@ -86,11 +104,6 @@ export function RoundCouncilsPanel({ round, cycleId, trackId }: RoundCouncilsPan
           ))}
         </ul>
       )}
-
-      <Button size="sm" variant="outline" className="w-full gap-1" onClick={() => setCreateOpen(true)}>
-        <Gavel className="size-3.5" />
-        {t("reviewBoard.createCouncil")}
-      </Button>
 
       <ConfirmDialog
         open={confirmDelete}

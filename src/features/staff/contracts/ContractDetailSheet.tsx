@@ -284,6 +284,7 @@ export function ContractDetailSheet({ open, onOpenChange, contractId }: Contract
                     contractId={contract.id}
                     contractStartDate={contract.startDate}
                     contractEndDate={contract.endDate}
+                    defaultRounds={contract.defaultProgressRounds ?? 1}
                   />
                 </TabsContent>
                 <TabsContent value="final">

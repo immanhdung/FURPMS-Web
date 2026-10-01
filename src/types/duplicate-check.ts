@@ -51,8 +51,8 @@ export interface DuplicateFlag {
   maxSimilarity?: number | null;
 }
 
-export const DUPLICATE_VERDICTS: DuplicateVerdict[] = [
-  "NOT_DUPLICATE",
-  "NEEDS_REVISION",
-  "DUPLICATE",
-];
+/**
+ * Lựa chọn Phòng QLKH được chọn — từ 01/10 chỉ còn 2 (thầy góp ý). "NEEDS_REVISION" giữ trong kiểu
+ * để hiển thị kết luận cũ, không còn cho chọn.
+ */
+export const DUPLICATE_VERDICTS: DuplicateVerdict[] = ["NOT_DUPLICATE", "DUPLICATE"];

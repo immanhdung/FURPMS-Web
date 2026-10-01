@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { CouncilAssignSelect } from "@/features/staff/review-board/CouncilAssignSelect";
+import { ProposalQuickViewSheet } from "@/features/staff/review-board/ProposalQuickViewSheet";
 import { useAddProjectToRoundMutation } from "@/hooks/useReviewBoard";
 import { ROUND_STATUS } from "@/constants/statuses";
 import type { ReviewBoardProject, ReviewBoardRound } from "@/types/review-board";
@@ -17,6 +19,7 @@ interface RoundProposalsPanelProps {
 export function RoundProposalsPanel({ round, cycleId, trackId, trackProjects }: RoundProposalsPanelProps) {
   const { t } = useTranslation();
   const addMutation = useAddProjectToRoundMutation(cycleId, trackId);
+  const [quickViewId, setQuickViewId] = useState<string | null>(null);
 
   const inRound = new Set(round.projects.map((p) => p.projectId));
   // Đề tài ĐÃ NỘP trong lĩnh vực nhưng chưa vào vòng này (kể cả nộp trễ sau khi vòng chạy).
@@ -36,18 +39,29 @@ export function RoundProposalsPanel({ round, cycleId, trackId, trackProjects }: 
   const canAdd = status === ROUND_STATUS.PENDING || status === ROUND_STATUS.OPEN;
 
   return (
-    <div className="rounded-xl border border-border p-3">
-      <p className="mb-2 text-sm font-medium text-foreground">{t("reviewBoard.projectsInRound")}</p>
+    <div className="flex h-full flex-col rounded-xl border border-border p-4">
+      <p className="mb-3 text-sm font-medium text-foreground">{t("reviewBoard.projectsInRound")}</p>
 
       {round.projects.length === 0 ? (
         <p className="text-xs text-muted-foreground">{t("reviewBoard.noProjectsInRound")}</p>
       ) : (
-        <ul className="space-y-1.5">
+        <ul className="space-y-2">
           {round.projects.map((p) => (
-            <li key={p.projectId} className="flex items-center gap-2 rounded-lg border border-border px-2.5 py-1.5">
-              <span className="min-w-0 flex-1 truncate text-sm text-foreground" title={p.titleVi}>
-                {p.titleVi}
-              </span>
+            <li key={p.projectId} className="flex items-center gap-2 rounded-lg border border-border px-3 py-2">
+              {/* Bấm tên để xem nhanh đề tài ngay tại đây (01/10) — trước chỉ có cái tên, muốn biết
+                  đề tài nói gì phải sang tab khác. */}
+              <button
+                type="button"
+                className="min-w-0 flex-1 text-left disabled:cursor-default"
+                disabled={!p.proposalId}
+                onClick={() => p.proposalId && setQuickViewId(p.proposalId)}
+                title={t("reviewBoard.quick.hint")}
+              >
+                <span className="block truncate text-sm font-medium text-foreground hover:text-primary hover:underline">
+                  {p.titleVi}
+                </span>
+                {p.piName && <span className="block truncate text-xs text-muted-foreground">{p.piName}</span>}
+              </button>
               {p.status && <StatusBadge status={p.status} />}
               <CouncilAssignSelect projectId={p.projectId} councils={round.councils} cycleId={cycleId} trackId={trackId} />
             </li>
@@ -88,6 +102,8 @@ export function RoundProposalsPanel({ round, cycleId, trackId, trackProjects }: 
           </ul>
         </div>
       )}
+
+      <ProposalQuickViewSheet proposalId={quickViewId} onOpenChange={(o) => !o && setQuickViewId(null)} />
     </div>
   );
 }

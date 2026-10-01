@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import i18n from "@/i18n";
 import { amendmentService } from "@/services/api/amendment.service";
 import { queryKeys } from "@/services/queryKeys";
 import type { ApiError } from "@/types/common";
@@ -66,4 +67,27 @@ export function useRejectAmendmentMutation(contractId: string) {
     "Amendment rejected.",
     "Unable to reject the amendment."
   );
+}
+
+/** Đơn điều chỉnh chờ duyệt của mọi hợp đồng — màn "Yêu cầu điều chỉnh" của Staff (01/10). */
+export function usePendingAmendmentsQuery() {
+  return useQuery({
+    queryKey: queryKeys.amendments.pending(),
+    queryFn: amendmentService.listPending,
+  });
+}
+
+export function useReviewPendingAmendmentMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, approve, reviewerComments }: { id: string; approve: boolean; reviewerComments?: string }) =>
+      approve ? amendmentService.approve(id, reviewerComments) : amendmentService.reject(id, reviewerComments),
+    onSuccess: (_data, vars) => {
+      toast.success(vars.approve ? i18n.t("pendingAmendments.approved") : i18n.t("pendingAmendments.rejected"));
+      queryClient.invalidateQueries({ queryKey: queryKeys.amendments.all() });
+      // Duyệt gia hạn là BE đổi luôn hạn hợp đồng.
+      queryClient.invalidateQueries({ queryKey: queryKeys.contracts.all() });
+    },
+    onError: (error: ApiError) => toast.error(error.message),
+  });
 }

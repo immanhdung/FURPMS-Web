@@ -17,6 +17,14 @@ export interface Amendment {
   reviewedAt?: string | null;
 }
 
+/** Đơn đang chờ duyệt kèm ngữ cảnh — màn "Yêu cầu điều chỉnh" của Staff. */
+export interface PendingAmendment extends Amendment {
+  categoryCode?: string | null;
+  contractNumber?: string | null;
+  projectTitle?: string | null;
+  piName?: string | null;
+}
+
 export interface CreateAmendmentPayload {
   categoryId: number;
   changeDescription: string;

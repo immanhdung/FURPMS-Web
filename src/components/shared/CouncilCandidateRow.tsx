@@ -5,48 +5,75 @@ import { cn } from "@/lib/utils";
 import type { CouncilCandidate } from "@/types/council-candidate";
 
 /**
+ * Nhãn cho biết vì sao nên (hoặc không thể) chọn một ứng viên. Tách riêng (01/10) để danh sách chọn
+ * trong `CouncilCandidatePicker` và dòng trong dropdown dùng ĐÚNG một bộ luật hiển thị.
+ */
+export function CandidateStatusBadge({ candidate, showTrack }: { candidate: CouncilCandidate; showTrack: boolean }) {
+  const { t } = useTranslation();
+
+  if (candidate.hasConflictOfInterest) {
+    return (
+      <Badge variant="destructive" className="gap-1 whitespace-nowrap">
+        <Ban className="size-3" />
+        {t("staff.flagCoi")}
+      </Badge>
+    );
+  }
+  if (candidate.alreadyInCouncil) {
+    return <Badge variant="secondary" className="whitespace-nowrap">{t("staff.flagAlreadyIn")}</Badge>;
+  }
+  if (!showTrack) return null;
+  if (candidate.matchesTrack) {
+    return (
+      <Badge variant="secondary" className="gap-1 whitespace-nowrap text-success">
+        <CircleCheck className="size-3" />
+        {t("staff.flagOnTrack")}
+      </Badge>
+    );
+  }
+  if (candidate.expertiseUnknown) {
+    return (
+      <Badge variant="outline" className="gap-1 whitespace-nowrap text-muted-foreground">
+        <CircleHelp className="size-3" />
+        {t("staff.flagUnknownTrack")}
+      </Badge>
+    );
+  }
+  return (
+    <Badge variant="outline" className="whitespace-nowrap text-muted-foreground">
+      {t("staff.flagOffTrack")}
+    </Badge>
+  );
+}
+
+/**
  * Một dòng ứng viên hội đồng: tên + học hàm, kèm cờ cho biết vì sao nên (hoặc không thể) chọn.
- * Dùng chung giữa `AddCouncilMemberDialog` (thêm 1 người vào hội đồng có sẵn) và
- * `CreateCouncilSheet` (tạo cả gói cùng lúc) — hai đường tạo hội đồng phải hiện cùng một xếp hạng
- * chuyên môn, không lệch nhau.
+ * Dùng trong dropdown của `CreateCouncilSheet` (tạo cả gói cùng lúc) — hai đường tạo hội đồng phải
+ * hiện cùng một xếp hạng chuyên môn, không lệch nhau.
+ *
+ * <p>01/10: tên bên trái, nhãn dồn sang phải và không xuống dòng — trước đây mọi thứ cùng `flex-wrap`
+ * nên nhãn nhảy lung tung theo độ dài tên, nhìn lệch.</p>
  */
 export function CouncilCandidateRow({ candidate, showTrack }: { candidate: CouncilCandidate; showTrack: boolean }) {
   const { t } = useTranslation();
   const blocked = candidate.hasConflictOfInterest || candidate.alreadyInCouncil;
 
   return (
-    <span className="flex w-full flex-wrap items-center gap-x-2 gap-y-0.5">
-      <span className={cn("font-medium", blocked && "text-muted-foreground")}>{candidate.fullName}</span>
+    <span className="flex w-full min-w-0 items-center gap-2">
+      <span className={cn("min-w-0 truncate font-medium", blocked && "text-muted-foreground")}>
+        {candidate.fullName}
+      </span>
       {candidate.academicTitle && (
-        <span className="text-xs text-muted-foreground">{candidate.academicTitle}</span>
+        <span className="shrink-0 text-xs text-muted-foreground">{candidate.academicTitle}</span>
       )}
-
-      {candidate.hasConflictOfInterest ? (
-        <Badge variant="destructive" className="gap-1">
-          <Ban className="size-3" />
-          {t("staff.flagCoi")}
-        </Badge>
-      ) : candidate.alreadyInCouncil ? (
-        <Badge variant="secondary">{t("staff.flagAlreadyIn")}</Badge>
-      ) : showTrack && candidate.matchesTrack ? (
-        <Badge variant="secondary" className="gap-1 text-success">
-          <CircleCheck className="size-3" />
-          {t("staff.flagOnTrack")}
-        </Badge>
-      ) : showTrack && candidate.expertiseUnknown ? (
-        <Badge variant="outline" className="gap-1 text-muted-foreground">
-          <CircleHelp className="size-3" />
-          {t("staff.flagUnknownTrack")}
-        </Badge>
-      ) : showTrack ? (
-        <Badge variant="outline" className="text-muted-foreground">
-          {t("staff.flagOffTrack")}
-        </Badge>
-      ) : null}
-
-      {candidate.activeCouncilCount > 0 && !blocked && (
-        <span className="text-xs text-muted-foreground">{t("staff.flagBusy", { n: candidate.activeCouncilCount })}</span>
-      )}
+      <span className="ml-auto flex shrink-0 items-center gap-2">
+        {candidate.activeCouncilCount > 0 && !blocked && (
+          <span className="text-xs whitespace-nowrap text-muted-foreground">
+            {t("staff.flagBusy", { n: candidate.activeCouncilCount })}
+          </span>
+        )}
+        <CandidateStatusBadge candidate={candidate} showTrack={showTrack} />
+      </span>
     </span>
   );
 }

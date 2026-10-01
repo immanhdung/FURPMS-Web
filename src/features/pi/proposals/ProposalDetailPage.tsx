@@ -21,7 +21,7 @@ import { SubmitProposalDialog } from "@/features/pi/proposals/SubmitProposalDial
 // import { AiFeedbackCard } from "@/features/pi/proposals/AiFeedbackCard";
 import { ExpectedProductsCard } from "@/features/pi/proposals/ExpectedProductsCard";
 import { ProposalDocumentsCard } from "@/features/pi/proposals/ProposalDocumentsCard";
-import { ChangeRequestsPanel } from "@/features/pi/proposals/ChangeRequestsPanel";
+
 import { DuplicateVerdictCard } from "@/features/pi/proposals/DuplicateVerdictCard";
 import { ProjectTimelinePanel } from "@/features/staff/contracts/ProjectTimelinePanel";
 import { ProposalExportMenu, makeSlug } from "@/features/pi/proposals/ProposalExportMenu";
@@ -112,8 +112,21 @@ export function ProposalDetailPage() {
         <ProposalStatusTimeline status={status} />
       </div>
 
+      {/* Bị từ chối thì PI phải đọc được VÌ SAO — trước 01/10 lý do có trong API nhưng không màn nào hiện. */}
+      {status === "REJECTED" && (
+        <div className="rounded-xl border border-destructive/40 bg-destructive/5 p-4">
+          <p className="flex items-center gap-2 text-sm font-semibold text-destructive">
+            <Ban className="size-4 shrink-0" />
+            {t("proposal.rejectedTitle")}
+          </p>
+          <p className="mt-1.5 pl-6 text-sm text-foreground">
+            {proposal.rejectionReason || t("proposal.rejectedNoReason")}
+          </p>
+        </div>
+      )}
+
       {/* Chỉ đề cương ĐÃ NỘP mới có gì để đối chiếu — bản nháp chưa vào kho rà trùng lặp. */}
-      {!isDraft && <DuplicateVerdictCard proposalId={proposal.id} />}
+      {!isDraft && <DuplicateVerdictCard proposalId={proposal.id} hideNote={status === "REJECTED"} />}
 
       {/* Chủ nhiệm thấy trước cả lộ trình từ lúc vừa nộp: còn những bước gì, bước nào đang tới hạn. */}
       {!isDraft && proposal.projectId && (
@@ -158,12 +171,19 @@ export function ProposalDetailPage() {
       </div>
       */}
 
-      {/* Yêu cầu thay đổi — chỉ hiển thị sau khi đã nộp đề xuất (không còn nháp). */}
-      {!isDraft && (
-        <ChangeRequestsPanel
-          proposalId={proposal.id}
-          editable={canWithdraw}
-        />
+      {/* Trước 01/10 ở đây là khung "Yêu cầu thay đổi" (5 loại) — Staff duyệt xong KHÔNG có tác
+          dụng gì, trùng việc với "Điều chỉnh hợp đồng" (BM07, gia hạn được tự áp dụng). Nay chỉ còn
+          một đường: đề tài đã duyệt thì trỏ sang đó. */}
+      {status === "APPROVED" && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card/95 p-4 shadow-soft-xs">
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-foreground">{t("proposal.amendPointerTitle")}</p>
+            <p className="text-xs text-muted-foreground">{t("proposal.amendPointerDesc")}</p>
+          </div>
+          <Button variant="outline" size="sm" onClick={() => navigate(ROUTES.MY_AMENDMENTS)}>
+            {t("proposal.amendPointerBtn")}
+          </Button>
+        </div>
       )}
 
       <SubmitProposalDialog open={submitOpen} onOpenChange={setSubmitOpen} proposalId={proposal.id} />

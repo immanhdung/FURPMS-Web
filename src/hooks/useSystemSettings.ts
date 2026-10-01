@@ -26,6 +26,15 @@ export function useCouncilPolicyQuery() {
   });
 }
 
+export function useContractDefaultsQuery(enabled = true) {
+  return useQuery({
+    queryKey: ["system-settings", "contract-defaults"],
+    queryFn: systemSettingService.contractDefaults,
+    staleTime: 5 * 60 * 1000,
+    enabled,
+  });
+}
+
 export function useSystemSettingsQuery(enabled = true) {
   return useQuery({
     queryKey: queryKeys.systemSettings.list(),

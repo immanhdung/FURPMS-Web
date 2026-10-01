@@ -38,6 +38,8 @@ export interface ProposalDetail {
   budgetItems?: ProposalBudgetItem[] | null;
   members?: ProposalMember[] | null;
   status?: string | null;
+  /** Lý do bị từ chối (rà trùng, đặt hàng chọn người khác…) — trang của PI phải hiện ra. */
+  rejectionReason?: string | null;
   createdAt?: string | null;
 }
 

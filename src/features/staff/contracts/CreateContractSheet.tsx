@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useContractDefaultsQuery } from "@/hooks/useSystemSettings";
 import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
@@ -54,6 +55,7 @@ export function CreateContractSheet({ open, onOpenChange, contract = null }: Cre
     reset,
     watch,
     setValue,
+    getValues,
     formState: { errors },
   } = useForm<ContractFormValues>({
     resolver: zodResolver(contractSchema),
@@ -75,6 +77,9 @@ export function CreateContractSheet({ open, onOpenChange, contract = null }: Cre
    * "6 tháng" mà tài liệu nội bộ hay nhắc chỉ đúng khi đề tài dài 12 tháng — Mẫu 1 giới hạn
    * "không quá 12 tháng" nên đó là ca hay gặp, không phải luật.
    */
+  // Đại diện Bên A lấy từ cấu hình và HIỆN SẴN trong ô (01/10, thầy góp ý): trước để trống kèm chữ
+  // "để trống = dùng mặc định" nên không ai biết mặc định là ai. Muốn đổi người thì Admin vào Cấu hình.
+  const { data: contractDefaults } = useContractDefaultsQuery(open && !isEdit);
   const selectedProposalId = watch("proposalId");
   const selectedDuration =
     approvedProposals.find((p) => p.id === selectedProposalId)?.durationMonths ?? 0;
@@ -99,7 +104,8 @@ export function CreateContractSheet({ open, onOpenChange, contract = null }: Cre
             proposalId: "",
             contractNumber: "",
             scopeTitle: "",
-            startDate: "",
+            // Ngày bắt đầu mặc định là HÔM NAY (01/10) — đa số hợp đồng lập xong là có hiệu lực ngay.
+            startDate: new Date().toLocaleDateString("en-CA"),
             endDate: "",
             maxExtensionMonths: 0,
             sideARepresentative: "",
@@ -107,6 +113,12 @@ export function CreateContractSheet({ open, onOpenChange, contract = null }: Cre
           }
     );
   }, [open, contract, reset]);
+
+  // Điền tên đại diện mặc định khi cấu hình tải xong — chỉ khi ô còn trống, không đè chữ người dùng gõ.
+  useEffect(() => {
+    if (!open || isEdit || !contractDefaults?.sideARepresentative) return;
+    if (!getValues("sideARepresentative")) setValue("sideARepresentative", contractDefaults.sideARepresentative);
+  }, [open, isEdit, contractDefaults, getValues, setValue]);
 
   // Chọn đề tài xong tự điền trần gia hạn — Staff không phải tự chia đôi rồi gõ tay.
   useEffect(() => {
@@ -231,7 +243,7 @@ export function CreateContractSheet({ open, onOpenChange, contract = null }: Cre
           placeholder={t("contract.representativePlaceholder")}
           {...register("sideARepresentative")}
         />
-        <p className="mt-1 text-xs text-muted-foreground">{t("contract.representativeHint")}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{t("contract.sideADefaultHint")}</p>
       </div>
 
       {/* Thầy 29/07: bỏ ô dán URL hợp đồng — file thật upload sau khi tạo, ở tab "Hồ sơ hợp đồng

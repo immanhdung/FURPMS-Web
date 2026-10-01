@@ -136,6 +136,7 @@ export const queryKeys = {
   amendments: {
     all: () => ["amendments"] as const,
     list: (contractId: string) => ["amendments", "list", contractId] as const,
+    pending: () => ["amendments", "pending"] as const,
   },
   settlements: {
     all: () => ["settlements"] as const,

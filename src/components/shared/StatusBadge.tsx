@@ -3,6 +3,12 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 const STATUS_STYLES: Record<string, string> = {
+  // Kết luận đánh giá (tiến độ, nghiệm thu) — trước 01/10 "Đạt" và "Không đạt" cùng màu xám.
+  pass: "bg-success/10 text-success",
+  passed: "bg-success/10 text-success",
+  conditional: "bg-warning/10 text-warning",
+  fail: "bg-danger/10 text-danger",
+  failed: "bg-danger/10 text-danger",
   active: "bg-success/10 text-success",
   open: "bg-success/10 text-success",
   approved: "bg-success/10 text-success",
@@ -13,11 +19,18 @@ const STATUS_STYLES: Record<string, string> = {
   invited: "bg-warning/10 text-warning",
   inactive: "bg-muted text-muted-foreground",
   closed: "bg-muted text-muted-foreground",
+  finalized: "bg-muted text-muted-foreground",
   rejected: "bg-danger/10 text-danger",
   declined: "bg-danger/10 text-danger",
 };
 
 const DOT_STYLES: Record<string, string> = {
+  // Kết luận đánh giá (tiến độ, nghiệm thu) — trước 01/10 "Đạt" và "Không đạt" cùng màu xám.
+  pass: "bg-success",
+  passed: "bg-success",
+  conditional: "bg-warning",
+  fail: "bg-danger",
+  failed: "bg-danger",
   active: "bg-success",
   open: "bg-success",
   approved: "bg-success",
@@ -28,6 +41,7 @@ const DOT_STYLES: Record<string, string> = {
   invited: "bg-warning",
   inactive: "bg-muted-foreground",
   closed: "bg-muted-foreground",
+  finalized: "bg-muted-foreground",
   rejected: "bg-danger",
   declined: "bg-danger",
 };

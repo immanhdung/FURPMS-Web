@@ -5,6 +5,7 @@ import { FileText, Loader2, Upload } from "lucide-react";
 import { FormSheet } from "@/components/shared/FormSheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { MoneyInput } from "@/components/shared/MoneyInput";
 import { Textarea } from "@/components/ui/textarea";
 import {
   useProgressReportDocumentsQuery,
@@ -39,7 +40,9 @@ export function CreateProgressReportSheet({ open, onOpenChange, contractId, prop
   const isSubmitting = updateMutation.isPending || submitMutation.isPending;
 
   // File báo cáo (BM06) — Staff cần mở xem file này rồi mới đánh giá Đạt/Không đạt.
-  const { data: docs } = useProgressReportDocumentsQuery(report?.id ?? null);
+  const { data: allDocs } = useProgressReportDocumentsQuery(report?.id ?? null);
+  // Biên bản họp hội đồng do Phòng QLKH tải — không phải file của PI.
+  const docs = allDocs?.filter((d) => d.documentType !== "PROGRESS_MINUTES");
   const uploadMutation = useUploadProgressReportDocMutation(report?.id ?? "");
   // Một kỳ báo cáo thường kèm cả phụ lục/minh chứng — chọn một lượt thay vì từng tệp.
   const { handleFiles, progress, isUploading } = useMultiFileUpload({
@@ -227,6 +230,7 @@ export function CreateProgressReportSheet({ open, onOpenChange, contractId, prop
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="mb-1.5 block text-sm font-medium text-foreground">{t("reports.overallCompletion")}</label>
+          <p className="mb-1.5 text-xs text-muted-foreground">{t("reports.selfAssessHint")}</p>
           <Input
             type="number"
             min={0}
@@ -237,7 +241,7 @@ export function CreateProgressReportSheet({ open, onOpenChange, contractId, prop
         </div>
         <div>
           <label className="mb-1.5 block text-sm font-medium text-foreground">{t("reports.expenditure")}</label>
-          <Input type="number" min={0} value={expenditureToDate} onChange={(e) => setExpenditureToDate(e.target.value)} />
+          <MoneyInput className="tabular-nums" value={expenditureToDate} onValueChange={setExpenditureToDate} />
         </div>
       </div>
 

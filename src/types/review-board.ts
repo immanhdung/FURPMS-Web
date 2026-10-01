@@ -8,6 +8,7 @@ export interface ReviewBoardProject {
   projectStatus: string;
   /** Chủ nhiệm — dùng để loại khỏi danh sách chọn ủy viên hội đồng (COI, rule #5). */
   piUserId: string;
+  piName?: string | null;
 }
 
 export interface ReviewBoardProjectRound {
@@ -17,11 +18,18 @@ export interface ReviewBoardProjectRound {
   result?: string | null;
   /** Chủ nhiệm — dùng để loại khỏi danh sách chọn ủy viên hội đồng (COI, rule #5). */
   piUserId: string;
+  /** Đề cương hiện hành — bấm tên đề tài để xem nhanh. */
+  proposalId?: string | null;
+  piName?: string | null;
 }
 
 export interface ReviewBoardCouncil {
   id: string;
   status: string;
+  establishedAt?: string | null;
+  /** Hạn họp — QĐ543 Điều 8.3.a; `isMeetingDeadlineDerived` = suy ra từ ngày lập, chưa ai ghi. */
+  meetingDeadline?: string | null;
+  isMeetingDeadlineDerived?: boolean;
   projectIds: string[];
   members: CouncilMember[];
 }
@@ -42,6 +50,9 @@ export interface ReviewBoardRound {
   isScoringOverdue?: boolean;
   /** Số ngày còn lại — do MÁY CHỦ tính, âm = quá hạn. */
   scoringDaysLeft?: number | null;
+  isScoringExtended?: boolean;
+  openedAt?: string | null;
+  closedAt?: string | null;
   projects: ReviewBoardProjectRound[];
   councils: ReviewBoardCouncil[];
 }

@@ -27,7 +27,15 @@ export function getTrackColumns({
     {
       accessorKey: "description",
       header: ({ column }) => <DataTableColumnHeader column={column} title={t("common.description")} />,
-      cell: ({ row }) => row.original.description ?? "-",
+      // Mô tả dài làm bảng kéo cao cả màn (01/10) — cắt 2 dòng, rê chuột xem đủ.
+      cell: ({ row }) =>
+        row.original.description ? (
+          <span className="line-clamp-2 max-w-md text-sm whitespace-normal text-muted-foreground" title={row.original.description}>
+            {row.original.description}
+          </span>
+        ) : (
+          "-"
+        ),
     },
     // Cột "Phụ trách" đã ẩn: `ResearchTrack.OwnerId` chỉ được ghi vào rồi đọc ra để hiện, không có
     // chỗ nào trong hệ thống dùng nó — không gửi thông báo, không phân quyền, không lọc danh sách.

@@ -47,15 +47,25 @@ export function ProjectTimelinePanel({ projectId }: { projectId: string | null }
       {/* Trục dọc: chấm + đường nối, cùng hình hài với ContractMilestoneTimeline để hai màn nhìn
           như một hệ thống chứ không phải hai người làm. */}
       <ol className="relative space-y-0">
-        {data.stages.map((stage, index) => (
-          <StageRow key={`${stage.code}-${stage.entityId ?? index}`} stage={stage} isLast={index === data.stages.length - 1} />
-        ))}
+        {data.stages.map((stage, index) => {
+          // Giai đoạn lặp (giải ngân 4 đợt, báo cáo 2 kỳ, nhiều sản phẩm) đánh số để phân biệt (01/10).
+          const same = data.stages.filter((s) => s.code === stage.code);
+          const seq = same.length > 1 ? same.indexOf(stage) + 1 : null;
+          return (
+            <StageRow
+              key={`${stage.code}-${stage.entityId ?? index}`}
+              stage={stage}
+              seq={seq}
+              isLast={index === data.stages.length - 1}
+            />
+          );
+        })}
       </ol>
     </div>
   );
 }
 
-function StageRow({ stage, isLast }: { stage: ProjectStage; isLast: boolean }) {
+function StageRow({ stage, seq, isLast }: { stage: ProjectStage; seq: number | null; isLast: boolean }) {
   const { t } = useTranslation();
   const done = stage.status === "DONE";
   const overdue = stage.status === "OVERDUE";
@@ -84,6 +94,7 @@ function StageRow({ stage, isLast }: { stage: ProjectStage; isLast: boolean }) {
         <div className="flex flex-wrap items-center gap-2">
           <span className={cn("text-sm font-medium", overdue ? "text-destructive" : "text-foreground")}>
             {t(`projectTimeline.stage.${stage.code}`, { defaultValue: stage.code })}
+            {seq != null && <span className="font-normal text-muted-foreground"> · {t("projectTimeline.seq", { n: seq })}</span>}
           </span>
 
           {done ? (
@@ -94,7 +105,9 @@ function StageRow({ stage, isLast }: { stage: ProjectStage; isLast: boolean }) {
             <span className="rounded-full border border-dashed border-border px-2 py-0.5 text-xs text-muted-foreground">
               {t("projectTimeline.notStarted")}
             </span>
-          ) : (
+          ) : stage.status === "NO_DEADLINE" ? null : (
+            // Bước mở theo ĐIỀU KIỆN (giải ngân, quyết toán) không có hạn — nhãn "Chưa đặt hạn" ở đó là
+            // chữ thừa, nghe như hệ thống thiếu sót (01/10). Dòng điều kiện bên dưới đã nói đủ.
             <DeadlineBadge
               deadline={stage.deadline}
               daysLeft={stage.daysLeft}
@@ -106,7 +119,9 @@ function StageRow({ stage, isLast }: { stage: ProjectStage; isLast: boolean }) {
 
         {/* Căn cứ hiện THẲNG ra màn hình, không giấu trong tooltip: hội đồng hỏi "hạn này ở đâu ra"
             thì người demo chỉ vào màn hình đọc, không phải giở tài liệu. */}
-        {stage.deadlineBasis && (
+        {/* Bước ĐÃ XONG chỉ cần "Xong ngày …" — căn cứ hạn của việc đã làm xong là chữ thừa, dễ bị hỏi
+            vặn (01/10). Ai quyết, lúc nào, văn bản nào thì xem tab Quyết định. */}
+        {stage.deadlineBasis && !done && (
           <p className="text-xs text-muted-foreground">{stage.deadlineBasis}</p>
         )}
       </div>

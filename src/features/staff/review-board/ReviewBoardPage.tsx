@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { roundSessionNo, roundStatusKey } from "@/utils/review-round";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
@@ -18,8 +19,7 @@ import { RoundProposalsPanel } from "@/features/staff/review-board/RoundProposal
 import { CreateRoundSheet } from "@/features/staff/review-board/CreateRoundSheet";
 import { RoundRubricPicker } from "@/features/staff/review-board/RoundRubricPicker";
 import { SetRoundDeadlineDialog } from "@/features/staff/proposal-reviews/SetRoundDeadlineDialog";
-import { DeadlineBadge } from "@/components/shared/DeadlineBadge";
-import { CalendarClock } from "lucide-react";
+import { RoundTimelineStrip } from "@/features/staff/review-board/RoundTimelineStrip";
 import { queryKeys } from "@/services/queryKeys";
 import type { ReviewBoardRound } from "@/types/review-board";
 
@@ -127,20 +127,20 @@ export function ReviewBoardPage() {
                 type="button"
                 onClick={() => setSelectedRoundId(round.id)}
                 className={cn(
-                  "flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm transition-all",
+                  "flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm transition-all",
                   selectedRound?.id === round.id
                     ? "border-transparent bg-linear-to-r from-primary to-brand-secondary text-white shadow-soft-sm"
                     : "border-border text-muted-foreground hover:border-primary/30 hover:text-foreground"
                 )}
               >
-                <span className="font-medium">{t("staff.round", { num: round.roundNumber })}</span>
-                {/* Không hiện "phương diện" nữa: rule #16 bỏ FINANCE nên mọi vòng đều là SCIENCE —
-                    nhãn chỉ có đúng một giá trị thì dán lên chỉ tổ rối. Loại vòng mới là thứ phân biệt. */}
-                <span className="text-xs">{t(`reviewBoard.type.${round.roundType}`)}</span>
-                {round.status && <StatusBadge status={round.status} />}
+                {/* Tên = LOẠI + số phiên trong loại đó (01/10) — "Vòng 3" làm người xem tưởng đề tài
+                    phải qua 3 vòng. Không hiện "phương diện": rule #16 bỏ FINANCE. */}
+                <span className="font-medium">{t(`reviewBoard.type.${round.roundType}`)}</span>
+                <span className="text-xs">{t("reviewBoard.session", { n: roundSessionNo(round, sortedRounds) })}</span>
+                {round.status && <StatusBadge status={roundStatusKey(round.status)} />}
               </button>
             ))}
-            <Button size="sm" variant="outline" className="gap-1" onClick={() => setCreateRoundOpen(true)}>
+            <Button variant="outline" className="h-auto gap-1 rounded-xl px-4 py-2.5" onClick={() => setCreateRoundOpen(true)}>
               <Plus className="size-3.5" />
               {t("reviewBoard.newRound")}
             </Button>
@@ -153,46 +153,22 @@ export function ReviewBoardPage() {
             <>
               <div className="flex flex-wrap items-center gap-2 rounded-lg bg-muted/40 px-3 py-2">
                 <span className="text-sm font-semibold text-foreground">
-                  {t("staff.round", { num: selectedRound.roundNumber })}
-                </span>
-                <span className="text-xs text-muted-foreground">
                   {t(`reviewBoard.type.${selectedRound.roundType}`)}
                 </span>
-                {selectedRound.status && <StatusBadge status={selectedRound.status} />}
-                {/* Hạn chấm — trước 27/08 màn này hoàn toàn không hiện, dù luật đã có sẵn từ
-                    25/08: phải mở đúng màn "Đề cương" của TỪNG đề tài mới đặt được, mà đây mới
-                    là màn Staff thực sự quản lý vòng chấm. */}
-                {selectedRound.status !== "PASSED" && selectedRound.status !== "FAILED" && (
-                  <div className="flex items-center gap-1.5">
-                    {selectedRound.scoringDeadline ? (
-                      <button type="button" onClick={() => setDeadlineRound(selectedRound)}>
-                        <DeadlineBadge
-                          deadline={selectedRound.scoringDeadline}
-                          daysLeft={selectedRound.scoringDaysLeft}
-                          isExtended={false}
-                          className="cursor-pointer"
-                        />
-                      </button>
-                    ) : (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-1"
-                        onClick={() => setDeadlineRound(selectedRound)}
-                      >
-                        <CalendarClock className="size-3.5" />
-                        {t("roundDeadline.setTitle")}
-                      </Button>
-                    )}
-                  </div>
-                )}
+                <span className="text-xs text-muted-foreground">
+                  {t("reviewBoard.session", { n: roundSessionNo(selectedRound, sortedRounds) })}
+                </span>
+                {selectedRound.status && <StatusBadge status={roundStatusKey(selectedRound.status)} />}
                 {/* Bộ tiêu chí riêng cho vòng này — để trống thì dùng bộ theo (đợt + lĩnh vực). */}
                 <div className="ml-auto">
                   <RoundRubricPicker round={selectedRound} cycleId={cycleId as number} trackId={trackId as number} />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              {/* Mốc thời gian của vòng — hiện cho MỌI vòng, kể cả vòng đã chốt (01/10). */}
+              <RoundTimelineStrip round={selectedRound} onSetDeadline={setDeadlineRound} />
+
+              <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
                 <RoundCouncilsPanel round={selectedRound} cycleId={cycleId as number} trackId={trackId as number} />
                 <RoundProposalsPanel
                   round={selectedRound}

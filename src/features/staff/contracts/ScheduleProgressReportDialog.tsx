@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { useScheduleProgressReportMutation,
   useProgressReportQuery,
 } from "@/hooks/useProgressReports";
-import { fromDateTimeLocalInput, toDateTimeLocalInput } from "@/utils/format";
+import { formatDate, fromDateTimeLocalInput, toDateTimeLocalInput } from "@/utils/format";
 
 interface ScheduleProgressReportDialogProps {
   open: boolean;
@@ -51,6 +51,14 @@ export function ScheduleProgressReportDialog({
     .sort()
     .at(-1);
   const maxDueDate = contractEndDate?.slice(0, 10);
+  // Mốc chặn dưới là mốc nào trong ba — để câu giải thích nói ĐÚNG lý do (01/10). Trước đây lịch khoá
+  // ngày mà không nói vì sao, người dùng tưởng hỏng.
+  const minReason =
+    minDueDate === report?.reportingPeriodStart?.slice(0, 10) && minDueDate !== today
+      ? t("contract.minReasonPeriod")
+      : minDueDate === contractStartDate?.slice(0, 10) && minDueDate !== today
+        ? t("contract.minReasonContract")
+        : t("contract.minReasonToday");
   const nowLocal = toDateTimeLocalInput(new Date());
   const maxMeetingAt = maxDueDate ? `${maxDueDate}T23:59` : undefined;
 
@@ -96,6 +104,11 @@ export function ScheduleProgressReportDialog({
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
             />
+            {minDueDate && maxDueDate && (
+              <p className="mt-1 text-xs text-foreground">
+                {t("contract.dueDateRange", { min: formatDate(minDueDate), max: formatDate(maxDueDate), reason: minReason })}
+              </p>
+            )}
             {/* Đặt lại ngày ở đây = GIA HẠN hạn nộp (thầy 29/07: đánh giá trúng ngày cuối thì gia hạn được). */}
             <p className="mt-1 text-xs text-muted-foreground">{t("contract.dueDateExtendHint")}</p>
           </div>
@@ -108,12 +121,9 @@ export function ScheduleProgressReportDialog({
               value={scheduledMeetingAt}
               onChange={(e) => setScheduledMeetingAt(e.target.value)}
             />
-            {contractStartDate && contractEndDate && (
+            {maxDueDate && (
               <p className="mt-1 text-xs text-muted-foreground">
-                {t("contract.scheduleWithinContract", {
-                  start: contractStartDate.slice(0, 10),
-                  end: contractEndDate.slice(0, 10),
-                })}
+                {t("contract.meetingRange", { max: formatDate(maxDueDate) })}
               </p>
             )}
           </div>

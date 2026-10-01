@@ -12,6 +12,8 @@ export interface Contract {
   researchTypeId?: number;
   researchTypeCode?: string | null;
   researchTypeName?: string | null;
+  /** Số kỳ báo cáo tiến độ mặc định theo loại đề tài (QĐ543 Điều 10.1) — máy chủ tính. */
+  defaultProgressRounds?: number;
   cycleId?: number;
   cycleCode?: string | null;
   trackId?: number;

@@ -6,10 +6,17 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
+import { ProgressMinutesLinks } from "@/components/shared/ProgressMinutesLinks";
 import { DeadlineBadge } from "@/components/shared/DeadlineBadge";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
-import { useDeleteProgressReportMutation, useGenerateProgressRoundsMutation, useProgressReportQuery, useProgressReportsQuery } from "@/hooks/useProgressReports";
+import {
+  useDeleteProgressReportMutation,
+  useGenerateProgressRoundsMutation,
+  useProgressReportQuery,
+  useProgressReportsQuery,
+} from "@/hooks/useProgressReports";
 import { ScheduleProgressReportDialog } from "@/features/staff/contracts/ScheduleProgressReportDialog";
+import { ProgressSchedulePreview } from "@/features/staff/contracts/ProgressSchedulePreview";
 import { EvaluateProgressReportDialog } from "@/features/staff/contracts/EvaluateProgressReportDialog";
 import { externalUrl, formatDate, formatDateTime } from "@/utils/format";
 import { ProgressReportDetailSheet } from "@/components/shared/DossierDetailSheet";
@@ -18,10 +25,13 @@ export function ProgressReportsPanel({
   contractId,
   contractStartDate,
   contractEndDate,
+  defaultRounds = 1,
 }: {
   contractId: string;
   contractStartDate?: string | null;
   contractEndDate?: string | null;
+  /** Số kỳ mặc định theo loại đề tài — QĐ543 Điều 10.1 (Ứng dụng 2, Cơ bản 1). */
+  defaultRounds?: number;
 }) {
   // Chi tiết nạp riêng: danh sách chỉ trả bản tóm tắt, không có nội dung PI đã gõ.
   const [openReportId, setOpenReportId] = useState<string | null>(null);
@@ -36,6 +46,8 @@ export function ProgressReportsPanel({
   const [roundCount, setRoundCount] = useState("");
   const [deletingReportId, setDeletingReportId] = useState<string | null>(null);
   const [confirmGenerate, setConfirmGenerate] = useState(false);
+  const plannedCount = roundCount ? Number(roundCount) : defaultRounds;
+  const existingRounds = (reports ?? []).map((r) => r.reportRound ?? 0);
 
   return (
     <div className="space-y-3">
@@ -51,7 +63,7 @@ export function ProgressReportsPanel({
           min={1}
           max={12}
           className="w-20"
-          placeholder={t("reports.auto")}
+          placeholder={String(defaultRounds)}
           value={roundCount}
           onChange={(e) => setRoundCount(e.target.value)}
         />
@@ -65,6 +77,18 @@ export function ProgressReportsPanel({
           {t("reports.generateRounds")}
         </Button>
       </div>
+
+      {/* Xem trước lịch sẽ tạo: hợp đồng từ đâu tới đâu, mấy kỳ, mỗi kỳ hạn ngày nào (01/10).
+          Đủ kỳ rồi thì thôi — các kỳ đã tạo có thể đã dời ngày, xem trước lúc đó chỉ gây rối. */}
+      {existingRounds.length < plannedCount && (
+        <ProgressSchedulePreview
+          startDate={contractStartDate}
+          endDate={contractEndDate}
+          count={plannedCount}
+          isDefault={!roundCount}
+          existingRounds={existingRounds}
+        />
+      )}
 
       {isLoading ? (
         <div className="space-y-2">
@@ -110,9 +134,7 @@ export function ProgressReportsPanel({
                   <CalendarClock className="size-3.5" />
                   {t("reports.dueOn", { date: formatDate(report.dueDate) })}
                   {/* Kỳ CHƯA nộp mới cần đếm ngược; nộp rồi thì hạn hết ý nghĩa. */}
-                  {!report.submittedAt && (
-                    <DeadlineBadge deadline={report.dueDate} daysLeft={report.daysLeft} />
-                  )}
+                  {!report.submittedAt && <DeadlineBadge deadline={report.dueDate} daysLeft={report.daysLeft} />}
                   {report.scheduledMeetingAt &&
                     ` · ${t("reports.workingSessionAt", { datetime: formatDateTime(report.scheduledMeetingAt) })}`}
                 </p>
@@ -131,28 +153,44 @@ export function ProgressReportsPanel({
               )}
 
               {report.evaluationResult && (
-                <p className="text-xs text-muted-foreground">
-                  {t("reports.evaluationLabel")} <StatusBadge status={report.evaluationResult} />
-                  {report.evaluationComments && ` — ${report.evaluationComments}`}
-                </p>
+                <div className="space-y-1 text-xs text-muted-foreground">
+                  <p>
+                    {t("reports.evaluationLabel")} <StatusBadge status={report.evaluationResult} />
+                    {report.evaluationComments && ` — ${report.evaluationComments}`}
+                  </p>
+                  <ProgressMinutesLinks reportId={report.id} />
+                </div>
               )}
 
-              <div className="flex gap-2 pt-1">
-                <Button variant="outline" size="sm" onClick={() => setSchedulingReportId(report.id)}>
-                  <CalendarClock />
-                  {t("reports.scheduleSession")}
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => setEvaluatingReportId(report.id)}>
-                  <ClipboardCheck />
-                  {t("reports.evaluateReport")}
-                </Button>
-                {report.status === "DRAFT" && (
-                  <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => setDeletingReportId(report.id)}>
-                    <Trash2 />
-                    {t("common.delete")}
-                  </Button>
-                )}
-              </div>
+              {/* Đã có kết luận hội đồng thì kỳ đóng lại — không đặt lịch / ghi nhận lại nữa (BE cũng
+                  chỉ nhận kỳ đang ở trạng thái Đã nộp). Trước 01/10 hai nút này hiện mãi. */}
+              {(!report.evaluationResult || report.status === "DRAFT") && (
+                <div className="flex gap-2 pt-1">
+                  {!report.evaluationResult && (
+                    <Button variant="outline" size="sm" onClick={() => setSchedulingReportId(report.id)}>
+                      <CalendarClock />
+                      {t("reports.scheduleSession")}
+                    </Button>
+                  )}
+                  {report.status === "SUBMITTED" && (
+                    <Button size="sm" onClick={() => setEvaluatingReportId(report.id)}>
+                      <ClipboardCheck />
+                      {t("reports.evaluateReport")}
+                    </Button>
+                  )}
+                  {report.status === "DRAFT" && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive"
+                      onClick={() => setDeletingReportId(report.id)}
+                    >
+                      <Trash2 />
+                      {t("common.delete")}
+                    </Button>
+                  )}
+                </div>
+              )}
             </li>
           ))}
         </ul>
@@ -182,13 +220,15 @@ export function ProgressReportsPanel({
         onOpenChange={setConfirmGenerate}
         title={t("reports.generateRoundsTitle")}
         description={t("reports.generateRoundsDescription", {
-          count: roundCount || t("reports.auto"),
+          count: plannedCount,
         })}
         confirmLabel={t("reports.generateRounds")}
         isLoading={generateMutation.isPending}
-        onConfirm={() => generateMutation.mutate(roundCount ? Number(roundCount) : undefined, {
-          onSuccess: () => setConfirmGenerate(false),
-        })}
+        onConfirm={() =>
+          generateMutation.mutate(roundCount ? Number(roundCount) : undefined, {
+            onSuccess: () => setConfirmGenerate(false),
+          })
+        }
       />
       <ConfirmDialog
         open={Boolean(deletingReportId)}
@@ -198,9 +238,12 @@ export function ProgressReportsPanel({
         confirmLabel={t("common.delete")}
         variant="destructive"
         isLoading={deleteMutation.isPending}
-        onConfirm={() => deletingReportId && deleteMutation.mutate(deletingReportId, {
-          onSuccess: () => setDeletingReportId(null),
-        })}
+        onConfirm={() =>
+          deletingReportId &&
+          deleteMutation.mutate(deletingReportId, {
+            onSuccess: () => setDeletingReportId(null),
+          })
+        }
       />
     </div>
   );

@@ -1,6 +1,6 @@
 import { axiosClient } from "@/services/api/axiosClient";
 import type { ApiResponse } from "@/types/common";
-import type { Amendment, AmendmentCategory, CreateAmendmentPayload } from "@/types/amendment";
+import type { Amendment, AmendmentCategory, CreateAmendmentPayload, PendingAmendment } from "@/types/amendment";
 
 export const amendmentService = {
   listByContract: (contractId: string) =>
@@ -10,6 +10,10 @@ export const amendmentService = {
     axiosClient
       .post<ApiResponse<Amendment>>(`/contracts/${contractId}/amendments`, payload)
       .then((res) => res.data.data),
+
+  /** Đơn chờ duyệt của MỌI hợp đồng (Staff/Admin). */
+  listPending: () =>
+    axiosClient.get<ApiResponse<PendingAmendment[]>>("/amendments/pending").then((res) => res.data.data),
 
   approve: (id: string, reviewerComments?: string) =>
     axiosClient

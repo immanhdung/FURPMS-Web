@@ -42,6 +42,8 @@ export function useReviewDuplicateMutation(proposalId: string) {
       qc.setQueryData(queryKeys.duplicateCheck.detail(proposalId), data);
       // Kết luận sinh một dòng trong sổ quyết định — làm mới để hồ sơ hiện ngay.
       qc.invalidateQueries({ queryKey: queryKeys.projectDecisions.all() });
+      // "Trùng lặp" từ chối luôn đề cương ⇒ trạng thái đề cương đổi.
+      qc.invalidateQueries({ queryKey: queryKeys.proposals.all() });
       toast.success("Đã ghi kết luận rà trùng lặp vào hồ sơ đề tài.");
     },
   });
