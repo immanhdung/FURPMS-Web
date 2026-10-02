@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { Loader2, Sparkles } from "lucide-react";
+import { ListChecks, Loader2, RotateCcw, Sparkles } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +8,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   useProposalSummaryQuery,
   useReviewKitMutation,
+  useScoreSuggestionsQuery,
+  useSuggestScoresMutation,
   useSummarizeProposalMutation,
 } from "@/hooks/useProposalAi";
 import { formatDateTime } from "@/utils/format";
@@ -43,17 +45,30 @@ export function AiSummaryCard({
   const { data: cached, isLoading } = useProposalSummaryQuery(proposalId);
   const summarizeMutation = useSummarizeProposalMutation();
   const reviewKitMutation = useReviewKitMutation(councilId ?? "");
+  const suggestMutation = useSuggestScoresMutation(councilId ?? "");
   const aiCooldown = useAiCooldown();
 
   const isCouncilMode = Boolean(councilId);
-  const isWorking = isCouncilMode ? reviewKitMutation.isPending : summarizeMutation.isPending;
+  // Gợi ý điểm đã lưu (chỉ đọc, không gọi Gemini) — để biết còn THIẾU phần nào mà tự chạy bù.
+  const { data: suggestions, isLoading: isSuggestionsLoading } = useScoreSuggestionsQuery(
+    councilId ?? "",
+    isCouncilMode ? proposalId : null
+  );
+  const hasSuggestions = (suggestions?.length ?? 0) > 0;
+  const isSummaryWorking = summarizeMutation.isPending || reviewKitMutation.isPending;
+  const isSuggestWorking = suggestMutation.isPending || reviewKitMutation.isPending;
+  const isWorking = isCouncilMode ? isSummaryWorking || isSuggestWorking : summarizeMutation.isPending;
+  const options = { onSettled: () => aiCooldown.start() };
   const run = () => {
-    const options = { onSettled: () => aiCooldown.start() };
     if (isCouncilMode) reviewKitMutation.mutate(proposalId, options);
     else summarizeMutation.mutate(proposalId, options);
   };
+  // 03/10: chạy LẠI riêng từng phần — trước đây chỉ có một nút chạy cả hai (30–60 giây và tốn
+  // lượt Gemini) dù người chấm chỉ muốn gợi ý điểm mới.
+  const rerunSummary = () => summarizeMutation.mutate(proposalId, options);
+  const rerunSuggestions = () => suggestMutation.mutate(proposalId, options);
 
-  const summary = reviewKitMutation.data?.summary ?? summarizeMutation.data ?? cached ?? null;
+  const summary = summarizeMutation.data ?? reviewKitMutation.data?.summary ?? cached ?? null;
 
   /**
    * Thầy 05/08: *"phần tạo tóm tắt AI phải tự động chạy trước khi vào page chấm điểm, không cần
@@ -62,12 +77,24 @@ export function AiSummaryCard({
    */
   const triggered = useRef(false);
   useEffect(() => {
-    if (!autoGenerate || isLoading || cached || triggered.current) return;
+    if (!autoGenerate || isLoading || triggered.current) return;
+    if (!isCouncilMode) {
+      if (cached) return;
+      triggered.current = true;
+      run();
+      return;
+    }
+    // Màn CHẤM: chạy bù đúng phần còn thiếu (03/10). Trước đây đã có tóm tắt (sinh từ lúc PI nộp)
+    // là không chạy gì — gợi ý điểm không bao giờ tự có, người chấm phải bấm "Chạy lại".
+    if (isSuggestionsLoading) return;
+    if (cached && hasSuggestions) return;
     triggered.current = true;
-    run();
-    // Chỉ chạy MỘT lần cho mỗi đề cương; `run` đổi tham chiếu mỗi lần render nên không đưa vào deps.
+    if (!cached && !hasSuggestions) reviewKitMutation.mutate(proposalId, options);
+    else if (!hasSuggestions) suggestMutation.mutate(proposalId, options);
+    else summarizeMutation.mutate(proposalId, options);
+    // Chỉ chạy MỘT lần cho mỗi đề cương; các hàm mutate đổi tham chiếu mỗi lần render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoGenerate, isLoading, cached, proposalId]);
+  }, [autoGenerate, isLoading, cached, isSuggestionsLoading, hasSuggestions, proposalId]);
   // Bản người sửa tay được ưu tiên hơn bản AI viết (PATCH /proposals/{id}/summary).
   const text = summary?.editedText?.trim() || summary?.summaryText?.trim() || "";
 
@@ -83,26 +110,47 @@ export function AiSummaryCard({
               {isCouncilMode ? t("proposal.aiReviewKit") : t("proposal.aiSummary")}
             </CardTitle>
           </div>
-          <Button variant="outline" size="sm" onClick={run} disabled={isWorking || aiCooldown.seconds > 0}>
-            {isWorking ? <Loader2 className="animate-spin" /> : <Sparkles />}
-            {aiCooldown.seconds > 0
-              ? t("proposal.aiCooldown", { seconds: aiCooldown.seconds })
-              : isCouncilMode
-              ? text
-                ? t("proposal.aiReviewKitAgain")
-                : t("proposal.aiReviewKitRun")
-              : text
-                ? t("proposal.regenerate")
-                : t("proposal.generate")}
-          </Button>
+          {isCouncilMode && (text || hasSuggestions) ? (
+            <div className="flex flex-wrap justify-end gap-1.5">
+              <Button variant="outline" size="sm" onClick={rerunSummary} disabled={isWorking || aiCooldown.seconds > 0}>
+                {isSummaryWorking ? <Loader2 className="animate-spin" /> : <RotateCcw />}
+                {aiCooldown.seconds > 0 ? t("proposal.aiCooldown", { seconds: aiCooldown.seconds }) : t("proposal.aiRerunSummary")}
+              </Button>
+              <Button variant="outline" size="sm" onClick={rerunSuggestions} disabled={isWorking || aiCooldown.seconds > 0}>
+                {isSuggestWorking ? <Loader2 className="animate-spin" /> : <ListChecks />}
+                {t("proposal.aiRerunScores")}
+              </Button>
+            </div>
+          ) : (
+            <Button variant="outline" size="sm" onClick={run} disabled={isWorking || aiCooldown.seconds > 0}>
+              {isWorking ? <Loader2 className="animate-spin" /> : <Sparkles />}
+              {aiCooldown.seconds > 0
+                ? t("proposal.aiCooldown", { seconds: aiCooldown.seconds })
+                : isCouncilMode
+                ? t("proposal.aiReviewKitRun")
+                : text
+                  ? t("proposal.regenerate")
+                  : t("proposal.generate")}
+            </Button>
+          )}
         </div>
+        {/* Nói rõ gợi ý điểm nằm ở đâu — chúng hiện dưới TỪNG tiêu chí của phiếu chấm, không ở thẻ này. */}
+        {isCouncilMode && (
+          <p className="mt-1 text-xs text-muted-foreground">
+            {isSuggestWorking
+              ? t("proposal.aiScoresWorking")
+              : hasSuggestions
+                ? t("proposal.aiScoresReady", { n: suggestions?.length ?? 0 })
+                : t("proposal.aiScoresNone")}
+          </p>
+        )}
       </CardHeader>
       <CardContent>
-        {isLoading || isWorking ? (
+        {isLoading || (isCouncilMode ? isSummaryWorking : isWorking) ? (
           /* AI đọc file rồi mới tóm tắt nên mất 30–60 giây. Chỉ hiện khung xám thì trông như treo —
              lúc demo là người xem tưởng hỏng. Nói thẳng đang làm gì và mất bao lâu. */
           <div className="space-y-2">
-            {isWorking && (
+            {(isCouncilMode ? isSummaryWorking : isWorking) && (
               <p className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Loader2 className="size-4 animate-spin" />
                 {isCouncilMode ? t("proposal.aiReviewKitWorking") : t("proposal.aiSummaryWorking")}

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
 import { FileSignature, Filter, Plus } from "lucide-react";
@@ -45,7 +46,33 @@ export function ContractsPage() {
   ), [sortedData, researchType, cycle, track, stage]);
 
   const [createOpen, setCreateOpen] = useState(false);
-  const [detailContractId, setDetailContractId] = useState<string | null>(null);
+  // Hợp đồng đang mở + tab đang xem nằm trên URL (03/10): tải lại trang lúc demo vẫn mở đúng chỗ,
+  // gửi link cho người khác cũng vậy. Dùng replace để nút Back không phải lùi qua từng lần đổi tab.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const detailContractId = searchParams.get("contract");
+  const detailTab = searchParams.get("tab") ?? "timeline";
+  const setDetailContractId = (id: string | null) =>
+    setSearchParams(
+      (prev) => {
+        const p = new URLSearchParams(prev);
+        if (id) p.set("contract", id);
+        else {
+          p.delete("contract");
+          p.delete("tab");
+        }
+        return p;
+      },
+      { replace: true }
+    );
+  const setDetailTab = (tab: string) =>
+    setSearchParams(
+      (prev) => {
+        const p = new URLSearchParams(prev);
+        p.set("tab", tab);
+        return p;
+      },
+      { replace: true }
+    );
   // Cùng một sheet dùng cho tạo và sửa — có `editing` là chế độ sửa.
   const [editing, setEditing] = useState<Contract | null>(null);
   const [deleting, setDeleting] = useState<Contract | null>(null);
@@ -167,6 +194,8 @@ export function ContractsPage() {
         open={Boolean(detailContractId)}
         onOpenChange={(open) => !open && setDetailContractId(null)}
         contractId={detailContractId}
+        tab={detailTab}
+        onTabChange={setDetailTab}
       />
     </div>
   );

@@ -11,6 +11,9 @@ interface CouncilCandidatePickerProps {
   value: string | undefined;
   onChange: (userId: string) => void;
   showTrack: boolean;
+  /** Dòng thấp, danh sách ngắn hơn — dùng khi bộ chọn mở NGAY trong form (tạo hội đồng). */
+  compact?: boolean;
+  autoFocus?: boolean;
 }
 
 /**
@@ -24,7 +27,14 @@ interface CouncilCandidatePickerProps {
  * <p>Người không chọn được (xung đột lợi ích, đã có tên) vẫn HIỆN, dồn xuống nhóm cuối — giấu đi thì
  * không ai hiểu vì sao tìm mãi không thấy một cái tên.</p>
  */
-export function CouncilCandidatePicker({ candidates, value, onChange, showTrack }: CouncilCandidatePickerProps) {
+export function CouncilCandidatePicker({
+  candidates,
+  value,
+  onChange,
+  showTrack,
+  compact = false,
+  autoFocus = false,
+}: CouncilCandidatePickerProps) {
   const { t } = useTranslation();
   const [query, setQuery] = useState("");
 
@@ -58,7 +68,8 @@ export function CouncilCandidatePicker({ candidates, value, onChange, showTrack 
         disabled={disabled}
         onClick={() => onChange(c.userId)}
         className={cn(
-          "flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors",
+          "flex w-full items-center gap-3 rounded-lg border text-left transition-colors",
+          compact ? "px-2.5 py-1.5" : "px-3 py-2.5",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           selected ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50",
           disabled && "cursor-not-allowed opacity-60 hover:bg-transparent"
@@ -101,11 +112,15 @@ export function CouncilCandidatePicker({ candidates, value, onChange, showTrack 
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t("staff.searchCandidate")}
           className="pl-8"
+          autoFocus={autoFocus}
           aria-label={t("staff.searchCandidate")}
         />
       </div>
 
-      <div role="radiogroup" className="max-h-72 space-y-1.5 overflow-y-auto pr-1">
+      <div
+        role="radiogroup"
+        className={cn("space-y-1.5 overflow-y-auto overscroll-contain pr-1", compact ? "max-h-56" : "max-h-72")}
+      >
         {available.length === 0 && blocked.length === 0 && (
           <p className="py-6 text-center text-sm text-muted-foreground">{t("staff.noCandidateMatch")}</p>
         )}

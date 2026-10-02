@@ -71,9 +71,14 @@ export function useCheckConsistencyMutation() {
 
 /** AI gợi ý điểm theo từng tiêu chí — người chấm vẫn quyết định cuối (rule #12). */
 export function useSuggestScoresMutation(councilId: string) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (proposalId: string) => aiService.suggestScores(councilId, proposalId),
-    onError: () => toast.error("Unable to generate AI feedback."),
+    // Ghi thẳng vào cache mà phiếu chấm đang đọc — chạy riêng phần gợi ý điểm (03/10) thì phiếu
+    // chấm cũng tự hiện gợi ý mới, không phải tải lại trang.
+    onSuccess: (suggestions, proposalId) =>
+      queryClient.setQueryData(scoreSuggestionKey(councilId, proposalId), suggestions),
+    onError: (error) => showAiError(error, "Không tạo được gợi ý điểm AI."),
   });
 }
 

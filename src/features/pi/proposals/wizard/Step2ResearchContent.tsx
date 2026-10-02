@@ -128,22 +128,26 @@ export function Step2ResearchContent({ form, file, onFileChange, proposalId }: S
     if (result.teamMembers?.length) {
       const label = t("wizard.step2.fieldMembers");
       const current = getValues("members") ?? [];
-      if (getFieldState("members").isDirty || current.length > 0) preserved.push(label);
+      // 03/10: trước đây danh sách đã có ai (vd bấm "Điền dữ liệu mẫu", hay nộp lại file lần 2) là
+      // AI bỏ qua CẢ danh sách — PI thấy "AI không điền thành viên". Nay chỉ THÊM người còn thiếu
+      // (so theo tên), người PI đã nhập giữ nguyên.
+      const norm = (s: string) => s.trim().toLowerCase();
+      const known = new Set(current.map((m) => norm(m.fullName ?? "")));
+      const toAdd = result.teamMembers
+        .filter((member) => member.fullName?.trim() && !known.has(norm(member.fullName)))
+        .map((member) => ({
+          fullName: member.fullName.trim(),
+          email: member.email?.trim() ?? "",
+          department: member.department ?? "",
+          academicTitle: member.academicTitle ?? "",
+          role: member.role ?? "",
+          workMonths: member.workMonths ?? 0,
+          memberRoleCode: "",
+          isSecretary: member.isSecretary,
+        }));
+      if (toAdd.length === 0) preserved.push(label);
       else {
-        setValue(
-          "members",
-          result.teamMembers.map((member) => ({
-            fullName: member.fullName,
-            email: member.email?.trim() ?? "",
-            department: member.department ?? "",
-            academicTitle: member.academicTitle ?? "",
-            role: member.role ?? "",
-            workMonths: member.workMonths ?? 0,
-            memberRoleCode: "",
-            isSecretary: member.isSecretary,
-          })),
-          { shouldValidate: true, shouldDirty: true }
-        );
+        setValue("members", [...current, ...toAdd], { shouldValidate: true, shouldDirty: true });
         applied.push(label);
       }
     }

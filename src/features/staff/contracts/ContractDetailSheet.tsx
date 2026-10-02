@@ -34,9 +34,12 @@ interface ContractDetailSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   contractId: string | null;
+  /** Tab đang xem — do trang cha giữ trên URL. Không truyền thì tự quản như cũ. */
+  tab?: string;
+  onTabChange?: (tab: string) => void;
 }
 
-export function ContractDetailSheet({ open, onOpenChange, contractId }: ContractDetailSheetProps) {
+export function ContractDetailSheet({ open, onOpenChange, contractId, tab, onTabChange }: ContractDetailSheetProps) {
   const { t } = useTranslation();
   const { data: contract, isLoading } = useContractQuery(contractId);
   const { data: proposal } = useProposalQuery(contract?.proposalId ?? null);
@@ -244,7 +247,7 @@ export function ContractDetailSheet({ open, onOpenChange, contractId }: Contract
               </Dialog>
 
               {/* Thứ tự tab theo đúng dòng đời hợp đồng: tiền → sản phẩm → báo cáo → tổng kết → điều chỉnh → chốt sổ */}
-              <Tabs defaultValue="timeline">
+              <Tabs {...(tab ? { value: tab, onValueChange: onTabChange } : { defaultValue: "timeline" })}>
                 {/* Lưới đều 7 tab — sheet rộng thì 4/hàng, hẹp thì 2/hàng. Mọi tab hiện hết, không cắt. */}
                 <TabsList className="grid h-auto w-full grid-cols-2 gap-1 sm:grid-cols-4">
                   <TabsTrigger value="timeline" className="w-full text-xs">{t("contract.tabs.timeline")}</TabsTrigger>

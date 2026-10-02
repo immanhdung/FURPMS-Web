@@ -1,8 +1,23 @@
 import { axiosClient } from "@/services/api/axiosClient";
 import type { ApiResponse } from "@/types/common";
-import type { DecisionResponse, SaveMinutesPayload } from "@/types/decision";
+import type { DecisionResponse, ProjectMinutes, SaveMinutesPayload } from "@/types/decision";
 
 export const decisionService = {
+  /** Biên bản đã khoá của một đề tài — PI, Phòng QLKH, thành viên hội đồng. */
+  listForProject: (projectId: string) =>
+    axiosClient
+      .get<ApiResponse<ProjectMinutes[]>>(`/review-scoring/projects/${projectId}/minutes`)
+      .then((res) => res.data.data),
+
+  /** Word theo BM04 (xét duyệt) / BM12 (nghiệm thu) — chỉ bản đã khoá. */
+  exportWord: (councilId: string, projectId: string) =>
+    axiosClient
+      .get<Blob>(`/review-scoring/councils/${councilId}/minutes/export-word`, {
+        params: { projectId },
+        responseType: "blob",
+      })
+      .then((res) => res.data),
+
   get: (councilId: string, projectId?: string) =>
     axiosClient
       .get<ApiResponse<DecisionResponse | null>>(`/review-scoring/councils/${councilId}/decision`, {

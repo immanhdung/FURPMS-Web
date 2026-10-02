@@ -41,6 +41,12 @@ export function RubricScoringForm({ councilId, proposalId, projectId }: RubricSc
   const { data: scoringPolicy } = useScoringPolicyQuery();
   const scoreDecimals = scoringPolicy?.scoreDecimalPlaces ?? 0;
   const scoreStep = scoreDecimals > 0 ? String(1 / 10 ** scoreDecimals) : "1";
+  // Làm tròn theo ĐÚNG số chữ số thập phân hệ thống cho phép (03/10): AI từng gợi ý 7.5 khi hệ
+  // thống chấm số nguyên ⇒ bấm "Áp dụng" rồi nộp bị lỗi. BE nay cũng làm tròn; đây phủ cả gợi ý cũ.
+  const roundScore = (v: number, max: number) => {
+    const f = 10 ** scoreDecimals;
+    return Math.min(Math.max(Math.round(v * f) / f, 0), max);
+  };
   // Lấy ĐÚNG bộ tiêu chí cho hội đồng này: BE tự suy (đợt + lĩnh vực + loại vòng) từ councilId
   // rồi trả bộ đã gắn cho lĩnh vực đó; chưa gắn thì trả bộ mặc định (không bao giờ kẹt).
   const { data: resolvedTemplate, isLoading: isTemplatesLoading } = useRubricForCouncilQuery(councilId);
@@ -162,6 +168,23 @@ export function RubricScoringForm({ councilId, proposalId, projectId }: RubricSc
    *
    * Không tự nộp — vẫn phải bấm nút nộp, để không ai lỡ tay gửi phiếu chưa xem.
    */
+  const applyAllSuggestions = () => {
+    setScores((prev) => {
+      const next = { ...prev };
+      for (const c of activeCriteria) {
+        const s = suggestionById.get(c.id);
+        if (!s) continue;
+        next[c.id] = {
+          givenScore: isAcceptanceRubric
+            ? toStoredAcceptanceScore(toAcceptanceRating(s.suggestedScore, c.maxScore), c.maxScore)
+            : roundScore(s.suggestedScore, c.maxScore),
+          comments: prev[c.id]?.comments || s.comment,
+        };
+      }
+      return next;
+    });
+  };
+
   const fillAll = () => {
     const filled: Record<number, { givenScore: number; comments: string }> = {};
     for (const c of activeCriteria) {
@@ -199,6 +222,20 @@ export function RubricScoringForm({ councilId, proposalId, projectId }: RubricSc
           <Button type="button" variant="outline" size="sm" onClick={fillAll}>
             <Wand2 />
             {t("review.quickFill")}
+          </Button>
+        </div>
+      )}
+
+      {/* Áp dụng một lần cho mọi tiêu chí — trước đây phải bấm "Áp dụng" từng ô. Vẫn không tự nộp. */}
+      {proposalId && suggestionById.size > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/15 bg-primary/4 px-3 py-2">
+          <p className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Sparkles className="size-3.5 shrink-0 text-primary" />
+            {t("review.aiSuggestReady")}
+          </p>
+          <Button type="button" size="sm" variant="outline" onClick={applyAllSuggestions}>
+            <Sparkles />
+            {t("review.aiApplyAll")}
           </Button>
         </div>
       )}
@@ -313,7 +350,7 @@ export function RubricScoringForm({ councilId, proposalId, projectId }: RubricSc
                   <div className="min-w-0 flex-1">
                     <p className="font-medium text-foreground">
                       {t("review.aiSuggestedScore", {
-                        score: suggestionById.get(criterion.id)!.suggestedScore,
+                        score: roundScore(suggestionById.get(criterion.id)!.suggestedScore, criterion.maxScore),
                         max: criterion.maxScore,
                       })}
                     </p>
@@ -334,7 +371,7 @@ export function RubricScoringForm({ councilId, proposalId, projectId }: RubricSc
                                 toAcceptanceRating(s.suggestedScore, criterion.maxScore),
                                 criterion.maxScore,
                               )
-                            : s.suggestedScore,
+                            : roundScore(s.suggestedScore, criterion.maxScore),
                           comments: prev[criterion.id]?.comments || s.comment,
                         },
                       }));

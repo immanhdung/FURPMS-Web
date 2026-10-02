@@ -5,14 +5,23 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { FormSheet } from "@/components/shared/FormSheet";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ApprovedProposalPicker } from "@/features/staff/contracts/ApprovedProposalPicker";
 import { useContractsQuery, useCreateContractMutation, useUpdateContractMutation } from "@/hooks/useContracts";
 import { useProposalsQuery } from "@/hooks/useProposals";
 import { PROPOSAL_STATUS } from "@/constants/statuses";
 import { contractSchema, type ContractFormValues } from "@/features/staff/contracts/contract.schema";
 import type { Contract } from "@/types/contract";
 
-import { proposalTitle } from "@/utils/format";
+/** Cộng N tháng vào ngày "yyyy-MM-dd"; ngày không tồn tại (31/02) lùi về cuối tháng. */
+function addMonthsIso(iso: string, months: number): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  if (!y || !m || !d) return "";
+  const target = new Date(y, m - 1 + months, 1);
+  const lastDay = new Date(target.getFullYear(), target.getMonth() + 1, 0).getDate();
+  target.setDate(Math.min(d, lastDay));
+  return target.toLocaleDateString("en-CA");
+}
+
 interface CreateContractSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -56,6 +65,7 @@ export function CreateContractSheet({ open, onOpenChange, contract = null }: Cre
     watch,
     setValue,
     getValues,
+    getFieldState,
     formState: { errors },
   } = useForm<ContractFormValues>({
     resolver: zodResolver(contractSchema),
@@ -120,6 +130,17 @@ export function CreateContractSheet({ open, onOpenChange, contract = null }: Cre
     if (!getValues("sideARepresentative")) setValue("sideARepresentative", contractDefaults.sideARepresentative);
   }, [open, isEdit, contractDefaults, getValues, setValue]);
 
+  /**
+   * Ngày kết thúc TỰ TÍNH = ngày bắt đầu + thời gian thực hiện PI đã đăng ký (03/10). Trước đây Staff
+   * phải tự đếm tháng rồi gõ lại. Staff sửa tay ngày kết thúc thì thôi không ghi đè nữa.
+   */
+  const startDate = watch("startDate");
+  useEffect(() => {
+    if (!open || isEdit || !selectedDuration || !startDate) return;
+    if (getFieldState("endDate").isDirty) return;
+    setValue("endDate", addMonthsIso(startDate, selectedDuration), { shouldValidate: true });
+  }, [open, isEdit, selectedDuration, startDate, getFieldState, setValue]);
+
   // Chọn đề tài xong tự điền trần gia hạn — Staff không phải tự chia đôi rồi gõ tay.
   useEffect(() => {
     if (!open || isEdit || extensionCap == null) return;
@@ -149,6 +170,7 @@ export function CreateContractSheet({ open, onOpenChange, contract = null }: Cre
       onSubmit={handleSubmit(onSubmit)}
       isSubmitting={isSubmitting}
       submitLabel={isEdit ? t("common.save") : t("contract.createBtn")}
+      width={560}
     >
       {!isEdit && (
       <div>
@@ -157,18 +179,12 @@ export function CreateContractSheet({ open, onOpenChange, contract = null }: Cre
           control={control}
           name="proposalId"
           render={({ field }) => (
-            <Select value={field.value || undefined} onValueChange={field.onChange}>
-              <SelectTrigger aria-invalid={Boolean(errors.proposalId)}>
-                <SelectValue placeholder={t("contract.selectApproved")} />
-              </SelectTrigger>
-              <SelectContent>
-                {approvedProposals.map((proposal) => (
-                  <SelectItem key={proposal.id} value={proposal.id}>
-                    {proposalTitle(proposal, proposal.id)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <ApprovedProposalPicker
+              proposals={approvedProposals}
+              value={field.value}
+              onChange={field.onChange}
+              invalid={Boolean(errors.proposalId)}
+            />
           )}
         />
         {errors.proposalId && <p className="mt-1 text-xs text-destructive">{errors.proposalId.message}</p>}
@@ -210,6 +226,9 @@ export function CreateContractSheet({ open, onOpenChange, contract = null }: Cre
           </label>
           <Input id="contract-end" type="date" aria-invalid={Boolean(errors.endDate)} {...register("endDate")} />
           {errors.endDate && <p className="mt-1 text-xs text-destructive">{errors.endDate.message}</p>}
+          {!isEdit && selectedDuration > 0 && !errors.endDate && (
+            <p className="mt-1 text-xs text-muted-foreground">{t("contract.endDateAutoHint", { n: selectedDuration })}</p>
+          )}
         </div>
       </div>
 

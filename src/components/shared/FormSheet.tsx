@@ -23,6 +23,8 @@ interface FormSheetProps {
   submitLabel?: string;
   formId: string;
   submitVariant?: "default" | "destructive" | "outline" | "secondary" | "gradient";
+  /** Độ rộng ban đầu (px). Form có danh sách dài (vd tạo hội đồng) cần rộng hơn 480 mặc định. */
+  width?: number;
 }
 
 export function FormSheet({
@@ -36,19 +38,21 @@ export function FormSheet({
   submitLabel,
   formId,
   submitVariant = "gradient",
+  width = 480,
 }: FormSheetProps) {
   // Mặc định của hai nút này vốn là "Save"/"Cancel" — mọi sheet tạo/sửa không tự đặt nhãn đều lòi
   // tiếng Anh ra giữa giao diện tiếng Việt.
   const { t } = useTranslation();
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent resizable defaultWidth={480} className="flex w-full flex-col sm:max-w-md">
+      <SheetContent resizable defaultWidth={width} className="flex w-full flex-col sm:max-w-md">
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>
           {description && <SheetDescription>{description}</SheetDescription>}
         </SheetHeader>
 
-        <ScrollArea className="flex-1 px-4">
+        {/* Lớp trong của ScrollArea (Radix) là display:table nên nội dung dài đẩy rộng form thay vì xuống dòng/cắt chữ (03/10: thẻ chọn người tràn ngang). Ép về block. */}
+        <ScrollArea className="flex-1 px-4 [&_[data-radix-scroll-area-viewport]>div]:!block">
           <form id={formId} onSubmit={onSubmit} noValidate className="space-y-4 pb-4">
             {children}
           </form>

@@ -20,9 +20,10 @@ import { useCouncilPolicyQuery } from "@/hooks/useSystemSettings";
 interface CouncilMembersPanelProps {
   councilId: string;
   trackId?: string | null;
+  roundType?: string;
 }
 
-export function CouncilMembersPanel({ councilId, trackId }: CouncilMembersPanelProps) {
+export function CouncilMembersPanel({ councilId, trackId, roundType }: CouncilMembersPanelProps) {
   const { t } = useTranslation();
   const { data: members, isLoading } = useCouncilMembersQuery(councilId);
   const sendInvitationsMutation = useSendInvitationsMutation(councilId);
@@ -84,7 +85,11 @@ export function CouncilMembersPanel({ councilId, trackId }: CouncilMembersPanelP
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium text-foreground">
                   {member.reviewerName ?? member.userId}
-                  {member.memberRole && <span className="ml-1.5 text-xs text-muted-foreground">· {member.memberRole}</span>}
+                  {member.memberRole && (
+                    <span className="ml-1.5 text-xs text-muted-foreground">
+                      · {t(`reviewBoard.role.${member.memberRole}`, { defaultValue: member.memberRole })}
+                    </span>
+                  )}
                 </p>
                 <p className="truncate text-xs text-muted-foreground">{member.reviewerEmail}</p>
                 {member.confirmedAt && (
@@ -92,6 +97,19 @@ export function CouncilMembersPanel({ councilId, trackId }: CouncilMembersPanelP
                 )}
                 {member.declinedAt && (
                   <p className="text-[11px] text-muted-foreground">{t("reviewBoard.declinedAt", { at: formatDateTime(member.declinedAt) })}</p>
+                )}
+                {/* Lý do mời dù khác lĩnh vực (QĐ543 Điều 8.2) — lưu lúc thêm người, cũng được ghi vào
+                    hồ sơ quyết định của từng đề tài khi gán đề tài cho hội đồng. */}
+                {member.expertiseNote && (
+                  <p className="mt-0.5 text-xs text-warning">{t("reviewBoard.expertiseNoteLine", { note: member.expertiseNote })}</p>
+                )}
+                {/* Lý do từ chối — trước 03/10 API không trả ra nên Phòng QLKH không đọc được. */}
+                {(member.status === "DECLINED" || member.declinedAt) && (
+                  <p className="mt-0.5 text-xs text-destructive">
+                    {member.declineReason?.trim()
+                      ? t("reviewBoard.declineReason", { reason: member.declineReason.trim() })
+                      : t("reviewBoard.declineNoReason")}
+                  </p>
                 )}
               </div>
 
@@ -139,7 +157,7 @@ export function CouncilMembersPanel({ councilId, trackId }: CouncilMembersPanelP
         </ul>
       )}
 
-      <AddCouncilMemberDialog open={addOpen} onOpenChange={setAddOpen} councilId={councilId} trackId={trackId} />
+      <AddCouncilMemberDialog open={addOpen} onOpenChange={setAddOpen} councilId={councilId} trackId={trackId} roundType={roundType} />
 
       <ConfirmDialog
         open={Boolean(removingMember)}

@@ -2,7 +2,9 @@ import { z } from "zod";
 
 export const proposalMemberSchema = z.object({
   fullName: z.string().min(1, "Phải nhập tên."),
-  email: z.string().min(1, "Phải nhập email.").email("Enter a valid email"),
+  // Email KHÔNG bắt buộc (03/10): BE không cần, và thuyết minh thường chỉ ghi tên + học vị — AI
+  // điền được tên nhưng không có email để điền, PI lại bị chặn lúc nộp. Có nhập thì phải đúng dạng.
+  email: z.union([z.literal(""), z.string().email("Email không đúng định dạng.")]),
   department: z.string().optional(),
   role: z.string().optional(),
   workMonths: z.number().min(0, "Phải từ 0 trở lên."),

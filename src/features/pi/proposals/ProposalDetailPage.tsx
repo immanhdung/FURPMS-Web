@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { CouncilMinutesCard } from "@/components/shared/CouncilMinutesCard";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
@@ -124,6 +125,10 @@ export function ProposalDetailPage() {
           </p>
         </div>
       )}
+
+      {/* Biên bản hội đồng đã khoá — kết luận, góp ý, kiến nghị + tải BM04/BM12 (03/10). Trước đây PI
+          không đọc được, kể cả khi hội đồng yêu cầu hoàn thiện đề cương. */}
+      {!isDraft && proposal.projectId && <CouncilMinutesCard projectId={proposal.projectId} />}
 
       {/* Chỉ đề cương ĐÃ NỘP mới có gì để đối chiếu — bản nháp chưa vào kho rà trùng lặp. */}
       {!isDraft && <DuplicateVerdictCard proposalId={proposal.id} hideNote={status === "REJECTED"} />}

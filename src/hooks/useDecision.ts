@@ -38,6 +38,7 @@ export function useApproveMinutesMutation(councilId: string, projectId?: string)
       queryClient.invalidateQueries({ queryKey: queryKeys.decision.detail(councilId) });
       // Trạng thái đề tài + vòng chấm đổi theo → làm mới danh sách liên quan.
       queryClient.invalidateQueries({ queryKey: queryKeys.memberships.mine() });
+      queryClient.invalidateQueries({ queryKey: ["decision", "project-minutes"] });
       queryClient.invalidateQueries({ queryKey: queryKeys.proposals.all() });
     },
     onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.minutesApproveFailed")),
@@ -56,5 +57,14 @@ export function useRequestMinutesRevisionMutation(councilId: string, projectId?:
       queryClient.invalidateQueries({ queryKey: queryKeys.decision.detail(councilId) });
     },
     onError: (error: ApiError) => toast.error(error.message || i18n.t("common.error")),
+  });
+}
+
+/** Biên bản đã khoá của một đề tài (03/10). */
+export function useProjectMinutesQuery(projectId: string | null | undefined) {
+  return useQuery({
+    queryKey: queryKeys.decision.projectMinutes(projectId ?? ""),
+    queryFn: () => decisionService.listForProject(projectId as string),
+    enabled: Boolean(projectId),
   });
 }

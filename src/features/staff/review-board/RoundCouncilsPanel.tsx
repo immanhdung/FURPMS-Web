@@ -143,6 +143,7 @@ export function RoundCouncilsPanel({ round, cycleId, trackId }: RoundCouncilsPan
         open={Boolean(manageCouncilId)}
         onOpenChange={(o) => !o && setManageCouncilId(null)}
         councilId={manageCouncilId}
+        roundType={round.roundType}
         title={manageIndex >= 0 ? t("reviewBoard.councilN", { n: manageIndex + 1 }) : t("reviewBoard.councils")}
       />
     </div>

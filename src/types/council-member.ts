@@ -10,6 +10,10 @@ export interface CouncilMember {
   invitationSentAt?: string | null;
   confirmedAt?: string | null;
   declinedAt?: string | null;
+  /** Lý do từ chối lời mời — BE trả từ 03/10. */
+  declineReason?: string | null;
+  /** Lý do mời dù khác lĩnh vực — null nếu đúng lĩnh vực. */
+  expertiseNote?: string | null;
 }
 
 export interface AddCouncilMemberPayload {

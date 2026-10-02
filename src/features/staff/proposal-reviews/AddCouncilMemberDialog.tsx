@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { councilRolesFor } from "@/utils/review-round";
 import { useTranslation } from "react-i18next";
 import { AlertTriangle, Loader2, UserPlus } from "lucide-react";
 import {
@@ -22,13 +23,14 @@ import { cn } from "@/lib/utils";
  * gửi thư mời kiểm "Chair"/"Secretary", màn chấm nghiệm thu kiểm "Opponent" (chỉ phản biện mới
  * viết BM10 — QĐ543 Điều 12.3.b).
  */
-const COUNCIL_MEMBER_ROLES = ["Chair", "Secretary", "Member", "Opponent"];
+// Vai theo loại phiên: phản biện chỉ ở nghiệm thu (councilRolesFor).
 
 interface AddCouncilMemberDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   councilId: string;
   trackId?: string | null;
+  roundType?: string;
 }
 
 /**
@@ -42,7 +44,8 @@ interface AddCouncilMemberDialogProps {
  * <p>Danh sách <b>vẫn hiện</b> người không chọn được (xung đột lợi ích, đã có tên) — giấu đi thì
  * Phòng QLKH không hiểu vì sao tìm mãi không thấy một cái tên.</p>
  */
-export function AddCouncilMemberDialog({ open, onOpenChange, councilId }: AddCouncilMemberDialogProps) {
+export function AddCouncilMemberDialog({ open, onOpenChange, councilId, roundType }: AddCouncilMemberDialogProps) {
+  const COUNCIL_MEMBER_ROLES = councilRolesFor(roundType);
   const { t } = useTranslation();
   const { data, isLoading } = useCouncilCandidatesQuery({ councilId }, open);
   const addMutation = useAddCouncilMemberMutation(councilId);

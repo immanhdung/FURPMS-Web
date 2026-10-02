@@ -85,4 +85,7 @@ export interface CreateCouncilPackagePayload {
   councilType?: string;
   projectIds: string[];
   members: CouncilPackageMember[];
+  /** Số / ngày Quyết định thành lập — in vào biên bản BM04/BM12. Có thể nhập sau. */
+  establishmentDecisionNo?: string;
+  establishedAt?: string;
 }

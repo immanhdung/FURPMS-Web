@@ -1,6 +1,9 @@
 import { useState } from "react";
+import { toast } from "sonner";
+import { decisionService } from "@/services/api/decision.service";
+import { saveBlob } from "@/utils/download-blob";
 import { useTranslation } from "react-i18next";
-import { AlertTriangle, FileText, Gavel, Loader2, Lock, MessagesSquare, Plus, Save, ShieldCheck, Trash2, Undo2, Users } from "lucide-react";
+import { AlertTriangle, ClipboardList, FileDown, FileText, Gavel, Loader2, Lock, MessagesSquare, Plus, Save, ShieldCheck, Trash2, Undo2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,7 +24,6 @@ import {
 import { useCouncilMembersQuery } from "@/hooks/useCouncilMembers";
 import { useCouncilMeetingsQuery, useMeetingAttendanceQuery, useSaveAttendanceMutation } from "@/hooks/useMeetings";
 import { useAllScoresQuery, useBallotTallyQuery } from "@/hooks/useReviewScoring";
-import { useFeedbackListQuery } from "@/hooks/useFeedback";
 import { REVIEW_DECISION } from "@/constants/statuses";
 import { formatDateTime } from "@/utils/format";
 import type { ApiError } from "@/types/common";
@@ -67,9 +69,7 @@ export function MinutesPanel({
   const { data: scores, error: scoresError } = useAllScoresQuery(councilId, projectId ?? undefined);
   // BM12 mục 10.1 — số phiếu phát ra/thu về/hợp lệ + Đạt/Không đạt + chi tiết từng thành viên.
   const { data: tally } = useBallotTallyQuery(councilId, projectId ?? undefined);
-  const { data: feedbackList, error: feedbackError } = useFeedbackListQuery(councilId);
   const isScoresForbidden = (scoresError as ApiError | null)?.status === 403;
-  const isFeedbackForbidden = (feedbackError as ApiError | null)?.status === 403;
 
   // Điểm danh (rule tuần 10): gắn với buổi họp của hội đồng (thường 1 buổi cho vòng xét duyệt).
   const { data: meetings } = useCouncilMeetingsQuery(councilId);
@@ -84,6 +84,7 @@ export function MinutesPanel({
   const [qaEntries, setQaEntries] = useState<QaEntry[]>([]);
   const [minutesStyle, setMinutesStyle] = useState<"QA" | "FREEFORM">("FREEFORM");
   const [opinions, setOpinions] = useState<MemberOpinion[]>([]);
+  const [autoFilled, setAutoFilled] = useState(false);
   const [loadedDraftId, setLoadedDraftId] = useState<string | null>(null);
   // memberId (CouncilMember.Id) → { có mặt, lý do vắng }. Mặc định chưa đánh dấu = có mặt.
   const [attendance, setAttendance] = useState<Record<string, { attended: boolean; reason: string }>>({});
@@ -139,6 +140,65 @@ export function MinutesPanel({
   const updateOpinion = (i: number, patch: Partial<MemberOpinion>) =>
     setOpinions((prev) => prev.map((o, idx) => (idx === i ? { ...o, ...patch } : o)));
   const removeOpinion = (i: number) => setOpinions((prev) => prev.filter((_, idx) => idx !== i));
+  /**
+   * Điền "Ý kiến từng thành viên" TỪ PHIẾU CHẤM (03/10).
+   *
+   * Nhận xét người chấm gõ trong phiếu (chung, từng tiêu chí, kiến nghị) trước đây không đi vào
+   * biên bản ở đâu cả — Thư ký phải chép tay. Nay đổ sẵn: tiêu chí về kinh phí vào cột kinh phí,
+   * còn lại vào cột chuyên môn; kiến nghị gộp vào ô Kiến nghị nếu ô đó còn trống. Chỉ điền ô
+   * TRỐNG — chữ Thư ký đã sửa giữ nguyên.
+   */
+  // Bỏ chuỗi là KHOÁ DỊCH lọt vào dữ liệu (vd "review.quickFillGeneralNote" do nút "Điền nhanh"
+  // từng lưu nguyên khoá trước khi sửa i18n 03/10).
+  const clean = (text?: string | null) => {
+    const v = text?.trim();
+    return v && !/^[a-z][A-Za-z]*(\.[A-Za-z][A-Za-z0-9]*)+$/.test(v) ? v : "";
+  };
+  const scoredWithComments = (scores ?? []).filter(
+    (s) =>
+      clean(s.generalComments) ||
+      clean(s.otherRecommendations) ||
+      (s.scoreDetails ?? []).some((d) => clean(d.comments))
+  );
+  const fillOpinionsFromScores = () => {
+    const isBudget = (name: string) => /kinh phí|dự toán|tài chính|ngân sách|budget/i.test(name);
+    const built = (scores ?? []).map((s, i) => {
+      const details = s.scoreDetails ?? [];
+      const academic = [
+        clean(s.generalComments),
+        ...details
+          .filter((d) => clean(d.comments) && !isBudget(d.criterionName))
+          .map((d) => `${d.criterionName}: ${clean(d.comments)}`),
+      ]
+        .filter(Boolean)
+        .join("\n");
+      const budget = details
+        .filter((d) => clean(d.comments) && isBudget(d.criterionName))
+        .map((d) => `${d.criterionName}: ${clean(d.comments)}`)
+        .join("\n");
+      return { memberName: s.evaluatorName || "—", academicComment: academic, budgetComment: budget, order: i };
+    });
+    setOpinions((prev) => {
+      const next = prev.map((o) => ({ ...o }));
+      for (const b of built) {
+        const hit = next.find((o) => o.memberName.trim().toLowerCase() === b.memberName.trim().toLowerCase());
+        if (!hit) next.push({ ...b, order: next.length });
+        else {
+          if (!hit.academicComment?.trim()) hit.academicComment = b.academicComment;
+          if (!hit.budgetComment?.trim()) hit.budgetComment = b.budgetComment;
+        }
+      }
+      return next;
+    });
+    if (!recommendations.trim()) {
+      const recs = (scores ?? [])
+        .filter((s) => clean(s.otherRecommendations))
+        .map((s) => `${s.evaluatorName || "—"}: ${clean(s.otherRecommendations)}`)
+        .join("\n");
+      if (recs) setRecommendations(recs);
+    }
+  };
+
   // Prefill 1 dòng / thành viên hội đồng (BM04 II.1) để Thư ký khỏi gõ tên.
   const fillOpinionsFromRoster = () =>
     setOpinions(
@@ -168,6 +228,13 @@ export function MinutesPanel({
         absenceReason: att(m.id).attended ? undefined : att(m.id).reason || undefined,
       }))
     );
+
+  // Biên bản MỚI (chưa có nháp): tự điền sẵn ý kiến từng thành viên từ phiếu chấm (03/10) — trước đây
+  // Thư ký chỉ chọn "Đạt" rồi lưu là ra biên bản trống trơn, file BM04 in ra gần như không có gì.
+  if (!autoFilled && !isLoading && !decision && scoredWithComments.length > 0 && opinions.length === 0) {
+    setAutoFilled(true);
+    fillOpinionsFromScores();
+  }
 
   if (isLoading) return <Skeleton className="h-40 w-full rounded-xl" />;
 
@@ -383,40 +450,41 @@ export function MinutesPanel({
                 {/* Tên người chấm lấy THẲNG từ phiếu (BE đã trả `evaluatorName`). Trước đây tra
                     `score.reviewerId` — trường không tồn tại ⇒ mọi dòng hiện "—: 58.0", Thư ký
                     soạn biên bản không biết điểm nào của ai. */}
-                {scores.map((score) => (
-                  <li key={score.id} className="text-sm text-foreground">
-                    <span className="font-medium">{score.evaluatorName || t("minutes.unknownMember")}</span>:{" "}
-                    {score.totalScore?.toFixed(1)}
-                    {score.maxPossibleScore ? `/${score.maxPossibleScore.toFixed(0)}` : ""}
-                    {!score.isValidBallot && (
-                      <span className="ml-1 text-xs text-warning">({t("minutes.invalidBallot")})</span>
-                    )}
-                    {score.generalComments && <span className="text-muted-foreground"> — {score.generalComments}</span>}
-                  </li>
-                ))}
+                {scores.map((score) => {
+                  const criterionNotes = (score.scoreDetails ?? []).filter((d) => d.comments?.trim());
+                  return (
+                    <li key={score.id} className="text-sm text-foreground">
+                      <span className="font-medium">{score.evaluatorName || t("minutes.unknownMember")}</span>:{" "}
+                      {score.totalScore?.toFixed(1)}
+                      {score.maxPossibleScore ? `/${score.maxPossibleScore.toFixed(0)}` : ""}
+                      {!score.isValidBallot && (
+                        <span className="ml-1 text-xs text-warning">({t("minutes.invalidBallot")})</span>
+                      )}
+                      {score.generalComments && <span className="text-muted-foreground"> — {score.generalComments}</span>}
+                      {/* Nhận xét theo tiêu chí + kiến nghị trong phiếu chấm — trước 03/10 không hiện ở đâu. */}
+                      {(criterionNotes.length > 0 || score.otherRecommendations?.trim()) && (
+                        <ul className="mt-1 space-y-0.5 border-l-2 border-border pl-3 text-xs text-muted-foreground">
+                          {criterionNotes.map((d) => (
+                            <li key={d.id}>
+                              <span className="text-foreground">{d.criterionName}</span> ({d.givenScore}/{d.maxScore}): {d.comments}
+                            </li>
+                          ))}
+                          {score.otherRecommendations?.trim() && (
+                            <li>
+                              <span className="text-foreground">{t("minutes.memberRecommendation")}</span>: {score.otherRecommendations}
+                            </li>
+                          )}
+                        </ul>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             ) : (
               <p className="mt-1 text-sm text-muted-foreground">{t("minutes.noScores")}</p>
             )}
           </div>
 
-          <div>
-            <p className="text-sm font-medium text-foreground">{t("minutes.feedbackTitle")}</p>
-            {isFeedbackForbidden ? (
-              <p className="mt-1 text-sm text-warning">{t("minutes.feedbackForbidden")}</p>
-            ) : feedbackList && feedbackList.length > 0 ? (
-              <ul className="mt-1.5 space-y-1.5">
-                {feedbackList.map((feedback) => (
-                  <li key={feedback.id} className="text-sm text-foreground">
-                    <span className="font-medium">{feedback.reviewerName || t("minutes.unknownMember")}</span>:{" "}
-                    {feedback.overallAssessment ?? feedback.otherComments ?? "—"}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="mt-1 text-sm text-muted-foreground">{t("minutes.noFeedback")}</p>
-            )}
-          </div>
         </CardContent>
       </Card>
 
@@ -576,11 +644,18 @@ export function MinutesPanel({
             <div>
               <div className="mb-1.5 flex items-center justify-between gap-2">
                 <p className="text-sm font-medium text-foreground">{t("minutes.opinionsTitle")}</p>
-                {opinions.length === 0 && (members?.length ?? 0) > 0 && (
-                  <Button type="button" variant="outline" size="sm" onClick={fillOpinionsFromRoster}>
-                    <Users className="size-3.5" /> {t("minutes.opinionsFill")}
-                  </Button>
-                )}
+                <div className="flex flex-wrap gap-1.5">
+                  {scoredWithComments.length > 0 && (
+                    <Button type="button" variant="outline" size="sm" onClick={fillOpinionsFromScores}>
+                      <ClipboardList className="size-3.5" /> {t("minutes.opinionsFromScores")}
+                    </Button>
+                  )}
+                  {opinions.length === 0 && (members?.length ?? 0) > 0 && (
+                    <Button type="button" variant="outline" size="sm" onClick={fillOpinionsFromRoster}>
+                      <Users className="size-3.5" /> {t("minutes.opinionsFill")}
+                    </Button>
+                  )}
+                </div>
               </div>
               {opinions.length === 0 ? (
                 <p className="text-xs text-muted-foreground">{t("minutes.opinionsEmpty")}</p>
@@ -742,7 +817,26 @@ export function MinutesPanel({
               </div>
             )}
             {decision.finalizedAt && (
-              <p className="text-xs text-muted-foreground">{t("minutes.approvedAt", { date: formatDateTime(decision.finalizedAt) })}</p>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-xs text-muted-foreground">{t("minutes.approvedAt", { date: formatDateTime(decision.finalizedAt) })}</p>
+                {/* Xuất đúng BM04/BM12 để in, ký, lưu hồ sơ (03/10). */}
+                {projectId && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={async () => {
+                      try {
+                        saveBlob(await decisionService.exportWord(councilId, projectId), "BienBanHoiDong.docx");
+                      } catch {
+                        toast.error(t("councilMinutes.downloadError"));
+                      }
+                    }}
+                  >
+                    <FileDown /> {t("councilMinutes.download")}
+                  </Button>
+                )}
+              </div>
             )}
           </CardContent>
         </Card>

@@ -65,3 +65,10 @@ export interface SaveMinutesPayload {
   /** Bắt buộc khi kết luận lệch với điểm chấm — thiếu thì máy chủ trả 400 kèm câu giải thích. */
   resultJustification?: string;
 }
+
+/** Biên bản ĐÃ KHOÁ của một đề tài (GET /review-scoring/projects/{id}/minutes) — 03/10. */
+export interface ProjectMinutes extends DecisionResponse {
+  projectId: string;
+  /** REVIEW (BM04) hoặc ACCEPTANCE (BM12). */
+  roundType?: string | null;
+}

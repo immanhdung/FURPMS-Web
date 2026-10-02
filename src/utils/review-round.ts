@@ -27,3 +27,13 @@ export function roundLabel(t: TFunction, round: RoundLike, all: RoundLike[]): st
 export function roundStatusKey(status?: string | null): string {
   return status === "PASSED" || status === "FAILED" ? "FINALIZED" : (status ?? "");
 }
+
+/**
+ * Vai được chọn trong hội đồng theo LOẠI phiên (03/10). "Phản biện" chỉ có ở hội đồng NGHIỆM THU
+ * (QĐ543 Điều 12.3.b, nhận xét theo Biểu mẫu 10); hội đồng xét duyệt đề cương (Điều 8.2) gồm Chủ
+ * tịch, Thư ký và thành viên. Không biết loại phiên thì trả đủ 4 — máy chủ vẫn chặn.
+ */
+export function councilRolesFor(roundType?: string | null): string[] {
+  const base = ["Chair", "Secretary", "Member"];
+  return !roundType || roundType === "ACCEPTANCE" ? [...base, "Opponent"] : base;
+}

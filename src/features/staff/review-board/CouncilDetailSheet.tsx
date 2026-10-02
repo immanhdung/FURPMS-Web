@@ -7,19 +7,22 @@ import { CouncilMembersPanel } from "@/features/staff/proposal-reviews/CouncilMe
 import { MeetingsPanel } from "@/features/staff/proposal-reviews/MeetingsPanel";
 import { CouncilSlotsPanel } from "@/features/staff/review-board/CouncilSlotsPanel";
 import { useCouncilSlotsQuery } from "@/hooks/useCouncilSlots";
+import { CouncilDecisionNoForm } from "@/features/staff/review-board/CouncilDecisionNoForm";
 
 interface CouncilDetailSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   councilId: string | null;
   title: string;
+  /** Loại phiên — quyết định có vai Phản biện hay không. */
+  roundType?: string;
 }
 
 /**
  * Chi tiết 1 hội đồng (thành viên + lịch họp) trong 1 Sheet — thay cho việc nhúng
  * inline vào board (trước đây gây "tường dài"). Chỉ render khi có councilId.
  */
-export function CouncilDetailSheet({ open, onOpenChange, councilId, title }: CouncilDetailSheetProps) {
+export function CouncilDetailSheet({ open, onOpenChange, councilId, title, roundType }: CouncilDetailSheetProps) {
   const { t } = useTranslation();
   // Danh sách đề tài của hội đồng — dùng để quyết định có hiện tab "Lịch chấm" hay không.
   const { data: board } = useCouncilSlotsQuery(open ? councilId : null);
@@ -42,6 +45,8 @@ export function CouncilDetailSheet({ open, onOpenChange, councilId, title }: Cou
           </div>
         )}
 
+        {councilId && <CouncilDecisionNoForm councilId={councilId} />}
+
         <ScrollArea className="flex-1 px-4">
           <div className="pb-6">
             {councilId && (
@@ -56,7 +61,7 @@ export function CouncilDetailSheet({ open, onOpenChange, councilId, title }: Cou
                   )}
                 </TabsList>
                 <TabsContent value="members">
-                  <CouncilMembersPanel councilId={councilId} />
+                  <CouncilMembersPanel councilId={councilId} roundType={roundType} />
                 </TabsContent>
                 <TabsContent value="meetings">
                   <MeetingsPanel councilId={councilId} />

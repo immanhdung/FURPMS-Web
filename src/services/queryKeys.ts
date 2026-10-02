@@ -106,6 +106,7 @@ export const queryKeys = {
   },
   decision: {
     detail: (councilId: string) => ["decision", "detail", councilId] as const,
+    projectMinutes: (projectId: string) => ["decision", "project-minutes", projectId] as const,
   },
   systemClock: {
     detail: () => ["system-clock"] as const,

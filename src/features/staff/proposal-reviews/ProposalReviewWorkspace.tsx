@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { CouncilMinutesCard } from "@/components/shared/CouncilMinutesCard";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, ExternalLink, FileText, Gavel, Route, ScanSearch, ScrollText } from "lucide-react";
+import { ArrowLeft, ExternalLink, FileSignature, FileText, Gavel, Route, ScanSearch, ScrollText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -113,6 +114,10 @@ export function ProposalReviewWorkspace() {
             <ScanSearch className="size-3.5" />
             {t("staff.duplicateTab")}
           </TabsTrigger>
+          <TabsTrigger value="minutes">
+            <FileSignature className="size-3.5" />
+            {t("councilMinutes.tab")}
+          </TabsTrigger>
           <TabsTrigger value="decisions">
             <ScrollText className="size-3.5" />
             {t("staff.decisionsTab")}
@@ -147,6 +152,11 @@ export function ProposalReviewWorkspace() {
         {/* Hồ sơ quyết định gắn với ĐỀ TÀI, có từ mốc nộp đề cương — trước khi có hợp đồng rất
             lâu. Trước đây panel này chỉ nằm trong tab hợp đồng, nên đề tài chưa qua vòng 1
             (chưa có hợp đồng) không có chỗ nào xem được chuỗi quyết định của chính nó. */}
+        {/* Biên bản hội đồng đã khoá gắn với ĐỀ TÀI — Phòng QLKH xem lại và tải BM04/BM12 để lưu hồ sơ. */}
+        <TabsContent value="minutes">
+          {proposal.projectId ? <CouncilMinutesCard projectId={proposal.projectId} showEmpty /> : null}
+        </TabsContent>
+
         <TabsContent value="decisions">
           <DecisionDossierPanel projectId={proposal.projectId ?? null} />
         </TabsContent>
