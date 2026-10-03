@@ -30,6 +30,10 @@ export function useSendInvitationsMutation(councilId: string) {
     onSuccess: () => {
       toast.success(i18n.t("council.invitationsSent"));
       queryClient.invalidateQueries({ queryKey: queryKeys.councilMembers.list(councilId) });
+      // 04/10: chip "x/y nhận lời" trên bảng Hội đồng & Chấm đọc từ bảng phiên — không làm mới thì vẫn hiện
+      // "Chưa gửi thư mời" tới khi tải lại trang, dù cửa sổ chi tiết đã thấy "Đã gửi lời mời".
+      queryClient.invalidateQueries({ queryKey: ["review-board"] });
+      queryClient.invalidateQueries({ queryKey: ["project-invitations"] });
     },
     onError: (error: ApiError) => toast.error(error.message || i18n.t("common.error")),
   });

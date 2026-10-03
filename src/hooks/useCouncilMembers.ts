@@ -21,6 +21,7 @@ export function useAddCouncilMemberMutation(councilId: string) {
     onSuccess: () => {
       toast.success("Member added.");
       queryClient.invalidateQueries({ queryKey: queryKeys.councilMembers.list(councilId) });
+      queryClient.invalidateQueries({ queryKey: ["review-board"] }); // số người, chip nhận lời trên bảng phiên
     },
     onError: (error: ApiError) => toast.error(error.message || "Unable to add member."),
   });
@@ -34,6 +35,7 @@ export function useRespondMembershipMutation(councilId: string) {
     onSuccess: () => {
       toast.success(i18n.t("common.saved"));
       queryClient.invalidateQueries({ queryKey: queryKeys.councilMembers.list(councilId) });
+      queryClient.invalidateQueries({ queryKey: ["review-board"] }); // số người, chip nhận lời trên bảng phiên
     },
     onError: (error: ApiError) => toast.error(error.message || i18n.t("common.error")),
   });
@@ -51,6 +53,7 @@ export function useRespondOnBehalfMutation(councilId: string) {
     onSuccess: (_data, vars) => {
       toast.success(i18n.t(vars.accept ? "toast.memberConfirmedOnBehalf" : "toast.memberDeclinedOnBehalf"));
       queryClient.invalidateQueries({ queryKey: queryKeys.councilMembers.list(councilId) });
+      queryClient.invalidateQueries({ queryKey: ["review-board"] }); // số người, chip nhận lời trên bảng phiên
       // Danh sách hội đồng có cột "còn thiếu gì" phụ thuộc số người đã xác nhận.
       queryClient.invalidateQueries({ queryKey: ["councils"] });
     },
@@ -65,6 +68,7 @@ export function useRemoveCouncilMemberMutation(councilId: string) {
     onSuccess: () => {
       toast.success("Member removed.");
       queryClient.invalidateQueries({ queryKey: queryKeys.councilMembers.list(councilId) });
+      queryClient.invalidateQueries({ queryKey: ["review-board"] }); // số người, chip nhận lời trên bảng phiên
     },
     onError: (error: ApiError) => toast.error(error.message || "Unable to remove member."),
   });

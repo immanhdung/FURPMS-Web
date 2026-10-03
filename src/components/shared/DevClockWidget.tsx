@@ -30,7 +30,9 @@ export function DevClockWidget() {
     return () => clearInterval(interval);
   }, []);
 
-  if (!isAdmin) return null;
+  // 04/10: backend CHẶN tua thời gian ở môi trường production (deploy) — widget hiện mà bấm là lỗi. Bản build
+  // production (Vercel) thì ẩn hẳn; chỉ hiện khi chạy dev ở máy (test hạn, nhắc hạn).
+  if (!isAdmin || !import.meta.env.DEV) return null;
 
   const offsetDays = clock?.offsetDays ?? 0;
   const simulatedNow = now.add(offsetDays, "day");

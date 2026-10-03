@@ -176,14 +176,24 @@ function FeaturePage({ path }: { path: string }) {
 function RoleAwareDocumentTitle() {
   const { t } = useTranslation();
   const activeRole = useAuthStore((state) => state.activeRole);
+  const fullName = useAuthStore((state) => state.user?.fullName);
 
   useEffect(() => {
-    document.title = activeRole
-      ? t("documentTitle.role", {
-          role: t(`documentTitle.roles.${activeRole}`, { defaultValue: activeRole }),
-        })
-      : t("documentTitle.default");
-  }, [activeRole, t]);
+    if (!activeRole) {
+      document.title = t("documentTitle.default");
+      return;
+    }
+    const roleLabel = t(`documentTitle.roles.${activeRole}`, { defaultValue: activeRole });
+    // 04/10: TÊN người đứng đầu tiêu đề tab ("Minh Đức · Hội đồng — FURPMS") — demo mở nhiều tab nhiều tài
+    // khoản, thanh tác vụ cắt chữ nên chỉ còn thấy phần đầu; trước đây mọi tab đều bắt đầu "FURPMS — …".
+    const shortName = (fullName ?? "")
+      .replace(/^((GS|PGS|TS|ThS|KS|CN)\.?\s*)+/i, "")
+      .trim()
+      .split(/\s+/)
+      .slice(-2)
+      .join(" ");
+    document.title = shortName ? `${shortName} · ${roleLabel} — FURPMS` : t("documentTitle.role", { role: roleLabel });
+  }, [activeRole, fullName, t]);
 
   return null;
 }
