@@ -1,4 +1,5 @@
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { meetingPlatformKey } from "@/types/meeting";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, CalendarClock, ExternalLink, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -147,8 +148,8 @@ export function ProposalReviewWorkspace() {
                     <CalendarClock className="size-4 shrink-0 text-muted-foreground" />
                     <span className="font-medium">{meeting.title ?? t("reviewWorkspace.councilMeeting")}</span>
                     <span className="text-muted-foreground">
-                      · {formatDateTime(meeting.scheduledAt)} · {meeting.durationMinutes}min
-                      {meeting.platform && ` · ${meeting.platform}`}
+                      · {formatDateTime(meeting.scheduledAt)} · {meeting.durationMinutes} phút
+                      {meeting.platform && ` · ${t(meetingPlatformKey(meeting.platform))}`}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">

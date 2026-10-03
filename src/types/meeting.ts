@@ -51,3 +51,8 @@ export interface ScheduleConflict {
   thisMeetingAt: string;
   otherMeetingAt: string;
 }
+
+/** Khoá i18n cho hình thức họp — trước 04/10 giao diện in thẳng "IN_PERSON"/"ONLINE". */
+export function meetingPlatformKey(platform?: string | null): string {
+  return (platform ?? "").toUpperCase() === IN_PERSON ? "reviewBoard.modeOffline" : "reviewBoard.modeOnline";
+}

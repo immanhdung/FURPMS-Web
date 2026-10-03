@@ -1,4 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
+import { meetingPlatformKey } from "@/types/meeting";
 import type { TFunction } from "i18next";
 import { ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,7 +22,7 @@ export function getMeetingColumns({ t }: GetMeetingColumnsOptions): ColumnDef<Me
     {
       accessorKey: "platform",
       header: ({ column }) => <DataTableColumnHeader column={column} title={t("staff.platform")} />,
-      cell: ({ row }) => row.original.platform ?? "-",
+      cell: ({ row }) => (row.original.platform ? t(meetingPlatformKey(row.original.platform)) : "-"),
     },
     {
       accessorKey: "scheduledAt",

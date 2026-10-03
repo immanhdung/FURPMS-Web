@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { meetingPlatformKey } from "@/types/meeting";
 import { useTranslation } from "react-i18next";
 import { AlertTriangle, CalendarClock, CalendarPlus, ExternalLink, MapPin, Pencil, Trash2, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -65,7 +66,7 @@ export function MeetingsPanel({ councilId }: { councilId: string }) {
               </div>
               <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <CalendarClock className="size-3.5" />
-                {t("staff.meetingInfo", { time: formatDateTime(meeting.scheduledAt), min: meeting.durationMinutes, platform: meeting.platform })}
+                {t("staff.meetingInfo", { time: formatDateTime(meeting.scheduledAt), min: meeting.durationMinutes, platform: t(meetingPlatformKey(meeting.platform)) })}
               </p>
               {meeting.location && (
                 <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
