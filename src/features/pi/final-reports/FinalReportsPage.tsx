@@ -41,7 +41,7 @@ export function FinalReportsPage() {
       if (!document.downloadUrl) throw new Error(t("reports.uploadMissingUrl"));
       if (kind === "report") setReportFileUrl(document.downloadUrl);
       else setSummaryFileUrl(document.downloadUrl);
-      toast.success(t("reports.finalFileUploaded"));
+      toast.success(t("toast.finalFileUploaded"));
     } catch (error) {
       toast.error((error as ApiError).message || t("toast.uploadFailed"));
     } finally {

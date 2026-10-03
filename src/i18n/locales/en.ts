@@ -1743,6 +1743,7 @@ export const en = {
       confirm: "Confirm payment",
     },
     deliverable: {
+      productName: "Required product name (e.g. Early-warning dropout system)",
       deleteTitle: "Delete deliverable?",
       deleteDescription: "\"{{name}}\" will be removed from the contract.",
       deleteSubmittedDescription: "\"{{name}}\" already has evidence submitted by the PI. Only delete it if it was created by mistake — the reason is kept.",

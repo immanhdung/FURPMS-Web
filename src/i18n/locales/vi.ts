@@ -1757,6 +1757,7 @@ export const vi = {
       confirm: "Xác nhận đã chi",
     },
     deliverable: {
+      productName: "Tên sản phẩm phải nộp (vd: Hệ thống cảnh báo sớm nguy cơ bỏ học)",
       deleteTitle: "Xóa sản phẩm?",
       deleteDescription: "Sản phẩm \"{{name}}\" sẽ bị xóa khỏi hợp đồng.",
       deleteSubmittedDescription: "Sản phẩm \"{{name}}\" đã có minh chứng chủ nhiệm nộp. Chỉ xóa khi tạo nhầm/trùng — lý do được lưu lại.",
