@@ -175,6 +175,7 @@ export function ReviewBoardPage() {
                   cycleId={cycleId as number}
                   trackId={trackId as number}
                   trackProjects={board?.projects ?? []}
+                  allRounds={board?.rounds ?? []}
                 />
               </div>
             </>

@@ -4,7 +4,7 @@ import i18n from "@/i18n";
 import { disbursementService } from "@/services/api/disbursement.service";
 import { queryKeys } from "@/services/queryKeys";
 import type { ApiError } from "@/types/common";
-import type { ConfirmDisbursementPayload } from "@/types/disbursement";
+import type { ConfirmDisbursementPayload, SaveDisbursementSchedulePayload } from "@/types/disbursement";
 
 export function useDisbursementsQuery(contractId: string | null) {
   return useQuery({
@@ -62,6 +62,19 @@ export function useRegenerateDisbursementsMutation(contractId: string) {
     mutationFn: (reason: string) => disbursementService.regenerate(contractId, reason),
     onSuccess: (tranches) => {
       toast.success(i18n.t("toast.disbursementsGenerated", { n: tranches?.length ?? 0 }));
+      queryClient.invalidateQueries({ queryKey: queryKeys.disbursements.list(contractId) });
+    },
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.actionFailed")),
+  });
+}
+
+/** Chỉnh cả lịch giải ngân của hợp đồng (03/10). */
+export function useSaveDisbursementScheduleMutation(contractId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: SaveDisbursementSchedulePayload) => disbursementService.saveSchedule(contractId, payload),
+    onSuccess: () => {
+      toast.success(i18n.t("contract.disbursement.scheduleSaved"));
       queryClient.invalidateQueries({ queryKey: queryKeys.disbursements.list(contractId) });
     },
     onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.actionFailed")),

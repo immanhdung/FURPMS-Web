@@ -69,3 +69,26 @@ export function useRemoveCouncilMemberMutation(councilId: string) {
     onError: (error: ApiError) => toast.error(error.message || "Unable to remove member."),
   });
 }
+
+/** Trạng thái nhận lời của hội đồng với MỘT đề tài (03/10). */
+export function useProjectInvitationsQuery(councilId: string, projectId: string) {
+  return useQuery({
+    queryKey: ["project-invitations", councilId, projectId] as const,
+    queryFn: () => councilMemberService.projectInvitations(councilId, projectId),
+  });
+}
+
+/** Phòng QLKH ghi nhận hộ trả lời cho một đề tài — làm mới cửa sổ trạng thái và chip trên bảng hội đồng. */
+export function useRespondProjectOnBehalfMutation(councilId: string, projectId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ memberId, accept, declineReason }: { memberId: string; accept: boolean; declineReason?: string }) =>
+      councilMemberService.respondProjectOnBehalf(memberId, projectId, { accept, declineReason }),
+    onSuccess: (_d, v) => {
+      toast.success(i18n.t(v.accept ? "projectInvite.acceptedToast" : "projectInvite.declinedToast"));
+      queryClient.invalidateQueries({ queryKey: ["project-invitations", councilId, projectId] });
+      queryClient.invalidateQueries({ queryKey: ["review-board"] });
+    },
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.actionFailed")),
+  });
+}

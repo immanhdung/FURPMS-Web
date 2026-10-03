@@ -32,6 +32,17 @@ export interface ReviewBoardCouncil {
   isMeetingDeadlineDerived?: boolean;
   projectIds: string[];
   members: CouncilMember[];
+  /** Nhận lời theo TỪNG đề tài (03/10). */
+  projectInvites?: ProjectInviteSummary[];
+}
+
+export interface ProjectInviteSummary {
+  projectId: string;
+  total: number;
+  confirmed: number;
+  pending: number;
+  declined: number;
+  notSent: number;
 }
 
 export interface ReviewBoardRound {

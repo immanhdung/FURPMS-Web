@@ -14,7 +14,6 @@ import { useCreateCouncilPackageMutation, useReviewBoardQuery } from "@/hooks/us
 import { useCouncilCandidatesQuery } from "@/hooks/useCouncilCandidates";
 import type { CouncilPackageMember } from "@/types/review-board";
 
-
 interface CreateCouncilSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -26,10 +25,14 @@ interface CreateCouncilSheetProps {
 
 /** "PGS.TS. Lê Quang Minh" → "LM": bỏ học hàm/học vị, lấy chữ đầu của từ đầu và từ cuối. */
 const initials = (name: string) => {
-  const words = name.replace(/^((GS|PGS|TS|ThS|KS|CN)\.?\s*)+/i, "").trim().split(/\s+/).filter(Boolean);
+  const words = name
+    .replace(/^((GS|PGS|TS|ThS|KS|CN)\.?\s*)+/i, "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
   if (words.length === 0) return "?";
   const first = words[0][0] ?? "";
-  const last = words.length > 1 ? words[words.length - 1][0] ?? "" : "";
+  const last = words.length > 1 ? (words[words.length - 1][0] ?? "") : "";
   return (first + last).toUpperCase();
 };
 
@@ -39,7 +42,17 @@ const emptyRow = (): CouncilPackageMember => ({ userId: "", memberRole: "Member"
  * Tạo hội đồng CHỈ với thành viên (không gán đề tài). Đề tài gán sau qua dropdown ở cột đề tài.
  * BE nhận projectIds rỗng (đã nới rule).
  */
-export function CreateCouncilSheet({ open, onOpenChange, cycleId, trackId, roundId, roundNumber }: CreateCouncilSheetProps) {
+/** Giá trị của lựa chọn "Không sao chép" trong ô hội đồng nguồn. */
+const NO_COPY = "__none__";
+
+export function CreateCouncilSheet({
+  open,
+  onOpenChange,
+  cycleId,
+  trackId,
+  roundId,
+  roundNumber,
+}: CreateCouncilSheetProps) {
   const { t } = useTranslation();
   const { data: board } = useReviewBoardQuery(cycleId, trackId);
   const { data: candidateData } = useCouncilCandidatesQuery({ trackId }, open);
@@ -81,12 +94,14 @@ export function CreateCouncilSheet({ open, onOpenChange, cycleId, trackId, round
   // Khung mặc định theo loại phiên (03/10): nghiệm thu 5–7 người và BẮT BUỘC có phản biện (QĐ543
   // Điều 12.2, 12.3.b); xét duyệt 3–5 người (Điều 8.2).
   const defaultRows = (acceptance: boolean): CouncilPackageMember[] =>
-    (acceptance
-      ? ["Chair", "Secretary", "Opponent", "Member", "Member"]
-      : ["Chair", "Secretary", "Member"]
-    ).map((memberRole) => ({ userId: "", memberRole, isExternal: false }));
+    (acceptance ? ["Chair", "Secretary", "Opponent", "Member", "Member"] : ["Chair", "Secretary", "Member"]).map(
+      (memberRole) => ({ userId: "", memberRole, isExternal: false })
+    );
   const [rows, setRows] = useState<CouncilPackageMember[]>(() => defaultRows(isAcceptance));
   const [decisionNo, setDecisionNo] = useState("");
+  // Hội đồng nguồn đang sao chép — có giá trị để chọn lại "Không sao chép" (03/10: trước đây chọn rồi là
+  // không bỏ được, phải thoát form vào lại).
+  const [copySource, setCopySource] = useState("");
   const [decisionDate, setDecisionDate] = useState("");
   // Mở form lần đầu khi bảng phiên chưa tải xong thì khung mặc định chưa biết là nghiệm thu — sửa
   // lại một lần khi biết, miễn là người dùng chưa chọn ai.
@@ -112,16 +127,20 @@ export function CreateCouncilSheet({ open, onOpenChange, cycleId, trackId, round
       .filter((c) => c.members.length > 0 && c.id !== roundId)
       .map((c, ci) => ({
         id: c.id,
-        label: `${roundLabel(t, r, board?.rounds ?? [])}${
-          r.councils.length > 1 ? ` (HĐ ${ci + 1})` : ""
-        }`,
+        label: `${roundLabel(t, r, board?.rounds ?? [])}${r.councils.length > 1 ? ` (HĐ ${ci + 1})` : ""}`,
         members: c.members,
       }))
   );
 
   const copyFrom = (councilId: string) => {
+    if (councilId === NO_COPY) {
+      setCopySource("");
+      setRows(defaultRows(isAcceptance));
+      return;
+    }
     const src = copySources.find((s) => s.id === councilId);
     if (!src) return;
+    setCopySource(councilId);
     setRows(
       src.members.map((m) => ({
         userId: m.userId,
@@ -172,6 +191,7 @@ export function CreateCouncilSheet({ open, onOpenChange, cycleId, trackId, round
       {
         onSuccess: () => {
           setRows(defaultRows(isAcceptance));
+          setCopySource("");
           setDecisionNo("");
           setDecisionDate("");
           onOpenChange(false);
@@ -195,14 +215,15 @@ export function CreateCouncilSheet({ open, onOpenChange, cycleId, trackId, round
       {copySources.length > 0 && (
         <div className="mb-3">
           <label className="mb-1.5 block text-sm font-medium text-foreground">{t("reviewBoard.copyMembers")}</label>
-          <Select onValueChange={copyFrom}>
+          <Select value={copySource || NO_COPY} onValueChange={copyFrom}>
             <SelectTrigger>
               <SelectValue placeholder={t("reviewBoard.copyMembersPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value={NO_COPY}>{t("reviewBoard.copyNone")}</SelectItem>
               {copySources.map((s) => (
                 <SelectItem key={s.id} value={s.id}>
-                  {s.label}
+                  {s.label} · {t("reviewBoard.copyMemberCount", { n: s.members.length })}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -216,7 +237,11 @@ export function CreateCouncilSheet({ open, onOpenChange, cycleId, trackId, round
       <div className="grid grid-cols-[1fr_auto] gap-2">
         <label>
           <span className="mb-1.5 block text-sm font-medium text-foreground">{t("reviewBoard.decision.no")}</span>
-          <Input value={decisionNo} onChange={(e) => setDecisionNo(e.target.value)} placeholder={t("reviewBoard.decision.noPlaceholder")} />
+          <Input
+            value={decisionNo}
+            onChange={(e) => setDecisionNo(e.target.value)}
+            placeholder={t("reviewBoard.decision.noPlaceholder")}
+          />
         </label>
         <label className="w-44">
           <span className="mb-1.5 block text-sm font-medium text-foreground">{t("reviewBoard.decision.date")}</span>
@@ -227,7 +252,16 @@ export function CreateCouncilSheet({ open, onOpenChange, cycleId, trackId, round
       <div>
         <div className="mb-1.5 flex items-center justify-between">
           <label className="block text-sm font-medium text-foreground">{t("reviewBoard.councilMembers")}</label>
-          <Button type="button" variant="ghost" size="sm" className="h-7 gap-1 text-xs" onClick={() => { setPickingRow(rows.length); setRows((prev) => [...prev, emptyRow()]); }}>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-7 gap-1 text-xs"
+            onClick={() => {
+              setPickingRow(rows.length);
+              setRows((prev) => [...prev, emptyRow()]);
+            }}
+          >
             <Plus className="size-3.5" />
             {t("reviewBoard.addMemberRow")}
           </Button>
@@ -298,7 +332,9 @@ export function CreateCouncilSheet({ open, onOpenChange, cycleId, trackId, round
                               .join(" · ")}
                           </span>
                         </span>
-                        <span className="shrink-0 text-xs font-medium text-primary">{t("reviewBoard.changePerson")}</span>
+                        <span className="shrink-0 text-xs font-medium text-primary">
+                          {t("reviewBoard.changePerson")}
+                        </span>
                       </>
                     ) : (
                       <>
@@ -308,7 +344,12 @@ export function CreateCouncilSheet({ open, onOpenChange, cycleId, trackId, round
                         <span className="flex-1 text-sm text-muted-foreground">
                           {t("reviewBoard.pickPersonFor", { role: t(`reviewBoard.role.${row.memberRole}`) })}
                         </span>
-                        <ChevronDown className={cn("size-4 shrink-0 text-muted-foreground transition-transform", picking && "rotate-180")} />
+                        <ChevronDown
+                          className={cn(
+                            "size-4 shrink-0 text-muted-foreground transition-transform",
+                            picking && "rotate-180"
+                          )}
+                        />
                       </>
                     )}
                   </button>

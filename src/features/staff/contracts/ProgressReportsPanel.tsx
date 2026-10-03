@@ -19,6 +19,7 @@ import { DeadlineBadge } from "@/components/shared/DeadlineBadge";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import {
   useDeleteProgressReportMutation,
+  useResetProgressRoundsMutation,
   useReopenProgressReportMutation,
   useGenerateProgressRoundsMutation,
   useProgressReportQuery,
@@ -50,6 +51,8 @@ export function ProgressReportsPanel({
   const { data: reports, isLoading } = useProgressReportsQuery(contractId);
   const generateMutation = useGenerateProgressRoundsMutation(contractId);
   const deleteMutation = useDeleteProgressReportMutation(contractId);
+  const resetMutation = useResetProgressRoundsMutation(contractId);
+  const [resetting, setResetting] = useState(false);
   const reopenMutation = useReopenProgressReportMutation(contractId);
   const [reopeningReportId, setReopeningReportId] = useState<string | null>(null);
   // Xoá bản ĐÃ NỘP (nộp nhầm) — khác xoá bản nháp ở chỗ phải ghi lý do.
@@ -65,6 +68,9 @@ export function ProgressReportsPanel({
   const plannedCount = customMode && roundCount ? Number(roundCount) : defaultRounds;
   const existingRounds = (reports ?? []).map((r) => r.reportRound ?? 0);
   const missingByRule = existingRounds.length < defaultRounds;
+  // "Lập lại theo mẫu" chỉ khi mọi kỳ còn nháp — kỳ đã nộp / có kết luận phải xoá riêng hoặc mở lại (03/10).
+  const canReset =
+    (reports ?? []).length > 0 && (reports ?? []).every((r) => r.status === "DRAFT" && !r.evaluationResult);
 
   return (
     <div className="space-y-3">
@@ -119,6 +125,12 @@ export function ProgressReportsPanel({
               <Button size="sm" onClick={() => setConfirmGenerate(true)} disabled={generateMutation.isPending}>
                 <CalendarPlus />
                 {t("reports.generateByRule", { n: defaultRounds })}
+              </Button>
+            )}
+            {canReset && (
+              <Button variant="ghost" size="sm" onClick={() => setResetting(true)}>
+                <RotateCcw />
+                {t("reports.resetToTemplate", { n: defaultRounds })}
               </Button>
             )}
             <Button variant="ghost" size="sm" onClick={() => setCustomMode(true)}>
@@ -307,7 +319,8 @@ export function ProgressReportsPanel({
           })
         }
       />
-      <ConfirmDialog
+      {/* 03/10: bỏ một kỳ khỏi lịch cũng là quyết định (số kỳ tiến độ chi phối các đợt giải ngân giữa) ⇒ lý do. */}
+      <ReasonDialog
         open={Boolean(deletingReportId)}
         onOpenChange={(open) => !open && setDeletingReportId(null)}
         title={t("reports.deleteRoundTitle")}
@@ -315,15 +328,19 @@ export function ProgressReportsPanel({
         confirmLabel={t("common.delete")}
         variant="destructive"
         isLoading={deleteMutation.isPending}
-        onConfirm={() =>
+        onConfirm={(reason) =>
           deletingReportId &&
-          deleteMutation.mutate(
-            { id: deletingReportId },
-            {
-              onSuccess: () => setDeletingReportId(null),
-            },
-          )
+          deleteMutation.mutate({ id: deletingReportId, reason }, { onSuccess: () => setDeletingReportId(null) })
         }
+      />
+      <ReasonDialog
+        open={resetting}
+        onOpenChange={setResetting}
+        title={t("reports.resetTitle")}
+        description={t("reports.resetDescription", { n: defaultRounds })}
+        confirmLabel={t("reports.resetToTemplate", { n: defaultRounds })}
+        isLoading={resetMutation.isPending}
+        onConfirm={(reason) => resetMutation.mutate(reason, { onSuccess: () => setResetting(false) })}
       />
       <ReasonDialog
         open={Boolean(reopeningReportId)}

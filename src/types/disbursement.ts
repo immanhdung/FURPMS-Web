@@ -52,3 +52,9 @@ export const DISBURSEMENT_STATUS = {
   PENDING: "PENDING",
   DISBURSED: "DISBURSED",
 } as const;
+
+/** Chỉnh cả lịch giải ngân (03/10) — gửi đủ danh sách theo thứ tự đợt; không có id = đợt mới. */
+export interface SaveDisbursementSchedulePayload {
+  reason: string;
+  rows: { id?: number; percentage: number; conditionDescription?: string | null }[];
+}

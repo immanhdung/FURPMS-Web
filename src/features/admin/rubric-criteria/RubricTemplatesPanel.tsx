@@ -477,7 +477,9 @@ function ScopeEditor({ template }: { template: RubricTemplateFull }) {
 
   // Chỉ hiện đợt đúng loại mà bộ này áp dụng (rào chắn tránh gắn nhầm).
   const eligible = (cycles ?? []).filter((c) => {
-    const isApplied = Boolean((c as { requireOrderingUnit?: boolean }).requireOrderingUnit);
+    // 03/10: trước đây đọc `requireOrderingUnit` trên ĐỢT — đợt không có trường đó ⇒ mọi đợt bị coi là Cơ
+    // bản, bộ chỉ dành cho Ứng dụng không gắn được vào đợt nào.
+    const isApplied = Boolean(c.isApplied);
     return isApplied ? template.appliesApplied : template.appliesBasic;
   });
 

@@ -1,6 +1,11 @@
 import { axiosClient } from "@/services/api/axiosClient";
 import type { ApiResponse } from "@/types/common";
-import type { ConfirmDisbursementPayload, Disbursement, LinkDeliverablePayload } from "@/types/disbursement";
+import type {
+  ConfirmDisbursementPayload,
+  Disbursement,
+  LinkDeliverablePayload,
+  SaveDisbursementSchedulePayload,
+} from "@/types/disbursement";
 
 export const disbursementService = {
   listByContract: (contractId: string) =>
@@ -26,6 +31,12 @@ export const disbursementService = {
   regenerate: (contractId: string, reason: string) =>
     axiosClient
       .post<ApiResponse<Disbursement[]>>(`/contracts/${contractId}/disbursements/regenerate`, { reason })
+      .then((res) => res.data.data),
+
+  /** Chỉnh cả lịch giải ngân (thêm / bớt / sửa đợt) — lý do bắt buộc, ghi sổ quyết định. */
+  saveSchedule: (contractId: string, payload: SaveDisbursementSchedulePayload) =>
+    axiosClient
+      .put<ApiResponse<Disbursement[]>>(`/contracts/${contractId}/disbursements/schedule`, payload)
       .then((res) => res.data.data),
 
   /** Huỷ một lần "đã giải ngân" bấm nhầm — lý do bắt buộc. */

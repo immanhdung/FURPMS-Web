@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { CouncilAssignSelect } from "@/features/staff/review-board/CouncilAssignSelect";
+import { ProjectInviteStatus } from "@/features/staff/review-board/ProjectInviteStatus";
 import { ProposalQuickViewSheet } from "@/features/staff/review-board/ProposalQuickViewSheet";
 import { useAddProjectToRoundMutation } from "@/hooks/useReviewBoard";
 import { ROUND_STATUS } from "@/constants/statuses";
@@ -14,9 +15,17 @@ interface RoundProposalsPanelProps {
   cycleId: number;
   trackId: number;
   trackProjects: ReviewBoardProject[];
+  /** Mọi phiên của lĩnh vực — để bỏ đề tài đang chấm dở ở phiên cùng loại khác khỏi danh sách "chưa vào phiên". */
+  allRounds?: ReviewBoardRound[];
 }
 
-export function RoundProposalsPanel({ round, cycleId, trackId, trackProjects }: RoundProposalsPanelProps) {
+export function RoundProposalsPanel({
+  round,
+  cycleId,
+  trackId,
+  trackProjects,
+  allRounds = [],
+}: RoundProposalsPanelProps) {
   const { t } = useTranslation();
   const addMutation = useAddProjectToRoundMutation(cycleId, trackId);
   const [quickViewId, setQuickViewId] = useState<string | null>(null);
@@ -29,10 +38,26 @@ export function RoundProposalsPanel({ round, cycleId, trackId, trackProjects }: 
   const isReview = round.roundType?.toUpperCase() === "REVIEW";
   const isAcceptance = round.roundType?.toUpperCase() === "ACCEPTANCE";
   const reviewable = ["PROPOSED", "UNDER_REVIEW"];
+  // Đề tài đang chấm dở (chưa chốt Đạt/Không đạt) ở phiên CÙNG LOẠI khác còn mở — BE không cho đưa sang
+  // phiên này nữa (03/10), nên cũng không liệt kê để Staff khỏi bấm "Thêm" rồi ăn lỗi.
+  const closed = ["PASSED", "FAILED"];
+  const busyElsewhere = new Set(
+    allRounds
+      .filter(
+        (r) =>
+          r.id !== round.id &&
+          r.roundType?.toUpperCase() === round.roundType?.toUpperCase() &&
+          !closed.includes(r.status?.toUpperCase() ?? "")
+      )
+      .flatMap((r) => r.projects.filter((p) => !closed.includes(p.status?.toUpperCase() ?? "")))
+      .map((p) => p.projectId)
+  );
   const available = trackProjects.filter(
-    (p) => !inRound.has(p.projectId)
-      && (!isReview || reviewable.includes((p.projectStatus ?? "").toUpperCase()))
-      && (!isAcceptance || (p.projectStatus ?? "").toUpperCase() === "ACCEPTANCE")
+    (p) =>
+      !inRound.has(p.projectId) &&
+      !busyElsewhere.has(p.projectId) &&
+      (!isReview || reviewable.includes((p.projectStatus ?? "").toUpperCase())) &&
+      (!isAcceptance || (p.projectStatus ?? "").toUpperCase() === "ACCEPTANCE")
   );
   // Chỉ thêm được vào vòng còn PENDING/OPEN (rule #17). Vòng đã PASSED/CLOSED → chỉ hiện để biết.
   const status = round.status?.toUpperCase();
@@ -63,7 +88,23 @@ export function RoundProposalsPanel({ round, cycleId, trackId, trackProjects }: 
                 {p.piName && <span className="block truncate text-xs text-muted-foreground">{p.piName}</span>}
               </button>
               {p.status && <StatusBadge status={p.status} />}
-              <CouncilAssignSelect projectId={p.projectId} councils={round.councils} cycleId={cycleId} trackId={trackId} />
+              <CouncilAssignSelect
+                projectId={p.projectId}
+                councils={round.councils}
+                cycleId={cycleId}
+                trackId={trackId}
+              />
+              {(() => {
+                const idx = round.councils.findIndex((c) => c.projectIds.includes(p.projectId));
+                return idx >= 0 ? (
+                  <ProjectInviteStatus
+                    council={round.councils[idx]}
+                    councilLabel={t("reviewBoard.councilN", { n: idx + 1 })}
+                    projectId={p.projectId}
+                    projectTitle={p.titleVi ?? ""}
+                  />
+                ) : null;
+              })()}
             </li>
           ))}
         </ul>

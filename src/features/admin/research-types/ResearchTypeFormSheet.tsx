@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { ResearchKindBadge } from "@/components/shared/ResearchKindBadge";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { FormSheet } from "@/components/shared/FormSheet";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useCreateResearchTypeMutation, useUpdateResearchTypeMutation } from "@/hooks/useResearchTypes";
+import { useUpdateResearchTypeMutation } from "@/hooks/useResearchTypes";
 import { researchTypeSchema, type ResearchTypeFormValues } from "@/features/admin/research-types/research-type.schema";
 import type { ResearchType } from "@/types/research-type";
 
@@ -17,10 +17,9 @@ interface ResearchTypeFormSheetProps {
 
 export function ResearchTypeFormSheet({ open, onOpenChange, researchType }: ResearchTypeFormSheetProps) {
   const { t, i18n } = useTranslation();
-  const isEdit = Boolean(researchType);
-  const createMutation = useCreateResearchTypeMutation();
+  // 03/10: chỉ có 2 loại cố định ⇒ form chỉ để SỬA tên và trần kinh phí (Điều 14.3: Hiệu trưởng nâng trần).
   const updateMutation = useUpdateResearchTypeMutation();
-  const isSubmitting = createMutation.isPending || updateMutation.isPending;
+  const isSubmitting = updateMutation.isPending;
 
   const {
     register,
@@ -49,40 +48,33 @@ export function ResearchTypeFormSheet({ open, onOpenChange, researchType }: Rese
   }, [open, researchType, reset]);
 
   const onSubmit = (values: ResearchTypeFormValues) => {
-    if (isEdit && researchType) {
-      updateMutation.mutate(
-        {
-          id: researchType.id,
-          payload: {
-            name: values.name,
-            maxBudgetCap: values.maxBudgetCap,
-            requireOrderingUnit: values.requireOrderingUnit,
-          },
-        },
-        { onSuccess: () => onOpenChange(false) },
-      );
-    } else {
-      createMutation.mutate(values, { onSuccess: () => onOpenChange(false) });
-    }
+    if (!researchType) return;
+    updateMutation.mutate(
+      { id: researchType.id, payload: { name: values.name, maxBudgetCap: values.maxBudgetCap } },
+      { onSuccess: () => onOpenChange(false) }
+    );
   };
 
   return (
     <FormSheet
       open={open}
       onOpenChange={onOpenChange}
-      title={isEdit ? t("researchTypes.editTitle") : t("researchTypes.createTitle")}
+      title={t("researchTypes.editTitle")}
       description={t("researchTypes.formDesc")}
       formId="research-type-form"
       onSubmit={handleSubmit(onSubmit)}
       isSubmitting={isSubmitting}
-      submitLabel={isEdit ? t("common.saveChanges") : t("common.create")}
+      submitLabel={t("common.saveChanges")}
     >
       <div>
         <label htmlFor="rt-code" className="mb-1.5 block text-sm font-medium text-foreground">
           {t("researchTypes.code")}
         </label>
-        <Input id="rt-code" disabled={isEdit} aria-invalid={Boolean(errors.code)} {...register("code")} />
-        {errors.code && <p className="mt-1 text-xs text-destructive">{errors.code.message}</p>}
+        <div className="flex items-center gap-2">
+          <Input id="rt-code" disabled className="max-w-40" {...register("code")} />
+          {researchType && <ResearchKindBadge isApplied={researchType.kind === "APPLIED"} />}
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">{t("researchTypes.codeFixedHint")}</p>
       </div>
 
       <div>
@@ -136,21 +128,6 @@ export function ResearchTypeFormSheet({ open, onOpenChange, researchType }: Rese
         </p>
       </div>
 
-      <Controller
-        control={control}
-        name="requireOrderingUnit"
-        render={({ field }) => (
-          <div className="space-y-1">
-            <label className="flex items-center gap-2 text-sm text-foreground">
-              <Checkbox checked={field.value} onCheckedChange={(checked) => field.onChange(Boolean(checked))} />
-              {t("researchTypes.requiresOrderingUnitLabel")}
-            </label>
-            {/* 03/10: ô này quyết định cả lịch giải ngân và số kỳ tiến độ — trước đây chỉ ghi "Yêu cầu
-                đơn vị đặt hàng", loại "Ứng dụng" tạo trên deploy không tick nên chỉ ra 1 đợt giải ngân. */}
-            <p className="pl-6 text-xs text-muted-foreground">{t("researchTypes.appliedEffectHint")}</p>
-          </div>
-        )}
-      />
     </FormSheet>
   );
 }

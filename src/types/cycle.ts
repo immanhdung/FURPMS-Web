@@ -5,6 +5,9 @@ export interface Cycle {
   name: string;
   academicYear: string;
   researchTypeId: number;
+  /** Đợt đề tài ứng dụng hay cơ bản — máy chủ suy từ loại đề tài (03/10). */
+  isApplied?: boolean;
+  researchKind?: "BASIC" | "APPLIED";
   submissionStartDate: string;
   submissionDeadline: string;      // hạn HIỆU LỰC (sau gia hạn nếu có)
   originalDeadline?: string | null; // hạn gốc — chỉ có khi đã gia hạn

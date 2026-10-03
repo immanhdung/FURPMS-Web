@@ -91,6 +91,19 @@ export function useGenerateProgressRoundsMutation(contractId: string) {
   });
 }
 
+/** Lập lại lịch tiến độ theo mẫu của loại đề tài (03/10). */
+export function useResetProgressRoundsMutation(contractId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (reason: string) => progressReportService.reset(contractId, reason),
+    onSuccess: () => {
+      toast.success(i18n.t("toast.roundsGenerated"));
+      queryClient.invalidateQueries({ queryKey: queryKeys.progressReports.list(contractId) });
+    },
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.actionFailed")),
+  });
+}
+
 export function useUpdateProgressReportMutation(contractId: string) {
   const queryClient = useQueryClient();
   return useMutation({

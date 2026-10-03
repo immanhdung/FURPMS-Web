@@ -1,27 +1,22 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
-import { FolderKanban, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { FolderKanban } from "lucide-react";
 import { DataTable } from "@/components/tables/DataTable";
 import { ErrorState } from "@/components/shared/ErrorState";
-import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
-import { useDeleteResearchTypeMutation, useResearchTypesQuery } from "@/hooks/useResearchTypes";
+import { useResearchTypesQuery } from "@/hooks/useResearchTypes";
 import { getResearchTypeColumns } from "@/features/admin/research-types/columns";
 import { ResearchTypeFormSheet } from "@/features/admin/research-types/ResearchTypeFormSheet";
 import { sortByIdDesc } from "@/utils/sort";
-import { researchTypeDisplayName } from "@/utils/research-type";
 import type { ResearchType } from "@/types/research-type";
 
 export function ResearchTypesPage() {
   const { t } = useTranslation();
   const { data, isLoading, isError, refetch, isRefetching } = useResearchTypesQuery(true);
-  const deleteMutation = useDeleteResearchTypeMutation();
   const sortedData = useMemo(() => sortByIdDesc(data), [data]);
 
   const [formOpen, setFormOpen] = useState(false);
   const [editingType, setEditingType] = useState<ResearchType | null>(null);
-  const [deletingType, setDeletingType] = useState<ResearchType | null>(null);
 
   const columns = useMemo(
     () =>
@@ -31,7 +26,6 @@ export function ResearchTypesPage() {
           setEditingType(rt);
           setFormOpen(true);
         },
-        onDelete: (rt) => setDeletingType(rt),
       }),
     [t]
   );
@@ -55,16 +49,13 @@ export function ResearchTypesPage() {
             </p>
           </div>
         </div>
-        <Button
-          onClick={() => {
-            setEditingType(null);
-            setFormOpen(true);
-          }}
-        >
-          <Plus />
-          {t("researchTypes.newBtn")}
-        </Button>
       </motion.div>
+
+      {/* 03/10: hệ thống chỉ có 2 loại cố định (mã BASIC / APPLIED) — tiến trình mỗi loại rõ ràng theo QĐ543.
+          Không thêm / xoá loại; lịch tiến độ và giải ngân của từng hợp đồng vẫn chỉnh được (ghi sổ quyết định). */}
+      <p className="rounded-lg border border-border bg-muted/40 px-3 py-2.5 text-xs text-muted-foreground">
+        {t("researchTypes.fixedNote")}
+      </p>
 
       {isError ? (
         <ErrorState onRetry={() => refetch()} isRetrying={isRefetching} />
@@ -82,21 +73,6 @@ export function ResearchTypesPage() {
 
       <ResearchTypeFormSheet open={formOpen} onOpenChange={setFormOpen} researchType={editingType} />
 
-      <ConfirmDialog
-        open={Boolean(deletingType)}
-        onOpenChange={(open) => !open && setDeletingType(null)}
-        title={t("researchTypes.deleteTitle")}
-        description={t("researchTypes.deleteDesc", { name: researchTypeDisplayName(deletingType, t) })}
-        variant="destructive"
-        confirmLabel={t("common.delete")}
-        isLoading={deleteMutation.isPending}
-        onConfirm={() =>
-          deletingType &&
-          deleteMutation.mutate(deletingType.id, {
-            onSuccess: () => setDeletingType(null),
-          })
-        }
-      />
     </div>
   );
 }

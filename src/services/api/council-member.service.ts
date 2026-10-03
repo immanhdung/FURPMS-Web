@@ -1,6 +1,11 @@
 import { axiosClient } from "@/services/api/axiosClient";
 import type { ApiResponse } from "@/types/common";
-import type { AddCouncilMemberPayload, CouncilMember, RespondMembershipPayload } from "@/types/council-member";
+import type {
+  AddCouncilMemberPayload,
+  CouncilMember,
+  ProjectInvitationStatus,
+  RespondMembershipPayload,
+} from "@/types/council-member";
 
 export const councilMemberService = {
   list: (councilId: string) =>
@@ -26,6 +31,30 @@ export const councilMemberService = {
   respondOnBehalf: (memberId: string, payload: RespondMembershipPayload) =>
     axiosClient
       .post<ApiResponse<CouncilMember>>(`/council-members/${memberId}/respond-on-behalf`, payload)
+      .then((res) => res.data.data),
+
+  /** Trạng thái nhận lời của từng thành viên với MỘT đề tài (03/10). */
+  projectInvitations: (councilId: string, projectId: string) =>
+    axiosClient
+      .get<ApiResponse<ProjectInvitationStatus[]>>(`/councils/${councilId}/projects/${projectId}/invitations`)
+      .then((res) => res.data.data),
+
+  /** Thành viên trả lời riêng một đề tài. */
+  respondProject: (memberId: string, projectId: string, payload: RespondMembershipPayload) =>
+    axiosClient
+      .patch<ApiResponse<ProjectInvitationStatus>>(
+        `/council-members/${memberId}/projects/${projectId}/respond`,
+        payload
+      )
+      .then((res) => res.data.data),
+
+  /** Phòng QLKH ghi nhận hộ trả lời cho một đề tài. */
+  respondProjectOnBehalf: (memberId: string, projectId: string, payload: RespondMembershipPayload) =>
+    axiosClient
+      .post<ApiResponse<ProjectInvitationStatus>>(
+        `/council-members/${memberId}/projects/${projectId}/respond-on-behalf`,
+        payload
+      )
       .then((res) => res.data.data),
 
   remove: (memberId: string) =>

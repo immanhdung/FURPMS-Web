@@ -6,7 +6,12 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useMyMembershipsQuery, useRespondToInvitationMutation } from "@/hooks/useMemberships";
+import {
+  useMyMembershipsQuery,
+  useRespondProjectInvitationMutation,
+  useRespondToInvitationMutation,
+} from "@/hooks/useMemberships";
+import { ReasonDialog } from "@/components/shared/ReasonDialog";
 import { MembershipCard } from "@/features/reviewer/shared/MembershipCard";
 import { DeclineInvitationDialog } from "@/features/reviewer/invitations/DeclineInvitationDialog";
 import { INVITATION_STATUS } from "@/constants/statuses";
@@ -17,6 +22,12 @@ export function InvitationsPage() {
   const { data, isLoading, isError, refetch, isRefetching } = useMyMembershipsQuery();
   const respondMutation = useRespondToInvitationMutation();
   const [decliningMemberId, setDecliningMemberId] = useState<string | null>(null);
+  const respondProject = useRespondProjectInvitationMutation();
+  const [decliningProject, setDecliningProject] = useState<MyMembership | null>(null);
+  // Đề tài được GIAO THÊM cho hội đồng mình đã nhận lời (03/10) — mỗi đề tài một thẻ, nhận/từ chối riêng.
+  const projectPending = (data ?? []).filter(
+    (m) => m.status?.toUpperCase() !== INVITATION_STATUS.PENDING && m.projectInviteStatus?.toUpperCase() === "INVITED"
+  );
 
   // MyMembershipDto has no invitedAt/sentAt timestamp to sort by — the backend returns rows in
   // creation order (oldest first), so reversing approximates "newest first" until it exposes a
@@ -30,14 +41,24 @@ export function InvitationsPage() {
   }
   // Một lời mời xác nhận tư cách trong HỘI ĐỒNG, không phải từng đề tài. API trả một dòng/đề tài để
   // màn chấm không làm mất bài thứ hai, nên tại đây gộp lại thành đúng một thẻ lời mời và liệt kê phạm vi.
-  const pending = Array.from(pendingByMember.values()).map((group) => ({
-    ...group[0],
-    proposalTitleVI: group.map((m) => m.proposalTitleVI).filter(Boolean).join("; "),
-  })).reverse();
+  const pending = Array.from(pendingByMember.values())
+    .map((group) => ({
+      ...group[0],
+      proposalTitleVI: group
+        .map((m) => m.proposalTitleVI)
+        .filter(Boolean)
+        .join("; "),
+    }))
+    .reverse();
 
   return (
     <div className="space-y-6">
-      <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }} className="flex items-center gap-3">
+      <motion.div
+        initial={{ opacity: 0, y: -4 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2 }}
+        className="flex items-center gap-3"
+      >
         <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-brand-accent-2/15 to-primary/10 text-brand-accent-2">
           <Mail className="size-5" />
         </div>
@@ -55,7 +76,7 @@ export function InvitationsPage() {
             <Skeleton key={index} className="h-20 w-full rounded-xl" />
           ))}
         </div>
-      ) : pending.length === 0 ? (
+      ) : pending.length === 0 && projectPending.length === 0 ? (
         <EmptyState icon={Mail} title={t("reviewer.noPending")} description={t("reviewer.allCaughtUp")} />
       ) : (
         <div className="space-y-3">
@@ -78,9 +99,7 @@ export function InvitationsPage() {
                   </Button>
                   <Button
                     size="sm"
-                    onClick={() =>
-                      respondMutation.mutate({ memberId: membership.memberId, payload: { accept: true } })
-                    }
+                    onClick={() => respondMutation.mutate({ memberId: membership.memberId, payload: { accept: true } })}
                     disabled={respondMutation.isPending}
                   >
                     <Check />
@@ -92,6 +111,74 @@ export function InvitationsPage() {
           ))}
         </div>
       )}
+
+      {!isLoading && !isError && projectPending.length > 0 && (
+        <div className="space-y-3">
+          <div>
+            <h2 className="text-sm font-semibold text-foreground">{t("projectInvite.extraTitle")}</h2>
+            <p className="text-xs text-muted-foreground">{t("projectInvite.extraHint")}</p>
+          </div>
+          {projectPending.map((membership, index) => (
+            <MembershipCard
+              key={`${membership.memberId}-${membership.projectId}`}
+              // Badge theo lời mời RIÊNG đề tài này — badge cấp hội đồng ("Đã xác nhận") cạnh nút "Nhận
+              // chấm" dễ hiểu nhầm là đã nhận rồi.
+              membership={{ ...membership, status: membership.projectInviteStatus ?? membership.status }}
+              index={index}
+              wrapTitle
+              actions={
+                <>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setDecliningProject(membership)}
+                    disabled={respondProject.isPending}
+                  >
+                    <X />
+                    {t("projectInvite.declineProject")}
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() =>
+                      respondProject.mutate({
+                        memberId: membership.memberId,
+                        projectId: membership.projectId,
+                        payload: { accept: true },
+                      })
+                    }
+                    disabled={respondProject.isPending}
+                  >
+                    <Check />
+                    {t("projectInvite.acceptProject")}
+                  </Button>
+                </>
+              }
+            />
+          ))}
+        </div>
+      )}
+
+      <ReasonDialog
+        open={Boolean(decliningProject)}
+        onOpenChange={(o) => !o && setDecliningProject(null)}
+        title={t("projectInvite.declineTitle")}
+        hint={t("projectInvite.declineHint")}
+        description={decliningProject?.proposalTitleVI ?? ""}
+        confirmLabel={t("projectInvite.declineProject")}
+        variant="destructive"
+        isLoading={respondProject.isPending}
+        onConfirm={(reason) =>
+          decliningProject &&
+          respondProject.mutate(
+            {
+              memberId: decliningProject.memberId,
+              projectId: decliningProject.projectId,
+              payload: { accept: false, declineReason: reason },
+            },
+            { onSuccess: () => setDecliningProject(null) }
+          )
+        }
+      />
 
       <DeclineInvitationDialog
         open={Boolean(decliningMemberId)}

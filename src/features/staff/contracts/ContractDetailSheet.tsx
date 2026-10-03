@@ -16,6 +16,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/shared/StatusBadge";
+import { ResearchKindBadge } from "@/components/shared/ResearchKindBadge";
 import { PageLoader } from "@/components/shared/PageLoader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DecisionDossierPanel } from "@/components/shared/DecisionDossierPanel";
@@ -114,6 +115,7 @@ export function ContractDetailSheet({ open, onOpenChange, contractId, tab, onTab
             <div className="space-y-5 pb-6">
               <div className="flex flex-wrap items-center gap-2">
                 {contract.status && <StatusBadge status={contract.status} />}
+                <ResearchKindBadge isApplied={Boolean(contract.isApplied)} />
                 <span className="text-xs text-muted-foreground">
                   {formatDate(contract.startDate)} – {formatDate(contract.endDate)}
                 </span>
@@ -338,7 +340,8 @@ export function ContractDetailSheet({ open, onOpenChange, contractId, tab, onTab
                     contractId={contract.id}
                     canManage={canManage}
                     researchTypeName={contract.researchTypeName}
-                    isApplied={(contract.defaultProgressRounds ?? 1) >= 2}
+                    isApplied={Boolean(contract.isApplied)}
+                    expectedRounds={contract.expectedDisbursementRounds}
                   />
                 </TabsContent>
                 <TabsContent value="deliverables">

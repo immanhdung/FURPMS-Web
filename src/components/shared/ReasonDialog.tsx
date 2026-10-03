@@ -24,6 +24,7 @@ export function ReasonDialog({
   confirmLabel,
   variant = "default",
   isLoading = false,
+  hint,
   onConfirm,
 }: {
   open: boolean;
@@ -33,6 +34,8 @@ export function ReasonDialog({
   confirmLabel: string;
   variant?: "default" | "destructive";
   isLoading?: boolean;
+  /** Dòng nhỏ dưới ô lý do — mặc định "lưu vào tab Quyết định"; nơi khác lưu chỗ khác thì truyền vào. */
+  hint?: string;
   onConfirm: (reason: string) => void;
 }) {
   const { t } = useTranslation();
@@ -53,7 +56,7 @@ export function ReasonDialog({
         <div>
           <label className="mb-1.5 block text-sm font-medium text-foreground">{t("common.reasonRequired")}</label>
           <Textarea rows={3} autoFocus value={reason} onChange={(e) => setReason(e.target.value)} />
-          <p className="mt-1.5 text-xs text-muted-foreground">{t("common.reasonLogged")}</p>
+          <p className="mt-1.5 text-xs text-muted-foreground">{hint ?? t("common.reasonLogged")}</p>
         </div>
         <DialogFooter>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>

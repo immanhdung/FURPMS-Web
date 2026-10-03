@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { BanknoteArrowUp, CircleCheck, Clock, Loader2, Lock, RefreshCw, RotateCcw, Wallet } from "lucide-react";
+import { BanknoteArrowUp, CircleCheck, Clock, Loader2, Lock, PencilLine, RefreshCw, RotateCcw, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
@@ -13,6 +13,7 @@ import {
 } from "@/hooks/useDisbursements";
 import { ReasonDialog } from "@/components/shared/ReasonDialog";
 import { ConfirmDisbursementDialog } from "@/features/staff/contracts/ConfirmDisbursementDialog";
+import { DisbursementScheduleEditor } from "@/features/staff/contracts/DisbursementScheduleEditor";
 import { DisbursementEvidence } from "@/features/staff/contracts/DisbursementEvidence";
 import { DisbursementDeliverableLink } from "@/features/staff/contracts/DisbursementDeliverableLink";
 import { DISBURSEMENT_STATUS, type Disbursement } from "@/types/disbursement";
@@ -31,11 +32,14 @@ export function DisbursementsPanel({
   canManage,
   researchTypeName,
   isApplied,
+  expectedRounds,
 }: {
   contractId: string;
   canManage: boolean;
   researchTypeName?: string | null;
   isApplied?: boolean;
+  /** Số đợt đúng theo loại — lịch đã sinh có số đợt khác thì cảnh báo (03/10). */
+  expectedRounds?: number;
 }) {
   const { t } = useTranslation();
   const { data: disbursements, isLoading } = useDisbursementsQuery(contractId);
@@ -44,6 +48,7 @@ export function DisbursementsPanel({
   const undoMutation = useUndoDisbursementMutation(contractId);
   const [confirming, setConfirming] = useState<Disbursement | null>(null);
   const [regenerating, setRegenerating] = useState(false);
+  const [editing, setEditing] = useState(false);
   const [undoing, setUndoing] = useState<Disbursement | null>(null);
 
   // Quy định áp cho hợp đồng này — nói thẳng ra để thấy ngay khi loại đề tài bị cấu hình sai.
@@ -91,16 +96,32 @@ export function DisbursementsPanel({
   }
 
   const anyPaid = disbursements.some((d) => d.status === DISBURSEMENT_STATUS.DISBURSED);
+  // Lịch khác mẫu của loại: đã chỉnh tay (hợp lệ, có sổ quyết định) hoặc sinh theo loại cấu hình sai trước 03/10
+  // — chỉ nhắc, không coi là lỗi.
+  const mismatch = expectedRounds != null && disbursements.length !== expectedRounds;
 
   return (
     <div className="space-y-3">
       {rule}
+      {mismatch && (
+        <p className="rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+          {t("contract.disbursement.kindMismatch", { actual: disbursements.length, expected: expectedRounds })}{" "}
+          {canManage && t("contract.disbursement.kindMismatchFix")}
+        </p>
+      )}
       <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2.5 text-xs text-muted-foreground">
         <span>{t("contract.disbursement.evidenceNote")}</span>
         <span className="flex items-center gap-2">
           {disbursements.filter((d) => d.status === DISBURSEMENT_STATUS.DISBURSED).length}/{disbursements.length}{" "}
           {t("contract.disbursement.tranches")}
-          {/* Lịch sinh sai (vd loại đề tài chưa đánh dấu Ứng dụng ⇒ 1 đợt 100%): sinh lại khi CHƯA chi đợt nào. */}
+          {/* 03/10: lịch theo loại chỉ là mặc định — "Chỉnh lịch" thêm / bớt / sửa từng đợt (đợt đã chi bị khoá),
+              "Lập lại theo mẫu" về mặc định khi CHƯA chi đợt nào. Cả hai bắt lý do, ghi sổ quyết định. */}
+          {canManage && (
+            <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs" onClick={() => setEditing(true)}>
+              <PencilLine className="size-3.5" />
+              {t("contract.disbursement.editSchedule")}
+            </Button>
+          )}
           {canManage && !anyPaid && (
             <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs" onClick={() => setRegenerating(true)}>
               <RefreshCw className="size-3.5" />
@@ -215,6 +236,12 @@ export function DisbursementsPanel({
         );
       })}
 
+      <DisbursementScheduleEditor
+        open={editing}
+        onOpenChange={setEditing}
+        contractId={contractId}
+        disbursements={disbursements}
+      />
       <ReasonDialog
         open={regenerating}
         onOpenChange={setRegenerating}

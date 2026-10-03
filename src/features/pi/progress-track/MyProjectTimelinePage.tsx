@@ -111,7 +111,8 @@ export function MyProjectTimelinePage() {
                         contractId={contract.id}
                         canManage={false}
                         researchTypeName={contract.researchTypeName}
-                        isApplied={(contract.defaultProgressRounds ?? 1) >= 2}
+                        isApplied={Boolean(contract.isApplied)}
+                        expectedRounds={contract.expectedDisbursementRounds}
                       />
                     </div>
 

@@ -50,6 +50,12 @@ export const progressReportService = {
     axiosClient.post<ApiResponse<ProgressReport>>(`/progress-reports/${id}/submit`).then((res) => res.data.data),
 
   /** Xoá kỳ báo cáo. Bản ĐÃ NỘP chỉ Phòng QLKH xoá được và phải kèm lý do. */
+  /** Xoá các kỳ nháp rồi lập lại theo mẫu của loại đề tài — lý do bắt buộc (03/10). */
+  reset: (contractId: string, reason: string) =>
+    axiosClient
+      .post<ApiResponse<ProgressReport[]>>("/progress-reports/reset", { reason }, { params: { contractId } })
+      .then((res) => res.data.data),
+
   delete: (id: string, reason?: string) =>
     axiosClient.delete(`/progress-reports/${id}`, { params: reason ? { reason } : undefined }),
 

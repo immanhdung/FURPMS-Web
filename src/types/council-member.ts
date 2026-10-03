@@ -33,3 +33,16 @@ export interface RespondMembershipPayload {
   accept: boolean;
   declineReason?: string;
 }
+
+/** Trạng thái nhận lời của một thành viên với MỘT đề tài (03/10). */
+export interface ProjectInvitationStatus {
+  memberId: string;
+  userId: string;
+  fullName?: string | null;
+  memberRole?: string | null;
+  /** NOT_SENT / INVITED / CONFIRMED / DECLINED */
+  status: string;
+  respondedAt?: string | null;
+  declineReason?: string | null;
+  respondedOnBehalf: boolean;
+}

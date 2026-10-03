@@ -14,6 +14,10 @@ export interface Contract {
   researchTypeName?: string | null;
   /** Số kỳ báo cáo tiến độ mặc định theo loại đề tài (QĐ543 Điều 10.1) — máy chủ tính. */
   defaultProgressRounds?: number;
+  /** Đề tài ứng dụng (true) hay cơ bản — máy chủ tính; đừng suy từ số kỳ (03/10). */
+  isApplied?: boolean;
+  /** Số đợt giải ngân đúng theo loại (QĐ543 Điều 16) — lệch với lịch đã sinh thì báo. */
+  expectedDisbursementRounds?: number;
   cycleId?: number;
   cycleCode?: string | null;
   trackId?: number;

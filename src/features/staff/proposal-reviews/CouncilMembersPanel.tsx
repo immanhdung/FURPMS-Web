@@ -1,21 +1,14 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { CheckCircle2, Mail, UserPlus, UserX, XCircle } from "lucide-react";
+import { Mail, UserPlus, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
-import { StatusBadge } from "@/components/shared/StatusBadge";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
-import {
-  useRespondOnBehalfMutation,
-  useCouncilMembersQuery,
-  useRemoveCouncilMemberMutation,
-} from "@/hooks/useCouncilMembers";
+import { useCouncilMembersQuery, useRemoveCouncilMemberMutation } from "@/hooks/useCouncilMembers";
 import { useSendInvitationsMutation } from "@/hooks/useCouncils";
 import { AddCouncilMemberDialog } from "@/features/staff/proposal-reviews/AddCouncilMemberDialog";
-import { formatDateTime } from "@/utils/format";
 import type { CouncilMember } from "@/types/council-member";
-import { useCouncilPolicyQuery } from "@/hooks/useSystemSettings";
 
 interface CouncilMembersPanelProps {
   councilId: string;
@@ -27,8 +20,6 @@ export function CouncilMembersPanel({ councilId, trackId, roundType }: CouncilMe
   const { t } = useTranslation();
   const { data: members, isLoading } = useCouncilMembersQuery(councilId);
   const sendInvitationsMutation = useSendInvitationsMutation(councilId);
-  const respondOnBehalfMutation = useRespondOnBehalfMutation(councilId);
-  const { data: councilPolicy } = useCouncilPolicyQuery();
   const removeMutation = useRemoveCouncilMemberMutation(councilId);
 
   const [addOpen, setAddOpen] = useState(false);
@@ -50,7 +41,12 @@ export function CouncilMembersPanel({ councilId, trackId, roundType }: CouncilMe
           {memberCount > 0 && <span className="ml-1.5 text-xs text-muted-foreground">({memberCount})</span>}
         </p>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => sendInvitationsMutation.mutate({})} disabled={sendInvitationsMutation.isPending}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => sendInvitationsMutation.mutate({})}
+            disabled={sendInvitationsMutation.isPending}
+          >
             <Mail />
             {t("reviewBoard.sendInvitations")}
           </Button>
@@ -60,6 +56,8 @@ export function CouncilMembersPanel({ councilId, trackId, roundType }: CouncilMe
           </Button>
         </div>
       </div>
+
+      <p className="text-xs text-muted-foreground">{t("projectInvite.membersHint")}</p>
 
       {/* Giải thích VÌ SAO phải lẻ, không chỉ báo "sai" — mọi thành viên đều chấm, Thư ký dựa vào
           chênh lệch phiếu để soạn kết luận, Chủ tịch xem lại rồi mới ký. Hoà phiếu là không có
@@ -77,7 +75,12 @@ export function CouncilMembersPanel({ councilId, trackId, roundType }: CouncilMe
           ))}
         </div>
       ) : !members || members.length === 0 ? (
-        <EmptyState icon={UserX} title={t("reviewBoard.noMembers")} description={t("reviewBoard.noMembersDesc")} className="min-h-32 border-none p-4" />
+        <EmptyState
+          icon={UserX}
+          title={t("reviewBoard.noMembers")}
+          description={t("reviewBoard.noMembersDesc")}
+          className="min-h-32 border-none p-4"
+        />
       ) : (
         <ul className="space-y-2">
           {members.map((member) => (
@@ -92,63 +95,26 @@ export function CouncilMembersPanel({ councilId, trackId, roundType }: CouncilMe
                   )}
                 </p>
                 <p className="truncate text-xs text-muted-foreground">{member.reviewerEmail}</p>
-                {member.confirmedAt && (
-                  <p className="text-[11px] text-muted-foreground">{t("reviewBoard.confirmedAt", { at: formatDateTime(member.confirmedAt) })}</p>
-                )}
-                {member.declinedAt && (
-                  <p className="text-[11px] text-muted-foreground">{t("reviewBoard.declinedAt", { at: formatDateTime(member.declinedAt) })}</p>
-                )}
                 {/* Lý do mời dù khác lĩnh vực (QĐ543 Điều 8.2) — lưu lúc thêm người, cũng được ghi vào
                     hồ sơ quyết định của từng đề tài khi gán đề tài cho hội đồng. */}
                 {member.expertiseNote && (
-                  <p className="mt-0.5 text-xs text-warning">{t("reviewBoard.expertiseNoteLine", { note: member.expertiseNote })}</p>
-                )}
-                {/* Lý do từ chối — trước 03/10 API không trả ra nên Phòng QLKH không đọc được. */}
-                {(member.status === "DECLINED" || member.declinedAt) && (
-                  <p className="mt-0.5 text-xs text-destructive">
-                    {member.declineReason?.trim()
-                      ? t("reviewBoard.declineReason", { reason: member.declineReason.trim() })
-                      : t("reviewBoard.declineNoReason")}
+                  <p className="mt-0.5 text-xs text-warning">
+                    {t("reviewBoard.expertiseNoteLine", { note: member.expertiseNote })}
                   </p>
                 )}
               </div>
 
               <div className="flex shrink-0 items-center gap-1.5">
-                {member.status && <StatusBadge status={member.status} />}
-                {/* "Xác nhận thay": Staff bấm hộ (reviewer đồng ý ngoài hệ thống / tiện demo).
-                    Trước đây nút này gọi /respond → BE chặn 403 vì Staff không phải chính reviewer;
-                    giờ dùng endpoint confirm-on-behalf. Hiện cả khi ASSIGNED lẫn INVITED. */}
-                {/* CHỈ hiện khi đã GỬI thư mời. Trước đây hiện cả lúc mới gán người (ASSIGNED) —
-                    ghi nhận "đã trả lời" khi chưa có thư nào để trả lời là hồ sơ tự mâu thuẫn,
-                    và máy chủ nay chặn hẳn. */}
-                {councilPolicy?.allowRespondOnBehalf && member.status?.toLowerCase() === "invited" && (
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    title={t("reviewBoard.confirmOnBehalf")}
-                    aria-label={t("reviewBoard.confirmOnBehalf")}
-                    disabled={respondOnBehalfMutation.isPending}
-                    onClick={() => respondOnBehalfMutation.mutate({ memberId: member.id, accept: true })}
-                  >
-                    <CheckCircle2 className="text-success" />
-                  </Button>
-                )}
-                {/* Nút này TỪNG GỌI NHẦM endpoint dành cho chính thành viên (`PATCH /respond`)
-                    nên chuyên viên luôn ăn 403 "Bạn chỉ trả lời được thư mời gửi cho chính mình".
-                    Nhánh xác nhận đã chuyển sang endpoint riêng từ trước, nhánh từ chối bị bỏ sót. */}
-                {councilPolicy?.allowRespondOnBehalf && member.status?.toLowerCase() === "invited" && (
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    title={t("reviewBoard.markDeclined")}
-                    aria-label={t("reviewBoard.markDeclined")}
-                    disabled={respondOnBehalfMutation.isPending}
-                    onClick={() => respondOnBehalfMutation.mutate({ memberId: member.id, accept: false })}
-                  >
-                    <XCircle className="text-danger" />
-                  </Button>
-                )}
-                <Button variant="ghost" size="icon-sm" title={t("reviewBoard.removeMember")} aria-label={t("reviewBoard.removeMember")} onClick={() => setRemovingMember(member)}>
+                {/* 03/10: trạng thái nhận lời nay tính THEO TỪNG ĐỀ TÀI — xem ở chip cạnh mỗi đề tài trong danh
+                    sách đề tài của phiên (bấm vào mở cửa sổ trạng thái + ghi nhận hộ). Màn quản lý chỉ còn
+                    gán / gỡ người, không lặp lại trạng thái cấp hội đồng dễ gây hiểu nhầm. */}
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  title={t("reviewBoard.removeMember")}
+                  aria-label={t("reviewBoard.removeMember")}
+                  onClick={() => setRemovingMember(member)}
+                >
                   <UserX />
                 </Button>
               </div>
@@ -157,13 +123,21 @@ export function CouncilMembersPanel({ councilId, trackId, roundType }: CouncilMe
         </ul>
       )}
 
-      <AddCouncilMemberDialog open={addOpen} onOpenChange={setAddOpen} councilId={councilId} trackId={trackId} roundType={roundType} />
+      <AddCouncilMemberDialog
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        councilId={councilId}
+        trackId={trackId}
+        roundType={roundType}
+      />
 
       <ConfirmDialog
         open={Boolean(removingMember)}
         onOpenChange={(open) => !open && setRemovingMember(null)}
         title={t("reviewBoard.removeMember")}
-        description={t("reviewBoard.removeMemberDesc", { name: removingMember?.reviewerName ?? t("reviewBoard.thisMember") })}
+        description={t("reviewBoard.removeMemberDesc", {
+          name: removingMember?.reviewerName ?? t("reviewBoard.thisMember"),
+        })}
         variant="destructive"
         confirmLabel={t("reviewBoard.remove")}
         isLoading={removeMutation.isPending}
