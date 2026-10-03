@@ -24,7 +24,7 @@ import { externalUrl, formatDateTime } from "@/utils/format";
 export function ProposalReviewWorkspace() {
   const { t } = useTranslation();
   const { councilId } = useParams<{ councilId: string }>();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const projectId = searchParams.get("projectId");
   const navigate = useNavigate();
   const { data: memberships, isLoading } = useMyMembershipsQuery();
@@ -167,7 +167,30 @@ export function ProposalReviewWorkspace() {
             </div>
           )}
 
-          <Tabs defaultValue="info">
+          {/* Tab nằm trên URL (?tab=) — tải lại trang vẫn ở tab đang xem (04/10). Tab không còn hợp lệ
+              (vd không còn quyền chấm) thì về "Thông tin". */}
+          <Tabs
+            value={
+              [
+                "info",
+                canScore ? "scoring" : null,
+                isAcceptanceRound ? "acceptance" : null,
+                "minutes",
+              ].includes(searchParams.get("tab"))
+                ? (searchParams.get("tab") as string)
+                : "info"
+            }
+            onValueChange={(v) =>
+              setSearchParams(
+                (prev) => {
+                  const next = new URLSearchParams(prev);
+                  next.set("tab", v);
+                  return next;
+                },
+                { replace: true }
+              )
+            }
+          >
             <TabsList>
               <TabsTrigger value="info">{t("reviewWorkspace.tabInfo")}</TabsTrigger>
               {/* Nghiệm thu phải nhìn được đề tài ĐÃ LÀM RA GÌ, không chỉ đề cương như vòng 1. */}

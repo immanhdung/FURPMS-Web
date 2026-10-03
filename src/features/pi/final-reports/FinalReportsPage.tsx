@@ -199,7 +199,7 @@ export function FinalReportsPage() {
                     </Select>
                   </div>
                   <Button
-                    disabled={submitMutation.isPending || Boolean(uploading) || !reportFileUrl || !language}
+                    disabled={submitMutation.isPending || Boolean(uploading) || !reportFileUrl || !summaryFileUrl || !language}
                     onClick={() =>
                       submitMutation.mutate({
                         reportFileUrl,

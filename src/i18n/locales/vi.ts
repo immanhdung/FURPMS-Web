@@ -837,7 +837,7 @@ export const vi = {
     deleteRoundTitle: "Xóa kỳ báo cáo nháp?",
     deleteRoundDescription: "Kỳ nháp này sẽ bị xóa. Báo cáo đã nộp hoặc đã đánh giá không thể xóa.",
     reportFileUpload: "Báo cáo tổng kết đầy đủ (BM09)",
-    summaryFileUpload: "Bản tóm tắt báo cáo",
+    summaryFileUpload: "Bản tóm tắt báo cáo (bắt buộc — QĐ543 Điều 13)",
     fileReady: "Đã chọn file hoặc liên kết và sẵn sàng nộp.",
     uploadMissingUrl: "Máy chủ không trả về đường dẫn file vừa tải lên.",
     orPasteLink: "Hoặc dán liên kết tài liệu",

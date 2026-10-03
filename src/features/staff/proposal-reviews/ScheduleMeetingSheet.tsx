@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
@@ -7,7 +7,7 @@ import { FormSheet } from "@/components/shared/FormSheet";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useScheduleMeetingMutation, useUpdateMeetingMutation } from "@/hooks/useMeetings";
+import { useMeetingsQuery, useScheduleMeetingMutation, useUpdateMeetingMutation } from "@/hooks/useMeetings";
 import { MEETING_MODES, IN_PERSON, type Meeting } from "@/types/meeting";
 import { fromDateTimeLocalInput, toDateTimeLocalInput } from "@/utils/format";
 
@@ -56,6 +56,8 @@ export function ScheduleMeetingSheet({ open, onOpenChange, councilId, meeting = 
     control,
     watch,
     reset,
+    setValue,
+    getValues,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -65,6 +67,20 @@ export function ScheduleMeetingSheet({ open, onOpenChange, councilId, meeting = 
   const platform = watch("platform");
   const isOffline = platform === IN_PERSON;
 
+  // 04/10: lịch MỚI tự điền giờ đề xuất — muộn hơn trong hai mốc: ~1 giờ nữa (làm tròn lên 30 phút) và lúc kết
+  // thúc buổi họp muộn nhất đang có lịch. BE chặn giờ quá khứ và trùng giờ thành viên; trước đây Staff tự chọn hay
+  // vướng hai lỗi này. Chỉ là gợi ý — vẫn sửa được.
+  const { data: allMeetings } = useMeetingsQuery();
+  const suggestedStart = useMemo(() => {
+    const step = 30 * 60 * 1000;
+    let start = Math.ceil((Date.now() + 60 * 60 * 1000) / step) * step;
+    for (const m of allMeetings ?? []) {
+      if (!m.scheduledAt || (m.status ?? "").toUpperCase() === "CANCELLED") continue;
+      const end = new Date(m.scheduledAt).getTime() + (m.durationMinutes ?? 60) * 60 * 1000;
+      if (end > Date.now() && end > start) start = Math.ceil(end / step) * step;
+    }
+    return toDateTimeLocalInput(new Date(start));
+  }, [allMeetings]);
   // Mở form sửa phải thấy lịch đang đặt, không thì lưu lại là ghi đè trắng.
   useEffect(() => {
     if (!open) return;
@@ -83,6 +99,12 @@ export function ScheduleMeetingSheet({ open, onOpenChange, councilId, meeting = 
         : { title: "", platform: MEETING_MODES[0].value, meetingLink: "", location: "", scheduledAt: "", durationMinutes: 60, agenda: "" }
     );
   }, [open, meeting, reset]);
+
+  // Chạy SAU reset (thứ tự effect) — reset làm trống ô giờ rồi mới điền gợi ý; dữ liệu lịch tải xong sau cũng chỉ
+  // điền khi ô còn trống, không đè giờ Staff đã gõ.
+  useEffect(() => {
+    if (open && !meeting && !getValues("scheduledAt") && suggestedStart) setValue("scheduledAt", suggestedStart);
+  }, [open, meeting, suggestedStart, getValues, setValue]);
 
   const onSubmit = (values: FormValues) => {
     const payload = {

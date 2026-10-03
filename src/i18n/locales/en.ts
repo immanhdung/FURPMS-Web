@@ -827,7 +827,7 @@ export const en = {
     deleteRoundTitle: "Delete this draft report round?",
     deleteRoundDescription: "This draft round will be deleted. Submitted or evaluated reports cannot be deleted.",
     reportFileUpload: "Full final report (Form BM09)",
-    summaryFileUpload: "Final report summary",
+    summaryFileUpload: "Final report summary (required — QĐ543 Art. 13)",
     fileReady: "A file or link is selected and ready to submit.",
     uploadMissingUrl: "The server did not return the uploaded file URL.",
     orPasteLink: "Or paste a document link",
