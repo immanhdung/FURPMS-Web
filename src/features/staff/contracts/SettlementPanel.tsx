@@ -225,6 +225,10 @@ export function SettlementPanel({
               {t("contract.settlement.unsign")}
             </Button>
           )}
+          {/* Điều 13.2: hồ sơ sau nghiệm thu phải được lưu trữ trước — BE chặn, nhắc trước để khỏi bấm rồi mới biết. */}
+          {key === "sign" && !at && !blocked && (
+            <p className="w-full text-xs text-muted-foreground">{t("contract.settlement.signNeedsArchive")}</p>
+          )}
           {key === "sign" && blocked && (
             <p className="w-full text-xs text-warning">{t("contract.settlement.signBlocked")}</p>
           )}

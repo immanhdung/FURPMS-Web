@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import i18n from "@/i18n";
 import { contractService } from "@/services/api/contract.service";
 import { queryKeys } from "@/services/queryKeys";
 import type { ApiError } from "@/types/common";
@@ -70,6 +71,19 @@ export function useSignContractMutation() {
       queryClient.invalidateQueries({ queryKey: queryKeys.contracts.all() });
     },
     onError: (error: ApiError) => toast.error(error.message || "Không ghi nhận được hợp đồng đã ký."),
+  });
+}
+
+export function useRestoreContractMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason: string }) => contractService.restore(id, reason),
+    onSuccess: (_data, { id }) => {
+      toast.success(i18n.t("toast.contractRestored"));
+      queryClient.invalidateQueries({ queryKey: queryKeys.contracts.detail(id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.contracts.all() });
+    },
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.actionFailed")),
   });
 }
 

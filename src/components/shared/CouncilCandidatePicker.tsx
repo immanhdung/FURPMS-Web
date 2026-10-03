@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Search } from "lucide-react";
+import { IdCard, Search } from "lucide-react";
+import { UserExpertiseSheet } from "@/components/shared/UserExpertiseProfile";
 import { Input } from "@/components/ui/input";
 import { CandidateStatusBadge } from "@/components/shared/CouncilCandidateRow";
 import { cn } from "@/lib/utils";
@@ -37,6 +38,8 @@ export function CouncilCandidatePicker({
 }: CouncilCandidatePickerProps) {
   const { t } = useTranslation();
   const [query, setQuery] = useState("");
+  // Xem hồ sơ chuyên môn trước khi chọn (03/10) — Điều 8.2/12.2: chọn chuyên gia có trình độ, kinh nghiệm.
+  const [viewing, setViewing] = useState<CouncilCandidate | null>(null);
 
   const { available, blocked } = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -60,46 +63,56 @@ export function CouncilCandidatePicker({
       .join(" · ");
 
     return (
-      <button
-        key={c.userId}
-        type="button"
-        role="radio"
-        aria-checked={selected}
-        disabled={disabled}
-        onClick={() => onChange(c.userId)}
-        className={cn(
-          "flex w-full items-center gap-3 rounded-lg border text-left transition-colors",
-          compact ? "px-2.5 py-1.5" : "px-3 py-2.5",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-          selected ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50",
-          disabled && "cursor-not-allowed opacity-60 hover:bg-transparent"
-        )}
-      >
-        <span
-          aria-hidden
+      <div key={c.userId} className="flex items-stretch gap-1">
+        <button
+          type="button"
+          role="radio"
+          aria-checked={selected}
+          disabled={disabled}
+          onClick={() => onChange(c.userId)}
           className={cn(
-            "flex size-4 shrink-0 items-center justify-center rounded-full border",
-            selected ? "border-primary" : "border-muted-foreground/40"
+            "flex w-full items-center gap-3 rounded-lg border text-left transition-colors",
+            compact ? "px-2.5 py-1.5" : "px-3 py-2.5",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            selected ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50",
+            disabled && "cursor-not-allowed opacity-60 hover:bg-transparent",
           )}
         >
-          {selected && <span className="size-2 rounded-full bg-primary" />}
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="flex min-w-0 items-baseline gap-2">
-            <span className="truncate text-sm font-medium text-foreground">{c.fullName}</span>
-            {c.academicTitle && <span className="shrink-0 text-xs text-muted-foreground">{c.academicTitle}</span>}
+          <span
+            aria-hidden
+            className={cn(
+              "flex size-4 shrink-0 items-center justify-center rounded-full border",
+              selected ? "border-primary" : "border-muted-foreground/40",
+            )}
+          >
+            {selected && <span className="size-2 rounded-full bg-primary" />}
           </span>
-          <span className="block truncate text-xs text-muted-foreground">{details}</span>
-        </span>
-        <span className="flex shrink-0 flex-col items-end gap-1">
-          <CandidateStatusBadge candidate={c} showTrack={showTrack} />
-          {c.activeCouncilCount > 0 && !disabled && (
-            <span className="text-xs whitespace-nowrap text-muted-foreground">
-              {t("staff.flagBusy", { n: c.activeCouncilCount })}
+          <span className="min-w-0 flex-1">
+            <span className="flex min-w-0 items-baseline gap-2">
+              <span className="truncate text-sm font-medium text-foreground">{c.fullName}</span>
+              {c.academicTitle && <span className="shrink-0 text-xs text-muted-foreground">{c.academicTitle}</span>}
             </span>
-          )}
-        </span>
-      </button>
+            <span className="block truncate text-xs text-muted-foreground">{details}</span>
+          </span>
+          <span className="flex shrink-0 flex-col items-end gap-1">
+            <CandidateStatusBadge candidate={c} showTrack={showTrack} />
+            {c.activeCouncilCount > 0 && !disabled && (
+              <span className="text-xs whitespace-nowrap text-muted-foreground">
+                {t("staff.flagBusy", { n: c.activeCouncilCount })}
+              </span>
+            )}
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setViewing(c)}
+          aria-label={t("userExpertise.view", { name: c.fullName })}
+          title={t("userExpertise.view", { name: c.fullName })}
+          className="flex w-8 shrink-0 items-center justify-center rounded-lg border border-border text-muted-foreground hover:bg-muted/50 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+        >
+          <IdCard className="size-4" />
+        </button>
+      </div>
     );
   };
 
@@ -134,6 +147,15 @@ export function CouncilCandidatePicker({
           </>
         )}
       </div>
+
+      <UserExpertiseSheet
+        userId={viewing?.userId ?? null}
+        fullName={viewing?.fullName}
+        subtitle={viewing?.unitName}
+        tracks={viewing?.tracks}
+        open={Boolean(viewing)}
+        onOpenChange={(open) => !open && setViewing(null)}
+      />
     </div>
   );
 }

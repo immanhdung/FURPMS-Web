@@ -29,6 +29,10 @@ export const contractService = {
   terminate: (id: string, payload: TerminateContractPayload) =>
     axiosClient.post<ApiResponse<Contract>>(`/contracts/${id}/terminate`, payload).then((res) => res.data.data),
 
+  /** Khôi phục hợp đồng chấm dứt nhầm — lý do bắt buộc. */
+  restore: (id: string, reason: string) =>
+    axiosClient.post<ApiResponse<Contract>>(`/contracts/${id}/restore`, { reason }).then((res) => res.data.data),
+
   // BM05 — tự sinh Word hợp đồng (rule tuần 10). Tải qua axios (kèm token) rồi lưu file.
   exportWord: (id: string) =>
     axiosClient.get<Blob>(`/contracts/${id}/export-word`, { responseType: "blob" }).then((res) => res.data),

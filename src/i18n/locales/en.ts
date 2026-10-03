@@ -164,6 +164,7 @@ export const en = {
   },
   // Toast messages (called via i18n.t inside hooks).
   toast: {
+    contractRestored: "Contract restored.",
     settlementCreated: "Settlement created.",
     settlementCreateFailed: "Unable to create the settlement.",
     settlementSigned: "Settlement signed.",
@@ -1443,6 +1444,9 @@ export const en = {
     zoomOut: "Zoom out",
   },
   minutes: {
+    opponentReviewsTitle: "Opponent reviews (Form 10)",
+    bm10Submitted: "Form 10 submitted",
+    voteFail: "Fail vote",
     ballotsIssued: "Ballots issued",
     ballotsReturned: "Ballots returned",
     invalidBallots: "Invalid ballots",
@@ -1482,7 +1486,7 @@ export const en = {
     opinionsTitle: "Council members' opinions",
     opinionsFromScores: "Fill from score sheets",
     memberRecommendation: "Recommendation",
-    opinionsFill: "Fill from council",
+    opinionsFill: "Add a row for each member",
     opinionsEmpty: 'No opinions yet. Click "Fill from council" or "Add".',
     opMember: "Member",
     opAcademic: "On expertise",
@@ -1540,6 +1544,9 @@ export const en = {
     noMinutesDesc: "The secretary hasn't drafted the minutes for this council meeting yet.",
   },
   contract: {
+    restore: "Restore contract",
+    restoreTitle: "Restore the terminated contract?",
+    restoreDescription: "The contract goes back to Active and the project resumes. The earlier termination stays in the Decisions tab; the PI is notified.",
     evalFailEffect: "Fail does not terminate the contract: the next disbursement is held; suspension or extension is the Rector's decision (QĐ543 Art. 10.3).",
     dueDateRange: "Pick a date from {{min}} ({{reason}}) to {{max}} (contract end date).",
     minReasonToday: "today — deadlines cannot be in the past",
@@ -1779,6 +1786,7 @@ export const en = {
       signAsSideA: "Sign as side A",
       markCleared: "Mark cleared",
       signBlocked: "Form 13 can only be signed after accounting and assets have both been cleared.",
+      signNeedsArchive: "Before signing: the post-acceptance records must be archived in the Final report tab (QĐ543 Art. 13.2).",
     },
     finalReport: {
       archiveAfterAcceptance: "Archiving comes after acceptance: wait for the acceptance council to pass the project and for the PI to submit the revised report (QĐ543 Art. 13).",
@@ -2191,7 +2199,19 @@ export const en = {
     showPassword: "Show password",
     hidePassword: "Hide password",
   },
+  cvAutofill: {
+    hint: "Have a CV? Upload it and AI will fill the form — review it, then click Save.",
+    button: "Fill from CV (AI)",
+    reading: "AI is reading the CV…",
+    filled: "Filled {{n}} fields from the CV and found {{works}} works — review, then click Save.",
+    failed: "Unable to read the CV.",
+    worksFound: "AI found {{n}} works in the CV:",
+    addWorks: "Add {{n}} works to the CV",
+    worksAdded: "Added {{n}} works to the academic CV.",
+  },
   academicProfile: {
+    exportBm02: "Export Form 02 (Word)",
+    exportBm02Failed: "Could not export — save the academic CV first.",
     title: "Academic Profile (Scientific CV)",
     subtitle: "Your scientific background, publications, and research record.",
     sectionPersonal: "Personal information",
@@ -2230,6 +2250,15 @@ export const en = {
     saveBtn: "Save academic profile",
   },
   // Academic works — QĐ543 Form 02, sections 13 · 14.6 · 15 · 16.3 · 17 · 18 · 19.4.
+  userExpertise: {
+    title: "Expertise profile",
+    view: "View {{name}}'s expertise profile",
+    tracks: "Declared fields of expertise",
+    noWorks: "No works declared in the academic CV yet.",
+    more: "… and {{n}} more",
+    privacyLabel: "Scope of information",
+    privacyNote: "Only professional information is shown for choosing council members (QĐ543 Art. 8.2, 12.2). Date of birth, hometown, ID card and bank details are not shown here.",
+  },
   academicWorks: {
     title: "Works & projects",
     subtitle: "Itemised per Form 02 — the council must be able to verify sources, not just counts.",

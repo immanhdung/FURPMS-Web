@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { CircleCheckBig, FileDown, FileSignature, Loader2, OctagonX } from "lucide-react";
+import { CircleCheckBig, FileDown, FileSignature, Loader2, OctagonX, RotateCcw } from "lucide-react";
 import { contractService } from "@/services/api/contract.service";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -19,7 +19,8 @@ import { StatusBadge } from "@/components/shared/StatusBadge";
 import { PageLoader } from "@/components/shared/PageLoader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DecisionDossierPanel } from "@/components/shared/DecisionDossierPanel";
-import { useContractQuery, useTerminateContractMutation } from "@/hooks/useContracts";
+import { useContractQuery, useRestoreContractMutation, useTerminateContractMutation } from "@/hooks/useContracts";
+import { ReasonDialog } from "@/components/shared/ReasonDialog";
 import { useProposalQuery } from "@/hooks/useProposals";
 import { BudgetOverviewPanel } from "@/features/staff/contracts/BudgetOverviewPanel";
 import { ProjectTimelinePanel } from "@/features/staff/contracts/ProjectTimelinePanel";
@@ -51,6 +52,8 @@ export function ContractDetailSheet({ open, onOpenChange, contractId, tab, onTab
   const [terminateOpen, setTerminateOpen] = useState(false);
   const [terminateReason, setTerminateReason] = useState("");
   const terminateMutation = useTerminateContractMutation();
+  const restoreMutation = useRestoreContractMutation();
+  const [restoreOpen, setRestoreOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
 
   const [exportingSettlement, setExportingSettlement] = useState(false);
@@ -154,12 +157,32 @@ export function ContractDetailSheet({ open, onOpenChange, contractId, tab, onTab
 
               {contract.status === "TERMINATED" && contract.terminatedReason && (
                 <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
-                  <p className="text-sm font-medium text-destructive">{t("contract.terminatedReason")}</p>
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <p className="text-sm font-medium text-destructive">{t("contract.terminatedReason")}</p>
+                    {/* Chấm dứt nhầm / Hiệu trưởng rút lại quyết định đình chỉ — khôi phục, ghi lý do (03/10). */}
+                    {canManage && (
+                      <Button size="sm" variant="outline" onClick={() => setRestoreOpen(true)}>
+                        <RotateCcw />
+                        {t("contract.restore")}
+                      </Button>
+                    )}
+                  </div>
                   <p className="mt-1 text-sm text-foreground whitespace-pre-wrap break-words">
                     {contract.terminatedReason}
                   </p>
                 </div>
               )}
+              <ReasonDialog
+                open={restoreOpen}
+                onOpenChange={setRestoreOpen}
+                title={t("contract.restoreTitle")}
+                description={t("contract.restoreDescription")}
+                confirmLabel={t("contract.restore")}
+                isLoading={restoreMutation.isPending}
+                onConfirm={(reason) =>
+                  restoreMutation.mutate({ id: contract.id, reason }, { onSuccess: () => setRestoreOpen(false) })
+                }
+              />
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>

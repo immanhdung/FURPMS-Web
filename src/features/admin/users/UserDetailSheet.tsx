@@ -5,6 +5,7 @@ import { useUserQuery } from "@/hooks/useUsers";
 import { useTracksQuery } from "@/hooks/useTracks";
 import { formatDateTime } from "@/utils/format";
 import { AcademicProfileSummary } from "@/features/admin/users/AcademicProfileSummary";
+import { AcademicWorksList } from "@/components/shared/UserExpertiseProfile";
 
 interface UserDetailSheetProps {
   open: boolean;
@@ -73,6 +74,11 @@ export function UserDetailSheet({ open, onOpenChange, userId }: UserDetailSheetP
         {
           label: t("academicProfile.title"),
           value: userId ? <AcademicProfileSummary userId={userId} /> : undefined,
+        },
+        // 03/10: Admin xem được cả danh sách công trình (BM02), không chỉ các ô đếm số.
+        {
+          label: t("academicWorks.title"),
+          value: userId ? <AcademicWorksList userId={userId} limitPerType={10} /> : undefined,
         },
       ]}
     />

@@ -168,6 +168,7 @@ export const vi = {
   },
   // Thông báo toast (dùng qua i18n.t trong hooks — trước đây hardcode nên bật EN vẫn ra tiếng Việt).
   toast: {
+    contractRestored: "Đã khôi phục hợp đồng.",
     settlementCreated: "Đã lập hồ sơ quyết toán.",
     settlementCreateFailed: "Không lập được hồ sơ quyết toán.",
     settlementSigned: "Đã ký biên bản thanh lý.",
@@ -1455,6 +1456,9 @@ export const vi = {
     zoomOut: "Thu nhỏ",
   },
   minutes: {
+    opponentReviewsTitle: "Nhận xét của phản biện (Biểu mẫu 10)",
+    bm10Submitted: "đã nộp BM10",
+    voteFail: "Phiếu Không đạt",
     ballotsIssued: "Phiếu phát ra",
     ballotsReturned: "Phiếu thu về",
     invalidBallots: "Phiếu không hợp lệ",
@@ -1494,8 +1498,8 @@ export const vi = {
     opinionsTitle: "Ý kiến thành viên hội đồng",
     opinionsFromScores: "Điền từ phiếu chấm",
     memberRecommendation: "Kiến nghị",
-    opinionsFill: "Điền từ hội đồng",
-    opinionsEmpty: 'Chưa có ý kiến nào. Bấm "Điền từ hội đồng" hoặc "Thêm".',
+    opinionsFill: "Thêm dòng cho từng thành viên",
+    opinionsEmpty: 'Chưa có ý kiến nào. Bấm "Điền từ phiếu chấm" hoặc "Thêm".',
     opMember: "Thành viên",
     opAcademic: "Về chuyên môn",
     opBudget: "Về kinh phí",
@@ -1552,6 +1556,9 @@ export const vi = {
     noMinutesDesc: "Thư ký chưa soạn biên bản cho cuộc họp hội đồng này.",
   },
   contract: {
+    restore: "Khôi phục hợp đồng",
+    restoreTitle: "Khôi phục hợp đồng đã chấm dứt?",
+    restoreDescription: "Hợp đồng về Đang hiệu lực, đề tài tiếp tục thực hiện. Lần chấm dứt cũ vẫn còn trong tab Quyết định; chủ nhiệm được báo.",
     evalFailEffect: "Không đạt không chấm dứt hợp đồng: đợt giải ngân kế tiếp bị giữ lại; đình chỉ hay gia hạn do Hiệu trưởng quyết (QĐ543 Điều 10.3).",
     dueDateRange: "Chọn được từ {{min}} ({{reason}}) đến {{max}} (ngày kết thúc hợp đồng).",
     minReasonToday: "hôm nay — không đặt hạn vào quá khứ",
@@ -1796,6 +1803,7 @@ export const vi = {
       signAsSideA: "Ký (Bên A)",
       markCleared: "Đánh dấu đã tất toán",
       signBlocked: "Chỉ ký BM13 sau khi đã xác nhận quyết toán kinh phí và xử lý tài sản.",
+      signNeedsArchive: "Trước khi ký: hồ sơ sau nghiệm thu phải được Lưu trữ ở tab Báo cáo tổng kết (QĐ543 Điều 13.2).",
     },
     finalReport: {
       archiveAfterAcceptance: "Lưu trữ là bước sau nghiệm thu: chờ hội đồng nghiệm thu kết luận Đạt, chủ nhiệm nộp bản đã chỉnh sửa theo ý kiến hội đồng (QĐ543 Điều 13).",
@@ -2209,7 +2217,19 @@ export const vi = {
     showPassword: "Hiện mật khẩu",
     hidePassword: "Ẩn mật khẩu",
   },
+  cvAutofill: {
+    hint: "Có sẵn CV / lý lịch khoa học? Tải lên để AI điền hộ — bạn xem lại rồi bấm Lưu.",
+    button: "Điền từ CV (AI)",
+    reading: "AI đang đọc CV…",
+    filled: "Đã điền {{n}} ô từ CV và tìm thấy {{works}} công trình — kiểm tra lại rồi bấm Lưu.",
+    failed: "Không đọc được CV.",
+    worksFound: "AI tìm thấy {{n}} công trình trong CV:",
+    addWorks: "Thêm {{n}} công trình vào lý lịch",
+    worksAdded: "Đã thêm {{n}} công trình vào lý lịch khoa học.",
+  },
   academicProfile: {
+    exportBm02: "Xuất BM02 (Word)",
+    exportBm02Failed: "Chưa xuất được lý lịch — hãy lưu lý lịch khoa học trước.",
     title: "Lý lịch khoa học",
     subtitle: "Thông tin khoa học, công trình nghiên cứu và hướng dẫn đào tạo.",
     sectionPersonal: "Thông tin cá nhân",
@@ -2250,6 +2270,15 @@ export const vi = {
   // Công trình khoa học — QĐ543 Biểu mẫu 02, các mục 13 · 14.6 · 15 · 16.3 · 17 · 18 · 19.4.
   // Trước đây chỉ có các ô ĐẾM SỐ (14.1–14.5); phần liệt kê chi tiết mà biểu mẫu bắt buộc thì
   // bỏ trắng hoàn toàn.
+  userExpertise: {
+    title: "Hồ sơ chuyên môn",
+    view: "Xem hồ sơ chuyên môn của {{name}}",
+    tracks: "Lĩnh vực chuyên môn đã khai",
+    noWorks: "Chưa khai công trình nào trong lý lịch khoa học.",
+    more: "… và {{n}} công trình khác",
+    privacyLabel: "Phạm vi thông tin",
+    privacyNote: "Chỉ hiện thông tin chuyên môn để chọn thành viên hội đồng (QĐ543 Điều 8.2, 12.2). Ngày sinh, quê quán, căn cước, tài khoản ngân hàng không hiện ở đây.",
+  },
   academicWorks: {
     title: "Công trình & đề tài đã tham gia",
     subtitle: "Liệt kê chi tiết theo Biểu mẫu 02 — hội đồng cần tra được nguồn, không chỉ con số.",

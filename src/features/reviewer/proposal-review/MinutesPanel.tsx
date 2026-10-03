@@ -3,7 +3,22 @@ import { toast } from "sonner";
 import { decisionService } from "@/services/api/decision.service";
 import { saveBlob } from "@/utils/download-blob";
 import { useTranslation } from "react-i18next";
-import { AlertTriangle, ClipboardList, FileDown, FileText, Gavel, Loader2, Lock, MessagesSquare, Plus, Save, ShieldCheck, Trash2, Undo2, Users } from "lucide-react";
+import {
+  AlertTriangle,
+  ClipboardList,
+  FileDown,
+  FileText,
+  Gavel,
+  Loader2,
+  Lock,
+  MessagesSquare,
+  Plus,
+  Save,
+  ShieldCheck,
+  Trash2,
+  Undo2,
+  Users,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Card, CardContent } from "@/components/ui/card";
@@ -114,8 +129,7 @@ export function MinutesPanel({
   const rubricTotal = decision?.rubricTotal ?? null;
   const thresholdPct = decision?.passThresholdPct ?? null;
 
-  const passMark =
-    rubricTotal != null && thresholdPct != null ? (rubricTotal * thresholdPct) / 100 : null;
+  const passMark = rubricTotal != null && thresholdPct != null ? (rubricTotal * thresholdPct) / 100 : null;
   const scoreIsLow = avgScore != null && passMark != null ? avgScore < passMark : null;
 
   // Đối xứng hai chiều. "Yêu cầu chỉnh sửa" hợp lý ở cả hai phía ngưỡng nên không tính là lệch.
@@ -154,11 +168,17 @@ export function MinutesPanel({
     const v = text?.trim();
     return v && !/^[a-z][A-Za-z]*(\.[A-Za-z][A-Za-z0-9]*)+$/.test(v) ? v : "";
   };
+  const isAcceptance = Boolean(tally?.isAcceptanceRound);
+  // Điểm lưu = mức × (trần/5) ⇒ quy về mức 1–5 kèm chữ (Biểu mẫu 10).
+  const levelText = (given: number, max: number) => {
+    const level = max > 0 ? Math.min(5, Math.max(1, Math.round((given / max) * 5))) : 0;
+    return level ? `${level}/5 (${t(`review.ratingLevel.${level}`)})` : "—";
+  };
   const scoredWithComments = (scores ?? []).filter(
     (s) =>
       clean(s.generalComments) ||
       clean(s.otherRecommendations) ||
-      (s.scoreDetails ?? []).some((d) => clean(d.comments))
+      (s.scoreDetails ?? []).some((d) => clean(d.comments)),
   );
   const fillOpinionsFromScores = () => {
     const isBudget = (name: string) => /kinh phí|dự toán|tài chính|ngân sách|budget/i.test(name);
@@ -166,9 +186,15 @@ export function MinutesPanel({
       const details = s.scoreDetails ?? [];
       const academic = [
         clean(s.generalComments),
-        ...details
-          .filter((d) => clean(d.comments) && !isBudget(d.criterionName))
-          .map((d) => `${d.criterionName}: ${clean(d.comments)}`),
+        // Nghiệm thu: phản biện chấm MỨC 1–5 (Biểu mẫu 10) — ghi cả mức, kể cả nội dung không có nhận xét.
+        ...(isAcceptance
+          ? details.map(
+              (d) =>
+                `${d.criterionName}: ${levelText(d.givenScore, d.maxScore)}${clean(d.comments) ? ` — ${clean(d.comments)}` : ""}`,
+            )
+          : details
+              .filter((d) => clean(d.comments) && !isBudget(d.criterionName))
+              .map((d) => `${d.criterionName}: ${clean(d.comments)}`)),
       ]
         .filter(Boolean)
         .join("\n");
@@ -178,6 +204,19 @@ export function MinutesPanel({
         .join("\n");
       return { memberName: s.evaluatorName || "—", academicComment: academic, budgetComment: budget, order: i };
     });
+    // Nghiệm thu: lý do của phiếu "Không đạt" (Biểu mẫu 11) cũng là ý kiến thành viên.
+    if (isAcceptance) {
+      for (const b of tally?.ballots ?? []) {
+        if (b.result === "FAIL" && clean(b.comments) && !built.some((x) => x.memberName === b.memberName)) {
+          built.push({
+            memberName: b.memberName,
+            academicComment: `${t("minutes.voteFail")}: ${clean(b.comments)}`,
+            budgetComment: "",
+            order: built.length,
+          });
+        }
+      }
+    }
     setOpinions((prev) => {
       const next = prev.map((o) => ({ ...o }));
       for (const b of built) {
@@ -199,11 +238,18 @@ export function MinutesPanel({
     }
   };
 
-  // Prefill 1 dòng / thành viên hội đồng (BM04 II.1) để Thư ký khỏi gõ tên.
+  // Thêm 1 dòng trống cho mỗi thành viên CHƯA có dòng (BM04 II.1) để Thư ký khỏi gõ tên. 03/10: trước đây
+  // nút này THAY toàn bộ danh sách ⇒ bấm nhầm là mất hết ý kiến đã gõ.
   const fillOpinionsFromRoster = () =>
-    setOpinions(
-      (members ?? []).map((m, i) => ({ memberName: m.reviewerName ?? "—", academicComment: "", budgetComment: "", order: i }))
-    );
+    setOpinions((prev) => {
+      const next = [...prev];
+      for (const m of members ?? []) {
+        const name = m.reviewerName ?? "—";
+        if (!next.some((o) => o.memberName.trim().toLowerCase() === name.trim().toLowerCase()))
+          next.push({ memberName: name, academicComment: "", budgetComment: "", order: next.length });
+      }
+      return next;
+    });
 
   // Nạp điểm danh đã lưu (nếu có) khi đổi buổi họp.
   if (attendanceData && meetingId && loadedAttMeetingId !== meetingId) {
@@ -217,7 +263,10 @@ export function MinutesPanel({
   const att = (memberId: string) => attendance[memberId] ?? { attended: true, reason: "" };
 
   const setAttended = (memberId: string, attended: boolean) =>
-    setAttendance((prev) => ({ ...prev, [memberId]: { attended, reason: attended ? "" : prev[memberId]?.reason ?? "" } }));
+    setAttendance((prev) => ({
+      ...prev,
+      [memberId]: { attended, reason: attended ? "" : (prev[memberId]?.reason ?? "") },
+    }));
   const setReason = (memberId: string, reason: string) =>
     setAttendance((prev) => ({ ...prev, [memberId]: { attended: prev[memberId]?.attended ?? true, reason } }));
   const saveAttendanceNow = () =>
@@ -226,7 +275,7 @@ export function MinutesPanel({
         memberId: m.id,
         attended: att(m.id).attended,
         absenceReason: att(m.id).attended ? undefined : att(m.id).reason || undefined,
-      }))
+      })),
     );
 
   // Biên bản MỚI (chưa có nháp): tự điền sẵn ý kiến từng thành viên từ phiếu chấm (03/10) — trước đây
@@ -248,7 +297,11 @@ export function MinutesPanel({
     const known = key ? t(`reviewBoard.role.${key}`, { defaultValue: "" }) : "";
     return known || key || "—";
   };
-  const memberStatusLabel = (m: { status?: string | null; confirmedAt?: string | null; declinedAt?: string | null }) => {
+  const memberStatusLabel = (m: {
+    status?: string | null;
+    confirmedAt?: string | null;
+    declinedAt?: string | null;
+  }) => {
     if (m.declinedAt || m.status?.toUpperCase() === "DECLINED") return t("minutes.mDeclined");
     if (m.confirmedAt || m.status?.toUpperCase() === "CONFIRMED") return t("minutes.mConfirmed");
     if (m.status?.toUpperCase() === "INVITED") return t("minutes.mInvited");
@@ -305,7 +358,11 @@ export function MinutesPanel({
                         {canTakeAttendance ? (
                           <div className="space-y-1">
                             <label className="inline-flex items-center gap-1.5 text-xs text-foreground">
-                              <input type="checkbox" checked={att(m.id).attended} onChange={(e) => setAttended(m.id, e.target.checked)} />
+                              <input
+                                type="checkbox"
+                                checked={att(m.id).attended}
+                                onChange={(e) => setAttended(m.id, e.target.checked)}
+                              />
                               {t("minutes.present")}
                             </label>
                             {!att(m.id).attended && (
@@ -339,10 +396,17 @@ export function MinutesPanel({
               {" · "}
               {t("minutes.attending")}: <span className="font-medium text-foreground">{presentCount}</span>
               {" · "}
-              {t("minutes.absent")}: <span className="font-medium text-foreground">{Math.max(rosterCount - presentCount, 0)}</span>
+              {t("minutes.absent")}:{" "}
+              <span className="font-medium text-foreground">{Math.max(rosterCount - presentCount, 0)}</span>
             </p>
             {canTakeAttendance && (
-              <Button type="button" size="sm" variant="outline" disabled={saveAttendance.isPending} onClick={saveAttendanceNow}>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={saveAttendance.isPending}
+                onClick={saveAttendanceNow}
+              >
                 {saveAttendance.isPending ? <Loader2 className="animate-spin" /> : <Save />}
                 {t("minutes.saveAttendance")}
               </Button>
@@ -379,16 +443,16 @@ export function MinutesPanel({
                     { label: t("minutes.failCount"), value: tally?.failCount },
                   ]
                 : []),
-              {
-                label: t("minutes.averageScore"),
-                // "35" một mình không nói lên gì — phải kèm thang điểm mới biết là thấp hay cao.
-                value:
-                  avgScore == null
-                    ? null
-                    : rubricTotal == null
-                      ? avgScore
-                      : `${avgScore}/${rubricTotal}`,
-              },
+              // Nghiệm thu kết luận bằng phiếu Đạt/Không đạt (BM11), không có "điểm trung bình".
+              ...(isAcceptance
+                ? []
+                : [
+                    {
+                      label: t("minutes.averageScore"),
+                      // "35" một mình không nói lên gì — phải kèm thang điểm mới biết là thấp hay cao.
+                      value: avgScore == null ? null : rubricTotal == null ? avgScore : `${avgScore}/${rubricTotal}`,
+                    },
+                  ]),
             ].map((item) => (
               <div key={item.label} className="rounded-lg border border-border p-2">
                 <dt className="text-xs text-muted-foreground">{item.label}</dt>
@@ -416,25 +480,33 @@ export function MinutesPanel({
                       <span className="text-warning">{t("minutes.notSubmitted")}</span>
                     ) : (
                       <>
-                        {b.totalScore != null && (
+                        {/* Nghiệm thu: phiếu BM10 của phản biện chấm MỨC, không phải "80/100" — chi tiết ở
+                            khung Nhận xét của phản biện bên dưới. */}
+                        {b.totalScore != null && !isAcceptance && (
                           <span className="font-medium text-foreground">
                             {b.totalScore}
                             {b.maxScore ? `/${b.maxScore}` : ""}
                           </span>
+                        )}
+                        {isAcceptance && b.totalScore != null && (
+                          <span className="text-muted-foreground">{t("minutes.bm10Submitted")}</span>
                         )}
                         {b.result && <StatusBadge status={b.result} />}
                         {!b.isValidBallot && <span className="text-destructive">{t("minutes.invalidBallot")}</span>}
                       </>
                     )}
                   </span>
+                  {isAcceptance && b.result === "FAIL" && clean(b.comments) && (
+                    <p className="w-full text-xs text-muted-foreground">
+                      {t("minutes.voteFail")}: {clean(b.comments)}
+                    </p>
+                  )}
                 </li>
               ))}
             </ul>
           )}
 
-          <p className="mt-2 text-xs text-muted-foreground">
-            {t("minutes.referenceOnly")}
-          </p>
+          {!isAcceptance && <p className="mt-2 text-xs text-muted-foreground">{t("minutes.referenceOnly")}</p>}
         </CardContent>
       </Card>
 
@@ -442,7 +514,9 @@ export function MinutesPanel({
       <Card>
         <CardContent className="space-y-4 p-4">
           <div>
-            <p className="text-sm font-medium text-foreground">{t("minutes.scoresTitle")}</p>
+            <p className="text-sm font-medium text-foreground">
+              {isAcceptance ? t("minutes.opponentReviewsTitle") : t("minutes.scoresTitle")}
+            </p>
             {isScoresForbidden ? (
               <p className="mt-1 text-sm text-warning">{t("minutes.scoresForbidden")}</p>
             ) : scores && scores.length > 0 ? (
@@ -454,24 +528,36 @@ export function MinutesPanel({
                   const criterionNotes = (score.scoreDetails ?? []).filter((d) => d.comments?.trim());
                   return (
                     <li key={score.id} className="text-sm text-foreground">
-                      <span className="font-medium">{score.evaluatorName || t("minutes.unknownMember")}</span>:{" "}
-                      {score.totalScore?.toFixed(1)}
-                      {score.maxPossibleScore ? `/${score.maxPossibleScore.toFixed(0)}` : ""}
+                      <span className="font-medium">{score.evaluatorName || t("minutes.unknownMember")}</span>
+                      {!isAcceptance && (
+                        <>
+                          : {score.totalScore?.toFixed(1)}
+                          {score.maxPossibleScore ? `/${score.maxPossibleScore.toFixed(0)}` : ""}
+                        </>
+                      )}
                       {!score.isValidBallot && (
                         <span className="ml-1 text-xs text-warning">({t("minutes.invalidBallot")})</span>
                       )}
-                      {score.generalComments && <span className="text-muted-foreground"> — {score.generalComments}</span>}
+                      {score.generalComments && (
+                        <span className="text-muted-foreground"> — {score.generalComments}</span>
+                      )}
                       {/* Nhận xét theo tiêu chí + kiến nghị trong phiếu chấm — trước 03/10 không hiện ở đâu. */}
-                      {(criterionNotes.length > 0 || score.otherRecommendations?.trim()) && (
+                      {(criterionNotes.length > 0 || score.otherRecommendations?.trim() || isAcceptance) && (
                         <ul className="mt-1 space-y-0.5 border-l-2 border-border pl-3 text-xs text-muted-foreground">
-                          {criterionNotes.map((d) => (
+                          {/* Nghiệm thu: in MỌI nội dung với mức 1–5 (BM10); xét duyệt: nội dung có nhận xét. */}
+                          {(isAcceptance ? (score.scoreDetails ?? []) : criterionNotes).map((d) => (
                             <li key={d.id}>
-                              <span className="text-foreground">{d.criterionName}</span> ({d.givenScore}/{d.maxScore}): {d.comments}
+                              <span className="text-foreground">{d.criterionName}</span>{" "}
+                              {isAcceptance
+                                ? `— ${levelText(d.givenScore, d.maxScore)}`
+                                : `(${d.givenScore}/${d.maxScore})`}
+                              {clean(d.comments) ? `: ${clean(d.comments)}` : ""}
                             </li>
                           ))}
                           {score.otherRecommendations?.trim() && (
                             <li>
-                              <span className="text-foreground">{t("minutes.memberRecommendation")}</span>: {score.otherRecommendations}
+                              <span className="text-foreground">{t("minutes.memberRecommendation")}</span>:{" "}
+                              {score.otherRecommendations}
                             </li>
                           )}
                         </ul>
@@ -484,7 +570,6 @@ export function MinutesPanel({
               <p className="mt-1 text-sm text-muted-foreground">{t("minutes.noScores")}</p>
             )}
           </div>
-
         </CardContent>
       </Card>
 
@@ -494,9 +579,7 @@ export function MinutesPanel({
           <CardContent className="space-y-4 p-4">
             <div>
               <p className="text-sm font-medium text-foreground">{t("minutes.draftTitle")}</p>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                {t("minutes.draftHint")}
-              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{t("minutes.draftHint")}</p>
             </div>
 
             <div>
@@ -541,15 +624,10 @@ export function MinutesPanel({
                         })}
                   </span>
                 </p>
-                <p className="mt-1.5 pl-6 text-xs text-muted-foreground">
-                  {t("minutes.divergeHint")}
-                </p>
+                <p className="mt-1.5 pl-6 text-xs text-muted-foreground">{t("minutes.divergeHint")}</p>
 
                 <div className="mt-3 pl-6">
-                  <label
-                    htmlFor="minutes-justification"
-                    className="mb-1.5 block text-sm font-medium text-foreground"
-                  >
+                  <label htmlFor="minutes-justification" className="mb-1.5 block text-sm font-medium text-foreground">
                     {t("minutes.justificationLabel")} <span className="text-destructive">*</span>
                   </label>
                   <Textarea
@@ -567,10 +645,12 @@ export function MinutesPanel({
             <div>
               <p className="mb-1.5 text-sm font-medium text-foreground">{t("minutes.styleLabel")}</p>
               <div className="inline-flex rounded-lg border border-border p-0.5">
-                {([
-                  { key: "QA", icon: MessagesSquare, label: t("minutes.styleQa") },
-                  { key: "FREEFORM", icon: FileText, label: t("minutes.styleFree") },
-                ] as const).map((opt) => (
+                {(
+                  [
+                    { key: "QA", icon: MessagesSquare, label: t("minutes.styleQa") },
+                    { key: "FREEFORM", icon: FileText, label: t("minutes.styleFree") },
+                  ] as const
+                ).map((opt) => (
                   <button
                     key={opt.key}
                     type="button"
@@ -579,7 +659,7 @@ export function MinutesPanel({
                       "inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
                       minutesStyle === opt.key
                         ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground"
+                        : "text-muted-foreground hover:text-foreground",
                     )}
                   >
                     <opt.icon className="size-3.5" />
@@ -591,9 +671,7 @@ export function MinutesPanel({
 
             {minutesStyle === "QA" ? (
               <div className="space-y-2">
-                {qaEntries.length === 0 && (
-                  <p className="text-xs text-muted-foreground">{t("minutes.qaEmpty")}</p>
-                )}
+                {qaEntries.length === 0 && <p className="text-xs text-muted-foreground">{t("minutes.qaEmpty")}</p>}
                 {qaEntries.map((qa, i) => (
                   <div key={i} className="space-y-2 rounded-lg border border-border p-3">
                     <div className="flex items-center gap-2">
@@ -603,7 +681,13 @@ export function MinutesPanel({
                         onChange={(e) => updateQa(i, { askedBy: e.target.value })}
                         className="h-8"
                       />
-                      <Button type="button" variant="ghost" size="icon-sm" aria-label={t("common.remove")} onClick={() => removeQa(i)}>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label={t("common.remove")}
+                        onClick={() => removeQa(i)}
+                      >
                         <Trash2 />
                       </Button>
                     </div>
@@ -670,7 +754,13 @@ export function MinutesPanel({
                           onChange={(e) => updateOpinion(i, { memberName: e.target.value })}
                           className="h-8 font-medium"
                         />
-                        <Button type="button" variant="ghost" size="icon-sm" aria-label={t("common.remove")} onClick={() => removeOpinion(i)}>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label={t("common.remove")}
+                          onClick={() => removeOpinion(i)}
+                        >
                           <Trash2 />
                         </Button>
                       </div>
@@ -775,7 +865,9 @@ export function MinutesPanel({
                       {decision.memberOpinions.map((o, i) => (
                         <tr key={i} className="border-b border-border/50 align-top last:border-0">
                           <td className="py-1.5 pr-3 font-medium text-foreground">{o.memberName}</td>
-                          <td className="py-1.5 pr-3 whitespace-pre-line text-foreground">{o.academicComment || "—"}</td>
+                          <td className="py-1.5 pr-3 whitespace-pre-line text-foreground">
+                            {o.academicComment || "—"}
+                          </td>
                           <td className="py-1.5 whitespace-pre-line text-foreground">{o.budgetComment || "—"}</td>
                         </tr>
                       ))}
@@ -818,7 +910,9 @@ export function MinutesPanel({
             )}
             {decision.finalizedAt && (
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-xs text-muted-foreground">{t("minutes.approvedAt", { date: formatDateTime(decision.finalizedAt) })}</p>
+                <p className="text-xs text-muted-foreground">
+                  {t("minutes.approvedAt", { date: formatDateTime(decision.finalizedAt) })}
+                </p>
                 {/* Xuất đúng BM04/BM12 để in, ký, lưu hồ sơ (03/10). */}
                 {projectId && (
                   <Button
@@ -848,20 +942,14 @@ export function MinutesPanel({
           <CardContent className="space-y-3 p-4">
             <div>
               <p className="text-sm font-medium text-foreground">{t("minutes.approveAsChair")}</p>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                {t("minutes.approveHint")}
-              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{t("minutes.approveHint")}</p>
             </div>
             {/*
               Duyệt & khoá là thao tác KHÔNG LÙI ĐƯỢC (rule #12): khoá xong không sửa điểm, không
               sửa biên bản, và trạng thái đề tài đổi theo. Bấm nhầm giữa buổi họp là hỏng cả vòng —
               phải hỏi lại, nêu rõ hậu quả.
             */}
-            <Button
-              type="button"
-              disabled={approveMutation.isPending}
-              onClick={() => setConfirmApprove(true)}
-            >
+            <Button type="button" disabled={approveMutation.isPending} onClick={() => setConfirmApprove(true)}>
               {approveMutation.isPending ? <Loader2 className="animate-spin" /> : <ShieldCheck />}
               {t("minutes.approveAndLock")}
             </Button>
@@ -886,9 +974,7 @@ export function MinutesPanel({
                 variant="outline"
                 className="mt-2"
                 disabled={revisionMutation.isPending || !revisionNote.trim()}
-                onClick={() =>
-                  revisionMutation.mutate(revisionNote.trim(), { onSuccess: () => setRevisionNote("") })
-                }
+                onClick={() => revisionMutation.mutate(revisionNote.trim(), { onSuccess: () => setRevisionNote("") })}
               >
                 {revisionMutation.isPending ? <Loader2 className="animate-spin" /> : <Undo2 />}
                 {t("minutes.requestRevision")}
@@ -911,11 +997,7 @@ export function MinutesPanel({
 
       {/* Chưa có gì và mình không phải Thư ký */}
       {!decision && !canDraft && (
-        <EmptyState
-          icon={Gavel}
-          title={t("minutes.noMinutes")}
-          description={t("minutes.noMinutesDesc")}
-        />
+        <EmptyState icon={Gavel} title={t("minutes.noMinutes")} description={t("minutes.noMinutesDesc")} />
       )}
     </div>
   );

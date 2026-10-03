@@ -44,3 +44,30 @@ export type AcademicProfilePayload = Omit<
   | "phdSupervisedCount"
   | "masterSupervisedCount"
 >;
+
+/** Kết quả AI đọc CV — chỉ để điền sẵn form (03/10). */
+export interface ExtractedCv {
+  academicTitle?: string | null;
+  scientificRank?: string | null;
+  degreeLevel?: string | null;
+  specialization?: string | null;
+  specializationAreas?: string | null;
+  dateOfBirth?: string | null;
+  gender?: string | null;
+  hometown?: string | null;
+  nationality?: string | null;
+  gsPgsYear?: number | null;
+  gsPgsInstitution?: string | null;
+  institution?: string | null;
+  institutionAddress?: string | null;
+  works: {
+    workType: import("@/types/academic-work").AcademicWorkType;
+    category: string;
+    title: string;
+    venue?: string | null;
+    authors?: string | null;
+    year?: number | null;
+    sortOrder?: number;
+  }[];
+  warning?: string | null;
+}

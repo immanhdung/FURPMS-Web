@@ -1,9 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod/v4";
-import { Save, GraduationCap } from "lucide-react";
+import { Save, GraduationCap, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,6 +12,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Controller } from "react-hook-form";
 import { useAcademicProfileQuery, useUpsertAcademicProfileMutation } from "@/hooks/useAcademicProfile";
+import { CvAutofill } from "@/features/auth/pages/CvAutofill";
+import { academicProfileService } from "@/services/api/academic-profile.service";
+import { saveBlob } from "@/utils/download-blob";
+import { toast } from "sonner";
+import type { ExtractedCv } from "@/types/academic-profile";
 
 const academicProfileSchema = z.object({
   academicTitle: z.string().optional(),
@@ -39,7 +44,15 @@ interface AcademicProfileCardProps {
   userId: string;
 }
 
-function FieldLabel({ htmlFor, children, required }: { htmlFor?: string; children: React.ReactNode; required?: boolean }) {
+function FieldLabel({
+  htmlFor,
+  children,
+  required,
+}: {
+  htmlFor?: string;
+  children: React.ReactNode;
+  required?: boolean;
+}) {
   return (
     <label htmlFor={htmlFor} className="mb-1.5 block text-sm font-medium text-foreground">
       {children}
@@ -65,13 +78,19 @@ export function AcademicProfileCard({ userId }: AcademicProfileCardProps) {
   const { t } = useTranslation();
   const { data: profile, isLoading } = useAcademicProfileQuery(userId);
   const mutation = useUpsertAcademicProfileMutation(userId);
+  const [exporting, setExporting] = useState(false);
+  const exportBm02 = async () => {
+    setExporting(true);
+    try {
+      saveBlob(await academicProfileService.exportBm02(userId), "BM02_LyLichKhoaHoc.docx");
+    } catch {
+      toast.error(t("academicProfile.exportBm02Failed"));
+    } finally {
+      setExporting(false);
+    }
+  };
 
-  const {
-    register,
-    handleSubmit,
-    control,
-    reset,
-  } = useForm<AcademicProfileFormValues>({
+  const { register, handleSubmit, control, reset, setValue } = useForm<AcademicProfileFormValues>({
     resolver: zodResolver(academicProfileSchema),
   });
 
@@ -94,6 +113,37 @@ export function AcademicProfileCard({ userId }: AcademicProfileCardProps) {
       });
     }
   }, [profile, reset]);
+
+  // Điền các ô AI đọc được từ CV — chỉ ô có giá trị; trả về số ô đã điền. Người dùng vẫn phải bấm Lưu.
+  const fillFromCv = (cv: ExtractedCv) => {
+    const keys = [
+      "academicTitle",
+      "scientificRank",
+      "degreeLevel",
+      "specialization",
+      "specializationAreas",
+      "dateOfBirth",
+      "gender",
+      "hometown",
+      "nationality",
+      "gsPgsInstitution",
+      "institution",
+      "institutionAddress",
+    ] as const;
+    let n = 0;
+    for (const key of keys) {
+      const value = cv[key];
+      if (value) {
+        setValue(key, value, { shouldDirty: true });
+        n++;
+      }
+    }
+    if (cv.gsPgsYear) {
+      setValue("gsPgsYear", cv.gsPgsYear, { shouldDirty: true });
+      n++;
+    }
+    return n;
+  };
 
   const onSubmit = (values: AcademicProfileFormValues) => {
     mutation.mutate({
@@ -134,15 +184,22 @@ export function AcademicProfileCard({ userId }: AcademicProfileCardProps) {
         <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
           <GraduationCap className="size-4.5" />
         </div>
-        <div>
+        <div className="min-w-0 flex-1">
           <h2 className="text-base font-semibold text-foreground">{t("academicProfile.title")}</h2>
           <p className="text-sm text-muted-foreground">{t("academicProfile.subtitle")}</p>
         </div>
+        {/* Xuất đúng Biểu mẫu 02 để nộp kèm đề cương — trước 03/10 phải chép tay sang Word. */}
+        <Button type="button" size="sm" variant="outline" disabled={exporting} onClick={exportBm02}>
+          <FileDown className="size-4" />
+          {t("academicProfile.exportBm02")}
+        </Button>
       </div>
 
       {/* Form */}
       <form id="academic-profile-form" onSubmit={handleSubmit(onSubmit)} noValidate>
         <div className="space-y-6 p-5">
+          <CvAutofill userId={userId} onFill={fillFromCv} />
+
           {/* Section: Personal Info */}
           <div>
             <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
@@ -276,10 +333,7 @@ export function AcademicProfileCard({ userId }: AcademicProfileCardProps) {
                 label={t("academicProfile.domesticJournalCount")}
                 value={profile?.domesticJournalCount ?? 0}
               />
-              <CounterStat
-                label={t("academicProfile.intlConferenceCount")}
-                value={profile?.intlConferenceCount ?? 0}
-              />
+              <CounterStat label={t("academicProfile.intlConferenceCount")} value={profile?.intlConferenceCount ?? 0} />
               <CounterStat
                 label={t("academicProfile.domesticConferenceCount")}
                 value={profile?.domesticConferenceCount ?? 0}

@@ -9,7 +9,7 @@ import { useAcademicProfileQuery } from "@/hooks/useAcademicProfile";
  * diện chỉ có màn tự sửa hồ sơ của chính mình ⇒ muốn biết học hàm, chuyên ngành, số công trình của
  * một chủ nhiệm là không có chỗ xem.</p>
  */
-export function AcademicProfileSummary({ userId }: { userId: string }) {
+export function AcademicProfileSummary({ userId, hidePersonal = false }: { userId: string; hidePersonal?: boolean }) {
   const { t } = useTranslation();
   const { data: profile, isLoading } = useAcademicProfileQuery(userId);
 
@@ -42,7 +42,11 @@ export function AcademicProfileSummary({ userId }: { userId: string }) {
     ["phdSupervisedCount", profile.phdSupervisedCount],
     ["masterSupervisedCount", profile.masterSupervisedCount],
   ];
-  const filled = rows.filter(([, v]) => v !== null && v !== undefined && v !== "");
+  // Khi Phòng QLKH xem để chọn thành viên hội đồng: chỉ thông tin chuyên môn, bỏ ngày sinh/giới tính/quê quán.
+  const personal = new Set(["dateOfBirth", "gender", "hometown"]);
+  const filled = rows.filter(
+    ([key, v]) => v !== null && v !== undefined && v !== "" && !(hidePersonal && personal.has(key)),
+  );
 
   return (
     <div className="space-y-3">

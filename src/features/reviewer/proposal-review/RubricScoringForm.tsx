@@ -241,7 +241,9 @@ export function RubricScoringForm({ councilId, proposalId, projectId }: RubricSc
       )}
 
       {/* Áp dụng một lần cho mọi tiêu chí — trước đây phải bấm "Áp dụng" từng ô. Vẫn không tự nộp. */}
-      {proposalId && suggestionById.size > 0 && (
+      {/* Phiếu nghiệm thu (BM10) KHÔNG dùng AI (03/10): hồ sơ nghiệm thu gồm báo cáo tổng kết + nhiều sản phẩm,
+          AI chỉ đọc được bản đề cương — gợi ý sẽ sai căn cứ. Đây là hạn chế đã nêu trong tài liệu. */}
+      {proposalId && !isAcceptanceRubric && suggestionById.size > 0 && (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/15 bg-primary/4 px-3 py-2">
           <p className="flex items-center gap-2 text-xs text-muted-foreground">
             <Sparkles className="size-3.5 shrink-0 text-primary" />
@@ -254,7 +256,7 @@ export function RubricScoringForm({ councilId, proposalId, projectId }: RubricSc
         </div>
       )}
 
-      {proposalId && !suggestionById.size && (
+      {proposalId && !isAcceptanceRubric && !suggestionById.size && (
         <div className="flex items-start gap-2 rounded-lg border border-primary/15 bg-primary/4 px-3 py-2">
           <Sparkles className="mt-0.5 size-3.5 shrink-0 text-primary" />
           <p className="text-xs text-muted-foreground">{t("review.aiSuggestFromKit")}</p>
@@ -355,7 +357,7 @@ export function RubricScoringForm({ councilId, proposalId, projectId }: RubricSc
                 }
               />
 
-              {suggestionById.get(criterion.id) && (
+              {!isAcceptanceRubric && suggestionById.get(criterion.id) && (
                 <div className="flex flex-wrap items-start gap-2 rounded-md bg-primary/4 px-2.5 py-2 text-xs">
                   <Sparkles className="mt-0.5 size-3.5 shrink-0 text-primary" />
                   <div className="min-w-0 flex-1">
