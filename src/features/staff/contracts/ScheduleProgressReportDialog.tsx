@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { useScheduleProgressReportMutation,
   useProgressReportQuery,
 } from "@/hooks/useProgressReports";
-import { formatDate, fromDateTimeLocalInput, toDateTimeLocalInput } from "@/utils/format";
+import { formatDate, formatDateTime, fromDateTimeLocalInput, toDateTimeLocalInput } from "@/utils/format";
 
 interface ScheduleProgressReportDialogProps {
   open: boolean;
@@ -67,9 +67,13 @@ export function ScheduleProgressReportDialog({
     setRoundName(report.roundName ?? "");
     setDueDate(report.dueDate ? report.dueDate.slice(0, 10) : "");
     // API trả mốc UTC; ô datetime-local chạy theo giờ máy — quy đổi, không cắt chuỗi.
-    setScheduledMeetingAt(toDateTimeLocalInput(report.scheduledMeetingAt));
+    // 04/10: lịch đã sinh trước bản sửa có thể nằm SAU ngày kết thúc hợp đồng (kỳ cuối) ⇒ kéo về ngày kết thúc 9:00
+    // để bấm Lưu không bị lỗi "Buổi họp phải nằm trong thời gian hợp đồng".
+    const end = contractEndDate?.slice(0, 10);
+    const at = toDateTimeLocalInput(report.scheduledMeetingAt);
+    setScheduledMeetingAt(end && at && at.slice(0, 10) > end ? `${end}T09:00` : at);
     setMeetingLink(report.meetingLink ?? "");
-  }, [open, report]);
+  }, [open, report, contractEndDate]);
 
   const reset = () => {
     setDueDate("");
@@ -104,6 +108,8 @@ export function ScheduleProgressReportDialog({
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
             />
+            {/* Ô ngày theo ngôn ngữ trình duyệt (có máy hiện tháng/ngày) — ghi lại rõ ngày/tháng/năm. */}
+            {dueDate && <p className="mt-1 text-xs font-medium text-primary">→ {formatDate(dueDate)}</p>}
             {minDueDate && maxDueDate && (
               <p className="mt-1 text-xs text-foreground">
                 {t("contract.dueDateRange", { min: formatDate(minDueDate), max: formatDate(maxDueDate), reason: minReason })}
@@ -121,6 +127,11 @@ export function ScheduleProgressReportDialog({
               value={scheduledMeetingAt}
               onChange={(e) => setScheduledMeetingAt(e.target.value)}
             />
+            {scheduledMeetingAt && (
+              <p className="mt-1 text-xs font-medium text-primary">
+                → {formatDateTime(fromDateTimeLocalInput(scheduledMeetingAt) ?? scheduledMeetingAt)}
+              </p>
+            )}
             {maxDueDate && (
               <p className="mt-1 text-xs text-muted-foreground">
                 {t("contract.meetingRange", { max: formatDate(maxDueDate) })}

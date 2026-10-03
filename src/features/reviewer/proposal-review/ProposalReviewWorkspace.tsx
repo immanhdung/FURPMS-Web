@@ -170,16 +170,18 @@ export function ProposalReviewWorkspace() {
           {/* Tab nằm trên URL (?tab=) — tải lại trang vẫn ở tab đang xem (04/10). Tab không còn hợp lệ
               (vd không còn quyền chấm) thì về "Thông tin". */}
           <Tabs
-            value={
-              [
+            value={(() => {
+              // Không có ?tab= (lần đầu mở) hoặc tab không hợp lệ ⇒ "Thông tin đề tài". Danh sách KHÔNG chứa null —
+              // trước đây có null nên thiếu ?tab= lại khớp null ⇒ không tab nào được chọn, trang trống.
+              const allowed = [
                 "info",
-                canScore ? "scoring" : null,
-                isAcceptanceRound ? "acceptance" : null,
                 "minutes",
-              ].includes(searchParams.get("tab"))
-                ? (searchParams.get("tab") as string)
-                : "info"
-            }
+                ...(canScore ? ["scoring"] : []),
+                ...(isAcceptanceRound ? ["acceptance"] : []),
+              ];
+              const tab = searchParams.get("tab");
+              return tab && allowed.includes(tab) ? tab : "info";
+            })()}
             onValueChange={(v) =>
               setSearchParams(
                 (prev) => {
