@@ -1,12 +1,9 @@
 import { useTranslation } from "react-i18next";
-import { TriangleAlert } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CouncilMembersPanel } from "@/features/staff/proposal-reviews/CouncilMembersPanel";
 import { MeetingsPanel } from "@/features/staff/proposal-reviews/MeetingsPanel";
-import { CouncilSlotsPanel } from "@/features/staff/review-board/CouncilSlotsPanel";
-import { useCouncilSlotsQuery } from "@/hooks/useCouncilSlots";
 import { CouncilDecisionNoForm } from "@/features/staff/review-board/CouncilDecisionNoForm";
 
 interface CouncilDetailSheetProps {
@@ -21,12 +18,13 @@ interface CouncilDetailSheetProps {
 /**
  * Chi tiết 1 hội đồng (thành viên + lịch họp) trong 1 Sheet — thay cho việc nhúng
  * inline vào board (trước đây gây "tường dài"). Chỉ render khi có councilId.
+ *
+ * 03/10: BỎ tab "Lịch chấm" (chia khung giờ con cho từng đề tài trong buổi họp). Tab bắt mọi khung
+ * phải nằm gọn trong buổi họp — Staff phải nhập lại giờ trùng với lịch họp cho từng đề tài, trong
+ * khi QĐ543 chỉ quy định HỌP hội đồng (Điều 8.3, 12.3), không có "lịch chấm" riêng. Lịch họp là đủ.
  */
 export function CouncilDetailSheet({ open, onOpenChange, councilId, title, roundType }: CouncilDetailSheetProps) {
   const { t } = useTranslation();
-  // Danh sách đề tài của hội đồng — dùng để quyết định có hiện tab "Lịch chấm" hay không.
-  const { data: board } = useCouncilSlotsQuery(open ? councilId : null);
-  const hasMultipleProjects = (board?.slots.length ?? 0) > 1;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -35,15 +33,6 @@ export function CouncilDetailSheet({ open, onOpenChange, councilId, title, round
           <SheetTitle>{title}</SheetTitle>
           <SheetDescription>{t("reviewBoard.councilManageDesc")}</SheetDescription>
         </SheetHeader>
-
-        {/* Cảnh báo quỹ giờ hiện NGAY ở đầu, không bắt Staff mở tab "Lịch chấm" mới thấy —
-            thứ tự thao tác thật là đặt lịch họp trước rồi mới gán thêm đề tài vào hội đồng. */}
-        {board?.warning && (
-          <div className="mx-4 flex items-start gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-400">
-            <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
-            <span>{board.warning}</span>
-          </div>
-        )}
 
         {councilId && <CouncilDecisionNoForm councilId={councilId} />}
 
@@ -54,11 +43,6 @@ export function CouncilDetailSheet({ open, onOpenChange, councilId, title, round
                 <TabsList>
                   <TabsTrigger value="members">{t("reviewBoard.members")}</TabsTrigger>
                   <TabsTrigger value="meetings">{t("reviewBoard.meetings")}</TabsTrigger>
-                  {/* Lịch chấm = chia khung giờ con CHO TỪNG ĐỀ TÀI trong một buổi họp. Hội đồng
-                      chỉ có 1 đề tài thì slot trùng luôn buổi họp ⇒ tab này chỉ làm rối. */}
-                  {hasMultipleProjects && (
-                    <TabsTrigger value="slots">{t("reviewBoard.slots")}</TabsTrigger>
-                  )}
                 </TabsList>
                 <TabsContent value="members">
                   <CouncilMembersPanel councilId={councilId} roundType={roundType} />
@@ -66,11 +50,6 @@ export function CouncilDetailSheet({ open, onOpenChange, councilId, title, round
                 <TabsContent value="meetings">
                   <MeetingsPanel councilId={councilId} />
                 </TabsContent>
-                {hasMultipleProjects && (
-                  <TabsContent value="slots">
-                    <CouncilSlotsPanel councilId={councilId} />
-                  </TabsContent>
-                )}
               </Tabs>
             )}
           </div>
