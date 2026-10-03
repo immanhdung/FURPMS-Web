@@ -1,11 +1,17 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { BanknoteArrowUp, CircleCheck, Clock, Loader2, Wallet } from "lucide-react";
+import { BanknoteArrowUp, CircleCheck, Clock, Loader2, Lock, RefreshCw, RotateCcw, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { useDisbursementsQuery, useGenerateDisbursementsMutation } from "@/hooks/useDisbursements";
+import {
+  useDisbursementsQuery,
+  useGenerateDisbursementsMutation,
+  useRegenerateDisbursementsMutation,
+  useUndoDisbursementMutation,
+} from "@/hooks/useDisbursements";
+import { ReasonDialog } from "@/components/shared/ReasonDialog";
 import { ConfirmDisbursementDialog } from "@/features/staff/contracts/ConfirmDisbursementDialog";
 import { DisbursementEvidence } from "@/features/staff/contracts/DisbursementEvidence";
 import { DisbursementDeliverableLink } from "@/features/staff/contracts/DisbursementDeliverableLink";
@@ -13,15 +19,42 @@ import { DISBURSEMENT_STATUS, type Disbursement } from "@/types/disbursement";
 import { formatCurrency, formatDate } from "@/utils/format";
 
 /**
- * Lịch giải ngân của hợp đồng.
- * Rule #6: lịch do BE sinh theo phương thức cấp kinh phí (WHOLE ≥3 đợt / PARTIAL theo mốc sản phẩm).
- * Rule #3: điều kiện đạt chỉ bật cờ "sẵn sàng chi" — Staff vẫn phải xác nhận tay sau khi chi thật.
+ * Lịch giải ngân của hợp đồng — theo LOẠI ĐỀ TÀI (QĐ543 Điều 16): Ứng dụng 4 đợt 30–30–30–10 (đợt 1 sau
+ * ký, đợt 2–3 sau tiến độ giai đoạn 1–2 Đạt, đợt 4 sau nghiệm thu Đạt); Cơ bản 1 lần 100% sau nghiệm thu.
+ * Tiền chi NGOÀI hệ thống (rule #15) — Staff tải chứng từ rồi đánh dấu đã chi.
+ *
+ * 03/10: mỗi đợt nói rõ đang chờ gì (BE trả `lockReason`); "Sinh lại lịch" khi lịch sinh sai (loại đề
+ * tài cấu hình sai ⇒ 1 đợt "cuối" chặn mọi thứ — lỗi deploy); "Huỷ xác nhận" khi bấm nhầm.
  */
-export function DisbursementsPanel({ contractId, canManage }: { contractId: string; canManage: boolean }) {
+export function DisbursementsPanel({
+  contractId,
+  canManage,
+  researchTypeName,
+  isApplied,
+}: {
+  contractId: string;
+  canManage: boolean;
+  researchTypeName?: string | null;
+  isApplied?: boolean;
+}) {
   const { t } = useTranslation();
   const { data: disbursements, isLoading } = useDisbursementsQuery(contractId);
   const generateMutation = useGenerateDisbursementsMutation(contractId);
+  const regenerateMutation = useRegenerateDisbursementsMutation(contractId);
+  const undoMutation = useUndoDisbursementMutation(contractId);
   const [confirming, setConfirming] = useState<Disbursement | null>(null);
+  const [regenerating, setRegenerating] = useState(false);
+  const [undoing, setUndoing] = useState<Disbursement | null>(null);
+
+  // Quy định áp cho hợp đồng này — nói thẳng ra để thấy ngay khi loại đề tài bị cấu hình sai.
+  const rule = (
+    <div className="rounded-lg border border-border bg-muted/40 px-3 py-2.5 text-xs text-muted-foreground">
+      <span className="font-medium text-foreground">
+        {t("contract.disbursement.ruleTitle", { type: researchTypeName ?? "—" })}
+      </span>{" "}
+      {isApplied ? t("contract.disbursement.ruleApplied") : t("contract.disbursement.ruleBasic")}
+    </div>
+  );
 
   if (isLoading) {
     return (
@@ -35,33 +68,45 @@ export function DisbursementsPanel({ contractId, canManage }: { contractId: stri
 
   if (!disbursements || disbursements.length === 0) {
     return (
-      <EmptyState
-        icon={Wallet}
-        title={t("contract.disbursement.noSchedule")}
-        description={
-          canManage
-            ? t("contract.disbursement.generateHint")
-            : t("contract.disbursement.staffNotGenerated")
-        }
-        className="min-h-32 border-none p-4"
-        action={
-          canManage ? (
-            <Button size="sm" onClick={() => generateMutation.mutate()} disabled={generateMutation.isPending}>
-              {generateMutation.isPending ? <Loader2 className="animate-spin" /> : <BanknoteArrowUp />}
-              {t("contract.disbursement.generate")}
-            </Button>
-          ) : undefined
-        }
-      />
+      <div className="space-y-3">
+        {rule}
+        <EmptyState
+          icon={Wallet}
+          title={t("contract.disbursement.noSchedule")}
+          description={
+            canManage ? t("contract.disbursement.generateHint") : t("contract.disbursement.staffNotGenerated")
+          }
+          className="min-h-32 border-none p-4"
+          action={
+            canManage ? (
+              <Button size="sm" onClick={() => generateMutation.mutate()} disabled={generateMutation.isPending}>
+                {generateMutation.isPending ? <Loader2 className="animate-spin" /> : <BanknoteArrowUp />}
+                {t("contract.disbursement.generate")}
+              </Button>
+            ) : undefined
+          }
+        />
+      </div>
     );
   }
 
+  const anyPaid = disbursements.some((d) => d.status === DISBURSEMENT_STATUS.DISBURSED);
+
   return (
     <div className="space-y-3">
+      {rule}
       <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2.5 text-xs text-muted-foreground">
         <span>{t("contract.disbursement.evidenceNote")}</span>
-        <span>
-          {disbursements.filter((d) => d.status === DISBURSEMENT_STATUS.DISBURSED).length}/{disbursements.length} {t("contract.disbursement.tranches")}
+        <span className="flex items-center gap-2">
+          {disbursements.filter((d) => d.status === DISBURSEMENT_STATUS.DISBURSED).length}/{disbursements.length}{" "}
+          {t("contract.disbursement.tranches")}
+          {/* Lịch sinh sai (vd loại đề tài chưa đánh dấu Ứng dụng ⇒ 1 đợt 100%): sinh lại khi CHƯA chi đợt nào. */}
+          {canManage && !anyPaid && (
+            <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs" onClick={() => setRegenerating(true)}>
+              <RefreshCw className="size-3.5" />
+              {t("contract.disbursement.regenerate")}
+            </Button>
+          )}
         </span>
       </div>
 
@@ -71,7 +116,8 @@ export function DisbursementsPanel({ contractId, canManage }: { contractId: stri
         // Khoá nút ngay ở FE để Staff không bấm rồi mới ăn lỗi.
         const isBlocked = !isDisbursed && Boolean(d.isBlockedByDeliverable);
         const isMissingEvidence = !isDisbursed && !d.hasEvidence;
-        const isReady = !isDisbursed && !isBlocked && Boolean(d.conditionMetAt);
+        const isLocked = !isDisbursed && Boolean(d.lockReason);
+        const isReady = !isDisbursed && !isBlocked && !isLocked;
 
         return (
           <div key={d.id} className="space-y-2 rounded-lg border border-border p-3">
@@ -80,9 +126,7 @@ export function DisbursementsPanel({ contractId, canManage }: { contractId: stri
                 <p className="text-sm font-medium text-foreground">
                   {t("contract.disbursement.tranche")} {d.roundNumber}
                   {/* Tỷ lệ % của đợt — BE tính sẵn từ mẫu giải ngân, trước 25/08 không hiện ở đâu. */}
-                  <span className="ml-1.5 text-xs font-normal text-muted-foreground">
-                    ({d.percentage}%)
-                  </span>
+                  <span className="ml-1.5 text-xs font-normal text-muted-foreground">({d.percentage}%)</span>
                 </p>
                 <p className="mt-0.5 text-xs text-muted-foreground">{d.conditionDescription}</p>
               </div>
@@ -108,29 +152,54 @@ export function DisbursementsPanel({ contractId, canManage }: { contractId: stri
                   <CircleCheck className="size-3" />
                   {t("contract.disbursement.disbursedOn", { date: formatDate(d.disbursedAt) })}
                 </span>
-                {d.bankReference && <span>{t("contract.disbursement.ref")} {d.bankReference}</span>}
+                {d.bankReference && (
+                  <span>
+                    {t("contract.disbursement.ref")} {d.bankReference}
+                  </span>
+                )}
                 {d.notes && <span className="w-full">{d.notes}</span>}
+                {canManage && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="ml-auto h-7 gap-1 px-2 text-xs"
+                    onClick={() => setUndoing(d)}
+                  >
+                    <RotateCcw className="size-3.5" />
+                    {t("contract.disbursement.undo")}
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                  <Clock className="size-3" />
+                <span
+                  className={`inline-flex items-start gap-1 text-xs ${isReady ? "text-success" : "text-muted-foreground"}`}
+                >
+                  {isLocked || isBlocked ? (
+                    <Lock className="mt-0.5 size-3 shrink-0" />
+                  ) : (
+                    <Clock className="mt-0.5 size-3 shrink-0" />
+                  )}
                   {isBlocked
                     ? t("contract.disbursement.blockedByProduct")
-                    : isReady
-                      ? t("contract.disbursement.conditionMet", { date: formatDate(d.conditionMetAt) })
-                      : t("contract.disbursement.waiting")}
+                    : isLocked
+                      ? t("contract.disbursement.lockedBecause", { reason: d.lockReason })
+                      : t("contract.disbursement.readyNow")}
                 </span>
                 {canManage && (
                   <Button
                     size="sm"
                     variant={isReady ? "default" : "outline"}
-                    disabled={isBlocked || isMissingEvidence}
-                    title={isBlocked
-                      ? t("contract.disbursement.blockedByProduct")
-                      : isMissingEvidence
-                        ? t("contract.disbursement.evidenceRequired")
-                        : undefined}
+                    disabled={isBlocked || isLocked || isMissingEvidence}
+                    title={
+                      isBlocked
+                        ? t("contract.disbursement.blockedByProduct")
+                        : isLocked
+                          ? (d.lockReason ?? undefined)
+                          : isMissingEvidence
+                            ? t("contract.disbursement.evidenceRequired")
+                            : undefined
+                    }
                     onClick={() => setConfirming(d)}
                   >
                     <BanknoteArrowUp />
@@ -146,6 +215,26 @@ export function DisbursementsPanel({ contractId, canManage }: { contractId: stri
         );
       })}
 
+      <ReasonDialog
+        open={regenerating}
+        onOpenChange={setRegenerating}
+        title={t("contract.disbursement.regenerateTitle")}
+        description={t("contract.disbursement.regenerateDescription")}
+        confirmLabel={t("contract.disbursement.regenerate")}
+        isLoading={regenerateMutation.isPending}
+        onConfirm={(reason) => regenerateMutation.mutate(reason, { onSuccess: () => setRegenerating(false) })}
+      />
+      <ReasonDialog
+        open={Boolean(undoing)}
+        onOpenChange={(open) => !open && setUndoing(null)}
+        title={t("contract.disbursement.undoTitle", { n: undoing?.roundNumber ?? "" })}
+        description={t("contract.disbursement.undoDescription")}
+        confirmLabel={t("contract.disbursement.undo")}
+        isLoading={undoMutation.isPending}
+        onConfirm={(reason) =>
+          undoing && undoMutation.mutate({ id: undoing.id, reason }, { onSuccess: () => setUndoing(null) })
+        }
+      />
       <ConfirmDisbursementDialog
         open={Boolean(confirming)}
         onOpenChange={(open) => !open && setConfirming(null)}

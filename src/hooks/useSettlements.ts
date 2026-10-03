@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import i18n from "@/i18n";
 import { settlementService } from "@/services/api/settlement.service";
 import { queryKeys } from "@/services/queryKeys";
 import type { ApiError } from "@/types/common";
@@ -18,7 +19,7 @@ function useSettlementAction<TArgs>(
   contractId: string,
   action: (args: TArgs) => Promise<unknown>,
   successMessage: string,
-  errorMessage: string
+  errorMessage: string,
 ) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -38,8 +39,8 @@ export function useCreateSettlementMutation(contractId: string) {
   return useSettlementAction<CreateSettlementPayload>(
     contractId,
     (payload) => settlementService.create(contractId, payload),
-    "Settlement created.",
-    "Unable to create the settlement."
+    i18n.t("toast.settlementCreated"),
+    i18n.t("toast.settlementCreateFailed"),
   );
 }
 
@@ -47,8 +48,8 @@ export function useSignSettlementMutation(contractId: string) {
   return useSettlementAction<{ id: number; sideASigneeId: string }>(
     contractId,
     ({ id, sideASigneeId }) => settlementService.sign(id, sideASigneeId),
-    "Settlement signed.",
-    "Unable to sign the settlement."
+    i18n.t("toast.settlementSigned"),
+    i18n.t("toast.settlementSignFailed"),
   );
 }
 
@@ -56,8 +57,8 @@ export function useMarkAccountingClearedMutation(contractId: string) {
   return useSettlementAction<{ id: number; clearedDate?: string }>(
     contractId,
     ({ id, clearedDate }) => settlementService.markAccountingCleared(id, clearedDate),
-    "Accounting marked as cleared.",
-    "Unable to mark accounting as cleared."
+    i18n.t("toast.accountingCleared"),
+    i18n.t("toast.actionFailed"),
   );
 }
 
@@ -65,7 +66,34 @@ export function useMarkAssetsClearedMutation(contractId: string) {
   return useSettlementAction<{ id: number; clearedDate?: string }>(
     contractId,
     ({ id, clearedDate }) => settlementService.markAssetsCleared(id, clearedDate),
-    "Assets marked as cleared.",
-    "Unable to mark assets as cleared."
+    i18n.t("toast.assetsCleared"),
+    i18n.t("toast.actionFailed"),
+  );
+}
+
+export function useUpdateSettlementMutation(contractId: string) {
+  return useSettlementAction<{ id: number; payload: CreateSettlementPayload }>(
+    contractId,
+    ({ id, payload }) => settlementService.update(id, payload),
+    i18n.t("toast.settlementUpdated"),
+    i18n.t("toast.actionFailed"),
+  );
+}
+
+export function useDeleteSettlementMutation(contractId: string) {
+  return useSettlementAction<{ id: number; reason: string }>(
+    contractId,
+    ({ id, reason }) => settlementService.delete(id, reason),
+    i18n.t("toast.settlementDeleted"),
+    i18n.t("toast.actionFailed"),
+  );
+}
+
+export function useUnsignSettlementMutation(contractId: string) {
+  return useSettlementAction<{ id: number; reason: string }>(
+    contractId,
+    ({ id, reason }) => settlementService.unsign(id, reason),
+    i18n.t("toast.settlementUnsigned"),
+    i18n.t("toast.actionFailed"),
   );
 }

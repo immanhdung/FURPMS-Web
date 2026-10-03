@@ -144,12 +144,25 @@ export function useSubmitProgressReportMutation(contractId: string) {
 export function useDeleteProgressReportMutation(contractId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => progressReportService.delete(id),
+    mutationFn: ({ id, reason }: { id: string; reason?: string }) => progressReportService.delete(id, reason),
     onSuccess: () => {
       toast.success(i18n.t("toast.progressRoundDeleted"));
       queryClient.invalidateQueries({ queryKey: queryKeys.progressReports.list(contractId) });
     },
     onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.progressRoundDeleteFailed")),
+  });
+}
+
+export function useReopenProgressReportMutation(contractId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason: string }) => progressReportService.reopen(id, reason),
+    onSuccess: () => {
+      toast.success(i18n.t("toast.resultReopened"));
+      queryClient.invalidateQueries({ queryKey: queryKeys.progressReports.list(contractId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.disbursements.list(contractId) });
+    },
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.resultReopenFailed")),
   });
 }
 

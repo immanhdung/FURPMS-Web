@@ -27,6 +27,36 @@ export function useCreateDeliverableMutation(contractId: string) {
   });
 }
 
+export function useUpdateDeliverableMutation(contractId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      payload,
+    }: {
+      id: number;
+      payload: { productName: string; dueDate?: string; description?: string };
+    }) => deliverableService.update(id, payload),
+    onSuccess: () => {
+      toast.success(i18n.t("toast.deliverableUpdated"));
+      queryClient.invalidateQueries({ queryKey: queryKeys.deliverables.list(contractId) });
+    },
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.deliverableUpdateFailed")),
+  });
+}
+
+export function useDeleteDeliverableMutation(contractId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, reason }: { id: number; reason?: string }) => deliverableService.delete(id, reason),
+    onSuccess: () => {
+      toast.success(i18n.t("toast.deliverableDeleted"));
+      queryClient.invalidateQueries({ queryKey: queryKeys.deliverables.list(contractId) });
+    },
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.deliverableDeleteFailed")),
+  });
+}
+
 export function useSubmitDeliverableMutation(contractId: string) {
   const queryClient = useQueryClient();
   return useMutation({

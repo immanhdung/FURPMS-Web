@@ -13,6 +13,7 @@ import { DeadlineBadge } from "@/components/shared/DeadlineBadge";
 import {
   useAcceptFinalReportMutation,
   useArchiveFinalReportMutation,
+  useReopenFinalReportMutation,
   useFinalReportQuery,
   useRequestFinalReportRevisionMutation,
   useSubmitFinalReportMutation,
@@ -20,7 +21,15 @@ import {
 import { finalReportDocumentService } from "@/services/api/final-report-document.service";
 import { openDocumentLocation } from "@/services/api/fileDownload";
 import { FINAL_REPORT_STATUS } from "@/types/final-report";
-import { formatDateTime } from "@/utils/format";
+import { formatDate, formatDateTime } from "@/utils/format";
+import { ReasonDialog } from "@/components/shared/ReasonDialog";
+
+/** Ngày yyyy-MM-dd cộng/trừ n ngày — chỉ để hiện hạn gợi ý, không dùng tính toán nghiệp vụ. */
+function shiftDays(isoDate: string, days: number) {
+  const d = new Date(`${isoDate.slice(0, 10)}T00:00:00`);
+  d.setDate(d.getDate() + days);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
 
 /**
  * Báo cáo tổng kết: PI nộp → Staff yêu cầu sửa / duyệt → lưu trữ.
@@ -37,10 +46,16 @@ export function FinalReportPanel({
   contractId,
   canManage,
   canSubmitReport = false,
+  contractEndDate,
+  projectStatus,
 }: {
   contractId: string;
   canManage: boolean;
   canSubmitReport?: boolean;
+  /** Để báo hạn nộp (30 ngày trước ngày kết thúc — Điều 11.2.a) ngay cả khi PI chưa nộp gì. */
+  contractEndDate?: string | null;
+  /** Lưu trữ chỉ làm được SAU nghiệm thu Đạt (Điều 13.1) — đề tài COMPLETED. */
+  projectStatus?: string | null;
 }) {
   const { t } = useTranslation();
   const { data: report, isLoading } = useFinalReportQuery(contractId);
@@ -48,6 +63,9 @@ export function FinalReportPanel({
   const revisionMutation = useRequestFinalReportRevisionMutation(contractId);
   const acceptMutation = useAcceptFinalReportMutation(contractId);
   const archiveMutation = useArchiveFinalReportMutation(contractId);
+  const reopenMutation = useReopenFinalReportMutation(contractId);
+  const [reopening, setReopening] = useState(false);
+  const acceptancePassed = projectStatus === "COMPLETED";
 
   const [reportFileUrl, setReportFileUrl] = useState("");
   const [summaryFileUrl, setSummaryFileUrl] = useState("");
@@ -137,10 +155,18 @@ export function FinalReportPanel({
             </div>
 
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-              {report.submittedAt && <span>{t("contract.finalReport.submittedAt", { date: formatDateTime(report.submittedAt) })}</span>}
-              {report.finalSubmittedAt && <span>{t("contract.finalReport.finalVersion", { date: formatDateTime(report.finalSubmittedAt) })}</span>}
-              {report.archivedAt && <span>{t("contract.finalReport.archivedAt", { date: formatDateTime(report.archivedAt) })}</span>}
-              <span>{t("contract.finalReport.language")}: {report.language}</span>
+              {report.submittedAt && (
+                <span>{t("contract.finalReport.submittedAt", { date: formatDateTime(report.submittedAt) })}</span>
+              )}
+              {report.finalSubmittedAt && (
+                <span>{t("contract.finalReport.finalVersion", { date: formatDateTime(report.finalSubmittedAt) })}</span>
+              )}
+              {report.archivedAt && (
+                <span>{t("contract.finalReport.archivedAt", { date: formatDateTime(report.archivedAt) })}</span>
+              )}
+              <span>
+                {t("contract.finalReport.language")}: {report.language}
+              </span>
             </div>
 
             <div className="flex flex-wrap gap-3">
@@ -189,14 +215,31 @@ export function FinalReportPanel({
                 {t("contract.finalReport.reportFile")} <span className="text-destructive">*</span>
               </label>
               <div className="flex flex-wrap items-center gap-2">
-                <Button type="button" variant="outline" size="sm" disabled={uploading !== null} onClick={() => reportInputRef.current?.click()}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={uploading !== null}
+                  onClick={() => reportInputRef.current?.click()}
+                >
                   {uploading === "report" ? <Loader2 className="animate-spin" /> : <Upload />}
                   {t("reports.chooseFile")}
                 </Button>
-                {reportFileUrl && <span className="truncate text-xs text-muted-foreground">{reportFileName || reportFileUrl}</span>}
+                {reportFileUrl && (
+                  <span className="truncate text-xs text-muted-foreground">{reportFileName || reportFileUrl}</span>
+                )}
               </div>
-              <input ref={reportInputRef} type="file" accept=".pdf,.doc,.docx" className="hidden"
-                onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadFile(f, "report"); e.target.value = ""; }} />
+              <input
+                ref={reportInputRef}
+                type="file"
+                accept=".pdf,.doc,.docx"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) uploadFile(f, "report");
+                  e.target.value = "";
+                }}
+              />
               <p className="my-1 text-center text-xs text-muted-foreground">{t("reports.orPasteLink")}</p>
               <Input
                 type="url"
@@ -210,14 +253,31 @@ export function FinalReportPanel({
                 {t("contract.finalReport.summaryFile")}
               </label>
               <div className="flex flex-wrap items-center gap-2">
-                <Button type="button" variant="outline" size="sm" disabled={uploading !== null} onClick={() => summaryInputRef.current?.click()}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={uploading !== null}
+                  onClick={() => summaryInputRef.current?.click()}
+                >
                   {uploading === "summary" ? <Loader2 className="animate-spin" /> : <Upload />}
                   {t("reports.chooseFile")}
                 </Button>
-                {summaryFileUrl && <span className="truncate text-xs text-muted-foreground">{summaryFileName || summaryFileUrl}</span>}
+                {summaryFileUrl && (
+                  <span className="truncate text-xs text-muted-foreground">{summaryFileName || summaryFileUrl}</span>
+                )}
               </div>
-              <input ref={summaryInputRef} type="file" accept=".pdf,.doc,.docx" className="hidden"
-                onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadFile(f, "summary"); e.target.value = ""; }} />
+              <input
+                ref={summaryInputRef}
+                type="file"
+                accept=".pdf,.doc,.docx"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) uploadFile(f, "summary");
+                  e.target.value = "";
+                }}
+              />
               <p className="my-1 text-center text-xs text-muted-foreground">{t("reports.orPasteLink")}</p>
               <Input
                 type="url"
@@ -227,7 +287,9 @@ export function FinalReportPanel({
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-foreground">{t("contract.finalReport.language")}</label>
+              <label className="mb-1.5 block text-sm font-medium text-foreground">
+                {t("contract.finalReport.language")}
+              </label>
               <Select value={language} onValueChange={setLanguage}>
                 <SelectTrigger className="w-40">
                   <SelectValue />
@@ -281,7 +343,7 @@ export function FinalReportPanel({
                     onClick={() =>
                       revisionMutation.mutate(
                         { id: report.id, revisionNotes: revisionNotes.trim() },
-                        { onSuccess: () => setRevisionNotes("") }
+                        { onSuccess: () => setRevisionNotes("") },
                       )
                     }
                   >
@@ -302,29 +364,71 @@ export function FinalReportPanel({
             )}
 
             {isAccepted && (
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-xs text-muted-foreground">{t("contract.finalReport.acceptedHint")}</p>
-                <Button
-                  type="button"
-                  size="sm"
-                  disabled={archiveMutation.isPending}
-                  onClick={() => archiveMutation.mutate(report.id)}
-                >
-                  {archiveMutation.isPending ? <Loader2 className="animate-spin" /> : <Archive />}
-                  {t("contract.finalReport.archive")}
-                </Button>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-xs text-muted-foreground">
+                  {acceptancePassed
+                    ? t("contract.finalReport.acceptedHint")
+                    : t("contract.finalReport.archiveAfterAcceptance")}
+                </p>
+                <div className="flex gap-2">
+                  <Button type="button" size="sm" variant="ghost" onClick={() => setReopening(true)}>
+                    <RotateCcw />
+                    {t("reports.reopen")}
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    disabled={archiveMutation.isPending || !acceptancePassed}
+                    onClick={() => archiveMutation.mutate(report.id)}
+                  >
+                    {archiveMutation.isPending ? <Loader2 className="animate-spin" /> : <Archive />}
+                    {t("contract.finalReport.archive")}
+                  </Button>
+                </div>
               </div>
             )}
           </CardContent>
         </Card>
       )}
 
-      {!report && !canSubmit && (
-        <div className="flex items-center gap-2 rounded-lg border border-dashed border-border p-4 text-sm text-muted-foreground">
-          <FileCheck2 className="size-4" />
-          {t("contract.finalReport.notSubmitted")}
+      {/* Đã lưu trữ mà sai sót (lưu nhầm, cần thay bản) — vẫn mở lại được, kèm lý do. */}
+      {canManage && isArchived && report && (
+        <div className="flex justify-end">
+          <Button type="button" size="sm" variant="ghost" onClick={() => setReopening(true)}>
+            <RotateCcw />
+            {t("reports.reopen")}
+          </Button>
         </div>
       )}
+
+      {/* Staff KHÔNG phải tạo gì: chủ nhiệm tự nộp BM09 ở mục "Báo cáo tổng kết"; hạn suy từ ngày kết
+          thúc hợp đồng. Trước 03/10 chỗ này chỉ có một dòng "PI chưa nộp", trống trơn. */}
+      {!report && !canSubmit && (
+        <div className="space-y-2 rounded-lg border border-dashed border-border p-4 text-sm text-muted-foreground">
+          <p className="flex items-center gap-2 font-medium text-foreground">
+            <FileCheck2 className="size-4" />
+            {t("contract.finalReport.notSubmitted")}
+          </p>
+          {contractEndDate && (
+            <p className="text-xs">
+              {t("contract.finalReport.dueHint", { date: formatDate(shiftDays(contractEndDate, -30)) })}
+            </p>
+          )}
+          <p className="text-xs">{t("contract.finalReport.dossierHint")}</p>
+        </div>
+      )}
+
+      <ReasonDialog
+        open={reopening}
+        onOpenChange={setReopening}
+        title={t("contract.finalReport.reopenTitle")}
+        description={t("contract.finalReport.reopenDescription")}
+        confirmLabel={t("reports.reopen")}
+        isLoading={reopenMutation.isPending}
+        onConfirm={(reason) =>
+          report && reopenMutation.mutate({ id: report.id, reason }, { onSuccess: () => setReopening(false) })
+        }
+      />
     </div>
   );
 }

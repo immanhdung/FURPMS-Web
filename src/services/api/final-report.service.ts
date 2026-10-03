@@ -22,4 +22,8 @@ export const finalReportService = {
 
   archive: (id: string) =>
     axiosClient.post<ApiResponse<FinalReport>>(`/final-reports/${id}/archive`).then((res) => res.data.data),
+
+  /** Mở lại báo cáo đã tiếp nhận / lưu trữ — lý do bắt buộc. */
+  reopen: (id: string, reason: string) =>
+    axiosClient.post<ApiResponse<FinalReport>>(`/final-reports/${id}/reopen`, { reason }).then((res) => res.data.data),
 };

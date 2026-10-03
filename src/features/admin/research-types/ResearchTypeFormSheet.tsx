@@ -6,10 +6,7 @@ import { FormSheet } from "@/components/shared/FormSheet";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useCreateResearchTypeMutation, useUpdateResearchTypeMutation } from "@/hooks/useResearchTypes";
-import {
-  researchTypeSchema,
-  type ResearchTypeFormValues,
-} from "@/features/admin/research-types/research-type.schema";
+import { researchTypeSchema, type ResearchTypeFormValues } from "@/features/admin/research-types/research-type.schema";
 import type { ResearchType } from "@/types/research-type";
 
 interface ResearchTypeFormSheetProps {
@@ -46,7 +43,7 @@ export function ResearchTypeFormSheet({ open, onOpenChange, researchType }: Rese
               maxBudgetCap: researchType.maxBudgetCap,
               requireOrderingUnit: researchType.requireOrderingUnit,
             }
-          : { code: "", name: "", maxBudgetCap: 0, requireOrderingUnit: false }
+          : { code: "", name: "", maxBudgetCap: 0, requireOrderingUnit: false },
       );
     }
   }, [open, researchType, reset]);
@@ -62,7 +59,7 @@ export function ResearchTypeFormSheet({ open, onOpenChange, researchType }: Rese
             requireOrderingUnit: values.requireOrderingUnit,
           },
         },
-        { onSuccess: () => onOpenChange(false) }
+        { onSuccess: () => onOpenChange(false) },
       );
     } else {
       createMutation.mutate(values, { onSuccess: () => onOpenChange(false) });
@@ -143,10 +140,15 @@ export function ResearchTypeFormSheet({ open, onOpenChange, researchType }: Rese
         control={control}
         name="requireOrderingUnit"
         render={({ field }) => (
-          <label className="flex items-center gap-2 text-sm text-foreground">
-            <Checkbox checked={field.value} onCheckedChange={(checked) => field.onChange(Boolean(checked))} />
-            {t("researchTypes.requiresOrderingUnitLabel")}
-          </label>
+          <div className="space-y-1">
+            <label className="flex items-center gap-2 text-sm text-foreground">
+              <Checkbox checked={field.value} onCheckedChange={(checked) => field.onChange(Boolean(checked))} />
+              {t("researchTypes.requiresOrderingUnitLabel")}
+            </label>
+            {/* 03/10: ô này quyết định cả lịch giải ngân và số kỳ tiến độ — trước đây chỉ ghi "Yêu cầu
+                đơn vị đặt hàng", loại "Ứng dụng" tạo trên deploy không tick nên chỉ ra 1 đợt giải ngân. */}
+            <p className="pl-6 text-xs text-muted-foreground">{t("researchTypes.appliedEffectHint")}</p>
+          </div>
         )}
       />
     </FormSheet>

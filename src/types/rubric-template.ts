@@ -30,6 +30,9 @@ export interface RubricTemplateFull {
   isActive: boolean;
   criteria: RubricCriterionItem[];
   scopes: RubricTemplateScope[];
+  /** Số phiếu đã chấm bằng bộ này. > 0 thì BE khoá tiêu chí (chỉ còn đổi tên / bật tắt / nhân bản). */
+  ballotCount?: number;
+  isLocked?: boolean;
 }
 
 export interface UpdateTemplatePayload {

@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { CircleCheck, CircleDashed, TriangleAlert } from "lucide-react";
+import { ArrowRight, CircleCheck, CircleDashed, TriangleAlert } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { EmptyState } from "@/components/shared/EmptyState";
@@ -35,8 +35,31 @@ export function ProjectTimelinePanel({ projectId }: { projectId: string | null }
     );
   }
 
+  // Việc tiếp theo = bước ĐẦU TIÊN chưa xong theo thứ tự quy định (03/10) — người dùng hỏi "giờ phải làm
+  // gì, ai làm" thì đọc ngay ở đây, không phải dò cả danh sách.
+  const nextIndex = data.stages.findIndex((s) => s.status !== "DONE");
+  const next = nextIndex >= 0 ? data.stages[nextIndex] : null;
+
   return (
     <div className="space-y-3">
+      {next && (
+        <div className="flex items-start gap-2 rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm">
+          <ArrowRight className="mt-0.5 size-4 shrink-0 text-primary" />
+          <div className="min-w-0 space-y-0.5">
+            <p className="font-medium text-foreground">
+              {t("projectTimeline.nextStep")}: {t(`projectTimeline.stage.${next.code}`, { defaultValue: next.code })}
+              {next.suffix && <span className="font-normal text-muted-foreground"> · {next.suffix}</span>}
+              {next.actor && (
+                <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                  {t(`projectTimeline.actor.${next.actor}`)}
+                </span>
+              )}
+            </p>
+            {next.deadlineBasis && <p className="text-xs text-muted-foreground">{next.deadlineBasis}</p>}
+          </div>
+        </div>
+      )}
+
       {data.overdueCount > 0 && (
         <div className="flex items-center gap-2 rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-sm">
           <TriangleAlert className="size-4 shrink-0 text-destructive" />
@@ -57,6 +80,7 @@ export function ProjectTimelinePanel({ projectId }: { projectId: string | null }
               stage={stage}
               seq={seq}
               isLast={index === data.stages.length - 1}
+              isNext={index === nextIndex}
             />
           );
         })}
@@ -65,7 +89,17 @@ export function ProjectTimelinePanel({ projectId }: { projectId: string | null }
   );
 }
 
-function StageRow({ stage, seq, isLast }: { stage: ProjectStage; seq: number | null; isLast: boolean }) {
+function StageRow({
+  stage,
+  seq,
+  isLast,
+  isNext,
+}: {
+  stage: ProjectStage;
+  seq: number | null;
+  isLast: boolean;
+  isNext: boolean;
+}) {
   const { t } = useTranslation();
   const done = stage.status === "DONE";
   const overdue = stage.status === "OVERDUE";
@@ -84,7 +118,7 @@ function StageRow({ stage, seq, isLast }: { stage: ProjectStage; seq: number | n
           done && "border-success",
           overdue && "border-destructive",
           planned && "border-muted-foreground/25",
-          !done && !overdue && !planned && "border-primary"
+          !done && !overdue && !planned && "border-primary",
         )}
       >
         {done && <CircleCheck className="size-3 text-success" />}
@@ -94,8 +128,25 @@ function StageRow({ stage, seq, isLast }: { stage: ProjectStage; seq: number | n
         <div className="flex flex-wrap items-center gap-2">
           <span className={cn("text-sm font-medium", overdue ? "text-destructive" : "text-foreground")}>
             {t(`projectTimeline.stage.${stage.code}`, { defaultValue: stage.code })}
-            {seq != null && <span className="font-normal text-muted-foreground"> · {t("projectTimeline.seq", { n: seq })}</span>}
+            {/* BE ghi sẵn "kỳ 1 — Đạt", "đợt 2 · 30%"; không có thì đánh số lần. */}
+            {stage.suffix ? (
+              <span className="font-normal text-muted-foreground"> · {stage.suffix}</span>
+            ) : (
+              seq != null && (
+                <span className="font-normal text-muted-foreground"> · {t("projectTimeline.seq", { n: seq })}</span>
+              )
+            )}
           </span>
+          {stage.actor && !done && (
+            <span
+              className={cn(
+                "rounded-full px-2 py-0.5 text-[11px]",
+                isNext ? "bg-primary/10 font-medium text-primary" : "bg-muted text-muted-foreground",
+              )}
+            >
+              {t(`projectTimeline.actor.${stage.actor}`)}
+            </span>
+          )}
 
           {done ? (
             <span className="text-xs text-muted-foreground">
@@ -121,9 +172,7 @@ function StageRow({ stage, seq, isLast }: { stage: ProjectStage; seq: number | n
             thì người demo chỉ vào màn hình đọc, không phải giở tài liệu. */}
         {/* Bước ĐÃ XONG chỉ cần "Xong ngày …" — căn cứ hạn của việc đã làm xong là chữ thừa, dễ bị hỏi
             vặn (01/10). Ai quyết, lúc nào, văn bản nào thì xem tab Quyết định. */}
-        {stage.deadlineBasis && !done && (
-          <p className="text-xs text-muted-foreground">{stage.deadlineBasis}</p>
-        )}
+        {stage.deadlineBasis && !done && <p className="text-xs text-muted-foreground">{stage.deadlineBasis}</p>}
       </div>
     </li>
   );

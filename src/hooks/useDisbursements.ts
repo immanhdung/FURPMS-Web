@@ -20,10 +20,10 @@ export function useGenerateDisbursementsMutation(contractId: string) {
   return useMutation({
     mutationFn: () => disbursementService.generate(contractId),
     onSuccess: (tranches) => {
-      toast.success(`Generated ${tranches?.length ?? 0} disbursement tranches.`);
+      toast.success(i18n.t("toast.disbursementsGenerated", { n: tranches?.length ?? 0 }));
       queryClient.invalidateQueries({ queryKey: queryKeys.disbursements.list(contractId) });
     },
-    onError: (error: ApiError) => toast.error(error.message || "Unable to generate the schedule."),
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.actionFailed")),
   });
 }
 
@@ -48,9 +48,35 @@ export function useConfirmDisbursementMutation(contractId: string) {
     mutationFn: ({ id, payload }: { id: number; payload: ConfirmDisbursementPayload }) =>
       disbursementService.confirm(id, payload),
     onSuccess: () => {
-      toast.success("Disbursement confirmed.");
+      toast.success(i18n.t("toast.disbursementConfirmed"));
       queryClient.invalidateQueries({ queryKey: queryKeys.disbursements.list(contractId) });
     },
-    onError: (error: ApiError) => toast.error(error.message || "Unable to confirm the disbursement."),
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.actionFailed")),
+  });
+}
+
+/** Sinh lại lịch giải ngân theo loại đề tài — lý do bắt buộc, ghi sổ quyết định. */
+export function useRegenerateDisbursementsMutation(contractId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (reason: string) => disbursementService.regenerate(contractId, reason),
+    onSuccess: (tranches) => {
+      toast.success(i18n.t("toast.disbursementsGenerated", { n: tranches?.length ?? 0 }));
+      queryClient.invalidateQueries({ queryKey: queryKeys.disbursements.list(contractId) });
+    },
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.actionFailed")),
+  });
+}
+
+/** Huỷ xác nhận "đã giải ngân" bấm nhầm — lý do bắt buộc. */
+export function useUndoDisbursementMutation(contractId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, reason }: { id: number; reason: string }) => disbursementService.undo(id, reason),
+    onSuccess: () => {
+      toast.success(i18n.t("toast.resultReopened"));
+      queryClient.invalidateQueries({ queryKey: queryKeys.disbursements.list(contractId) });
+    },
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.actionFailed")),
   });
 }

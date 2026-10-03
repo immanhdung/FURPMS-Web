@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
 import { ListChecks, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { REVIEW_ROUND_TYPE } from "@/constants/statuses";
 import { RubricTemplatesPanel } from "@/features/admin/rubric-criteria/RubricTemplatesPanel";
 import { CreateRubricSetDialog } from "@/features/admin/rubric-criteria/CreateRubricSetDialog";
 
@@ -20,6 +22,9 @@ import { CreateRubricSetDialog } from "@/features/admin/rubric-criteria/CreateRu
 export function RubricCriteriaPage() {
   const { t } = useTranslation();
   const [createOpen, setCreateOpen] = useState(false);
+  // Hai loại phiếu khác hẳn nhau (BM03 chấm điểm cộng 100 / BM10 chấm mức 1–5) ⇒ tách tab như
+  // màn Đợt nghiên cứu, thay vì một bộ lọc "loại vòng" trộn chung một danh sách.
+  const [roundType, setRoundType] = useState<string>(REVIEW_ROUND_TYPE.REVIEW);
 
   return (
     <div className="space-y-6">
@@ -44,9 +49,19 @@ export function RubricCriteriaPage() {
         </Button>
       </motion.div>
 
-      <RubricTemplatesPanel />
+      <Tabs value={roundType} onValueChange={setRoundType}>
+        <TabsList>
+          {[REVIEW_ROUND_TYPE.REVIEW, REVIEW_ROUND_TYPE.ACCEPTANCE].map((type) => (
+            <TabsTrigger key={type} value={type}>
+              {t(`reviewBoard.type.${type}`, type)}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
-      <CreateRubricSetDialog open={createOpen} onOpenChange={setCreateOpen} />
+      <RubricTemplatesPanel roundType={roundType} />
+
+      <CreateRubricSetDialog open={createOpen} onOpenChange={setCreateOpen} defaultType={roundType} />
     </div>
   );
 }

@@ -28,10 +28,11 @@ import { externalUrl, formatDateTime } from "@/utils/format";
  *
  * Từ 01/10 Phòng QLKH KHÔNG tự chấm nữa (thầy góp ý: cán bộ phòng không có chuyên môn). Điều 10.1
  * giao việc đánh giá cho "Hội đồng đánh giá tiến độ do Trường tổ chức" — dialog này chỉ GHI NHẬN
- * kết luận của hội đồng và bắt đính kèm biên bản họp làm căn cứ. Vẫn giữ 3 mức Đạt / Đạt có điều
- * kiện / Không đạt vì đợt giải ngân 2–3 (Điều 16) khoá theo kết luận này.
+ * kết luận của hội đồng và bắt đính kèm biên bản họp làm căn cứ. Chỉ 2 mức Đạt / Không đạt (03/10):
+ * QĐ543 Điều 16.1.b chỉ hỏi giai đoạn có "Đạt" hay không để giải ngân đợt sau — mức "Đạt có điều
+ * kiện" không mở cũng không chặn gì. "Không đạt" không chấm dứt hợp đồng, chỉ giữ đợt giải ngân lại.
  */
-const PROGRESS_EVAL = { PASS: "PASS", CONDITIONAL: "CONDITIONAL", FAIL: "FAIL" } as const;
+const PROGRESS_EVAL = { PASS: "PASS", FAIL: "FAIL" } as const;
 
 interface EvaluateProgressReportDialogProps {
   open: boolean;
@@ -194,7 +195,6 @@ export function EvaluateProgressReportDialog({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value={PROGRESS_EVAL.PASS}>{t("contract.evalPass")}</SelectItem>
-                <SelectItem value={PROGRESS_EVAL.CONDITIONAL}>{t("contract.evalConditional")}</SelectItem>
                 <SelectItem value={PROGRESS_EVAL.FAIL}>{t("contract.evalFail")}</SelectItem>
               </SelectContent>
             </Select>
@@ -203,6 +203,9 @@ export function EvaluateProgressReportDialog({
             <label className="mb-1.5 block text-sm font-medium text-foreground">{t("contract.evalComments")}</label>
             <Textarea rows={3} value={evaluationComments} onChange={(e) => setEvaluationComments(e.target.value)} />
             <p className="mt-1.5 text-xs text-muted-foreground">{t("contract.evalBasisNote")}</p>
+            {evaluationResult === PROGRESS_EVAL.FAIL && (
+              <p className="mt-1.5 text-xs text-warning">{t("contract.evalFailEffect")}</p>
+            )}
           </div>
         </div>
 

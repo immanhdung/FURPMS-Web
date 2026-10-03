@@ -16,6 +16,14 @@ export const deliverableService = {
   submit: (id: number, payload: SubmitDeliverablePayload) =>
     axiosClient.post<ApiResponse<Deliverable>>(`/deliverables/${id}/submit`, payload).then((res) => res.data.data),
 
+  /** Staff sửa tên / hạn / mô tả. Sản phẩm đã nghiệm thu Đạt thì BE chặn. */
+  update: (id: number, payload: { productName: string; dueDate?: string; description?: string }) =>
+    axiosClient.put<ApiResponse<Deliverable>>(`/deliverables/${id}`, payload).then((res) => res.data.data),
+
+  /** Staff xoá. Đã nộp minh chứng thì phải kèm lý do (vào sổ quyết định). */
+  delete: (id: number, reason?: string) =>
+    axiosClient.delete(`/deliverables/${id}`, { params: reason ? { reason } : undefined }),
+
   /** Staff nghiệm thu PASSED/FAILED. */
   evaluate: (id: number, payload: EvaluateDeliverablePayload) =>
     axiosClient.post<ApiResponse<Deliverable>>(`/deliverables/${id}/evaluate`, payload).then((res) => res.data.data),

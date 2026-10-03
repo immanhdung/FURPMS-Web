@@ -10,13 +10,7 @@ export type StageStatus =
   | "NO_DEADLINE";
 
 /** Hạn lấy từ đâu — hiện ra để trả lời ngay câu "hạn này ở đâu ra". */
-export type DeadlineSource =
-  | "CYCLE"
-  | "EXTENSION"
-  | "CONTRACT"
-  | "RULE_QD543"
-  | "DERIVED"
-  | "NOT_SET";
+export type DeadlineSource = "CYCLE" | "EXTENSION" | "CONTRACT" | "RULE_QD543" | "DERIVED" | "NOT_SET";
 
 export interface ProjectStage {
   /** Mã cố định — khoá i18n `timeline.stage.*`. */
@@ -35,6 +29,10 @@ export interface ProjectStage {
   isPlanned?: boolean;
   entityType?: string | null;
   entityId?: string | null;
+  /** Ai làm bước này: PI (chủ nhiệm) / STAFF (Phòng QLKH) / COUNCIL (hội đồng). */
+  actor?: "PI" | "STAFF" | "COUNCIL" | null;
+  /** Phân biệt bước lặp — "kỳ 1 — Đạt", "đợt 2 · 30%". BE dựng sẵn. */
+  suffix?: string | null;
 }
 
 export interface ProjectTimeline {

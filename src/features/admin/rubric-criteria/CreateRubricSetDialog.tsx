@@ -22,15 +22,23 @@ import { REVIEW_ROUND_TYPE } from "@/constants/statuses";
 export function CreateRubricSetDialog({
   open,
   onOpenChange,
+  defaultType = REVIEW_ROUND_TYPE.REVIEW,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Tab đang mở — tạo bộ từ tab Nghiệm thu thì mặc định là bộ nghiệm thu. */
+  defaultType?: string;
 }) {
   const { t } = useTranslation();
   const createMutation = useCreateRubricTemplateMutation();
 
   const [name, setName] = useState("");
-  const [templateType, setTemplateType] = useState<string>(REVIEW_ROUND_TYPE.REVIEW);
+  const [templateType, setTemplateType] = useState<string>(defaultType);
+  const [openedFor, setOpenedFor] = useState(open);
+  if (open !== openedFor) {
+    setOpenedFor(open);
+    if (open) setTemplateType(defaultType);
+  }
   const [appliesBasic, setAppliesBasic] = useState(true);
   const [appliesApplied, setAppliesApplied] = useState(true);
 
@@ -79,6 +87,9 @@ export function CreateRubricSetDialog({
                 ))}
               </SelectContent>
             </Select>
+            <p className="mt-1.5 text-xs text-muted-foreground">
+              {templateType === REVIEW_ROUND_TYPE.ACCEPTANCE ? t("rubricSet.hintAcceptance") : t("rubricSet.hintReview")}
+            </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-4">

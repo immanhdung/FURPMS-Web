@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import i18n from "@/i18n";
 import { finalReportService } from "@/services/api/final-report.service";
 import { queryKeys } from "@/services/queryKeys";
 import type { ApiError } from "@/types/common";
@@ -19,7 +20,7 @@ function useFinalReportAction<TArgs>(
   contractId: string,
   action: (args: TArgs) => Promise<unknown>,
   successMessage: string,
-  errorMessage: string
+  errorMessage: string,
 ) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -36,8 +37,8 @@ export function useSubmitFinalReportMutation(contractId: string) {
   return useFinalReportAction<SubmitFinalReportPayload>(
     contractId,
     (payload) => finalReportService.submit(contractId, payload),
-    "Final report submitted.",
-    "Unable to submit the final report."
+    i18n.t("toast.finalReportSubmitted"),
+    i18n.t("toast.actionFailed"),
   );
 }
 
@@ -45,8 +46,8 @@ export function useRequestFinalReportRevisionMutation(contractId: string) {
   return useFinalReportAction<{ id: string; revisionNotes: string }>(
     contractId,
     ({ id, revisionNotes }) => finalReportService.requestRevision(id, revisionNotes),
-    "Revision requested.",
-    "Unable to request a revision."
+    i18n.t("toast.finalReportRevision"),
+    i18n.t("toast.actionFailed"),
   );
 }
 
@@ -54,8 +55,8 @@ export function useAcceptFinalReportMutation(contractId: string) {
   return useFinalReportAction<string>(
     contractId,
     (id) => finalReportService.accept(id),
-    "Final report accepted.",
-    "Unable to accept the final report."
+    i18n.t("toast.finalReportAccepted"),
+    i18n.t("toast.actionFailed"),
   );
 }
 
@@ -63,7 +64,16 @@ export function useArchiveFinalReportMutation(contractId: string) {
   return useFinalReportAction<string>(
     contractId,
     (id) => finalReportService.archive(id),
-    "Final report archived.",
-    "Unable to archive the final report."
+    i18n.t("toast.finalReportArchived"),
+    i18n.t("toast.actionFailed"),
+  );
+}
+
+export function useReopenFinalReportMutation(contractId: string) {
+  return useFinalReportAction<{ id: string; reason: string }>(
+    contractId,
+    ({ id, reason }) => finalReportService.reopen(id, reason),
+    i18n.t("toast.resultReopened"),
+    i18n.t("toast.actionFailed"),
   );
 }

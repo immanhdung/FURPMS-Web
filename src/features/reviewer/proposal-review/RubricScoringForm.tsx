@@ -158,6 +158,8 @@ export function RubricScoringForm({ councilId, proposalId, projectId }: RubricSc
   };
 
   const scorePct = maxTotal > 0 ? Math.min(100, (totalScore / maxTotal) * 100) : 0;
+  const ratedCount = activeCriteria.filter((c) => (scores[c.id]?.givenScore ?? 0) > 0).length;
+  const ratedPct = activeCriteria.length > 0 ? (ratedCount / activeCriteria.length) * 100 : 0;
 
   /**
    * Điền nhanh cả phiếu — CHỈ để demo/thử.
@@ -203,18 +205,30 @@ export function RubricScoringForm({ councilId, proposalId, projectId }: RubricSc
   return (
     <div className="space-y-4">
       <div className="space-y-2 rounded-xl border border-primary/15 bg-linear-to-r from-primary/8 to-brand-secondary/8 px-4 py-3">
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-medium text-foreground">{t("review.totalScore")}</p>
-          <p className="text-base font-semibold text-foreground">
-            {totalScore.toFixed(1)} <span className="text-sm font-normal text-muted-foreground">/ {maxTotal}</span>
-          </p>
-        </div>
+        {isAcceptanceRubric ? (
+          // Biểu mẫu 10 chấm MỨC 1–5 từng nội dung, không có tổng điểm — "x/100" ở đây chỉ gây
+          // hiểu nhầm. Hiện số nội dung đã chấm để phản biện biết còn thiếu mục nào.
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm font-medium text-foreground">{t("review.acceptanceProgress")}</p>
+            <p className="text-base font-semibold text-foreground">
+              {ratedCount} <span className="text-sm font-normal text-muted-foreground">/ {activeCriteria.length}</span>
+            </p>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-foreground">{t("review.totalScore")}</p>
+            <p className="text-base font-semibold text-foreground">
+              {totalScore.toFixed(1)} <span className="text-sm font-normal text-muted-foreground">/ {maxTotal}</span>
+            </p>
+          </div>
+        )}
         <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
           <div
             className="h-full rounded-full bg-linear-to-r from-primary to-brand-secondary transition-all duration-300"
-            style={{ width: `${scorePct}%` }}
+            style={{ width: `${isAcceptanceRubric ? ratedPct : scorePct}%` }}
           />
         </div>
+        {isAcceptanceRubric && <p className="text-xs text-muted-foreground">{t("review.acceptanceScaleNote")}</p>}
       </div>
 
       {quickScoreFillEnabled && activeCriteria.length > 0 && (
@@ -276,20 +290,17 @@ export function RubricScoringForm({ councilId, proposalId, projectId }: RubricSc
                           }))
                         }
                       >
-                        <SelectTrigger className="w-32">
+                        <SelectTrigger className="w-40">
                           <SelectValue placeholder={t("review.acceptanceRating")} />
                         </SelectTrigger>
                         <SelectContent>
                           {[1, 2, 3, 4, 5].map((rating) => (
                             <SelectItem key={rating} value={String(rating)}>
-                              {rating}/5
+                              {rating} — {t(`review.ratingLevel.${rating}`)}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
-                      <span className="text-xs text-muted-foreground">
-                        = {scores[criterion.id]?.givenScore || 0}/{criterion.maxScore}
-                      </span>
                     </>
                   ) : (
                     <>

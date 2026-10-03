@@ -17,6 +17,14 @@ import type { ApiError } from "@/types/common";
  */
 export const AI_TIMEOUT_MS = 180_000;
 
+/**
+ * Hạn chờ khi **tải file lên** (03/10). File đi trình duyệt → Railway → kho lưu trữ, file vài MB trên
+ * mạng yếu mất quá 15 giây là chuyện thường ⇒ trước đây trình duyệt bỏ cuộc giữa chừng và báo "lỗi
+ * mạng" dù máy chủ vẫn đang nhận. Đây là lỗi bạn nhóm gặp khi nộp báo cáo tiến độ bằng file trên
+ * bản deploy (dán link thì không sao vì chỉ gửi vài byte).
+ */
+export const UPLOAD_TIMEOUT_MS = 300_000;
+
 export const axiosClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 15000,
@@ -30,6 +38,10 @@ axiosClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = tokenStorage.get();
   if (token) {
     config.headers.set("Authorization", `Bearer ${token}`);
+  }
+  // Mọi lời gọi gửi FormData (tải file) dùng hạn dài — trừ khi lời gọi đã tự đặt hạn dài hơn.
+  if (typeof FormData !== "undefined" && config.data instanceof FormData) {
+    config.timeout = Math.max(config.timeout ?? 0, UPLOAD_TIMEOUT_MS);
   }
   return config;
 });

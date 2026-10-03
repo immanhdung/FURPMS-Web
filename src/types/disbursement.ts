@@ -32,6 +32,8 @@ export interface Disbursement {
   isBlockedByDeliverable?: boolean;
   /** Có ít nhất một file hợp đồng/chứng từ; bắt buộc trước khi xác nhận đã giải ngân. */
   hasEvidence?: boolean;
+  /** BE nói đợt này đang chờ điều kiện gì theo QĐ543 Điều 16; null = đủ điều kiện giải ngân. */
+  lockReason?: string | null;
 }
 
 /** Gắn sản phẩm minh chứng cho đợt; `null` = gỡ. */

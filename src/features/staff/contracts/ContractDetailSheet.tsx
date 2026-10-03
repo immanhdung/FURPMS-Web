@@ -8,7 +8,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { PageLoader } from "@/components/shared/PageLoader";
@@ -16,7 +21,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DecisionDossierPanel } from "@/components/shared/DecisionDossierPanel";
 import { useContractQuery, useTerminateContractMutation } from "@/hooks/useContracts";
 import { useProposalQuery } from "@/hooks/useProposals";
-import { ContractMilestoneTimeline } from "@/features/staff/contracts/ContractMilestoneTimeline";
 import { BudgetOverviewPanel } from "@/features/staff/contracts/BudgetOverviewPanel";
 import { ProjectTimelinePanel } from "@/features/staff/contracts/ProjectTimelinePanel";
 import { ContractSignedDocs } from "@/features/staff/contracts/ContractSignedDocs";
@@ -151,7 +155,9 @@ export function ContractDetailSheet({ open, onOpenChange, contractId, tab, onTab
               {contract.status === "TERMINATED" && contract.terminatedReason && (
                 <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
                   <p className="text-sm font-medium text-destructive">{t("contract.terminatedReason")}</p>
-                  <p className="mt-1 text-sm text-foreground whitespace-pre-wrap break-words">{contract.terminatedReason}</p>
+                  <p className="mt-1 text-sm text-foreground whitespace-pre-wrap break-words">
+                    {contract.terminatedReason}
+                  </p>
                 </div>
               )}
 
@@ -199,18 +205,19 @@ export function ContractDetailSheet({ open, onOpenChange, contractId, tab, onTab
                     {t("contract.exportSettlementWord")}
                   </Button>
                 )}
-                {canManage && contract.projectStatus !== "COMPLETED"
-                  && (contract.status === "ACTIVE" || contract.status === "UNDER_REVIEW") && (
-                  <Button size="sm" variant="destructive" onClick={() => setTerminateOpen(true)}>
-                    <OctagonX />
-                    {t("contract.terminate")}
-                  </Button>
-                )}
+                {canManage &&
+                  contract.projectStatus !== "COMPLETED" &&
+                  (contract.status === "ACTIVE" || contract.status === "UNDER_REVIEW") && (
+                    <Button size="sm" variant="destructive" onClick={() => setTerminateOpen(true)}>
+                      <OctagonX />
+                      {t("contract.terminate")}
+                    </Button>
+                  )}
               </div>
 
               {canManage && <ContractSignedDocs contractId={contract.id} />}
 
-      <SignContractDialog open={signOpen} onOpenChange={setSignOpen} contractId={contractId} />
+              <SignContractDialog open={signOpen} onOpenChange={setSignOpen} contractId={contractId} />
 
               <Dialog open={terminateOpen} onOpenChange={setTerminateOpen}>
                 <DialogContent>
@@ -230,14 +237,23 @@ export function ContractDetailSheet({ open, onOpenChange, contractId, tab, onTab
                     />
                   </div>
                   <DialogFooter>
-                    <Button variant="outline" onClick={() => setTerminateOpen(false)}>{t("common.cancel")}</Button>
+                    <Button variant="outline" onClick={() => setTerminateOpen(false)}>
+                      {t("common.cancel")}
+                    </Button>
                     <Button
                       variant="destructive"
                       disabled={terminateReason.trim().length < 20 || terminateMutation.isPending}
-                      onClick={() => terminateMutation.mutate(
-                        { id: contract.id, reason: terminateReason.trim() },
-                        { onSuccess: () => { setTerminateReason(""); setTerminateOpen(false); } }
-                      )}
+                      onClick={() =>
+                        terminateMutation.mutate(
+                          { id: contract.id, reason: terminateReason.trim() },
+                          {
+                            onSuccess: () => {
+                              setTerminateReason("");
+                              setTerminateOpen(false);
+                            },
+                          },
+                        )
+                      }
                     >
                       {terminateMutation.isPending ? <Loader2 className="animate-spin" /> : <OctagonX />}
                       {t("contract.terminateConfirm")}
@@ -250,21 +266,39 @@ export function ContractDetailSheet({ open, onOpenChange, contractId, tab, onTab
               <Tabs {...(tab ? { value: tab, onValueChange: onTabChange } : { defaultValue: "timeline" })}>
                 {/* Lưới đều 7 tab — sheet rộng thì 4/hàng, hẹp thì 2/hàng. Mọi tab hiện hết, không cắt. */}
                 <TabsList className="grid h-auto w-full grid-cols-2 gap-1 sm:grid-cols-4">
-                  <TabsTrigger value="timeline" className="w-full text-xs">{t("contract.tabs.timeline")}</TabsTrigger>
-                  <TabsTrigger value="budget" className="w-full text-xs">{t("contract.tabs.budget")}</TabsTrigger>
-                  <TabsTrigger value="disbursements" className="w-full text-xs">{t("contract.tabs.disbursements")}</TabsTrigger>
-                  <TabsTrigger value="deliverables" className="w-full text-xs">{t("contract.tabs.deliverables")}</TabsTrigger>
-                  <TabsTrigger value="progress" className="w-full text-xs">{t("contract.tabs.progressReports")}</TabsTrigger>
-                  <TabsTrigger value="final" className="w-full text-xs">{t("contract.tabs.finalReport")}</TabsTrigger>
-                  <TabsTrigger value="amendments" className="w-full text-xs">{t("contract.tabs.amendments")}</TabsTrigger>
-                  <TabsTrigger value="settlement" className="w-full text-xs">{t("contract.tabs.settlement")}</TabsTrigger>
-                  <TabsTrigger value="decisions" className="w-full text-xs">{t("contract.tabs.decisions")}</TabsTrigger>
+                  <TabsTrigger value="timeline" className="w-full text-xs">
+                    {t("contract.tabs.timeline")}
+                  </TabsTrigger>
+                  <TabsTrigger value="budget" className="w-full text-xs">
+                    {t("contract.tabs.budget")}
+                  </TabsTrigger>
+                  <TabsTrigger value="disbursements" className="w-full text-xs">
+                    {t("contract.tabs.disbursements")}
+                  </TabsTrigger>
+                  <TabsTrigger value="deliverables" className="w-full text-xs">
+                    {t("contract.tabs.deliverables")}
+                  </TabsTrigger>
+                  <TabsTrigger value="progress" className="w-full text-xs">
+                    {t("contract.tabs.progressReports")}
+                  </TabsTrigger>
+                  <TabsTrigger value="final" className="w-full text-xs">
+                    {t("contract.tabs.finalReport")}
+                  </TabsTrigger>
+                  <TabsTrigger value="amendments" className="w-full text-xs">
+                    {t("contract.tabs.amendments")}
+                  </TabsTrigger>
+                  <TabsTrigger value="settlement" className="w-full text-xs">
+                    {t("contract.tabs.settlement")}
+                  </TabsTrigger>
+                  <TabsTrigger value="decisions" className="w-full text-xs">
+                    {t("contract.tabs.decisions")}
+                  </TabsTrigger>
                 </TabsList>
                 <TabsContent value="timeline" className="space-y-4">
-                  {/* Dòng thời gian ĐỀ TÀI (do máy chủ lắp, gồm cả giai đoạn trước khi có hợp đồng)
-                      đặt trên; các mốc riêng của hợp đồng giữ bên dưới. */}
+                  {/* Lộ trình ĐỀ TÀI do máy chủ lắp, xếp đúng thứ tự QĐ543 (tiến độ kỳ k → giải ngân đợt
+                      k+1 …) kèm "việc tiếp theo" và ai làm. 03/10: bỏ khối thẻ mốc hợp đồng bên dưới —
+                      nó gom theo loại việc (hết giải ngân rồi tới báo cáo) nên lệch thứ tự, lặp nội dung. */}
                   <ProjectTimelinePanel projectId={contract.projectId ?? null} />
-                  <ContractMilestoneTimeline contract={contract} />
                 </TabsContent>
                 {/* Kinh phí gắn với ĐỀ TÀI, không phải hợp đồng — một đề tài có thể có nhiều hợp
                     đồng, và dự toán thì có từ trước khi ký. */}
@@ -277,7 +311,12 @@ export function ContractDetailSheet({ open, onOpenChange, contractId, tab, onTab
                   <DecisionDossierPanel projectId={contract.projectId ?? null} />
                 </TabsContent>
                 <TabsContent value="disbursements">
-                  <DisbursementsPanel contractId={contract.id} canManage={canManage} />
+                  <DisbursementsPanel
+                    contractId={contract.id}
+                    canManage={canManage}
+                    researchTypeName={contract.researchTypeName}
+                    isApplied={(contract.defaultProgressRounds ?? 1) >= 2}
+                  />
                 </TabsContent>
                 <TabsContent value="deliverables">
                   <DeliverablesPanel contractId={contract.id} canManage={canManage} />
@@ -291,13 +330,18 @@ export function ContractDetailSheet({ open, onOpenChange, contractId, tab, onTab
                   />
                 </TabsContent>
                 <TabsContent value="final">
-                  <FinalReportPanel contractId={contract.id} canManage={canManage} />
+                  <FinalReportPanel
+                    contractId={contract.id}
+                    canManage={canManage}
+                    contractEndDate={contract.endDate}
+                    projectStatus={contract.projectStatus}
+                  />
                 </TabsContent>
                 <TabsContent value="amendments">
                   <AmendmentsPanel contractId={contract.id} canManage={canManage} />
                 </TabsContent>
                 <TabsContent value="settlement">
-                  <SettlementPanel contractId={contract.id} canManage={canManage} />
+                  <SettlementPanel contractId={contract.id} canManage={canManage} totalAmount={contract.totalAmount} />
                 </TabsContent>
               </Tabs>
             </div>

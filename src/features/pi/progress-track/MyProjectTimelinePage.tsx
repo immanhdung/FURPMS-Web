@@ -7,8 +7,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { useMyContractsQuery } from "@/hooks/useMyContracts";
-import { ContractMilestoneTimeline } from "@/features/staff/contracts/ContractMilestoneTimeline";
+import { ProjectTimelinePanel } from "@/features/staff/contracts/ProjectTimelinePanel";
 import { DecisionDossierPanel } from "@/components/shared/DecisionDossierPanel";
+import { DisbursementsPanel } from "@/features/staff/contracts/DisbursementsPanel";
 
 /**
  * PI xem TIẾN TRÌNH đề tài của chính mình.
@@ -98,7 +99,21 @@ export function MyProjectTimelinePage() {
                 {/* Tái dùng đúng timeline của màn Staff — cùng một nguồn sự thật, khỏi lệch. */}
                 {isOpen && (
                   <div className="space-y-5 px-4 pb-4">
-                    <ContractMilestoneTimeline contract={contract} />
+                    {/* 03/10: cùng lộ trình với Staff — đúng thứ tự QĐ543, có "việc tiếp theo" và ai làm. */}
+                    <ProjectTimelinePanel projectId={contract.projectId ?? null} />
+
+                    {/* Giải ngân CHỈ XEM (03/10): đợt nào đã chi, đợt nào đang chờ điều kiện gì, và chứng
+                        từ Phòng QLKH đã tải lên. Trước đây PI không có chỗ nào xem — thông báo "đã giải
+                        ngân" bảo xem minh chứng mà mở ra thì 403. */}
+                    <div>
+                      <p className="mb-2 text-sm font-semibold text-foreground">{t("contract.tabs.disbursements")}</p>
+                      <DisbursementsPanel
+                        contractId={contract.id}
+                        canManage={false}
+                        researchTypeName={contract.researchTypeName}
+                        isApplied={(contract.defaultProgressRounds ?? 1) >= 2}
+                      />
+                    </div>
 
                     {/* Chủ nhiệm phải xem được HỒ SƠ QUYẾT ĐỊNH của chính đề tài mình: trước đây
                         họ chỉ biết kết quả cuối, không biết ai quyết gì, lúc nào, căn cứ văn bản
