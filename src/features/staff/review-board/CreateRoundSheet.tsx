@@ -12,13 +12,15 @@ interface CreateRoundSheetProps {
   onOpenChange: (open: boolean) => void;
   cycleId: number;
   trackId: number;
+  /** Phiên vừa tạo — trang cha chuyển sang phiên này (04/10). */
+  onCreated?: (roundId: string) => void;
 }
 
 /**
  * Tạo vòng chấm ở CẤP LĨNH VỰC — để trống projectIds, BE tự gom mọi đề tài
  * SUBMITTED/REVISION của lĩnh vực chưa vào vòng (rule: cả track chung vòng).
  */
-export function CreateRoundSheet({ open, onOpenChange, cycleId, trackId }: CreateRoundSheetProps) {
+export function CreateRoundSheet({ open, onOpenChange, cycleId, trackId, onCreated }: CreateRoundSheetProps) {
   const { t } = useTranslation();
   const [roundType, setRoundType] = useState("REVIEW");
   const createMutation = useCreateTrackRoundMutation(cycleId, trackId);
@@ -27,7 +29,12 @@ export function CreateRoundSheet({ open, onOpenChange, cycleId, trackId }: Creat
     e?.preventDefault();
     createMutation.mutate(
       { dimension: "SCIENCE", roundType }, // dimension luôn SCIENCE (bỏ FINANCE — rule #16)
-      { onSuccess: () => onOpenChange(false) }
+      {
+        onSuccess: (round) => {
+          if (round?.id) onCreated?.(round.id);
+          onOpenChange(false);
+        },
+      }
     );
   };
 

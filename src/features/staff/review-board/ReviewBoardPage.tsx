@@ -31,21 +31,31 @@ export function ReviewBoardPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const cycleId = searchParams.get("cycle") ? Number(searchParams.get("cycle")) : undefined;
   const trackId = searchParams.get("track") ? Number(searchParams.get("track")) : undefined;
-  const [selectedRoundId, setSelectedRoundId] = useState<string | null>(null);
+  // 04/10: phiên đang chọn nằm trên URL (?round=) — tải lại trang vẫn ở đúng phiên (trước đây về phiên đầu).
+  const selectedRoundId = searchParams.get("round");
+  const setSelectedRoundId = (id: string | null) =>
+    setSearchParams(
+      (prev) => {
+        const p = new URLSearchParams(prev);
+        if (id) p.set("round", id);
+        else p.delete("round");
+        return p;
+      },
+      { replace: true }
+    );
   const [createRoundOpen, setCreateRoundOpen] = useState(false);
   const [deadlineRound, setDeadlineRound] = useState<ReviewBoardRound | null>(null);
 
   const selectCycle = (v: string) => {
-    setSearchParams({ cycle: v }); // đổi đợt → bỏ lĩnh vực cũ
-    setSelectedRoundId(null);
+    setSearchParams({ cycle: v }); // đổi đợt → bỏ lĩnh vực cũ (và phiên đang chọn)
   };
   const selectTrack = (v: string) => {
     setSearchParams((prev) => {
       const p = new URLSearchParams(prev);
       p.set("track", v);
+      p.delete("round");
       return p;
     });
-    setSelectedRoundId(null);
   };
 
   const { data: tracks } = useTracksByCycleQuery(cycleId);
@@ -198,6 +208,7 @@ export function ReviewBoardPage() {
           onOpenChange={setCreateRoundOpen}
           cycleId={cycleId as number}
           trackId={trackId as number}
+          onCreated={setSelectedRoundId}
         />
       )}
     </div>
