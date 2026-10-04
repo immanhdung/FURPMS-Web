@@ -43,9 +43,10 @@ import { REVIEW_DECISION } from "@/constants/statuses";
 import { formatDateTime } from "@/utils/format";
 import type { ApiError } from "@/types/common";
 
+// 04/10: bỏ "Cần chỉnh sửa" — màn chủ nhiệm chưa có đường nộp bản sửa, chọn vào là đề tài kẹt.
+// BE vẫn nhận REVISION_REQUIRED (dữ liệu cũ); thêm lại dòng này khi có luồng nộp bản sửa.
 const RESULT_OPTIONS = [
   { value: REVIEW_DECISION.APPROVED, labelKey: "minutes.resultApproved" },
-  { value: REVIEW_DECISION.REVISION_REQUIRED, labelKey: "minutes.resultRevision" },
   { value: REVIEW_DECISION.REJECTED, labelKey: "minutes.resultRejected" },
 ];
 
