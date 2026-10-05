@@ -1,37 +1,51 @@
 import { useMemo, useState } from "react";
-import { Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { motion } from "motion/react";
+import { CalendarRange, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/tables/DataTable";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useCloseCycleMutation, useCyclesQuery, useOpenCycleMutation } from "@/hooks/useCycles";
+import { useCloseCycleMutation,
+  useDeleteCycleMutation, useCyclesQuery, useOpenCycleMutation } from "@/hooks/useCycles";
 import { useResearchTypesQuery } from "@/hooks/useResearchTypes";
 import { getCycleColumns } from "@/features/admin/cycles/columns";
 import { CycleFormSheet } from "@/features/admin/cycles/CycleFormSheet";
 import { CycleDetailSheet } from "@/features/admin/cycles/CycleDetailSheet";
 import { TracksTabContent } from "@/features/staff/tracks/TracksTabContent";
+import { ManageCycleFieldsDialog } from "@/features/admin/cycles/ManageCycleFieldsDialog";
+import { ExtendDeadlineDialog } from "@/features/admin/cycles/ExtendDeadlineDialog";
+import { sortByIdDesc } from "@/utils/sort";
+import { researchTypeDisplayName } from "@/utils/research-type";
 import type { Cycle } from "@/types/cycle";
 
 export function CyclesPage() {
+  const { t } = useTranslation();
   const { data, isLoading, isError, refetch, isRefetching } = useCyclesQuery();
   const { data: researchTypes } = useResearchTypesQuery();
   const openMutation = useOpenCycleMutation();
   const closeMutation = useCloseCycleMutation();
+  const deleteMutation = useDeleteCycleMutation();
 
   const [formOpen, setFormOpen] = useState(false);
   const [editingCycle, setEditingCycle] = useState<Cycle | null>(null);
   const [detailCycleId, setDetailCycleId] = useState<number | null>(null);
   const [closingCycle, setClosingCycle] = useState<Cycle | null>(null);
+  const [deletingCycle, setDeletingCycle] = useState<Cycle | null>(null);
+  const [addingFieldToCycle, setAddingFieldToCycle] = useState<Cycle | null>(null);
+  const [extendingCycle, setExtendingCycle] = useState<Cycle | null>(null);
 
   const researchTypeNames = useMemo(
-    () => Object.fromEntries((researchTypes ?? []).map((rt) => [rt.id, rt.name])),
-    [researchTypes]
+    () => Object.fromEntries((researchTypes ?? []).map((rt) => [rt.id, researchTypeDisplayName(rt, t)])),
+    [researchTypes, t]
   );
+  const sortedData = useMemo(() => sortByIdDesc(data), [data]);
 
   const columns = useMemo(
     () =>
       getCycleColumns({
+        t,
         researchTypeNames,
         onView: (cycle) => setDetailCycleId(cycle.id),
         onEdit: (cycle) => {
@@ -40,35 +54,49 @@ export function CyclesPage() {
         },
         onOpen: (cycle) => openMutation.mutate(cycle.id),
         onClose: (cycle) => setClosingCycle(cycle),
+        onDelete: (cycle) => setDeletingCycle(cycle),
+        onAddField: (cycle) => setAddingFieldToCycle(cycle),
+        onExtend: (cycle) => setExtendingCycle(cycle),
       }),
-    [researchTypeNames, openMutation]
+    [t, researchTypeNames, openMutation]
   );
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Research Cycles</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Manage submission windows, open/close cycles, and the research fields within them.
-        </p>
-      </div>
+    <div className="space-y-6">
+      <motion.div
+        initial={{ opacity: 0, y: -4 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2 }}
+        className="flex items-center gap-3"
+      >
+        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-primary/15 to-brand-secondary/10 text-primary">
+          <CalendarRange className="size-5" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("cycles.title")}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {t("cycles.subtitle")}
+          </p>
+        </div>
+      </motion.div>
 
       <Tabs defaultValue="cycles">
         <TabsList>
-          <TabsTrigger value="cycles">Cycles</TabsTrigger>
-          <TabsTrigger value="fields">Research Fields</TabsTrigger>
+          <TabsTrigger value="cycles">{t("cycles.tabCycles")}</TabsTrigger>
+          <TabsTrigger value="fields">{t("cycles.tabFields")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="cycles" className="space-y-4">
           <div className="flex justify-end">
             <Button
+              variant="gradient"
               onClick={() => {
                 setEditingCycle(null);
                 setFormOpen(true);
               }}
             >
               <Plus />
-              New cycle
+              {t("cycles.newBtn")}
             </Button>
           </div>
 
@@ -77,12 +105,12 @@ export function CyclesPage() {
           ) : (
             <DataTable
               columns={columns}
-              data={data ?? []}
+              data={sortedData}
               isLoading={isLoading}
-              searchPlaceholder="Search cycles..."
+              searchPlaceholder={t("cycles.searchPlaceholder")}
               exportFileName="research-cycles"
-              emptyTitle="No research cycles found"
-              emptyDescription="Create a cycle to open submissions for a research type."
+              emptyTitle={t("cycles.emptyTitle")}
+              emptyDescription={t("cycles.emptyDesc")}
             />
           )}
         </TabsContent>
@@ -99,18 +127,46 @@ export function CyclesPage() {
         cycleId={detailCycleId}
       />
 
+      <ManageCycleFieldsDialog
+        open={Boolean(addingFieldToCycle)}
+        onOpenChange={(open) => !open && setAddingFieldToCycle(null)}
+        cycle={addingFieldToCycle}
+      />
+
+      <ExtendDeadlineDialog
+        open={Boolean(extendingCycle)}
+        onOpenChange={(open) => !open && setExtendingCycle(null)}
+        cycle={extendingCycle}
+      />
+
       <ConfirmDialog
         open={Boolean(closingCycle)}
         onOpenChange={(open) => !open && setClosingCycle(null)}
-        title="Close cycle"
-        description={`Are you sure you want to close "${closingCycle?.name}"? PIs will no longer be able to submit proposals for this cycle.`}
+        title={t("cycles.closeTitle")}
+        description={t("cycles.closeDesc", { name: closingCycle?.name ?? "" })}
         variant="destructive"
-        confirmLabel="Close cycle"
+        confirmLabel={t("cycles.closeBtn")}
         isLoading={closeMutation.isPending}
         onConfirm={() =>
           closingCycle &&
           closeMutation.mutate(closingCycle.id, {
             onSuccess: () => setClosingCycle(null),
+          })
+        }
+      />
+
+      <ConfirmDialog
+        open={Boolean(deletingCycle)}
+        onOpenChange={(open) => !open && setDeletingCycle(null)}
+        title={t("cycles.deleteTitle")}
+        description={t("cycles.deleteDesc", { name: deletingCycle?.name ?? "" })}
+        variant="destructive"
+        confirmLabel={t("cycles.deleteBtn")}
+        isLoading={deleteMutation.isPending}
+        onConfirm={() =>
+          deletingCycle &&
+          deleteMutation.mutate(deletingCycle.id, {
+            onSuccess: () => setDeletingCycle(null),
           })
         }
       />

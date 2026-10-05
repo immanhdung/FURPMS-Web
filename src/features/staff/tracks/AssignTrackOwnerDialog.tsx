@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 import {
   Dialog,
@@ -21,6 +22,7 @@ interface AssignTrackOwnerDialogProps {
 }
 
 export function AssignTrackOwnerDialog({ open, onOpenChange, track }: AssignTrackOwnerDialogProps) {
+  const { t } = useTranslation();
   const { data: users } = useUsersQuery();
   const assignMutation = useAssignTrackOwnerMutation();
   const [ownerId, setOwnerId] = useState<string | undefined>(track?.ownerId ?? undefined);
@@ -29,13 +31,13 @@ export function AssignTrackOwnerDialog({ open, onOpenChange, track }: AssignTrac
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Assign field owner</DialogTitle>
-          <DialogDescription>Choose the staff member responsible for "{track?.name}".</DialogDescription>
+          <DialogTitle>{t("staff.assignOwnerTitle")}</DialogTitle>
+          <DialogDescription>{t("staff.assignOwnerDesc", { name: track?.name ?? "" })}</DialogDescription>
         </DialogHeader>
 
         <Select value={ownerId} onValueChange={setOwnerId}>
           <SelectTrigger>
-            <SelectValue placeholder="Select owner" />
+            <SelectValue placeholder={t("staff.selectOwner")} />
           </SelectTrigger>
           <SelectContent>
             {users?.map((user) => (
@@ -48,7 +50,7 @@ export function AssignTrackOwnerDialog({ open, onOpenChange, track }: AssignTrac
 
         <DialogFooter>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={assignMutation.isPending}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button
             type="button"
@@ -60,7 +62,7 @@ export function AssignTrackOwnerDialog({ open, onOpenChange, track }: AssignTrac
             }
           >
             {assignMutation.isPending && <Loader2 className="animate-spin" />}
-            Assign
+            {t("staff.assign")}
           </Button>
         </DialogFooter>
       </DialogContent>

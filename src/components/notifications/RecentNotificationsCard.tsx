@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { BellOff } from "lucide-react";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -10,16 +11,17 @@ import { ROUTES } from "@/constants/routes";
 import { cn } from "@/lib/utils";
 
 export function RecentNotificationsCard({ limit = 5 }: { limit?: number }) {
+  const { t } = useTranslation();
   const { isLoading } = useNotificationsQuery();
   const notifications = useNotificationStore((state) => state.notifications).slice(0, limit);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-sm">Recent Notifications</CardTitle>
+        <CardTitle className="text-sm">{t("notifications.recentTitle")}</CardTitle>
         <CardAction>
           <Link to={ROUTES.NOTIFICATIONS} className="text-xs font-medium text-primary hover:underline">
-            View all
+            {t("notifications.viewAll")}
           </Link>
         </CardAction>
       </CardHeader>
@@ -34,7 +36,7 @@ export function RecentNotificationsCard({ limit = 5 }: { limit?: number }) {
             ))}
           </div>
         ) : notifications.length === 0 ? (
-          <EmptyState icon={BellOff} title="No notifications" className="min-h-40 border-none p-0" />
+          <EmptyState icon={BellOff} title={t("notifications.empty")} className="min-h-40 border-none p-0" />
         ) : (
           <ul className="space-y-3">
             {notifications.map((notification) => (

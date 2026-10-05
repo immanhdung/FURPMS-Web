@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
-import { Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { motion } from "motion/react";
+import { Plus, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/tables/DataTable";
 import { ErrorState } from "@/components/shared/ErrorState";
@@ -10,6 +12,7 @@ import { BudgetCategoryFormSheet } from "@/features/admin/budget-categories/Budg
 import type { BudgetCategory } from "@/types/budget-category";
 
 export function BudgetCategoriesPage() {
+  const { t } = useTranslation();
   const { data, isLoading, isError, refetch, isRefetching } = useBudgetCategoriesQuery();
   const updateMutation = useUpdateBudgetCategoryMutation();
 
@@ -20,21 +23,32 @@ export function BudgetCategoriesPage() {
   const columns = useMemo(
     () =>
       getBudgetCategoryColumns({
+        t,
         onEdit: (category) => {
           setEditingCategory(category);
           setFormOpen(true);
         },
         onToggleActive: (category) => setTogglingCategory(category),
       }),
-    []
+    [t]
   );
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Budget Categories</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Expense categories used in proposal budgets.</p>
+    <div className="space-y-6">
+      <motion.div
+        initial={{ opacity: 0, y: -4 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2 }}
+        className="flex items-center justify-between gap-3"
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-primary/15 to-brand-secondary/10 text-primary">
+            <Wallet className="size-5" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("budgetCategories.title")}</h1>
+            <p className="mt-1 text-sm text-muted-foreground">{t("budgetCategories.subtitle")}</p>
+          </div>
         </div>
         <Button
           onClick={() => {
@@ -43,9 +57,9 @@ export function BudgetCategoriesPage() {
           }}
         >
           <Plus />
-          New category
+          {t("budgetCategories.newBtn")}
         </Button>
-      </div>
+      </motion.div>
 
       {isError ? (
         <ErrorState onRetry={() => refetch()} isRetrying={isRefetching} />
@@ -54,10 +68,10 @@ export function BudgetCategoriesPage() {
           columns={columns}
           data={data ?? []}
           isLoading={isLoading}
-          searchPlaceholder="Search budget categories..."
+          searchPlaceholder={t("budgetCategories.searchPlaceholder")}
           exportFileName="budget-categories"
-          emptyTitle="No budget categories found"
-          emptyDescription="Create a category to organize proposal budgets."
+          emptyTitle={t("budgetCategories.emptyTitle")}
+          emptyDescription={t("budgetCategories.emptyDesc")}
         />
       )}
 
@@ -67,7 +81,7 @@ export function BudgetCategoriesPage() {
         open={Boolean(togglingCategory)}
         onOpenChange={(open) => !open && setTogglingCategory(null)}
         isActive={Boolean(togglingCategory?.isActive)}
-        entityName="category"
+        entityName={t("budgetCategories.entity")}
         itemLabel={togglingCategory?.name ?? ""}
         isLoading={updateMutation.isPending}
         onConfirm={() =>

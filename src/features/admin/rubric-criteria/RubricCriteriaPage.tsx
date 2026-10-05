@@ -1,83 +1,52 @@
-import { useMemo, useState } from "react";
-import { Plus } from "lucide-react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { motion } from "motion/react";
+import { ListChecks, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DataTable } from "@/components/tables/DataTable";
-import { ErrorState } from "@/components/shared/ErrorState";
-import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
-import { useDeleteRubricCriterionMutation, useRubricCriteriaQuery } from "@/hooks/useRubricCriteria";
-import { getRubricCriterionColumns } from "@/features/admin/rubric-criteria/columns";
-import { RubricCriterionFormSheet } from "@/features/admin/rubric-criteria/RubricCriterionFormSheet";
-import type { RubricCriterion } from "@/types/rubric-criterion";
+import { RubricTemplatesPanel } from "@/features/admin/rubric-criteria/RubricTemplatesPanel";
+import { CreateRubricSetDialog } from "@/features/admin/rubric-criteria/CreateRubricSetDialog";
 
+/**
+ * Quản lý bộ tiêu chí chấm.
+ *
+ * Trang này trước đây có HAI phần rời nhau và người dùng không hiểu phần nào làm gì:
+ * danh sách "bộ tiêu chí" ở trên (chỉ xem, không sửa được tiêu chí bên trong) và một
+ * bảng phẳng "tất cả tiêu chí" ở dưới (sửa được nhưng gom theo LOẠI VÒNG, không biết
+ * thuộc bộ nào). Tệ hơn: endpoint của bảng phẳng luôn gắn tiêu chí vào bộ ĐẦU TIÊN
+ * cùng loại vòng ⇒ bộ thứ hai vĩnh viễn rỗng.
+ *
+ * Nay gộp làm một: mỗi bộ tự quản tiêu chí của mình, thêm/sửa/xoá ngay tại chỗ.
+ */
 export function RubricCriteriaPage() {
-  const { data, isLoading, isError, refetch, isRefetching } = useRubricCriteriaQuery();
-  const deleteMutation = useDeleteRubricCriterionMutation();
-
-  const [formOpen, setFormOpen] = useState(false);
-  const [editingCriterion, setEditingCriterion] = useState<RubricCriterion | null>(null);
-  const [deletingCriterion, setDeletingCriterion] = useState<RubricCriterion | null>(null);
-
-  const columns = useMemo(
-    () =>
-      getRubricCriterionColumns({
-        onEdit: (criterion) => {
-          setEditingCriterion(criterion);
-          setFormOpen(true);
-        },
-        onDelete: (criterion) => setDeletingCriterion(criterion),
-      }),
-    []
-  );
+  const { t } = useTranslation();
+  const [createOpen, setCreateOpen] = useState(false);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Rubric Criteria</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Scoring criteria used by reviewers in each round.</p>
+    <div className="space-y-6">
+      <motion.div
+        initial={{ opacity: 0, y: -4 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2 }}
+        className="flex items-center justify-between gap-3"
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-primary/15 to-brand-secondary/10 text-primary">
+            <ListChecks className="size-5" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("rubricCriteria.title")}</h1>
+            <p className="mt-1 text-sm text-muted-foreground">{t("rubricSet.pageSubtitle")}</p>
+          </div>
         </div>
-        <Button
-          onClick={() => {
-            setEditingCriterion(null);
-            setFormOpen(true);
-          }}
-        >
+        <Button onClick={() => setCreateOpen(true)}>
           <Plus />
-          New criterion
+          {t("rubricSet.createBtn")}
         </Button>
-      </div>
+      </motion.div>
 
-      {isError ? (
-        <ErrorState onRetry={() => refetch()} isRetrying={isRefetching} />
-      ) : (
-        <DataTable
-          columns={columns}
-          data={data ?? []}
-          isLoading={isLoading}
-          searchPlaceholder="Search rubric criteria..."
-          exportFileName="rubric-criteria"
-          emptyTitle="No rubric criteria found"
-          emptyDescription="Create a criterion to score proposals during review."
-        />
-      )}
+      <RubricTemplatesPanel />
 
-      <RubricCriterionFormSheet open={formOpen} onOpenChange={setFormOpen} criterion={editingCriterion} />
-
-      <ConfirmDialog
-        open={Boolean(deletingCriterion)}
-        onOpenChange={(open) => !open && setDeletingCriterion(null)}
-        title="Delete rubric criterion"
-        description={`Are you sure you want to delete "${deletingCriterion?.name}"? This action cannot be undone.`}
-        variant="destructive"
-        confirmLabel="Delete"
-        isLoading={deleteMutation.isPending}
-        onConfirm={() =>
-          deletingCriterion &&
-          deleteMutation.mutate(deletingCriterion.id, {
-            onSuccess: () => setDeletingCriterion(null),
-          })
-        }
-      />
+      <CreateRubricSetDialog open={createOpen} onOpenChange={setCreateOpen} />
     </div>
   );
 }

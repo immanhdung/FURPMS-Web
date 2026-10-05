@@ -1,10 +1,11 @@
 export interface AcceptancePayload {
+  projectId: string;
   result: string;
   failReason?: string;
 }
 
 export interface AcceptanceResponse extends AcceptancePayload {
-  id: string;
+  id: number;
   councilId: string;
   submittedAt?: string | null;
 }

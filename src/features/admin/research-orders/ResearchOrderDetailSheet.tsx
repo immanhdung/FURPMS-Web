@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { DetailSheet } from "@/components/shared/DetailSheet";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { useResearchOrderQuery } from "@/hooks/useResearchOrders";
@@ -11,6 +12,7 @@ interface ResearchOrderDetailSheetProps {
 }
 
 export function ResearchOrderDetailSheet({ open, onOpenChange, orderId }: ResearchOrderDetailSheetProps) {
+  const { t } = useTranslation();
   const { data: order, isLoading } = useResearchOrderQuery(orderId);
   const { data: cycles } = useCyclesQuery();
   const { data: units } = useOrganizationalUnitsQuery();
@@ -22,14 +24,14 @@ export function ResearchOrderDetailSheet({ open, onOpenChange, orderId }: Resear
     <DetailSheet
       open={open}
       onOpenChange={onOpenChange}
-      title={order?.researchArea ?? "Research order details"}
+      title={order?.researchArea ?? t("researchOrders.detailsTitle")}
       isLoading={isLoading}
       fields={[
-        { label: "Status", value: order?.status ? <StatusBadge status={order.status} /> : "-" },
-        { label: "Cycle", value: cycleName ?? order?.cycleId },
-        { label: "Ordering unit", value: unitName ?? order?.orderingUnitId },
-        { label: "Problem description", value: order?.problemDescription },
-        { label: "Expected products", value: order?.expectedProducts },
+        { label: t("common.status"), value: order?.status ? <StatusBadge status={order.status} /> : "-" },
+        { label: t("researchOrders.cycle"), value: cycleName ?? order?.cycleId },
+        { label: t("researchOrders.orderingUnit"), value: unitName ?? order?.orderingUnitId },
+        { label: t("researchOrders.problemDescription"), value: order?.problemDescription },
+        { label: t("researchOrders.expectedProducts"), value: order?.expectedProducts },
       ]}
     />
   );

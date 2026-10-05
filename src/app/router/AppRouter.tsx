@@ -1,10 +1,13 @@
-import { lazy, Suspense, type ComponentType } from "react";
+import { lazy, Suspense, useEffect, type ComponentType } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { ComingSoonPage } from "@/components/shared/ComingSoonPage";
 import { NotFoundPage } from "@/components/shared/NotFoundPage";
 import { UnauthorizedPage } from "@/components/shared/UnauthorizedPage";
+import { ForgotPasswordPage } from "@/features/auth/pages/ForgotPasswordPage";
+import { ResetPasswordPage } from "@/features/auth/pages/ResetPasswordPage";
 import { PageLoader } from "@/components/shared/PageLoader";
 import { useBootstrapAuth } from "@/hooks/useAuth";
 import { ROUTES } from "@/constants/routes";
@@ -13,6 +16,7 @@ import { ProtectedRoute } from "@/app/router/ProtectedRoute";
 import { PublicOnlyRoute } from "@/app/router/PublicOnlyRoute";
 import { RoleGuard } from "@/app/router/RoleGuard";
 import { NAV_ITEMS } from "@/constants/nav";
+import { useAuthStore } from "@/store/auth.store";
 
 const HomePage = lazy(() => import("@/features/home/HomePage").then((m) => ({ default: m.HomePage })));
 const LoginPage = lazy(() => import("@/features/auth/pages/LoginPage").then((m) => ({ default: m.LoginPage })));
@@ -20,6 +24,7 @@ const ChangePasswordPage = lazy(() =>
   import("@/features/auth/pages/ChangePasswordPage").then((m) => ({ default: m.ChangePasswordPage }))
 );
 const ProfilePage = lazy(() => import("@/features/auth/pages/ProfilePage").then((m) => ({ default: m.ProfilePage })));
+const SettingsPage = lazy(() => import("@/features/settings/SettingsPage").then((m) => ({ default: m.SettingsPage })));
 const DashboardPage = lazy(() =>
   import("@/features/dashboard/pages/DashboardPage").then((m) => ({ default: m.DashboardPage }))
 );
@@ -56,11 +61,17 @@ const ProposalReviewWorkspace = lazy(() =>
     default: m.ProposalReviewWorkspace,
   }))
 );
+const ReviewBoardPage = lazy(() =>
+  import("@/features/staff/review-board/ReviewBoardPage").then((m) => ({ default: m.ReviewBoardPage }))
+);
 const CouncilsPage = lazy(() => import("@/features/staff/councils/CouncilsPage").then((m) => ({ default: m.CouncilsPage })));
 const AssignmentsPage = lazy(() =>
   import("@/features/staff/assignments/AssignmentsPage").then((m) => ({ default: m.AssignmentsPage }))
 );
 const MeetingsPage = lazy(() => import("@/features/staff/meetings/MeetingsPage").then((m) => ({ default: m.MeetingsPage })));
+const ContractsPage = lazy(() =>
+  import("@/features/staff/contracts/ContractsPage").then((m) => ({ default: m.ContractsPage }))
+);
 const MyProposalsPage = lazy(() =>
   import("@/features/pi/proposals/MyProposalsPage").then((m) => ({ default: m.MyProposalsPage }))
 );
@@ -91,6 +102,30 @@ const AnalyticsPage = lazy(() => import("@/features/analytics/AnalyticsPage").th
 const SemanticSearchPage = lazy(() =>
   import("@/features/pi/ai-search/SemanticSearchPage").then((m) => ({ default: m.SemanticSearchPage }))
 );
+const PiProgressReportsPage = lazy(() =>
+  import("@/features/pi/progress-reports/ProgressReportsPage").then((m) => ({ default: m.ProgressReportsPage }))
+);
+const PiFinalReportsPage = lazy(() =>
+  import("@/features/pi/final-reports/FinalReportsPage").then((m) => ({ default: m.FinalReportsPage }))
+);
+const PiMyMeetingsPage = lazy(() =>
+  import("@/features/pi/meetings/MyMeetingsPage").then((m) => ({ default: m.MyMeetingsPage }))
+);
+const PiMyAmendmentsPage = lazy(() =>
+  import("@/features/pi/amendments/MyAmendmentsPage").then((m) => ({ default: m.MyAmendmentsPage }))
+);
+const PiMyTimelinePage = lazy(() =>
+  import("@/features/pi/progress-track/MyProjectTimelinePage").then((m) => ({ default: m.MyProjectTimelinePage }))
+);
+const PiDeliverablesPage = lazy(() =>
+  import("@/features/pi/deliverables/DeliverablesPage").then((m) => ({ default: m.DeliverablesPage }))
+);
+const PendingChangeRequestsPage = lazy(() =>
+  import("@/features/staff/proposal-reviews/PendingChangeRequestsPanel").then((m) => ({ default: m.PendingChangeRequestsPanel }))
+);
+const DocumentRepositoryPage = lazy(() =>
+  import("@/features/staff/documents/DocumentRepositoryPage").then((m) => ({ default: m.DocumentRepositoryPage }))
+);
 
 const FEATURE_PAGES: Partial<Record<string, ComponentType>> = {
   [ROUTES.NOTIFICATIONS]: NotificationsPage,
@@ -103,9 +138,11 @@ const FEATURE_PAGES: Partial<Record<string, ComponentType>> = {
   [ROUTES.ORGANIZATIONAL_UNITS]: OrganizationalUnitsPage,
   [ROUTES.RUBRIC_CRITERIA]: RubricCriteriaPage,
   [ROUTES.PROPOSAL_REVIEWS]: ProposalReviewsPage,
+  [ROUTES.REVIEW_BOARD]: ReviewBoardPage,
   [ROUTES.COUNCILS]: CouncilsPage,
   [ROUTES.ASSIGNMENTS]: AssignmentsPage,
   [ROUTES.MEETINGS]: MeetingsPage,
+  [ROUTES.CONTRACTS]: ContractsPage,
   [ROUTES.MY_PROPOSALS]: MyProposalsPage,
   [ROUTES.SUBMIT_PROPOSAL]: ProposalWizardPage,
   [ROUTES.INVITATIONS]: InvitationsPage,
@@ -114,6 +151,15 @@ const FEATURE_PAGES: Partial<Record<string, ComponentType>> = {
   [ROUTES.COUNCIL_MEMBERSHIPS]: CouncilMembershipsPage,
   [ROUTES.ANALYTICS]: AnalyticsPage,
   [ROUTES.AI_SEARCH]: SemanticSearchPage,
+  [ROUTES.SETTINGS]: SettingsPage,
+  [ROUTES.PROGRESS_REPORTS]: PiProgressReportsPage,
+  [ROUTES.DELIVERABLES]: PiDeliverablesPage,
+  [ROUTES.MY_MEETINGS]: PiMyMeetingsPage,
+  [ROUTES.FINAL_REPORTS]: PiFinalReportsPage,
+  [ROUTES.MY_AMENDMENTS]: PiMyAmendmentsPage,
+  [ROUTES.MY_TIMELINE]: PiMyTimelinePage,
+  [ROUTES.CHANGE_REQUESTS]: PendingChangeRequestsPage,
+  [ROUTES.DOCUMENTS]: DocumentRepositoryPage,
 };
 
 const proposalReviewsRoles = NAV_ITEMS.find((item) => item.path === ROUTES.PROPOSAL_REVIEWS)?.roles ?? [];
@@ -125,11 +171,43 @@ function FeaturePage({ path }: { path: string }) {
   return Page ? <Page /> : <ComingSoonPage />;
 }
 
+function RoleAwareDocumentTitle() {
+  const { t } = useTranslation();
+  const activeRole = useAuthStore((state) => state.activeRole);
+
+  useEffect(() => {
+    document.title = activeRole
+      ? t("documentTitle.role", {
+          role: t(`documentTitle.roles.${activeRole}`, { defaultValue: activeRole }),
+        })
+      : t("documentTitle.default");
+  }, [activeRole, t]);
+
+  return null;
+}
+
 export function AppRouter() {
   useBootstrapAuth();
 
   return (
-    <BrowserRouter>
+    /*
+     * `useTransitions={false}` — đổi địa chỉ phải commit ĐỒNG BỘ, không đi qua `startTransition`.
+     *
+     * Lỗi thật: đang ở `/contracts` với vai Cán bộ, bấm đổi sang Giảng viên ở menu avatar → văng
+     * ra màn "Bạn không có quyền truy cập trang này" thay vì về bảng điều khiển. `switchRole` chạy
+     * hai việc liền nhau: ghi `activeRole` rồi `navigate("/dashboard")`. Từ React Router v7, mặc
+     * định mọi thay đổi địa chỉ được bọc trong `React.startTransition` — trong khi store zustand
+     * đọc qua `useSyncExternalStore` thì **không hoãn được**, luôn render đồng bộ. Kết quả là React
+     * commit một lượt với *(vai MỚI, địa chỉ CŨ)*: `RoleGuard` của trang cũ thấy vai không hợp lệ
+     * và bắn `<Navigate to="/unauthorized" replace>`, đè luôn điều hướng về dashboard đang chờ.
+     *
+     * Toàn bộ code trong app viết theo giả định "đổi state rồi navigate" là một lượt — đây là chỗ
+     * duy nhất sửa lại cho đúng giả định đó, thay vì đi vá từng chỗ gọi navigate.
+     * Đánh đổi: vào một route lần đầu (route nào cũng `lazy`) sẽ hiện `PageLoader` thay vì giữ màn
+     * cũ trong lúc tải chunk. Đổi lại là điều hướng không còn tự ý đá người dùng đi chỗ khác.
+     */
+    <BrowserRouter useTransitions={false}>
+      <RoleAwareDocumentTitle />
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route element={<PublicOnlyRoute />}>
@@ -139,6 +217,8 @@ export function AppRouter() {
             </Route>
           </Route>
 
+          <Route path={ROUTES.FORGOT_PASSWORD} element={<ForgotPasswordPage />} />
+          <Route path={ROUTES.RESET_PASSWORD} element={<ResetPasswordPage />} />
           <Route path={ROUTES.UNAUTHORIZED} element={<UnauthorizedPage />} />
 
           <Route element={<ProtectedRoute />}>

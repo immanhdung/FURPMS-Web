@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { Table } from "@tanstack/react-table";
-import { Download, SlidersHorizontal, X } from "lucide-react";
+import { Download, Search, SlidersHorizontal, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,9 +23,10 @@ interface DataTableToolbarProps<TData> {
 
 export function DataTableToolbar<TData>({
   table,
-  searchPlaceholder = "Search...",
+  searchPlaceholder,
   exportFileName = "export",
 }: DataTableToolbarProps<TData>) {
+  const { t } = useTranslation();
   const [searchInput, setSearchInput] = useState((table.getState().globalFilter as string) ?? "");
   const debouncedSearch = useDebouncedValue(searchInput, 250);
 
@@ -40,34 +42,46 @@ export function DataTableToolbar<TData>({
   return (
     <div className="flex items-center justify-between gap-2 pb-3">
       <div className="flex flex-1 items-center gap-2">
-        <Input
-          placeholder={searchPlaceholder}
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          className="h-8 max-w-xs"
-        />
+        <div className="relative max-w-xs flex-1">
+          <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder={searchPlaceholder ?? t("common.searchPlaceholder")}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="h-8 pl-8"
+          />
+        </div>
         {searchInput.length > 0 && (
-          <Button variant="ghost" size="icon-sm" aria-label="Clear search" onClick={() => setSearchInput("")}>
+          <Button variant="ghost" size="icon-sm" aria-label={t("common.clearSearch")} onClick={() => setSearchInput("")}>
             <X />
           </Button>
         )}
       </div>
 
       <div className="flex items-center gap-2">
-        <Button variant="outline" size="sm" onClick={handleExport}>
-          <Download />
-          Export
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleExport}
+          className="border-emerald-600/20 hover:border-emerald-600 hover:bg-emerald-50/50 hover:text-emerald-700 dark:border-emerald-950/30 dark:hover:bg-emerald-950/20 dark:hover:text-emerald-400 cursor-pointer transition-all duration-200"
+        >
+          <Download className="text-emerald-600 dark:text-emerald-400" />
+          {t("common.export")}
         </Button>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm">
-              <SlidersHorizontal />
-              Columns
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-primary/20 hover:border-primary hover:bg-primary/5 hover:text-primary dark:border-primary/30 dark:hover:bg-primary/10 dark:hover:text-primary cursor-pointer transition-all duration-200"
+            >
+              <SlidersHorizontal className="text-primary dark:text-blue-400" />
+              {t("common.columns")}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+            <DropdownMenuLabel>{t("common.toggleColumns")}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             {table
               .getAllColumns()
@@ -80,7 +94,10 @@ export function DataTableToolbar<TData>({
                   onCheckedChange={(value) => column.toggleVisibility(Boolean(value))}
                   onSelect={(e) => e.preventDefault()}
                 >
-                  {column.id}
+                  {/* Nhãn lấy từ `meta.label` của cột. Trước đây in thẳng `column.id` nên menu hiện
+                      "Title / Cycle / Pi / CreatedAt" — tiếng Anh lẫn giữa màn tiếng Việt. Bảng nào
+                      chưa khai `meta.label` thì vẫn rơi về id (lộ ra để còn biết mà bổ sung). */}
+                  {(column.columnDef.meta as { label?: string } | undefined)?.label ?? column.id}
                 </DropdownMenuCheckboxItem>
               ))}
           </DropdownMenuContent>

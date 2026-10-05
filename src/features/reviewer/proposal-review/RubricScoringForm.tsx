@@ -1,51 +1,78 @@
 import { useMemo, useState } from "react";
-import { ClipboardList, Loader2, Save } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { useScoringPolicyQuery } from "@/hooks/useSystemSettings";
+import { ClipboardList, Loader2, Save, Sparkles, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
-import { useRubricCriteriaQuery } from "@/hooks/useRubricCriteria";
-import { useMyScoreQuery, useRubricTemplatesQuery, useSubmitScoreMutation } from "@/hooks/useReviewScoring";
-import { rubricRoundTypeToAppType } from "@/constants/statuses";
+import { useMyScoreQuery, useSubmitScoreMutation } from "@/hooks/useReviewScoring";
+import { useRubricForCouncilQuery } from "@/hooks/useRubricTemplates";
+import { useScoreSuggestionsQuery } from "@/hooks/useProposalAi";
+import type { AiScoreSuggestion } from "@/types/ai-tools";
 import type { ScoreDetailPayload } from "@/types/review-scoring";
+import { useUiStore } from "@/store/ui.store";
 
 interface RubricScoringFormProps {
   councilId: string;
-  roundType: string;
+  /** Để AI đọc nội dung đề cương khi gợi ý điểm. Không có thì ẩn nút AI. */
+  proposalId?: string | null;
+  /**
+   * Đề tài ĐANG chấm. BẮT BUỘC khi hội đồng chấm nhiều đề tài — thiếu nó thì máy chủ từ chối
+   * ("cần chỉ rõ projectId") và phiếu đọc lên cũng là của đề tài khác.
+   */
+  projectId?: string | null;
+  // roundType đã bỏ: BE tự suy loại vòng từ councilId khi trả bộ tiêu chí.
 }
 
-export function RubricScoringForm({ councilId, roundType }: RubricScoringFormProps) {
+export function RubricScoringForm({ councilId, proposalId, projectId }: RubricScoringFormProps) {
+  const { t } = useTranslation();
+  const quickScoreFillEnabled = useUiStore((state) => state.quickScoreFillEnabled);
+
   /**
-   * Fetching unfiltered and matching client-side because the GET /rubric-criteria?roundType=
-   * query filter's expected value is unconfirmed (a round created as "REVIEW" produced zero
-   * results even for admin-created, active "Review"-labeled criteria) — the label mapping used
-   * to display the round type in the admin list is proven correct, so we reuse it here instead.
+   * Bước nhảy ô điểm do Admin quy định (`SCORE_DECIMAL_PLACES`, mặc định 0 = số nguyên).
+   * Trước đây hardcode `step="0.5"` — cẩm nang Capstone gọi đúng đây là hardcode tham số nghiệp
+   * vụ, và BE nay chặn theo cấu hình nên để lệch thì người chấm gõ được mà nộp lại ăn 400.
    */
-  const { data: criteria, isLoading: isCriteriaLoading } = useRubricCriteriaQuery();
-  const { data: templates } = useRubricTemplatesQuery();
-  const { data: existingScore, isLoading: isScoreLoading } = useMyScoreQuery(councilId);
+  const { data: scoringPolicy } = useScoringPolicyQuery();
+  const scoreDecimals = scoringPolicy?.scoreDecimalPlaces ?? 0;
+  const scoreStep = scoreDecimals > 0 ? String(1 / 10 ** scoreDecimals) : "1";
+  // Lấy ĐÚNG bộ tiêu chí cho hội đồng này: BE tự suy (đợt + lĩnh vực + loại vòng) từ councilId
+  // rồi trả bộ đã gắn cho lĩnh vực đó; chưa gắn thì trả bộ mặc định (không bao giờ kẹt).
+  const { data: resolvedTemplate, isLoading: isTemplatesLoading } = useRubricForCouncilQuery(councilId);
+  const { data: existingScore, isLoading: isScoreLoading } = useMyScoreQuery(councilId, projectId ?? undefined);
   const submitMutation = useSubmitScoreMutation(councilId);
 
-  const matchingTemplate = templates?.find((t) => t.roundType === roundType) ?? templates?.[0];
-
-  const normalizedRoundType = roundType?.toUpperCase();
-  const activeCriteria = useMemo(
-    () =>
-      (criteria ?? []).filter(
-        (c) => c.isActive && rubricRoundTypeToAppType(c.roundType) === normalizedRoundType
-      ),
-    [criteria, normalizedRoundType]
-  );
+  /**
+   * `criteria` trong bộ trả về là NGUỒN DUY NHẤT cho những gì BE yêu cầu — đừng đối chiếu với
+   * danh sách /rubric-criteria hay fallback "mọi tiêu chí đang bật"; cả hai từng gây nộp sai.
+   */
+  const matchingTemplate = resolvedTemplate ?? null;
+  const activeCriteria = useMemo(() => matchingTemplate?.criteria ?? [], [matchingTemplate]);
 
   const [scores, setScores] = useState<Record<number, { givenScore: number; comments: string }>>({});
   const [generalComments, setGeneralComments] = useState("");
   const [otherRecommendations, setOtherRecommendations] = useState("");
   const [seededFor, setSeededFor] = useState<string | null>(null);
 
-  const isReady = !isCriteriaLoading && !isScoreLoading && activeCriteria.length > 0;
+  // AI chỉ GỢI Ý: hiện dưới từng tiêu chí kèm nút "Áp dụng", KHÔNG tự ghi đè điểm
+  // người chấm đã nhập (rule #12 — quyết định là của con người).
+  //
+  // Gợi ý do nút AI gộp ở thẻ tóm tắt phía trên sinh ra (một lần bấm ra cả tóm tắt lẫn gợi ý),
+  // form này chỉ ĐỌC cache. Trước đây mỗi chỗ một nút ⇒ người chấm chờ hai lượt 30–60 giây liên
+  // tiếp và tốn hai request Gemini, mà gói miễn phí thì giới hạn request mỗi phút.
+  const { data: suggestions } = useScoreSuggestionsQuery(councilId, proposalId ?? null);
+  const suggestionById = useMemo(
+    () => new Map(((suggestions as AiScoreSuggestion[] | undefined) ?? []).map((s) => [s.criterionId, s])),
+    [suggestions],
+  );
+
+  const isLoading = isTemplatesLoading || isScoreLoading;
+  const isReady = !isLoading && activeCriteria.length > 0;
   const seedKey = isReady ? `${existingScore?.id ?? "none"}:${activeCriteria.length}` : null;
 
   if (seedKey !== null && seedKey !== seededFor) {
@@ -60,7 +87,7 @@ export function RubricScoringForm({ councilId, roundType }: RubricScoringFormPro
     setOtherRecommendations(existingScore?.otherRecommendations ?? "");
   }
 
-  if (isCriteriaLoading || isScoreLoading) {
+  if (isLoading) {
     return (
       <div className="space-y-3">
         {Array.from({ length: 3 }).map((_, index) => (
@@ -74,18 +101,36 @@ export function RubricScoringForm({ councilId, roundType }: RubricScoringFormPro
     return (
       <EmptyState
         icon={ClipboardList}
-        title="No rubric criteria configured"
-        description={`No active criteria found for ${roundType} rounds. Contact an administrator.`}
+        title={t("review.noRubric")}
+        description={t("review.noRubricDesc")}
       />
     );
   }
 
   const totalScore = Object.values(scores).reduce((sum, s) => sum + (s.givenScore || 0), 0);
   const maxTotal = activeCriteria.reduce((sum, c) => sum + c.maxScore, 0);
+  const isAcceptanceRubric = matchingTemplate?.templateType === "ACCEPTANCE";
+  const ratingWeight = (maxScore: number) => maxScore / 5;
+  const toStoredAcceptanceScore = (rating: number, maxScore: number) => rating * ratingWeight(maxScore);
+  const toAcceptanceRating = (storedScore: number, maxScore: number) => {
+    const weight = ratingWeight(maxScore);
+    return weight > 0 && storedScore > 0 ? Math.min(5, Math.max(1, Math.round(storedScore / weight))) : 0;
+  };
 
   const handleSubmit = () => {
     if (!matchingTemplate) {
-      toast.error("No rubric template is available for this round.");
+      toast.error(t("review.noRubricRound"));
+      return;
+    }
+    // Validate rõ criterion nào vượt thang điểm — trước đây để BE trả 400 chung, reviewer phải tự mò.
+    const invalid = activeCriteria.find((c) => {
+      const v = scores[c.id]?.givenScore ?? 0;
+      return v < 0 || v > c.maxScore || (isAcceptanceRubric && v === 0);
+    });
+    if (invalid) {
+      toast.error(isAcceptanceRubric
+        ? t("review.acceptanceRatingRequired", { name: invalid.criterionName })
+        : t("review.scoreRange", { name: invalid.criterionName, max: invalid.maxScore }));
       return;
     }
     const scoreDetails: ScoreDetailPayload[] = activeCriteria.map((criterion) => ({
@@ -93,49 +138,165 @@ export function RubricScoringForm({ councilId, roundType }: RubricScoringFormPro
       givenScore: scores[criterion.id]?.givenScore ?? 0,
       comments: scores[criterion.id]?.comments || undefined,
     }));
-    submitMutation.mutate({
-      templateId: matchingTemplate.id,
-      generalComments: generalComments || undefined,
-      otherRecommendations: otherRecommendations || undefined,
-      scoreDetails,
-    });
+    submitMutation.mutate(
+      {
+        templateId: matchingTemplate.id,
+        projectId: projectId ?? undefined,
+        generalComments: generalComments || undefined,
+        otherRecommendations: otherRecommendations || undefined,
+        scoreDetails,
+      },
+      // KHÔNG rời trang sau khi nộp: người chấm hay muốn xem lại/sửa điểm ngay,
+      // bị đá về danh sách rồi phải mò vào lại là khó chịu.
+    );
+  };
+
+  const scorePct = maxTotal > 0 ? Math.min(100, (totalScore / maxTotal) * 100) : 0;
+
+  /**
+   * Điền nhanh cả phiếu — CHỈ để demo/thử.
+   *
+   * Chấm tay một phiếu 5 tiêu chí mất cả phút; muốn xem luồng "5 người chấm → thư ký soạn biên bản
+   * → chủ tịch chốt" thì phải làm lại năm lần. Nút này đổ sẵn mức KHÁ (~80% thang mỗi mục) kèm
+   * nhận xét mẫu, người dùng sửa lại ô nào cũng được trước khi nộp.
+   *
+   * Không tự nộp — vẫn phải bấm nút nộp, để không ai lỡ tay gửi phiếu chưa xem.
+   */
+  const fillAll = () => {
+    const filled: Record<number, { givenScore: number; comments: string }> = {};
+    for (const c of activeCriteria) {
+      const max = Number(c.maxScore) || 0;
+      // BM10 hiển thị mức 1-5 nhưng lưu theo trọng số để tổng phiếu luôn ở thang 100.
+      const raw = max * 0.8;
+      filled[c.id] = {
+        givenScore: isAcceptanceRubric ? toStoredAcceptanceScore(4, max) : Math.round(raw),
+        comments: t("review.quickFillCriterionNote"),
+      };
+    }
+    setScores(filled);
+    if (!generalComments.trim()) setGeneralComments(t("review.quickFillGeneralNote"));
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-3 py-2">
-        <p className="text-sm font-medium text-foreground">Total score</p>
-        <p className="text-sm font-semibold text-foreground">
-          {totalScore.toFixed(1)} / {maxTotal}
-        </p>
+      <div className="space-y-2 rounded-xl border border-primary/15 bg-linear-to-r from-primary/8 to-brand-secondary/8 px-4 py-3">
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-medium text-foreground">{t("review.totalScore")}</p>
+          <p className="text-base font-semibold text-foreground">
+            {totalScore.toFixed(1)} <span className="text-sm font-normal text-muted-foreground">/ {maxTotal}</span>
+          </p>
+        </div>
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+          <div
+            className="h-full rounded-full bg-linear-to-r from-primary to-brand-secondary transition-all duration-300"
+            style={{ width: `${scorePct}%` }}
+          />
+        </div>
       </div>
 
+      {quickScoreFillEnabled && activeCriteria.length > 0 && (
+        <div className="flex justify-end">
+          <Button type="button" variant="outline" size="sm" onClick={fillAll}>
+            <Wand2 />
+            {t("review.quickFill")}
+          </Button>
+        </div>
+      )}
+
+      {proposalId && !suggestionById.size && (
+        <div className="flex items-start gap-2 rounded-lg border border-primary/15 bg-primary/4 px-3 py-2">
+          <Sparkles className="mt-0.5 size-3.5 shrink-0 text-primary" />
+          <p className="text-xs text-muted-foreground">{t("review.aiSuggestFromKit")}</p>
+        </div>
+      )}
+
       <div className="space-y-3">
-        {activeCriteria.map((criterion) => (
+        {activeCriteria.map((criterion, index) => (
           <Card key={criterion.id}>
             <CardContent className="space-y-2.5 p-4">
               <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-medium text-foreground">{criterion.name}</p>
+                <p className="flex items-center gap-2 text-sm font-medium text-foreground">
+                  <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-semibold text-primary">
+                    {index + 1}
+                  </span>
+                  {criterion.criterionName}
+                </p>
                 <div className="flex shrink-0 items-center gap-1.5">
-                  <Input
-                    type="number"
-                    min={0}
-                    max={criterion.maxScore}
-                    step="0.5"
-                    className="w-20"
-                    value={scores[criterion.id]?.givenScore ?? 0}
-                    onChange={(e) =>
+                  {isAcceptanceRubric ? (
+                    <>
+                      <Select
+                        value={(() => {
+                          const rating = toAcceptanceRating(scores[criterion.id]?.givenScore ?? 0, criterion.maxScore);
+                          return rating ? String(rating) : undefined;
+                        })()}
+                        onValueChange={(value) =>
+                          setScores((prev) => ({
+                            ...prev,
+                            [criterion.id]: {
+                              ...prev[criterion.id],
+                              givenScore: toStoredAcceptanceScore(Number(value), criterion.maxScore),
+                            },
+                          }))
+                        }
+                      >
+                        <SelectTrigger className="w-32">
+                          <SelectValue placeholder={t("review.acceptanceRating")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {[1, 2, 3, 4, 5].map((rating) => (
+                            <SelectItem key={rating} value={String(rating)}>
+                              {rating}/5
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <span className="text-xs text-muted-foreground">
+                        = {scores[criterion.id]?.givenScore || 0}/{criterion.maxScore}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <Input
+                        type="number"
+                        min={0}
+                        max={criterion.maxScore}
+                        step={scoreStep}
+                        className="w-20"
+                    // Hiện rỗng khi 0 (thay vì "0" dính đầu gây "05" khó chịu khi gõ tay); rỗng = 0 lúc nộp.
+                    value={scores[criterion.id]?.givenScore || ""}
+                    onChange={(e) => {
+                      // Chặn NGAY LÚC GÕ thay vì đợi bấm nộp mới báo lỗi: thuộc tính max của ô số
+                      // không ngăn người dùng gõ 99 vào tiêu chí trần 10, họ điền xong cả phiếu
+                      // rồi mới biết sai. Cắt về trần và làm tròn theo bước nhảy đang cấu hình.
+                      const raw = e.target.value;
+                      if (raw === "") {
+                        setScores((prev) => ({
+                          ...prev,
+                          [criterion.id]: { ...prev[criterion.id], givenScore: 0 },
+                        }));
+                        return;
+                      }
+                      let v = Number(raw);
+                      if (Number.isNaN(v)) return;
+                      v = Math.min(Math.max(v, 0), criterion.maxScore);
+                      if (scoreDecimals === 0) v = Math.round(v);
+                      else {
+                        const f = 10 ** scoreDecimals;
+                        v = Math.round(v * f) / f;
+                      }
                       setScores((prev) => ({
                         ...prev,
-                        [criterion.id]: { ...prev[criterion.id], givenScore: Number(e.target.value) },
-                      }))
-                    }
-                  />
-                  <span className="text-xs text-muted-foreground">/ {criterion.maxScore}</span>
+                        [criterion.id]: { ...prev[criterion.id], givenScore: v },
+                      }));
+                    }}
+                      />
+                      <span className="text-xs text-muted-foreground">/ {criterion.maxScore}</span>
+                    </>
+                  )}
                 </div>
               </div>
               <Textarea
-                placeholder="Comments (optional)"
+                placeholder={t("review.commentsOptional")}
                 rows={2}
                 value={scores[criterion.id]?.comments ?? ""}
                 onChange={(e) =>
@@ -145,25 +306,63 @@ export function RubricScoringForm({ councilId, roundType }: RubricScoringFormPro
                   }))
                 }
               />
+
+              {suggestionById.get(criterion.id) && (
+                <div className="flex flex-wrap items-start gap-2 rounded-md bg-primary/4 px-2.5 py-2 text-xs">
+                  <Sparkles className="mt-0.5 size-3.5 shrink-0 text-primary" />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-foreground">
+                      {t("review.aiSuggestedScore", {
+                        score: suggestionById.get(criterion.id)!.suggestedScore,
+                        max: criterion.maxScore,
+                      })}
+                    </p>
+                    <p className="text-muted-foreground">{suggestionById.get(criterion.id)!.comment}</p>
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="h-6 shrink-0 px-2 text-xs"
+                    onClick={() => {
+                      const s = suggestionById.get(criterion.id)!;
+                      setScores((prev) => ({
+                        ...prev,
+                        [criterion.id]: {
+                          givenScore: isAcceptanceRubric
+                            ? toStoredAcceptanceScore(
+                                toAcceptanceRating(s.suggestedScore, criterion.maxScore),
+                                criterion.maxScore,
+                              )
+                            : s.suggestedScore,
+                          comments: prev[criterion.id]?.comments || s.comment,
+                        },
+                      }));
+                    }}
+                  >
+                    {t("review.aiApply")}
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         ))}
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">General comments</label>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("review.generalComments")}</label>
         <Textarea rows={3} value={generalComments} onChange={(e) => setGeneralComments(e.target.value)} />
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Other recommendations</label>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("review.otherRecommendations")}</label>
         <Textarea rows={3} value={otherRecommendations} onChange={(e) => setOtherRecommendations(e.target.value)} />
       </div>
 
       <div className="flex justify-end">
         <Button onClick={handleSubmit} disabled={submitMutation.isPending}>
           {submitMutation.isPending ? <Loader2 className="animate-spin" /> : <Save />}
-          {existingScore ? "Update score" : "Submit score"}
+          {existingScore ? t("review.updateScore") : t("review.submitScore")}
         </Button>
       </div>
     </div>

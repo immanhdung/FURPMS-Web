@@ -1,4 +1,6 @@
-import { CalendarClock, ClipboardCheck, Gavel, Mail, Star, TrendingUp, type LucideIcon } from "lucide-react";
+import { CalendarClock, ClipboardCheck, Gavel, LayoutDashboard, Mail, Star, TrendingUp, type LucideIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { motion } from "motion/react";
 import { KpiCard, KpiCardSkeleton } from "@/components/shared/KpiCard";
 import { ChartCard, ChartCardSkeleton } from "@/components/charts/ChartCard";
 import { LineChartCardBody } from "@/components/charts/LineChartCard";
@@ -12,20 +14,21 @@ import { useReviewerDashboardQuery } from "@/hooks/useDashboard";
 import { ROUTES } from "@/constants/routes";
 
 const KPI_ICONS: Record<string, LucideIcon> = {
-  "pending-reviews": ClipboardCheck,
-  "assigned-councils": Gavel,
-  "completion-rate": TrendingUp,
-  "upcoming-meetings": CalendarClock,
+  memberships: Gavel,
+  invited: Mail,
+  scored: ClipboardCheck,
+  deciding: TrendingUp,
 };
 
 const QUICK_ACTIONS: QuickAction[] = [
-  { label: "Invitations", path: ROUTES.INVITATIONS, icon: Mail },
-  { label: "Assigned Reviews", path: ROUTES.ASSIGNED_REVIEWS, icon: ClipboardCheck },
-  { label: "Scoring", path: ROUTES.SCORING, icon: Star },
-  { label: "Meetings", path: ROUTES.MEETINGS, icon: CalendarClock },
+  { labelKey: "nav.invitations", path: ROUTES.INVITATIONS, icon: Mail },
+  { labelKey: "nav.assignedReviews", path: ROUTES.ASSIGNED_REVIEWS, icon: ClipboardCheck },
+  { labelKey: "nav.scoring", path: ROUTES.SCORING, icon: Star },
+  { labelKey: "nav.meetings", path: ROUTES.MEETINGS, icon: CalendarClock },
 ];
 
 export function ReviewerDashboardPage() {
+  const { t } = useTranslation();
   const { data, isLoading, isError, refetch, isRefetching } = useReviewerDashboardQuery();
 
   if (isError) {
@@ -33,18 +36,42 @@ export function ReviewerDashboardPage() {
   }
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Reviewer Dashboard</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Your assigned reviews, councils, and meetings.</p>
-      </div>
+    <div className="space-y-6">
+      <motion.div
+        initial={{ opacity: 0, y: -4 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2 }}
+        className="flex items-center gap-3"
+      >
+        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-brand-accent-2/15 to-primary/10 text-brand-accent-2">
+          <LayoutDashboard className="size-5" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("dashboard.reviewer.title")}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t("dashboard.reviewer.subtitle")}</p>
+        </div>
+      </motion.div>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {isLoading
           ? Array.from({ length: 4 }).map((_, index) => <KpiCardSkeleton key={index} />)
-          : data?.kpis.map((kpi, index) => (
-              <KpiCard key={kpi.id} datum={kpi} icon={KPI_ICONS[kpi.id] ?? ClipboardCheck} index={index} />
-            ))}
+          : data?.kpis.map((kpi, index) => {
+              // BE trả nhãn KPI bằng tiếng Việt. ID mới là hợp đồng ổn định để giao diện tự dịch
+              // theo ngôn ngữ đang chọn, không phải gọi lại API khi người dùng đổi Việt/Anh.
+              const localizedKpi = {
+                ...kpi,
+                label: t(`dashboard.reviewer.kpis.${kpi.id}`, { defaultValue: kpi.label }),
+              };
+
+              return (
+                <KpiCard
+                  key={kpi.id}
+                  datum={localizedKpi}
+                  icon={KPI_ICONS[kpi.id] ?? ClipboardCheck}
+                  index={index}
+                />
+              );
+            })}
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -55,17 +82,17 @@ export function ReviewerDashboardPage() {
           </>
         ) : (
           <>
-            <ChartCard title="Review Completion Trend" description="Completed vs. pending per week">
+            <ChartCard title={t("dashboard.reviewer.completionTrend")} description={t("dashboard.reviewer.completionTrendDesc")}>
               <LineChartCardBody
                 data={data?.reviewCompletionTrend ?? []}
                 xKey="label"
                 series={[
-                  { key: "completed", label: "Completed", color: "#22C55E" },
-                  { key: "pending", label: "Pending", color: "#F59E0B" },
+                  { key: "completed", label: t("analytics.seriesCompleted"), color: "#22C55E" },
+                  { key: "pending", label: t("analytics.seriesPending"), color: "#F59E0B" },
                 ]}
               />
             </ChartCard>
-            <ChartCard title="Review Decisions" description="Breakdown of your submitted decisions">
+            <ChartCard title={t("dashboard.reviewer.decisions")} description={t("dashboard.reviewer.decisionsDesc")}>
               <PieChartCardBody data={data?.reviewDecisions ?? []} nameKey="decision" valueKey="count" />
             </ChartCard>
           </>

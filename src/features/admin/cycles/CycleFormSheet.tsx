@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import dayjs from "dayjs";
@@ -9,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useCreateCycleMutation, useUpdateCycleMutation } from "@/hooks/useCycles";
 import { useResearchTypesQuery } from "@/hooks/useResearchTypes";
 import { cycleSchema, type CycleFormValues } from "@/features/admin/cycles/cycle.schema";
+import { researchTypeDisplayName } from "@/utils/research-type";
 import type { Cycle } from "@/types/cycle";
 
 interface CycleFormSheetProps {
@@ -18,6 +20,7 @@ interface CycleFormSheetProps {
 }
 
 export function CycleFormSheet({ open, onOpenChange, cycle }: CycleFormSheetProps) {
+  const { t } = useTranslation();
   const isEdit = Boolean(cycle);
   const { data: researchTypes } = useResearchTypesQuery();
   const createMutation = useCreateCycleMutation();
@@ -34,7 +37,9 @@ export function CycleFormSheet({ open, onOpenChange, cycle }: CycleFormSheetProp
     resolver: zodResolver(cycleSchema),
     defaultValues: {
       name: "",
-      academicYear: "",
+      // Điền sẵn năm hiện tại — gần như đợt nào cũng thuộc năm đang chạy, bắt gõ lại là thừa.
+      // Vẫn sửa được để tạo đợt cho năm sau.
+      academicYear: String(new Date().getFullYear()),
       researchTypeId: 0,
       submissionStartDate: "",
       submissionDeadline: "",
@@ -56,7 +61,7 @@ export function CycleFormSheet({ open, onOpenChange, cycle }: CycleFormSheetProp
             }
           : {
               name: "",
-              academicYear: "",
+              academicYear: String(new Date().getFullYear()),
               researchTypeId: 0,
               submissionStartDate: "",
               submissionDeadline: "",
@@ -79,16 +84,16 @@ export function CycleFormSheet({ open, onOpenChange, cycle }: CycleFormSheetProp
     <FormSheet
       open={open}
       onOpenChange={onOpenChange}
-      title={isEdit ? "Edit Research Cycle" : "Create Research Cycle"}
-      description="Configure the submission window for this cycle."
+      title={isEdit ? t("cycles.editTitle") : t("cycles.createTitle")}
+      description={t("cycles.formDesc")}
       formId="cycle-form"
       onSubmit={handleSubmit(onSubmit)}
       isSubmitting={isSubmitting}
-      submitLabel={isEdit ? "Save changes" : "Create"}
+      submitLabel={isEdit ? t("common.saveChanges") : t("common.create")}
     >
       <div>
         <label htmlFor="cycle-name" className="mb-1.5 block text-sm font-medium text-foreground">
-          Name
+          {t("common.name")}
         </label>
         <Input id="cycle-name" aria-invalid={Boolean(errors.name)} {...register("name")} />
         {errors.name && <p className="mt-1 text-xs text-destructive">{errors.name.message}</p>}
@@ -96,26 +101,26 @@ export function CycleFormSheet({ open, onOpenChange, cycle }: CycleFormSheetProp
 
       <div>
         <label htmlFor="cycle-year" className="mb-1.5 block text-sm font-medium text-foreground">
-          Academic year
+          {t("cycles.academicYear")}
         </label>
-        <Input id="cycle-year" placeholder="2025-2026" aria-invalid={Boolean(errors.academicYear)} {...register("academicYear")} />
+        <Input id="cycle-year" inputMode="numeric" maxLength={4} placeholder="2026" aria-invalid={Boolean(errors.academicYear)} {...register("academicYear")} />
         {errors.academicYear && <p className="mt-1 text-xs text-destructive">{errors.academicYear.message}</p>}
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Research type</label>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("cycles.researchType")}</label>
         <Controller
           control={control}
           name="researchTypeId"
           render={({ field }) => (
             <Select value={field.value ? field.value.toString() : undefined} onValueChange={(value) => field.onChange(Number(value))}>
               <SelectTrigger aria-invalid={Boolean(errors.researchTypeId)}>
-                <SelectValue placeholder="Select research type" />
+                <SelectValue placeholder={t("cycles.researchTypePlaceholder")} />
               </SelectTrigger>
               <SelectContent>
                 {researchTypes?.map((rt) => (
                   <SelectItem key={rt.id} value={rt.id.toString()}>
-                    {rt.name}
+                    {researchTypeDisplayName(rt, t)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -128,7 +133,7 @@ export function CycleFormSheet({ open, onOpenChange, cycle }: CycleFormSheetProp
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label htmlFor="cycle-start" className="mb-1.5 block text-sm font-medium text-foreground">
-            Submission start
+            {t("cycles.submissionStart")}
           </label>
           <Input id="cycle-start" type="date" aria-invalid={Boolean(errors.submissionStartDate)} {...register("submissionStartDate")} />
           {errors.submissionStartDate && (
@@ -137,7 +142,7 @@ export function CycleFormSheet({ open, onOpenChange, cycle }: CycleFormSheetProp
         </div>
         <div>
           <label htmlFor="cycle-deadline" className="mb-1.5 block text-sm font-medium text-foreground">
-            Submission deadline
+            {t("cycles.submissionDeadline")}
           </label>
           <Input id="cycle-deadline" type="date" aria-invalid={Boolean(errors.submissionDeadline)} {...register("submissionDeadline")} />
           {errors.submissionDeadline && (
@@ -148,7 +153,7 @@ export function CycleFormSheet({ open, onOpenChange, cycle }: CycleFormSheetProp
 
       <div>
         <label htmlFor="cycle-description" className="mb-1.5 block text-sm font-medium text-foreground">
-          Description
+          {t("common.description")}
         </label>
         <Textarea id="cycle-description" rows={4} {...register("description")} />
       </div>

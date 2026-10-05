@@ -1,11 +1,11 @@
 import { z } from "zod";
 
 export const researchOrderSchema = z.object({
-  cycleId: z.number().min(1, "Select a research cycle"),
-  orderingUnitId: z.number().min(1, "Select an ordering unit"),
-  researchArea: z.string().min(1, "Research area is required"),
-  problemDescription: z.string().min(1, "Problem description is required"),
-  expectedProducts: z.string().min(1, "Expected products are required"),
+  cycleId: z.number().min(1, "Phải chọn đợt nghiên cứu."),
+  orderingUnitId: z.number().min(1, "Phải chọn đơn vị đặt hàng."),
+  researchArea: z.string().min(1, "Phải nhập lĩnh vực nghiên cứu."),
+  problemDescription: z.string().min(1, "Phải mô tả vấn đề cần giải quyết."),
+  expectedProducts: z.string().min(1, "Phải nêu sản phẩm dự kiến."),
 });
 
 export type ResearchOrderFormValues = z.infer<typeof researchOrderSchema>;

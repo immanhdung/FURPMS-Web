@@ -14,7 +14,7 @@ interface ChartCardProps {
 export function ChartCard({ title, description, children, height = 260 }: ChartCardProps) {
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
-      <Card>
+      <Card variant="glass">
         <CardHeader>
           <CardTitle className="text-sm">{title}</CardTitle>
           {description && <CardDescription>{description}</CardDescription>}

@@ -1,23 +1,23 @@
-import type { AiFeedbackItem, ReviewerSuggestion, SemanticSearchResult, SummaryResult } from "@/types/ai-tools";
+import type { AiFeedbackItem, SemanticSearchResult, SummaryResult } from "@/types/ai-tools";
 
 export const SAMPLE_SUMMARIES: SummaryResult[] = [
   {
-    summary:
+    id: "mock-summary-1",
+    proposalId: "mock-proposal-1",
+    summaryText:
       "This proposal investigates a transformer-based approach to detecting plagiarism across academic manuscripts, combining semantic embeddings with citation-graph analysis to improve precision over traditional n-gram methods.",
-    highlights: [
-      "Novel combination of transformer embeddings and citation graphs",
-      "Evaluated on a corpus of 10,000+ published papers",
-      "Reports 12% precision improvement over baseline methods",
-    ],
+    isEditedByHuman: false,
+    generatedAt: "2026-08-01T00:00:00Z",
+    source: "textFields",
   },
   {
-    summary:
+    id: "mock-summary-2",
+    proposalId: "mock-proposal-2",
+    summaryText:
       "The project proposes a lightweight IoT architecture for real-time environmental monitoring across university campuses, using low-power sensor nodes with edge-based anomaly detection to reduce cloud dependency.",
-    highlights: [
-      "Energy-efficient edge computing architecture",
-      "Real-time anomaly detection at the sensor level",
-      "Pilot deployment planned across 3 campus buildings",
-    ],
+    isEditedByHuman: false,
+    generatedAt: "2026-08-01T00:00:00Z",
+    source: "textFields",
   },
 ];
 
@@ -59,25 +59,4 @@ export const SAMPLE_FEEDBACK: AiFeedbackItem[] = [
   { category: "Risk", suggestion: "No risk mitigation plan is mentioned — proposals in Data Science with a mitigation plan have a higher approval rate historically." },
 ];
 
-const SAMPLE_REVIEWER_POOL = [
-  "Dr. Nguyen Thi Hoa",
-  "Assoc. Prof. Tran Van Minh",
-  "Dr. Le Thi Lan",
-  "Prof. Pham Quoc Bao",
-  "Dr. Vo Thanh Tung",
-];
 
-export function getReviewerSuggestions(): ReviewerSuggestion[] {
-  const reasons = [
-    "Published 3+ papers in this research area within the last 2 years",
-    "Previously reviewed 5 proposals in a related track with high consistency scores",
-    "Department affiliation closely matches the proposal's research field",
-    "Available capacity — currently assigned to fewer than 2 active councils",
-  ];
-  return SAMPLE_REVIEWER_POOL.slice(0, 4).map((name, index) => ({
-    userId: `suggested-${index}`,
-    fullName: name,
-    matchScore: 92 - index * 8,
-    reason: reasons[index % reasons.length],
-  }));
-}

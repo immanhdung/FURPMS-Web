@@ -1,0 +1,272 @@
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { CircleCheck, CircleX, FileDown, FilePenLine, Loader2, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { EmptyState } from "@/components/shared/EmptyState";
+import { StatusBadge } from "@/components/shared/StatusBadge";
+import {
+  useAmendmentCategoriesQuery,
+  useAmendmentsQuery,
+  useApproveAmendmentMutation,
+  useCreateAmendmentMutation,
+  useRejectAmendmentMutation,
+} from "@/hooks/useAmendments";
+import { AMENDMENT_STATUS } from "@/types/amendment";
+import { formatDateTime } from "@/utils/format";
+
+import { amendmentService } from "@/services/api/amendment.service";
+import { toast } from "sonner";
+/** Điều chỉnh hợp đồng: PI mô tả thay đổi + lý do → Staff duyệt hoặc từ chối. */
+/**
+ * Yêu cầu điều chỉnh hợp đồng.
+ *
+ * `canRequest` mặc định FALSE: người XIN điều chỉnh là **PI** (trang /my-amendments),
+ * Staff chỉ **duyệt/từ chối**. Panel này nhúng trong màn Hợp đồng của Staff mà trước đây
+ * vẫn hiện form "Yêu cầu điều chỉnh mới" ⇒ Staff tự xin rồi tự duyệt, sai vai — cùng lỗi
+ * với form nộp báo cáo tổng kết.
+ */
+export function AmendmentsPanel({
+  contractId,
+  canManage,
+  canRequest = false,
+}: {
+  contractId: string;
+  canManage: boolean;
+  canRequest?: boolean;
+}) {
+  const { t } = useTranslation();
+  const { data: amendments, isLoading } = useAmendmentsQuery(contractId);
+  const { data: categories } = useAmendmentCategoriesQuery();
+  const createMutation = useCreateAmendmentMutation(contractId);
+  const approveMutation = useApproveAmendmentMutation(contractId);
+  const rejectMutation = useRejectAmendmentMutation(contractId);
+
+  const [showForm, setShowForm] = useState(false);
+  const [categoryId, setCategoryId] = useState("");
+  const [changeDescription, setChangeDescription] = useState("");
+  const [justification, setJustification] = useState("");
+  const [newValue, setNewValue] = useState("");
+  const [comments, setComments] = useState<Record<string, string>>({});
+  const [exportingId, setExportingId] = useState<string | null>(null);
+
+  /** Tải phụ lục về máy để ký ngoài — cùng khuôn với xuất hợp đồng BM05 và thanh lý BM13. */
+  const handleExport = async (id: string) => {
+    setExportingId(id);
+    try {
+      const blob = await amendmentService.exportWord(id);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `PhuLucHopDong-${id.slice(0, 8)}.docx`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      toast.error(t("contract.amendment.exportWordError"));
+    } finally {
+      setExportingId(null);
+    }
+  };
+
+  const resetForm = () => {
+    setCategoryId("");
+    setChangeDescription("");
+    setJustification("");
+    setNewValue("");
+    setShowForm(false);
+  };
+
+  const isExtension = categories?.find((c) => String(c.id) === categoryId)?.code === "EXTENSION";
+  const canCreate = categoryId && changeDescription.trim() && justification.trim()
+    && (!isExtension || Number(newValue) > 0) && !createMutation.isPending;
+
+  return (
+    <div className="space-y-3">
+      {canRequest && !showForm && (
+        <div className="flex justify-end">
+          <Button size="sm" variant="outline" onClick={() => setShowForm(true)}>
+            <Plus />
+            {t("contract.amendment.requestChange")}
+          </Button>
+        </div>
+      )}
+
+      {canRequest && showForm && (
+        <Card>
+          <CardContent className="space-y-3 p-4">
+            <p className="text-sm font-medium text-foreground">{t("contract.amendment.newRequest")}</p>
+
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                {t("contract.amendment.type")} <span className="text-destructive">*</span>
+              </label>
+              <Select value={categoryId} onValueChange={setCategoryId}>
+                <SelectTrigger>
+                  <SelectValue placeholder={t("contract.amendment.typePlaceholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories?.map((c) => (
+                    <SelectItem key={c.id} value={String(c.id)}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label htmlFor="a-desc" className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                {t("contract.amendment.whatChanges")} <span className="text-destructive">*</span>
+              </label>
+              <Textarea
+                id="a-desc"
+                rows={2}
+                value={changeDescription}
+                onChange={(e) => setChangeDescription(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="a-just" className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                {t("contract.amendment.why")} <span className="text-destructive">*</span>
+              </label>
+              <Textarea id="a-just" rows={2} value={justification} onChange={(e) => setJustification(e.target.value)} />
+            </div>
+
+            {isExtension && (
+              <div>
+                <label htmlFor="a-new" className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                  {t("amendments.extensionMonths")} <span className="text-destructive">*</span>
+                </label>
+                <Input id="a-new" type="number" min={1} value={newValue} onChange={(e) => setNewValue(e.target.value)} />
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2">
+              <Button type="button" size="sm" variant="outline" onClick={resetForm}>
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                disabled={!canCreate}
+                onClick={() =>
+                  createMutation.mutate(
+                    {
+                      categoryId: Number(categoryId),
+                      changeDescription: changeDescription.trim(),
+                      justification: justification.trim(),
+                      newValue: newValue.trim() || undefined,
+                      requiresRectorApproval: false,
+                    },
+                    { onSuccess: resetForm }
+                  )
+                }
+              >
+                {createMutation.isPending ? <Loader2 className="animate-spin" /> : <FilePenLine />}
+                {t("contract.amendment.submitRequest")}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {isLoading ? (
+        <Skeleton className="h-24 w-full rounded-lg" />
+      ) : !amendments || amendments.length === 0 ? (
+        <EmptyState
+          icon={FilePenLine}
+          title={t("contract.amendment.none")}
+          description={t("contract.amendment.noneDesc")}
+          className="min-h-28 border-none p-4"
+        />
+      ) : (
+        amendments.map((a) => {
+          const isPending = a.status === AMENDMENT_STATUS.PENDING;
+          return (
+            <div key={a.id} className="space-y-2 rounded-lg border border-border p-3">
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground">{a.categoryName ?? `Category ${a.categoryId}`}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {t("contract.amendment.requestedAt", { date: formatDateTime(a.requestedAt) })}
+                    {/* Duyệt gia hạn là đổi luôn EndDate của hợp đồng. Không ghi lại DUYỆT LÚC NÀO
+                        thì nhìn vào chỉ thấy hạn mới, không truy được ai đổi và đổi khi nào
+                        (thầy 05/08: "ở đâu để biết đã gia hạn thêm"). */}
+                    {a.reviewedAt && ` · ${t("contract.amendment.reviewedAt", { date: formatDateTime(a.reviewedAt) })}`}
+                  </p>
+                </div>
+                <StatusBadge status={a.status} />
+              </div>
+
+              <p className="text-sm text-foreground">{a.changeDescription}</p>
+              <p className="text-xs text-muted-foreground">{a.justification}</p>
+
+              {(a.oldValue || a.newValue) && (
+                <p className="text-xs text-muted-foreground">
+                  <span className="line-through">{a.oldValue || "—"}</span> → <span className="text-foreground">{a.newValue || "—"}</span>
+                </p>
+              )}
+
+              {a.reviewerComments && <p className="text-xs text-muted-foreground">{t("contract.amendment.reviewer")} {a.reviewerComments}</p>}
+
+              {/*
+                BM05 Điều 6.1: sửa đổi hợp đồng phải "lập thành văn bản phụ lục có đầy đủ chữ ký
+                của các bên" — hợp đồng gốc KHÔNG bị viết đè. Máy chủ đã có endpoint xuất từ lâu
+                nhưng giao diện chưa hề gọi, nên duyệt xong không có gì đem đi ký.
+                Chỉ hiện khi ĐÃ DUYỆT — in bản còn chờ duyệt ra là tạo giấy tờ khống (BE trả 409).
+              */}
+              {canManage && a.status === AMENDMENT_STATUS.APPROVED && (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={exportingId === a.id}
+                  onClick={() => handleExport(a.id)}
+                >
+                  {exportingId === a.id ? <Loader2 className="animate-spin" /> : <FileDown />}
+                  {t("contract.amendment.exportWord")}
+                </Button>
+              )}
+
+              {canManage && isPending && (
+                <div className="space-y-2 border-t border-border pt-2">
+                  <Input
+                    placeholder={t("contract.amendment.commentsPlaceholder")}
+                    value={comments[a.id] ?? ""}
+                    onChange={(e) => setComments((prev) => ({ ...prev, [a.id]: e.target.value }))}
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      disabled={approveMutation.isPending}
+                      onClick={() => approveMutation.mutate({ id: a.id, reviewerComments: comments[a.id] || undefined })}
+                    >
+                      <CircleCheck />
+                      {t("common.approve")}
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="destructive"
+                      disabled={rejectMutation.isPending}
+                      onClick={() => rejectMutation.mutate({ id: a.id, reviewerComments: comments[a.id] || undefined })}
+                    >
+                      <CircleX />
+                      {t("common.reject")}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })
+      )}
+    </div>
+  );
+}

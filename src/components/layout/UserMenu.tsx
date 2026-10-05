@@ -1,5 +1,6 @@
-import { KeyRound, LogOut, Settings, User as UserIcon } from "lucide-react";
+import { Check, KeyRound, LogOut, Settings, User as UserIcon, UserCog } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -12,6 +13,8 @@ import {
 import { useAuthStore } from "@/store/auth.store";
 import { useLogout } from "@/hooks/useAuth";
 import { ROUTES } from "@/constants/routes";
+import { ROLE_PRIORITY, type Role } from "@/constants/roles";
+import { cn } from "@/lib/utils";
 
 function initials(name: string) {
   return name
@@ -23,11 +26,24 @@ function initials(name: string) {
 }
 
 export function UserMenu() {
+  const { t } = useTranslation();
   const user = useAuthStore((state) => state.user);
+  const activeRole = useAuthStore((state) => state.activeRole);
+  const setActiveRole = useAuthStore((state) => state.setActiveRole);
   const logout = useLogout();
   const navigate = useNavigate();
 
   if (!user) return null;
+
+  // Roles the user actually holds, in a stable priority order (never the full 4-role taxonomy).
+  const myRoles = ROLE_PRIORITY.filter((role) => user.roles.includes(role));
+  const roleName = (role: Role) => t(`roleName.${role}`);
+
+  const switchRole = (role: Role) => {
+    if (role === activeRole) return;
+    setActiveRole(role);
+    navigate(ROUTES.DASHBOARD); // land on the chosen role's home so the nav matches
+  };
 
   return (
     <DropdownMenu>
@@ -48,22 +64,37 @@ export function UserMenu() {
           <p className="truncate text-xs text-muted-foreground">{user.email}</p>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        {myRoles.length > 1 && (
+          <>
+            <DropdownMenuLabel className="flex items-center gap-1.5 text-xs font-normal text-muted-foreground">
+              <UserCog className="size-3.5" />
+              {t("header.viewingAs")}
+            </DropdownMenuLabel>
+            {myRoles.map((role) => (
+              <DropdownMenuItem key={role} onSelect={() => switchRole(role)}>
+                <Check className={cn("size-4", role === activeRole ? "opacity-100" : "opacity-0")} />
+                {roleName(role)}
+              </DropdownMenuItem>
+            ))}
+            <DropdownMenuSeparator />
+          </>
+        )}
         <DropdownMenuItem onSelect={() => navigate(ROUTES.PROFILE)}>
           <UserIcon />
-          Profile
+          {t("header.profile")}
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => navigate(ROUTES.CHANGE_PASSWORD)}>
           <KeyRound />
-          Change password
+          {t("auth.changePassword")}
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => navigate(ROUTES.SETTINGS)}>
           <Settings />
-          Settings
+          {t("nav.settings")}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem variant="destructive" onSelect={logout}>
           <LogOut />
-          Sign out
+          {t("header.logout")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

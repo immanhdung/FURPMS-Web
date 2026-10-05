@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   CalendarRange,
   CheckCircle2,
@@ -25,17 +26,18 @@ const KPI_ICONS: Record<string, LucideIcon> = {
 };
 
 export function OverviewTab() {
+  const { t } = useTranslation();
   const { data, isLoading, isError, refetch, isRefetching } = useAnalyticsOverviewQuery();
 
   if (isError) return <ErrorState onRetry={() => refetch()} isRetrying={isRefetching} />;
 
   const kpis: KpiDatum[] = [
-    { id: "cycles", label: "Total Cycles", value: data?.totalCycles ?? 0 },
-    { id: "proposals", label: "Total Proposals", value: data?.totalProposals ?? 0 },
-    { id: "approved", label: "Approved Proposals", value: data?.approvedProposals ?? 0 },
-    { id: "pending-reviews", label: "Pending Reviews", value: data?.pendingReviews ?? 0 },
-    { id: "councils", label: "Total Councils", value: data?.totalCouncils ?? 0 },
-    { id: "contracts", label: "Total Contracts", value: data?.totalContracts ?? 0 },
+    { id: "cycles", label: t("analytics.kpiCycles"), value: data?.totalCycles ?? 0 },
+    { id: "proposals", label: t("analytics.kpiProposals"), value: data?.totalProposals ?? 0 },
+    { id: "approved", label: t("analytics.kpiApproved"), value: data?.approvedProposals ?? 0 },
+    { id: "pending-reviews", label: t("analytics.kpiPendingReviews"), value: data?.pendingReviews ?? 0 },
+    { id: "councils", label: t("analytics.kpiCouncils"), value: data?.totalCouncils ?? 0 },
+    { id: "contracts", label: t("analytics.kpiContracts"), value: data?.totalContracts ?? 0 },
   ];
 
   return (
@@ -49,18 +51,18 @@ export function OverviewTab() {
       {isLoading ? (
         <ChartCardSkeleton />
       ) : data?.monthlyTrend && data.monthlyTrend.length > 0 ? (
-        <ChartCard title="Monthly Submission Trend" description="Proposals submitted vs. approved">
+        <ChartCard title={t("analytics.monthlyTrend")} description={t("analytics.monthlyTrendDesc")}>
           <AreaChartCardBody
             data={data.monthlyTrend}
             xKey="label"
             series={[
-              { key: "submitted", label: "Submitted" },
-              { key: "approved", label: "Approved", color: "#14B8A6" },
+              { key: "submitted", label: t("analytics.submitted") },
+              { key: "approved", label: t("analytics.approved"), color: "#14B8A6" },
             ]}
           />
         </ChartCard>
       ) : (
-        <EmptyState title="No trend data available" description="Monthly submission trend will appear once data is available." />
+        <EmptyState title={t("analytics.noTrend")} description={t("analytics.noTrendDesc")} />
       )}
     </div>
   );

@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { motion } from "motion/react";
 import { Check, Mail, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/EmptyState";
@@ -8,20 +10,42 @@ import { useMyMembershipsQuery, useRespondToInvitationMutation } from "@/hooks/u
 import { MembershipCard } from "@/features/reviewer/shared/MembershipCard";
 import { DeclineInvitationDialog } from "@/features/reviewer/invitations/DeclineInvitationDialog";
 import { INVITATION_STATUS } from "@/constants/statuses";
+import type { MyMembership } from "@/types/membership";
 
 export function InvitationsPage() {
+  const { t } = useTranslation();
   const { data, isLoading, isError, refetch, isRefetching } = useMyMembershipsQuery();
   const respondMutation = useRespondToInvitationMutation();
   const [decliningMemberId, setDecliningMemberId] = useState<string | null>(null);
 
-  const pending = (data ?? []).filter((m) => m.status?.toUpperCase() === INVITATION_STATUS.PENDING);
+  // MyMembershipDto has no invitedAt/sentAt timestamp to sort by — the backend returns rows in
+  // creation order (oldest first), so reversing approximates "newest first" until it exposes a
+  // real timestamp field (same gap as CouncilMemberResponse.invitationSentAt, just missing here).
+  const pendingByMember = new Map<string, MyMembership[]>();
+  for (const membership of data ?? []) {
+    if (membership.status?.toUpperCase() !== INVITATION_STATUS.PENDING) continue;
+    const group = pendingByMember.get(membership.memberId) ?? [];
+    group.push(membership);
+    pendingByMember.set(membership.memberId, group);
+  }
+  // Một lời mời xác nhận tư cách trong HỘI ĐỒNG, không phải từng đề tài. API trả một dòng/đề tài để
+  // màn chấm không làm mất bài thứ hai, nên tại đây gộp lại thành đúng một thẻ lời mời và liệt kê phạm vi.
+  const pending = Array.from(pendingByMember.values()).map((group) => ({
+    ...group[0],
+    proposalTitleVI: group.map((m) => m.proposalTitleVI).filter(Boolean).join("; "),
+  })).reverse();
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Invitations</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Council invitations awaiting your response.</p>
-      </div>
+    <div className="space-y-6">
+      <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }} className="flex items-center gap-3">
+        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-brand-accent-2/15 to-primary/10 text-brand-accent-2">
+          <Mail className="size-5" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("reviewer.invitationsTitle")}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t("reviewer.invitationsSubtitle")}</p>
+        </div>
+      </motion.div>
 
       {isError ? (
         <ErrorState onRetry={() => refetch()} isRetrying={isRefetching} />
@@ -32,7 +56,7 @@ export function InvitationsPage() {
           ))}
         </div>
       ) : pending.length === 0 ? (
-        <EmptyState icon={Mail} title="No pending invitations" description="You're all caught up." />
+        <EmptyState icon={Mail} title={t("reviewer.noPending")} description={t("reviewer.allCaughtUp")} />
       ) : (
         <div className="space-y-3">
           {pending.map((membership, index) => (
@@ -40,6 +64,7 @@ export function InvitationsPage() {
               key={membership.memberId}
               membership={membership}
               index={index}
+              wrapTitle
               actions={
                 <>
                   <Button
@@ -49,7 +74,7 @@ export function InvitationsPage() {
                     disabled={respondMutation.isPending}
                   >
                     <X />
-                    Decline
+                    {t("reviewer.decline")}
                   </Button>
                   <Button
                     size="sm"
@@ -59,7 +84,7 @@ export function InvitationsPage() {
                     disabled={respondMutation.isPending}
                   >
                     <Check />
-                    Accept
+                    {t("reviewer.accept")}
                   </Button>
                 </>
               }

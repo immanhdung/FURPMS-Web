@@ -1,0 +1,161 @@
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Loader2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useScheduleProgressReportMutation,
+  useProgressReportQuery,
+} from "@/hooks/useProgressReports";
+import { fromDateTimeLocalInput, toDateTimeLocalInput } from "@/utils/format";
+
+interface ScheduleProgressReportDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  contractId: string;
+  reportId: string | null;
+  contractStartDate?: string | null;
+  contractEndDate?: string | null;
+}
+
+export function ScheduleProgressReportDialog({
+  open,
+  onOpenChange,
+  contractId,
+  reportId,
+  contractStartDate,
+  contractEndDate,
+}: ScheduleProgressReportDialogProps) {
+  const { t } = useTranslation();
+  const scheduleMutation = useScheduleProgressReportMutation(contractId);
+  const [dueDate, setDueDate] = useState("");
+  const [scheduledMeetingAt, setScheduledMeetingAt] = useState("");
+  const [meetingLink, setMeetingLink] = useState("");
+  const [roundName, setRoundName] = useState("");
+
+  /**
+   * Dialog này SỬA lịch đã có, nhưng trước đây mở ra TRẮNG TRƠN — không thấy hạn nộp,
+   * giờ họp, link họp đang đặt là gì. Lưu lại là ghi đè mất giá trị cũ mà không ai biết.
+   */
+  const { data: report } = useProgressReportQuery(open ? reportId : null);
+  const today = new Date().toLocaleDateString("en-CA");
+  const minDueDate = [today, contractStartDate?.slice(0, 10), report?.reportingPeriodStart?.slice(0, 10)]
+    .filter((value): value is string => Boolean(value))
+    .sort()
+    .at(-1);
+  const maxDueDate = contractEndDate?.slice(0, 10);
+  const nowLocal = toDateTimeLocalInput(new Date());
+  const maxMeetingAt = maxDueDate ? `${maxDueDate}T23:59` : undefined;
+
+  useEffect(() => {
+    if (!open || !report) return;
+    setRoundName(report.roundName ?? "");
+    setDueDate(report.dueDate ? report.dueDate.slice(0, 10) : "");
+    // API trả mốc UTC; ô datetime-local chạy theo giờ máy — quy đổi, không cắt chuỗi.
+    setScheduledMeetingAt(toDateTimeLocalInput(report.scheduledMeetingAt));
+    setMeetingLink(report.meetingLink ?? "");
+  }, [open, report]);
+
+  const reset = () => {
+    setDueDate("");
+    setScheduledMeetingAt("");
+    setMeetingLink("");
+    setRoundName("");
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t("contract.scheduleReportTitle")}</DialogTitle>
+          <DialogDescription>{t("contract.scheduleReportDesc")}</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">{t("contract.roundName")}</label>
+            <Input
+              value={roundName}
+              onChange={(e) => setRoundName(e.target.value)}
+              placeholder={t("contract.roundNamePlaceholder")}
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">{t("contract.dueDate")}</label>
+            <Input
+              type="date"
+              min={minDueDate}
+              max={maxDueDate}
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+            />
+            {/* Đặt lại ngày ở đây = GIA HẠN hạn nộp (thầy 29/07: đánh giá trúng ngày cuối thì gia hạn được). */}
+            <p className="mt-1 text-xs text-muted-foreground">{t("contract.dueDateExtendHint")}</p>
+          </div>
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">{t("contract.meetingDateTime")}</label>
+            <Input
+              type="datetime-local"
+              min={nowLocal}
+              max={maxMeetingAt}
+              value={scheduledMeetingAt}
+              onChange={(e) => setScheduledMeetingAt(e.target.value)}
+            />
+            {contractStartDate && contractEndDate && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                {t("contract.scheduleWithinContract", {
+                  start: contractStartDate.slice(0, 10),
+                  end: contractEndDate.slice(0, 10),
+                })}
+              </p>
+            )}
+          </div>
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">{t("contract.meetingLink")}</label>
+            <Input value={meetingLink} onChange={(e) => setMeetingLink(e.target.value)} placeholder="https://meet.google.com/..." />
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={scheduleMutation.isPending}>
+            {t("common.cancel")}
+          </Button>
+          <Button
+            type="button"
+            disabled={scheduleMutation.isPending}
+            onClick={() =>
+              reportId &&
+              scheduleMutation.mutate(
+                {
+                  id: reportId,
+                  payload: {
+                    dueDate: dueDate || undefined,
+                    scheduledMeetingAt: fromDateTimeLocalInput(scheduledMeetingAt),
+                    meetingLink: meetingLink || undefined,
+                    roundName: roundName.trim() || undefined,
+                  },
+                },
+                {
+                  onSuccess: () => {
+                    reset();
+                    onOpenChange(false);
+                  },
+                }
+              )
+            }
+          >
+            {scheduleMutation.isPending && <Loader2 className="animate-spin" />}
+            {t("contract.saveSchedule")}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

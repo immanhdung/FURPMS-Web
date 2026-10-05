@@ -1,29 +1,30 @@
-import { axiosClient } from "@/services/api/axiosClient";
+import { AI_TIMEOUT_MS, axiosClient } from "@/services/api/axiosClient";
 import type { ApiResponse } from "@/types/common";
-import type { AiExtractionResult, SimilarityCheckResult } from "@/types/ai-extraction";
-import type { AiFeedbackItem, ReviewerSuggestion, SemanticSearchResult, SummaryResult } from "@/types/ai-tools";
+import type { AiExtractionResult } from "@/types/ai-extraction";
+import type {
+  AiConsistencyResult,
+  AiFeedbackItem,
+  AiScoreSuggestion,
+  ReviewKit,
+  SemanticSearchResult,
+  SummaryResult,
+} from "@/types/ai-tools";
 
 export const aiService = {
   extractFromFile: (file: File) => {
     const formData = new FormData();
     formData.append("file", file);
+    // BE đặt endpoint ở /proposals/extract (ProposalsController), KHÔNG phải /ai/extract.
+    // Trước đây gọi sai đường dẫn ⇒ nút "trích xuất bằng AI" ở wizard luôn 404,
+    // tức Đường B (upload + AI, rule #10/#20) chưa từng chạy.
     return axiosClient
-      .post<ApiResponse<AiExtractionResult>>("/ai/extract", formData)
-      .then((res) => res.data.data);
-  },
-
-  checkSimilarity: (file: File, topicId: number) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("topicId", String(topicId));
-    return axiosClient
-      .post<ApiResponse<SimilarityCheckResult>>("/ai/similarity-check", formData)
+      .post<ApiResponse<AiExtractionResult>>("/proposals/extract", formData, { timeout: AI_TIMEOUT_MS })
       .then((res) => res.data.data);
   },
 
   summarizeProposal: (proposalId: string) =>
     axiosClient
-      .post<ApiResponse<SummaryResult>>(`/proposals/${proposalId}/generate-summary`)
+      .post<ApiResponse<SummaryResult>>(`/proposals/${proposalId}/generate-summary`, null, { timeout: AI_TIMEOUT_MS })
       .then((res) => res.data.data),
 
   getProposalSummary: (proposalId: string) =>
@@ -33,16 +34,56 @@ export const aiService = {
 
   semanticSearch: (query: string) =>
     axiosClient
-      .post<ApiResponse<SemanticSearchResult[]>>("/ai/search", { query })
+      .post<ApiResponse<SemanticSearchResult[]>>("/ai/search", { query }, { timeout: AI_TIMEOUT_MS })
       .then((res) => res.data.data),
 
-  suggestReviewers: (trackId: string) =>
-    axiosClient
-      .post<ApiResponse<ReviewerSuggestion[]>>("/ai/suggest-reviewers", { trackId })
-      .then((res) => res.data.data),
 
   generateFeedback: (proposalId: string) =>
     axiosClient
-      .post<ApiResponse<AiFeedbackItem[]>>(`/ai/proposals/${proposalId}/feedback`)
+      .post<ApiResponse<AiFeedbackItem[]>>(`/ai/proposals/${proposalId}/feedback`, null, { timeout: AI_TIMEOUT_MS })
+      .then((res) => res.data.data),
+
+  /** Góp ý đã sinh trước đó — không tốn quota Gemini. */
+  getFeedback: (proposalId: string) =>
+    axiosClient
+      .get<ApiResponse<AiFeedbackItem[] | null>>(`/ai/proposals/${proposalId}/feedback`)
+      .then((res) => res.data.data),
+
+  /** Đối chiếu thông tin đã điền với file đề cương đính kèm — chỉ ra chỗ thiếu/lệch. */
+  checkConsistency: (proposalId: string) =>
+    axiosClient
+      .post<ApiResponse<AiConsistencyResult>>(`/ai/proposals/${proposalId}/consistency-check`, null, { timeout: AI_TIMEOUT_MS })
+      .then((res) => res.data.data),
+
+  /** AI gợi ý điểm theo từng tiêu chí của bộ tiêu chí đang áp cho hội đồng. */
+  suggestScores: (councilId: string, proposalId: string) =>
+    axiosClient
+      .post<ApiResponse<AiScoreSuggestion[]>>(
+        `/ai/councils/${councilId}/proposals/${proposalId}/score-suggestion`,
+        null,
+        { timeout: AI_TIMEOUT_MS },
+      )
+      .then((res) => res.data.data),
+
+  getScoreSuggestions: (councilId: string, proposalId: string) =>
+    axiosClient
+      .get<ApiResponse<AiScoreSuggestion[] | null>>(
+        `/ai/councils/${councilId}/proposals/${proposalId}/score-suggestion`,
+      )
+      .then((res) => res.data.data),
+
+  /**
+   * Một lần gọi ra CẢ tóm tắt lẫn gợi ý điểm.
+   *
+   * Trước đây người chấm bấm "Tóm tắt" chờ 30–60 giây, xong mới bấm "Gợi ý điểm" chờ thêm lượt
+   * nữa — đúng lúc hội đồng đang ngồi nhìn. Gói Gemini miễn phí lại giới hạn request mỗi phút nên
+   * bấm hai lần liên tiếp rất dễ bị chặn. Máy chủ chạy hai phần song song, tổng thời gian chờ
+   * xấp xỉ một lần gọi.
+   */
+  reviewKit: (councilId: string, proposalId: string) =>
+    axiosClient
+      .post<ApiResponse<ReviewKit>>(`/ai/councils/${councilId}/proposals/${proposalId}/review-kit`, null, {
+        timeout: AI_TIMEOUT_MS,
+      })
       .then((res) => res.data.data),
 };

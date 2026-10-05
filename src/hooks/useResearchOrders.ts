@@ -1,14 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { researchOrderService } from "@/services/api/research-order.service";
+import { researchOrderService, type ResearchOrderListParams } from "@/services/api/research-order.service";
 import { queryKeys } from "@/services/queryKeys";
 import type { ApiError } from "@/types/common";
 import type { CreateResearchOrderPayload } from "@/types/research-order";
 
-export function useResearchOrdersQuery() {
+export function useResearchOrdersQuery(params?: ResearchOrderListParams) {
   return useQuery({
-    queryKey: queryKeys.researchOrders.list(),
-    queryFn: researchOrderService.list,
+    queryKey: queryKeys.researchOrders.list(params as Record<string, unknown> | undefined),
+    queryFn: () => researchOrderService.list(params),
   });
 }
 

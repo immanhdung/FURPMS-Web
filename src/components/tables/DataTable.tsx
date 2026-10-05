@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   type ColumnDef,
   type SortingState,
@@ -32,9 +33,10 @@ export function DataTable<TData, TValue>({
   isLoading = false,
   searchPlaceholder,
   exportFileName,
-  emptyTitle = "No records found",
-  emptyDescription = "There is no data to display yet.",
+  emptyTitle,
+  emptyDescription,
 }: DataTableProps<TData, TValue>) {
+  const { t } = useTranslation();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [globalFilter, setGlobalFilter] = useState("");
@@ -57,7 +59,7 @@ export function DataTable<TData, TValue>({
     <div className="w-full">
       <DataTableToolbar table={table} searchPlaceholder={searchPlaceholder} exportFileName={exportFileName} />
 
-      <div className="overflow-hidden rounded-xl border border-border">
+      <div className="overflow-hidden rounded-xl border border-border shadow-soft-sm">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -93,7 +95,7 @@ export function DataTable<TData, TValue>({
             ) : (
               <TableRow className="hover:bg-transparent">
                 <TableCell colSpan={columns.length} className="h-auto p-0">
-                  <EmptyState title={emptyTitle} description={emptyDescription} className="min-h-56 border-none" />
+                  <EmptyState title={emptyTitle ?? t("common.emptyTitle")} description={emptyDescription ?? t("common.emptyDesc")} className="min-h-56 border-none" />
                 </TableCell>
               </TableRow>
             )}

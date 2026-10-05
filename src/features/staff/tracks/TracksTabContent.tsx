@@ -1,47 +1,44 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/tables/DataTable";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { ToggleActiveDialog } from "@/components/shared/ToggleActiveDialog";
 import { useDeactivateTrackMutation, useTracksQuery } from "@/hooks/useTracks";
-import { useUsersQuery } from "@/hooks/useUsers";
 import { getTrackColumns } from "@/features/staff/tracks/columns";
 import { TrackFormSheet } from "@/features/staff/tracks/TrackFormSheet";
-import { AssignTrackOwnerDialog } from "@/features/staff/tracks/AssignTrackOwnerDialog";
+import { sortByIdDesc } from "@/utils/sort";
 import type { Track } from "@/types/track";
 
 export function TracksTabContent() {
+  const { t } = useTranslation();
   const { data, isLoading, isError, refetch, isRefetching } = useTracksQuery();
-  const { data: users } = useUsersQuery();
   const deactivateMutation = useDeactivateTrackMutation();
+  const sortedData = useMemo(() => sortByIdDesc(data), [data]);
 
   const [formOpen, setFormOpen] = useState(false);
   const [editingTrack, setEditingTrack] = useState<Track | null>(null);
-  const [assigningTrack, setAssigningTrack] = useState<Track | null>(null);
   const [deactivatingTrack, setDeactivatingTrack] = useState<Track | null>(null);
-
-  const ownerNames = useMemo(() => Object.fromEntries((users ?? []).map((u) => [u.id, u.fullName])), [users]);
 
   const columns = useMemo(
     () =>
       getTrackColumns({
-        ownerNames,
+        t,
         onEdit: (track) => {
           setEditingTrack(track);
           setFormOpen(true);
         },
-        onAssignOwner: (track) => setAssigningTrack(track),
         onDeactivate: (track) => setDeactivatingTrack(track),
       }),
-    [ownerNames]
+    [t]
   );
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">
-          Research fields (e.g. IT, AI, Business) used to categorize proposals within a cycle.
+          {t("staff.tracksIntro")}
         </p>
         <Button
           onClick={() => {
@@ -50,7 +47,7 @@ export function TracksTabContent() {
           }}
         >
           <Plus />
-          New field
+          {t("staff.newField")}
         </Button>
       </div>
 
@@ -59,23 +56,22 @@ export function TracksTabContent() {
       ) : (
         <DataTable
           columns={columns}
-          data={data ?? []}
+          data={sortedData}
           isLoading={isLoading}
-          searchPlaceholder="Search research fields..."
+          searchPlaceholder={t("staff.tracksSearch")}
           exportFileName="research-fields"
-          emptyTitle="No research fields found"
-          emptyDescription="Create a field such as IT, AI, or Business to categorize proposals."
+          emptyTitle={t("staff.noFields")}
+          emptyDescription={t("staff.noFieldsDesc")}
         />
       )}
 
       <TrackFormSheet open={formOpen} onOpenChange={setFormOpen} track={editingTrack} />
-      <AssignTrackOwnerDialog open={Boolean(assigningTrack)} onOpenChange={(open) => !open && setAssigningTrack(null)} track={assigningTrack} />
 
       <ToggleActiveDialog
         open={Boolean(deactivatingTrack)}
         onOpenChange={(open) => !open && setDeactivatingTrack(null)}
         isActive
-        entityName="research field"
+        entityName={t("staff.fieldEntity")}
         itemLabel={deactivatingTrack?.name ?? ""}
         isLoading={deactivateMutation.isPending}
         onConfirm={() =>

@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 import { ChevronsLeft, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -14,13 +15,13 @@ import type { NavItem } from "@/types/nav";
 function Brand({ collapsed }: { collapsed: boolean }) {
   return (
     <div className="flex h-14 shrink-0 items-center gap-2 border-b border-sidebar-border px-4">
-      <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+      <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-primary to-brand-secondary text-primary-foreground shadow-soft-sm">
         <GraduationCap className="size-4.5" />
       </div>
       {!collapsed && (
         <div className="min-w-0 leading-tight">
           <p className="truncate text-sm font-semibold text-sidebar-foreground">FURPMS</p>
-          <p className="truncate text-[11px] text-muted-foreground">Research Management</p>
+          <p className="truncate text-[11px] text-sidebar-foreground/50">Research Management</p>
         </div>
       )}
     </div>
@@ -28,20 +29,38 @@ function Brand({ collapsed }: { collapsed: boolean }) {
 }
 
 function NavLinkItem({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
+  const { t } = useTranslation();
+  const label = t(item.labelKey);
   const link = (
     <NavLink
       to={item.path}
       end={item.path === ROUTES.DASHBOARD}
       className={({ isActive }) =>
         cn(
-          "group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-          isActive && "bg-sidebar-accent text-sidebar-accent-foreground",
+          "group relative flex items-center gap-2.5 rounded-full px-3 py-2 text-sm font-medium text-sidebar-foreground/60 transition-colors hover:text-sidebar-accent-foreground",
+          isActive && "text-white",
           collapsed && "justify-center px-0"
         )
       }
     >
-      <item.icon className="size-4 shrink-0" />
-      {!collapsed && <span className="truncate">{item.label}</span>}
+      {({ isActive }) => (
+        <>
+          {isActive ? (
+            <motion.span
+              layoutId="sidebar-active-pill"
+              className="absolute inset-0 rounded-full bg-linear-to-r from-primary to-brand-secondary shadow-soft-md"
+              transition={{ type: "spring", stiffness: 420, damping: 32 }}
+            />
+          ) : (
+            <span className="absolute inset-0 rounded-full bg-transparent transition-colors group-hover:bg-sidebar-accent/70" />
+          )}
+          <item.icon className="relative z-10 size-4 shrink-0" />
+          {!collapsed && <span className="relative z-10 truncate">{label}</span>}
+          {isActive && !collapsed && (
+            <span className="absolute right-3 z-10 size-1.5 rounded-full bg-white shadow-[0_0_8px_2px_rgba(255,255,255,0.55)]" />
+          )}
+        </>
+      )}
     </NavLink>
   );
 
@@ -50,14 +69,17 @@ function NavLinkItem({ item, collapsed }: { item: NavItem; collapsed: boolean })
   return (
     <Tooltip>
       <TooltipTrigger asChild>{link}</TooltipTrigger>
-      <TooltipContent side="right">{item.label}</TooltipContent>
+      <TooltipContent side="right">{label}</TooltipContent>
     </Tooltip>
   );
 }
 
 export function SidebarNav({ collapsed = false }: { collapsed?: boolean }) {
   const user = useAuthStore((state) => state.user);
-  const items = user ? getNavItemsForRoles(user.roles) : [];
+  const activeRole = useAuthStore((state) => state.activeRole);
+  // Show only the nav for the role currently being viewed (multi-role users switch it in the header);
+  // fall back to the union of all roles if no active role is resolved yet.
+  const items = user ? getNavItemsForRoles(activeRole ? [activeRole] : user.roles) : [];
 
   return (
     <ScrollArea className="flex-1 px-2 py-3">
@@ -76,14 +98,19 @@ export function Sidebar() {
 
   return (
     <motion.aside
-      animate={{ width: collapsed ? 68 : 248 }}
+      animate={{ width: collapsed ? 76 : 256 }}
       transition={{ duration: 0.2, ease: "easeInOut" }}
-      className="sticky top-0 hidden h-screen shrink-0 flex-col border-r border-sidebar-border bg-sidebar md:flex"
+      className="liquid-glass sticky top-3 z-10 m-3 hidden h-[calc(100vh-1.5rem)] shrink-0 flex-col overflow-hidden rounded-2xl border border-sidebar-border md:flex"
     >
       <Brand collapsed={collapsed} />
       <SidebarNav collapsed={collapsed} />
       <div className="border-t border-sidebar-border p-2">
-        <Button variant="ghost" size="sm" className="w-full justify-center gap-2" onClick={toggleSidebar}>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-center gap-2 rounded-full text-sidebar-foreground/70 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground"
+          onClick={toggleSidebar}
+        >
           <ChevronsLeft className={cn("size-4 transition-transform", collapsed && "rotate-180")} />
           {!collapsed && "Collapse"}
         </Button>

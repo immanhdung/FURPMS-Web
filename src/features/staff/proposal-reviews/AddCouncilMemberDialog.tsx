@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Loader2, Sparkles } from "lucide-react";
-import { motion } from "motion/react";
+import { useTranslation } from "react-i18next";
+import { AlertTriangle, Loader2, UserPlus } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -10,14 +10,19 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAddCouncilMemberMutation } from "@/hooks/useCouncilMembers";
-import { useUsersQuery } from "@/hooks/useUsers";
-import { useSuggestReviewersMutation } from "@/hooks/useProposalAi";
+import { useCouncilCandidatesQuery } from "@/hooks/useCouncilCandidates";
+import { CouncilCandidateRow } from "@/components/shared/CouncilCandidateRow";
 
-const COUNCIL_MEMBER_ROLES = ["Chairman", "Secretary", "Member"];
+/*
+ * Chức danh trong hội đồng — PHẢI khớp `review-board/CreateCouncilSheet` và các chỗ BE so chuỗi:
+ * gửi thư mời kiểm "Chair"/"Secretary", màn chấm nghiệm thu kiểm "Opponent" (chỉ phản biện mới
+ * viết BM10 — QĐ543 Điều 12.3.b).
+ */
+const COUNCIL_MEMBER_ROLES = ["Chair", "Secretary", "Member", "Opponent"];
 
 interface AddCouncilMemberDialogProps {
   open: boolean;
@@ -26,123 +31,160 @@ interface AddCouncilMemberDialogProps {
   trackId?: string | null;
 }
 
-export function AddCouncilMemberDialog({ open, onOpenChange, councilId, trackId }: AddCouncilMemberDialogProps) {
-  const { data: users } = useUsersQuery();
+/**
+ * Thêm ủy viên hội đồng — danh sách **xếp hạng theo chuyên môn** (QĐ543 Điều 8.2).
+ *
+ * <p><b>Thay cho nút "Gợi ý AI" cũ (26/08).</b> Nút đó gọi `/ai/suggest-reviewers`, một endpoint
+ * <b>chưa bao giờ tồn tại ở máy chủ</b> — bấm vào là 404. Nay dùng
+ * `GET /api/councils/candidates`: một phép nối bảng người ↔ lĩnh vực rồi sắp xếp, và được gọi đúng
+ * tên như vậy chứ không dán nhãn AI cho một truy vấn SQL.</p>
+ *
+ * <p>Danh sách <b>vẫn hiện</b> người không chọn được (xung đột lợi ích, đã có tên) — giấu đi thì
+ * Phòng QLKH không hiểu vì sao tìm mãi không thấy một cái tên.</p>
+ */
+export function AddCouncilMemberDialog({ open, onOpenChange, councilId }: AddCouncilMemberDialogProps) {
+  const { t } = useTranslation();
+  const { data, isLoading } = useCouncilCandidatesQuery({ councilId }, open);
   const addMutation = useAddCouncilMemberMutation(councilId);
-  const suggestMutation = useSuggestReviewersMutation();
+
   const [userId, setUserId] = useState<string | undefined>();
-  const [suggestedName, setSuggestedName] = useState<string | undefined>();
   const [memberRole, setMemberRole] = useState<string>(COUNCIL_MEMBER_ROLES[2]);
-  const [isExternal, setIsExternal] = useState(false);
+  const [expertiseNote, setExpertiseNote] = useState("");
+
+  const candidates = data?.candidates ?? [];
+  const selected = candidates.find((c) => c.userId === userId);
+
+  // Ngoài lĩnh vực = khác ngành HOẶC chưa khai gì. Cả hai đều cần Phòng QLKH giải trình, nhưng
+  // câu chữ phải nói đúng trường hợp nào.
+  const needsOverride = Boolean(selected && !selected.matchesTrack && data?.trackId != null);
+  const noteMissing = needsOverride && !expertiseNote.trim();
 
   const reset = () => {
     setUserId(undefined);
-    setSuggestedName(undefined);
     setMemberRole(COUNCIL_MEMBER_ROLES[2]);
-    setIsExternal(false);
+    setExpertiseNote("");
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add council member</DialogTitle>
-          <DialogDescription>Invite a reviewer to this council (1 Chairman, 1 Secretary, 2 Members).</DialogDescription>
+          <DialogTitle>{t("staff.addMember")}</DialogTitle>
+          <DialogDescription>
+            {data?.trackName
+              ? t("staff.addMemberTrackDesc", {
+                  track: data.trackName,
+                  n: data.matchingCount,
+                })
+              : t("staff.addMemberDesc")}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div>
-            <div className="mb-1.5 flex items-center justify-between">
-              <label className="block text-sm font-medium text-foreground">Reviewer</label>
-              {trackId && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 gap-1 text-xs text-primary"
-                  onClick={() => suggestMutation.mutate(trackId)}
-                  disabled={suggestMutation.isPending}
-                >
-                  {suggestMutation.isPending ? <Loader2 className="animate-spin" /> : <Sparkles />}
-                  Suggest with AI
-                </Button>
-              )}
-            </div>
-            <Select value={userId} onValueChange={setUserId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select reviewer" />
-              </SelectTrigger>
-              <SelectContent>
-                {users?.map((user) => (
-                  <SelectItem key={user.id} value={user.id}>
-                    {user.fullName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {suggestedName && !userId && (
-              <p className="mt-1 text-xs text-muted-foreground">
-                Note: "{suggestedName}" is an AI suggestion outside the system — select a matching account above.
-              </p>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">
+              {t("staff.reviewer")}
+            </label>
+            {isLoading ? (
+              <Skeleton className="h-9 w-full rounded-md" />
+            ) : (
+              <Select value={userId} onValueChange={setUserId}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={t("staff.selectReviewer")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {candidates.map((c) => (
+                    <SelectItem
+                      key={c.userId}
+                      value={c.userId}
+                      // Xung đột lợi ích và người đã có tên: hiện ra nhưng không chọn được — BE
+                      // cũng chặn, đây chỉ để khỏi bấm vào rồi ăn lỗi.
+                      disabled={c.hasConflictOfInterest || c.alreadyInCouncil}
+                    >
+                      <CouncilCandidateRow candidate={c} showTrack={data?.trackId != null} />
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             )}
           </div>
 
-          {suggestMutation.data && (
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">AI suggested reviewers</p>
-              {suggestMutation.data.map((suggestion, index) => (
-                <motion.button
-                  key={suggestion.userId}
-                  type="button"
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.15, delay: index * 0.05 }}
-                  onClick={() => setSuggestedName(suggestion.fullName)}
-                  className="w-full rounded-lg border border-border p-2.5 text-left transition-colors hover:border-primary/40"
+          {/* Ngoài lĩnh vực → cảnh báo + bắt ghi lý do. KHÔNG khoá cứng: có ca cần mời chuyên gia
+              liên ngành, hoặc lĩnh vực hẹp không đủ người. */}
+          {needsOverride && selected && (
+            <div className="rounded-lg border border-warning bg-warning/10 p-3.5">
+              <p className="flex items-start gap-2 text-sm font-medium text-foreground">
+                <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
+                <span>
+                  {selected.expertiseUnknown
+                    ? t("staff.expertiseUnknownWarn", { name: selected.fullName })
+                    : t("staff.expertiseMismatchWarn", {
+                        name: selected.fullName,
+                        track: data?.trackName ?? "",
+                      })}
+                </span>
+              </p>
+              <p className="mt-1.5 pl-6 text-xs text-muted-foreground">{t("staff.expertiseHint")}</p>
+
+              <div className="mt-3 pl-6">
+                <label
+                  htmlFor="expertise-note"
+                  className="mb-1.5 block text-sm font-medium text-foreground"
                 >
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-xs font-medium text-foreground">{suggestion.fullName}</p>
-                    <Badge variant="secondary">{suggestion.matchScore}% match</Badge>
-                  </div>
-                  <p className="mt-0.5 text-[11px] text-muted-foreground">{suggestion.reason}</p>
-                </motion.button>
-              ))}
+                  {t("staff.expertiseNoteLabel")} <span className="text-destructive">*</span>
+                </label>
+                <Textarea
+                  id="expertise-note"
+                  rows={2}
+                  value={expertiseNote}
+                  onChange={(e) => setExpertiseNote(e.target.value)}
+                  placeholder={t("staff.expertiseNotePlaceholder")}
+                />
+              </div>
             </div>
           )}
 
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">Role</label>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">{t("staff.role")}</label>
             <Select value={memberRole} onValueChange={setMemberRole}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {COUNCIL_MEMBER_ROLES.map((role) => (
                   <SelectItem key={role} value={role}>
-                    {role}
+                    {t(`reviewBoard.role.${role}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
-          <label className="flex items-center gap-2 text-sm text-foreground">
-            <Checkbox checked={isExternal} onCheckedChange={(checked) => setIsExternal(Boolean(checked))} />
-            External reviewer
-          </label>
+          {/*
+            Ô "Phản biện ngoài" đã gỡ (17/08). Cờ `isExternal` chỉ được lưu rồi trả về, KHÔNG
+            luồng nào rẽ nhánh theo nó: mức thù lao riêng cho người ngoài trường đã bỏ cùng
+            toàn bộ phần tính tiền (rule #15). Cột trong DB giữ nguyên, vẫn gửi false.
+          */}
         </div>
 
         <DialogFooter>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={addMutation.isPending}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button
             type="button"
-            disabled={!userId || addMutation.isPending}
+            disabled={!userId || noteMissing || addMutation.isPending}
+            title={noteMissing ? t("staff.expertiseNoteRequired") : undefined}
             onClick={() =>
               userId &&
               addMutation.mutate(
-                { userId, memberRole, isExternal },
+                {
+                  userId,
+                  memberRole,
+                  isExternal: false,
+                  acceptWithoutExpertise: needsOverride,
+                  expertiseNote: needsOverride ? expertiseNote.trim() : undefined,
+                },
                 {
                   onSuccess: () => {
                     reset();
@@ -152,8 +194,8 @@ export function AddCouncilMemberDialog({ open, onOpenChange, councilId, trackId 
               )
             }
           >
-            {addMutation.isPending && <Loader2 className="animate-spin" />}
-            Add member
+            {addMutation.isPending ? <Loader2 className="animate-spin" /> : <UserPlus />}
+            {t("staff.addMemberBtn")}
           </Button>
         </DialogFooter>
       </DialogContent>

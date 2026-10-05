@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { motion } from "motion/react";
 import { BarChart3, Filter } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,26 +15,37 @@ import { BudgetAnalyticsTab } from "@/features/analytics/tabs/BudgetAnalyticsTab
 const ALL_CYCLES = "all";
 
 export function AnalyticsPage() {
+  const { t } = useTranslation();
   const { data: cycles } = useCyclesQuery();
   const [cycleFilter, setCycleFilter] = useState<string>(ALL_CYCLES);
   const cycleId = cycleFilter === ALL_CYCLES ? undefined : Number(cycleFilter);
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Analytics</h1>
-          <p className="mt-1 text-sm text-muted-foreground">System-wide research proposal analytics.</p>
+    <div className="space-y-6">
+      <motion.div
+        initial={{ opacity: 0, y: -4 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2 }}
+        className="flex flex-wrap items-center justify-between gap-3"
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-primary/15 to-brand-secondary/10 text-primary">
+            <BarChart3 className="size-5" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("analytics.title")}</h1>
+            <p className="mt-1 text-sm text-muted-foreground">{t("analytics.subtitle")}</p>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
           <Filter className="size-4 text-muted-foreground" />
           <Select value={cycleFilter} onValueChange={setCycleFilter}>
             <SelectTrigger className="w-56">
-              <SelectValue placeholder="All cycles" />
+              <SelectValue placeholder={t("analytics.allCycles")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={ALL_CYCLES}>All cycles</SelectItem>
+              <SelectItem value={ALL_CYCLES}>{t("analytics.allCycles")}</SelectItem>
               {cycles?.map((cycle) => (
                 <SelectItem key={cycle.id} value={cycle.id.toString()}>
                   {cycle.name}
@@ -41,19 +54,19 @@ export function AnalyticsPage() {
             </SelectContent>
           </Select>
         </div>
-      </div>
+      </motion.div>
 
       <Tabs defaultValue="overview">
         <TabsList className="flex-wrap">
           <TabsTrigger value="overview">
             <BarChart3 className="size-3.5" />
-            Overview
+            {t("analytics.tabOverview")}
           </TabsTrigger>
-          <TabsTrigger value="funnel">Proposal Funnel</TabsTrigger>
-          <TabsTrigger value="fields">Research Fields</TabsTrigger>
-          <TabsTrigger value="reviews">Reviews</TabsTrigger>
-          <TabsTrigger value="councils">Councils</TabsTrigger>
-          <TabsTrigger value="budget">Budget</TabsTrigger>
+          <TabsTrigger value="funnel">{t("analytics.tabFunnel")}</TabsTrigger>
+          <TabsTrigger value="fields">{t("analytics.tabFields")}</TabsTrigger>
+          <TabsTrigger value="reviews">{t("analytics.tabReviews")}</TabsTrigger>
+          <TabsTrigger value="councils">{t("analytics.tabCouncils")}</TabsTrigger>
+          <TabsTrigger value="budget">{t("analytics.tabBudget")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">

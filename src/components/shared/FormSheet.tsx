@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,6 +22,7 @@ interface FormSheetProps {
   isSubmitting?: boolean;
   submitLabel?: string;
   formId: string;
+  submitVariant?: "default" | "destructive" | "outline" | "secondary" | "gradient";
 }
 
 export function FormSheet({
@@ -31,9 +33,13 @@ export function FormSheet({
   children,
   onSubmit,
   isSubmitting = false,
-  submitLabel = "Save",
+  submitLabel,
   formId,
+  submitVariant = "gradient",
 }: FormSheetProps) {
+  // Mặc định của hai nút này vốn là "Save"/"Cancel" — mọi sheet tạo/sửa không tự đặt nhãn đều lòi
+  // tiếng Anh ra giữa giao diện tiếng Việt.
+  const { t } = useTranslation();
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent resizable defaultWidth={480} className="flex w-full flex-col sm:max-w-md">
@@ -48,14 +54,14 @@ export function FormSheet({
           </form>
         </ScrollArea>
 
-        <SheetFooter>
+        <SheetFooter className="border-t border-border">
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
-              Cancel
+              {t("common.cancel")}
             </Button>
-            <Button type="submit" form={formId} disabled={isSubmitting}>
+            <Button type="submit" form={formId} variant={submitVariant} disabled={isSubmitting}>
               {isSubmitting && <Loader2 className="animate-spin" />}
-              {submitLabel}
+              {submitLabel ?? t("common.save")}
             </Button>
           </div>
         </SheetFooter>
@@ -63,3 +69,4 @@ export function FormSheet({
     </Sheet>
   );
 }
+

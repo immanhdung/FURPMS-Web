@@ -17,9 +17,9 @@ export function getPrimaryRole(roles: Role[]): Role | undefined {
 }
 
 /**
- * The backend's CreateUserRequest/UpdateUserRequest take `roles` as integer IDs, but no
- * /api/roles lookup endpoint exists to confirm the mapping. This is a best-effort guess based
- * on declaration order in CLAUDE.md — verify against the real DB and adjust once known.
+ * `CreateUserRequest`/`UpdateUserRequest` của BE nhận `roles` là **id số**, mà không có endpoint
+ * `/api/roles` để tra. Bảng dưới **đã đối chiếu với bảng `roles` trong DB thật (12/08)** — khớp,
+ * không còn là phỏng đoán theo thứ tự khai báo.
  */
 export const ROLE_ID_MAP: Record<Role, number> = {
   [ROLES.ADMIN]: 1,

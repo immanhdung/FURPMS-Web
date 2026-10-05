@@ -24,6 +24,10 @@ export const queryKeys = {
     all: () => ["review-rounds"] as const,
     list: (proposalId: string) => ["review-rounds", "list", proposalId] as const,
   },
+  reviewBoard: {
+    all: () => ["review-board"] as const,
+    board: (cycleId: number, trackId: number) => ["review-board", cycleId, trackId] as const,
+  },
   councilMembers: {
     all: () => ["council-members"] as const,
     list: (councilId: string) => ["council-members", "list", councilId] as const,
@@ -32,10 +36,12 @@ export const queryKeys = {
     all: () => ["meetings"] as const,
     list: () => ["meetings", "list"] as const,
     byCouncil: (councilId: string) => ["meetings", "council", councilId] as const,
+    mine: () => ["meetings", "mine"] as const,
   },
   tracks: {
     all: () => ["tracks"] as const,
     list: () => ["tracks", "list"] as const,
+    byCycle: (cycleId: number) => ["tracks", "byCycle", cycleId] as const,
   },
   notifications: {
     all: () => ["notifications"] as const,
@@ -53,7 +59,7 @@ export const queryKeys = {
   },
   researchOrders: {
     all: () => ["research-orders"] as const,
-    list: (params?: PaginationParams) => ["research-orders", "list", params] as const,
+    list: (params?: Record<string, unknown>) => ["research-orders", "list", params] as const,
     detail: (id: number) => ["research-orders", "detail", id] as const,
   },
   budgetCategories: {
@@ -63,6 +69,11 @@ export const queryKeys = {
   financialConfigs: {
     all: () => ["financial-configs"] as const,
     list: () => ["financial-configs", "list"] as const,
+  },
+  systemSettings: {
+    all: () => ["system-settings"] as const,
+    list: () => ["system-settings", "list"] as const,
+    uploadPolicy: () => ["system-settings", "upload-policy"] as const,
   },
   organizationalUnits: {
     all: () => ["organizational-units"] as const,
@@ -78,20 +89,88 @@ export const queryKeys = {
   rubricTemplates: {
     all: () => ["rubric-templates"] as const,
     list: () => ["rubric-templates", "list"] as const,
+    full: () => ["rubric-templates", "full"] as const,
+    resolved: (cycleId: number, trackId: number, templateType: string) =>
+      ["rubric-templates", "resolved", cycleId, trackId, templateType] as const,
+    forCouncil: (councilId: string) => ["rubric-templates", "for-council", councilId] as const,
   },
   scores: {
     my: (councilId: string) => ["scores", "my", councilId] as const,
+    all: (councilId: string) => ["scores", "all", councilId] as const,
   },
   feedback: {
     list: (councilId: string) => ["feedback", "list", councilId] as const,
   },
   acceptance: {
-    detail: (councilId: string) => ["acceptance", "detail", councilId] as const,
+    detail: (councilId: string, projectId: string) => ["acceptance", "detail", councilId, projectId] as const,
   },
   decision: {
     detail: (councilId: string) => ["decision", "detail", councilId] as const,
   },
   systemClock: {
     detail: () => ["system-clock"] as const,
+  },
+  contracts: {
+    all: () => ["contracts"] as const,
+    list: () => ["contracts", "list"] as const,
+    detail: (id: string) => ["contracts", "detail", id] as const,
+  },
+  progressReports: {
+    all: () => ["progress-reports"] as const,
+    list: (contractId: string) => ["progress-reports", "list", contractId] as const,
+    detail: (id: string) => ["progress-reports", "detail", id] as const,
+    documents: (reportId: string) => ["progress-reports", "documents", reportId] as const,
+  },
+  disbursements: {
+    all: () => ["disbursements"] as const,
+    list: (contractId: string) => ["disbursements", "list", contractId] as const,
+  },
+  deliverables: {
+    all: () => ["deliverables"] as const,
+    list: (contractId: string) => ["deliverables", "list", contractId] as const,
+  },
+  finalReports: {
+    all: () => ["final-reports"] as const,
+    detail: (contractId: string) => ["final-reports", "detail", contractId] as const,
+  },
+  amendments: {
+    all: () => ["amendments"] as const,
+    list: (contractId: string) => ["amendments", "list", contractId] as const,
+  },
+  settlements: {
+    all: () => ["settlements"] as const,
+    detail: (contractId: string) => ["settlements", "detail", contractId] as const,
+  },
+  proposalDocuments: {
+    all: () => ["proposal-documents"] as const,
+    list: (proposalId: string) => ["proposal-documents", "list", proposalId] as const,
+  },
+  expectedProducts: {
+    all: () => ["expected-products"] as const,
+    list: (proposalId: string) => ["expected-products", "list", proposalId] as const,
+  },
+  projectBudget: {
+    all: () => ["project-budget"] as const,
+    overview: (projectId: string) => ["project-budget", "overview", projectId] as const,
+  },
+  duplicateCheck: {
+    all: () => ["duplicate-check"] as const,
+    detail: (proposalId: string) => ["duplicate-check", "detail", proposalId] as const,
+  },
+  councilCandidates: {
+    all: () => ["council-candidates"] as const,
+    list: (params: Record<string, unknown>) => ["council-candidates", "list", params] as const,
+  },
+  projectDecisions: {
+    all: () => ["project-decisions"] as const,
+    detail: (projectId: string) => ["project-decisions", "detail", projectId] as const,
+  },
+  projectTimeline: {
+    all: () => ["project-timeline"] as const,
+    detail: (projectId: string) => ["project-timeline", "detail", projectId] as const,
+  },
+  myDeadlines: {
+    all: () => ["my-deadlines"] as const,
+    list: (days: number) => ["my-deadlines", "list", days] as const,
   },
 } as const;

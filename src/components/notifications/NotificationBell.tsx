@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Bell, BellOff, CheckCheck } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { Button } from "@/components/ui/button";
@@ -11,14 +12,15 @@ import { formatRelativeTime } from "@/utils/format";
 import { cn } from "@/lib/utils";
 import type { NotificationType } from "@/types/notification";
 
-const TYPE_FILTERS: { label: string; value: NotificationType | "ALL" }[] = [
-  { label: "All", value: "ALL" },
-  { label: "Proposals", value: "PROPOSAL" },
-  { label: "Reviews", value: "REVIEW" },
-  { label: "Meetings", value: "MEETING" },
+const TYPE_FILTERS: { labelKey: string; value: NotificationType | "ALL" }[] = [
+  { labelKey: "notifications.filterAll", value: "ALL" },
+  { labelKey: "notifications.filterProposals", value: "PROPOSAL" },
+  { labelKey: "notifications.filterReviews", value: "REVIEW" },
+  { labelKey: "notifications.filterMeetings", value: "MEETING" },
 ];
 
 export function NotificationBell() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<NotificationType | "ALL">("ALL");
 
@@ -47,13 +49,13 @@ export function NotificationBell() {
               </motion.span>
             )}
           </AnimatePresence>
-          <span className="sr-only">Notifications</span>
+          <span className="sr-only">{t("notifications.title")}</span>
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent align="end" className="w-96 p-0">
+      <PopoverContent align="end" className="w-[min(30rem,calc(100vw-1rem))] p-0">
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <p className="text-sm font-medium">Notifications</p>
+          <p className="text-sm font-medium">{t("notifications.title")}</p>
           <Button
             variant="ghost"
             size="sm"
@@ -62,7 +64,7 @@ export function NotificationBell() {
             disabled={unreadCount === 0}
           >
             <CheckCheck className="size-3.5" />
-            Read all
+            {t("notifications.readAll")}
           </Button>
         </div>
 
@@ -76,17 +78,17 @@ export function NotificationBell() {
                 filter === item.value ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"
               )}
             >
-              {item.label}
+              {t(item.labelKey)}
             </button>
           ))}
         </div>
 
-        <ScrollArea className="h-80">
+        <ScrollArea className="h-[min(32rem,calc(100vh-8rem))]">
           {filtered.length === 0 ? (
             <EmptyState
               icon={BellOff}
-              title="No notifications"
-              description="You're all caught up for now."
+              title={t("notifications.empty")}
+              description={t("notifications.emptyDesc")}
               className="min-h-56 border-none"
             />
           ) : (
@@ -94,22 +96,26 @@ export function NotificationBell() {
               {filtered.map((notification) => (
                 <li
                   key={notification.id}
-                  onClick={() => !notification.read && markAsRead.mutate(notification.id)}
-                  className={cn(
-                    "cursor-pointer px-4 py-3 transition-colors hover:bg-muted/60",
-                    !notification.read && "bg-primary/3"
-                  )}
+                  className={cn("transition-colors hover:bg-muted/60", !notification.read && "bg-primary/3")}
                 >
-                  <div className="flex items-start gap-2">
+                  <button
+                    type="button"
+                    className="flex w-full items-start gap-2 px-4 py-3 text-left"
+                    onClick={() => {
+                      if (!notification.read) markAsRead.mutate(notification.id);
+                    }}
+                  >
                     {!notification.read && <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary" />}
                     <div className={cn("min-w-0 flex-1", notification.read && "pl-3.5")}>
-                      <p className="truncate text-sm font-medium text-foreground">{notification.title}</p>
-                      <p className="line-clamp-2 text-xs text-muted-foreground">{notification.message}</p>
+                      <p className="break-words text-sm font-medium text-foreground">{notification.title}</p>
+                      <p className="break-words whitespace-pre-line text-xs text-muted-foreground">
+                        {notification.message}
+                      </p>
                       <p className="mt-1 text-[11px] text-muted-foreground">
                         {formatRelativeTime(notification.createdAt)}
                       </p>
                     </div>
-                  </div>
+                  </button>
                 </li>
               ))}
             </ul>

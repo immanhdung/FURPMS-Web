@@ -1,4 +1,5 @@
 import type { LucideIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Eye, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,9 +29,10 @@ export function DataTableRowActions({
   onView,
   onEdit,
   onDelete,
-  deleteLabel = "Delete",
+  deleteLabel,
   extraActions = [],
 }: DataTableRowActionsProps) {
+  const { t } = useTranslation();
   if (!onView && !onEdit && !onDelete && extraActions.length === 0) return null;
 
   return (
@@ -38,20 +40,20 @@ export function DataTableRowActions({
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon-sm">
           <MoreHorizontal />
-          <span className="sr-only">Open row actions</span>
+          <span className="sr-only">{t("common.actions")}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44">
         {onView && (
           <DropdownMenuItem onSelect={onView}>
             <Eye />
-            View
+            {t("common.view")}
           </DropdownMenuItem>
         )}
         {onEdit && (
           <DropdownMenuItem onSelect={onEdit}>
             <Pencil />
-            Edit
+            {t("common.edit")}
           </DropdownMenuItem>
         )}
         {extraActions.map((action) => (
@@ -65,7 +67,7 @@ export function DataTableRowActions({
             {(onView || onEdit || extraActions.length > 0) && <DropdownMenuSeparator />}
             <DropdownMenuItem variant="destructive" onSelect={onDelete}>
               <Trash2 />
-              {deleteLabel}
+              {deleteLabel ?? t("common.delete")}
             </DropdownMenuItem>
           </>
         )}

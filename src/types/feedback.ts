@@ -7,9 +7,11 @@ export interface FeedbackPayload {
   overallAssessment?: string;
 }
 
+/** ⚠️ Cùng lỗi với ScoreResponse: BE trả `reviewerMemberId` + `reviewerName`, không có `reviewerId`. */
 export interface FeedbackResponse extends FeedbackPayload {
-  id: string;
+  id: number;
   councilId: string;
-  reviewerId?: string;
+  reviewerMemberId: string;
+  reviewerName?: string | null;
   submittedAt?: string | null;
 }

@@ -18,15 +18,23 @@ export const ROUTES = {
   SETTINGS: "/settings",
   PROFILE: "/profile",
   CHANGE_PASSWORD: "/change-password",
+  FORGOT_PASSWORD: "/forgot-password",
+  RESET_PASSWORD: "/reset-password",
 
   PROPOSAL_REVIEWS: "/proposal-reviews",
+  REVIEW_BOARD: "/review-board",
   COUNCILS: "/councils",
   MEETINGS: "/meetings",
   ASSIGNMENTS: "/assignments",
+  CONTRACTS: "/contracts",
 
   MY_PROPOSALS: "/my-proposals",
   SUBMIT_PROPOSAL: "/proposals/submit",
   PROGRESS_REPORTS: "/progress-reports",
+  DELIVERABLES: "/deliverables",
+  MY_MEETINGS: "/my-meetings",
+  MY_AMENDMENTS: "/my-amendments",
+  MY_TIMELINE: "/my-timeline",
   FINAL_REPORTS: "/final-reports",
   AI_SEARCH: "/ai-search",
 
@@ -34,6 +42,10 @@ export const ROUTES = {
   ASSIGNED_REVIEWS: "/assigned-reviews",
   SCORING: "/scoring",
   COUNCIL_MEMBERSHIPS: "/council-memberships",
+
+  // New feature routes
+  CHANGE_REQUESTS: "/change-requests",
+  DOCUMENTS: "/documents",
 } as const;
 
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];

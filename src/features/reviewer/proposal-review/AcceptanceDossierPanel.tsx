@@ -1,0 +1,223 @@
+import { useCallback, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
+import { CheckCircle2, FileText, Package, XCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { StatusBadge } from "@/components/shared/StatusBadge";
+import { DocumentViewer } from "@/components/shared/DocumentViewer";
+import { axiosClient } from "@/services/api/axiosClient";
+import { fetchFileBlob } from "@/services/api/fileDownload";
+import { formatDate, formatDateTime } from "@/utils/format";
+import type { ApiResponse } from "@/types/common";
+import type { AcceptanceDossier } from "@/types/acceptance-dossier";
+import {
+  DeliverableDetailSheet,
+  ProgressReportDetailSheet,
+  type DeliverableDetail,
+  type ProgressReportDetail,
+} from "@/components/shared/DossierDetailSheet";
+
+/**
+ * Hồ sơ để hội đồng NGHIỆM THU chấm.
+ *
+ * Vòng xét duyệt chỉ cần đọc đề cương, nhưng nghiệm thu phải nhìn được **đề tài đã làm
+ * ra những gì** (`Process_Spec_v2` §Giai đoạn 8: báo cáo tiến độ · sản phẩm · báo cáo
+ * tổng kết). Trước đây màn chấm nghiệm thu hiện y hệt vòng 1 — người chấm không có căn
+ * cứ nào ngoài buổi họp trực tiếp.
+ */
+export function AcceptanceDossierPanel({
+  councilId,
+  proposalId,
+}: {
+  councilId: string;
+  proposalId: string;
+}) {
+  const { t } = useTranslation();
+  // Chỉ XEM — panel không đổi trạng thái gì, nên giữ ở state cục bộ là đủ.
+  const [openReport, setOpenReport] = useState<ProgressReportDetail | null>(null);
+  const [openDeliverable, setOpenDeliverable] = useState<DeliverableDetail | null>(null);
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["acceptance-dossier", councilId, proposalId],
+    queryFn: () =>
+      axiosClient
+        .get<ApiResponse<AcceptanceDossier>>(`/councils/${councilId}/proposals/${proposalId}/dossier`)
+        .then((res) => res.data.data),
+    enabled: Boolean(councilId && proposalId),
+  });
+
+  /*
+   * Tra ngược file theo id: `DocumentViewer` chỉ cầm id, còn mỗi file lại có `downloadUrl` riêng
+   * (báo cáo tổng kết đi qua /final-reports/…, không phải endpoint tài liệu đề cương).
+   *
+   * `useMemo`/`useCallback` ở đây KHÔNG phải để tối ưu: `DocumentViewer` để `fetchBlob` trong deps
+   * của effect tải file, nên hàm mới mỗi lần render là tải file vô tận.
+   */
+  const finalReportFiles = useMemo(() => data?.finalReport?.files ?? [], [data?.finalReport?.files]);
+  const fetchFinalReportBlob = useCallback(
+    (documentId: string) => {
+      const file = finalReportFiles.find((f) => f.id === documentId);
+      if (!file) return Promise.reject(new Error("Không tìm thấy file"));
+      return fetchFileBlob(file.downloadUrl);
+    },
+    [finalReportFiles]
+  );
+
+  if (isLoading) return <Skeleton className="h-56 w-full rounded-xl" />;
+  if (!data) return null;
+
+  return (
+    <div className="space-y-4">
+      {/* Tóm tắt một dòng để hội đồng nắm ngay bức tranh trước khi đọc chi tiết. */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border border-border bg-muted/30 px-3 py-2 text-xs">
+        {data.contractNumber && (
+          <span className="text-muted-foreground">
+            {t("dossier.contract")}: <b className="text-foreground">{data.contractNumber}</b>
+          </span>
+        )}
+        <span className="text-muted-foreground">
+          {t("dossier.productsPassed")}:{" "}
+          <b className="text-foreground">
+            {data.deliverablesPassed}/{data.deliverablesTotal}
+          </b>
+        </span>
+        <span className="text-muted-foreground">
+          {t("dossier.reportsCount", { n: data.progressReports.length })}
+        </span>
+      </div>
+
+      {/* ── Báo cáo tiến độ: Staff đã đánh giá từng kỳ ra sao ── */}
+      <section>
+        <h3 className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-foreground">
+          <FileText className="size-4 text-primary" />
+          {t("dossier.progressReports")}
+        </h3>
+        {data.progressReports.length === 0 ? (
+          <p className="text-xs text-muted-foreground">{t("dossier.noProgressReports")}</p>
+        ) : (
+          <ul className="divide-y divide-border rounded-lg border border-border">
+            {data.progressReports.map((r) => (
+              <li key={r.reportRound}>
+                <button
+                  type="button"
+                  onClick={() => setOpenReport(r)}
+                  className="w-full space-y-1 px-3 py-2 text-left text-xs transition-colors hover:bg-muted/50"
+                >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="font-medium text-foreground">
+                    {r.roundName || t("reports.roundN", { n: r.reportRound })}
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <span className="tabular-nums text-muted-foreground">{r.overallCompletionPct}%</span>
+                    {r.evaluationResult ? (
+                      <StatusBadge status={r.evaluationResult} />
+                    ) : (
+                      <Badge variant="outline">{t("dossier.notEvaluated")}</Badge>
+                    )}
+                  </span>
+                </div>
+                <p className="text-muted-foreground">
+                  {formatDate(r.reportingPeriodStart)} – {formatDate(r.reportingPeriodEnd)}
+                  {r.submittedAt && ` · ${t("dossier.submittedAt", { date: formatDateTime(r.submittedAt) })}`}
+                </p>
+                  {r.evaluationComments && <p className="text-foreground">{r.evaluationComments}</p>}
+                  <p className="font-medium text-primary">{t("dossier.viewDetail")}</p>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {/* ── Sản phẩm: căn cứ chính để kết luận đạt/không đạt ── */}
+      <section>
+        <h3 className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-foreground">
+          <Package className="size-4 text-primary" />
+          {t("dossier.deliverables")}
+        </h3>
+        {data.deliverables.length === 0 ? (
+          <p className="text-xs text-muted-foreground">{t("dossier.noDeliverables")}</p>
+        ) : (
+          <ul className="divide-y divide-border rounded-lg border border-border">
+            {data.deliverables.map((d) => (
+              <li key={d.id}>
+                <button
+                  type="button"
+                  onClick={() => setOpenDeliverable(d)}
+                  className="w-full space-y-1 px-3 py-2 text-left text-xs transition-colors hover:bg-muted/50"
+                >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="flex items-center gap-1.5 font-medium text-foreground">
+                    {d.acceptanceStatus === "PASSED" ? (
+                      <CheckCircle2 className="size-3.5 text-success" />
+                    ) : d.acceptanceStatus === "FAILED" ? (
+                      <XCircle className="size-3.5 text-destructive" />
+                    ) : null}
+                    {d.productName}
+                  </span>
+                  {d.acceptanceStatus && <StatusBadge status={d.acceptanceStatus} />}
+                </div>
+                {d.description && <p className="text-muted-foreground">{d.description}</p>}
+                <p className="text-muted-foreground">
+                  {d.submittedAt
+                    ? t("dossier.submittedAt", { date: formatDateTime(d.submittedAt) })
+                    : t("dossier.notSubmitted")}
+                  {!d.hasFile && ` · ${t("dossier.noFile")}`}
+                </p>
+                  {d.qualityAssessment && <p className="text-foreground">{d.qualityAssessment}</p>}
+                  <p className="font-medium text-primary">{t("dossier.viewDetail")}</p>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {/* ── Báo cáo tổng kết (BM09) ── */}
+      <section>
+        <h3 className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-foreground">
+          <FileText className="size-4 text-primary" />
+          {t("dossier.finalReport")}
+        </h3>
+        {data.finalReport ? (
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border border-border px-3 py-2 text-xs">
+              <StatusBadge status={data.finalReport.status} />
+              <span className="text-muted-foreground">
+                {data.finalReport.submittedAt
+                  ? t("dossier.submittedAt", { date: formatDateTime(data.finalReport.submittedAt) })
+                  : t("dossier.notSubmitted")}
+              </span>
+              {!data.finalReport.hasFile && <span className="text-warning">{t("dossier.noFile")}</span>}
+            </div>
+
+            {/* Đọc được NỘI DUNG báo cáo, không chỉ biết là "đã tiếp nhận" — hội đồng nghiệm thu
+                kết luận đạt/không đạt dựa vào chính file này. Dùng đúng bộ xem của vòng xét duyệt
+                để hai vòng thao tác giống nhau; nhiều file thì chọn ở ô trên đầu khung. */}
+            {finalReportFiles.length > 0 && (
+              <DocumentViewer
+                documents={finalReportFiles}
+                fetchBlob={fetchFinalReportBlob}
+                className="h-[60vh]"
+              />
+            )}
+          </div>
+        ) : (
+          <p className="text-xs text-muted-foreground">{t("dossier.noFinalReport")}</p>
+        )}
+      </section>
+
+      <ProgressReportDetailSheet
+        item={openReport}
+        open={Boolean(openReport)}
+        onOpenChange={(o) => !o && setOpenReport(null)}
+      />
+      <DeliverableDetailSheet
+        item={openDeliverable}
+        open={Boolean(openDeliverable)}
+        onOpenChange={(o) => !o && setOpenDeliverable(null)}
+      />
+    </div>
+  );
+}

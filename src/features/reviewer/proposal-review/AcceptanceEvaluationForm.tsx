@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Loader2, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,13 +8,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAcceptanceQuery, useSubmitAcceptanceMutation } from "@/hooks/useAcceptance";
 import { ACCEPTANCE_RESULTS } from "@/types/acceptance";
 
-export function AcceptanceEvaluationForm({ councilId }: { councilId: string }) {
-  const { data: existing, isLoading } = useAcceptanceQuery(councilId);
-  const submitMutation = useSubmitAcceptanceMutation(councilId);
+export function AcceptanceEvaluationForm({ councilId, projectId }: { councilId: string; projectId: string }) {
+  const { t } = useTranslation();
+  const { data: existing, isLoading } = useAcceptanceQuery(councilId, projectId);
+  const submitMutation = useSubmitAcceptanceMutation(councilId, projectId);
 
   const [result, setResult] = useState<string>(ACCEPTANCE_RESULTS[0]);
   const [failReason, setFailReason] = useState("");
-  const [seededFor, setSeededFor] = useState<string | null>(null);
+  const [seededFor, setSeededFor] = useState<number | null>(null);
 
   if (existing && existing.id !== seededFor) {
     setSeededFor(existing.id);
@@ -34,15 +36,17 @@ export function AcceptanceEvaluationForm({ councilId }: { councilId: string }) {
   return (
     <div className="space-y-4">
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Result</label>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("review.result")}</label>
         <Select value={result} onValueChange={setResult}>
           <SelectTrigger className="w-full">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
+            {/* PASS/FAIL là mã gửi lên máy chủ, không phải chữ cho người đọc — bảng dịch
+                `status.*` đã có sẵn "Đạt"/"Không đạt", dùng lại cho khớp các màn khác. */}
             {ACCEPTANCE_RESULTS.map((value) => (
               <SelectItem key={value} value={value}>
-                {value}
+                {t(`status.${value}`, { defaultValue: value })}
               </SelectItem>
             ))}
           </SelectContent>
@@ -51,18 +55,18 @@ export function AcceptanceEvaluationForm({ councilId }: { councilId: string }) {
 
       {result === "FAIL" && (
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-foreground">Fail reason</label>
+          <label className="mb-1.5 block text-sm font-medium text-foreground">{t("review.failReason")}</label>
           <Textarea rows={3} value={failReason} onChange={(e) => setFailReason(e.target.value)} />
         </div>
       )}
 
       <div className="flex justify-end">
         <Button
-          onClick={() => submitMutation.mutate({ result, failReason: result === "FAIL" ? failReason || undefined : undefined })}
+          onClick={() => submitMutation.mutate({ projectId, result, failReason: result === "FAIL" ? failReason || undefined : undefined })}
           disabled={submitMutation.isPending}
         >
           {submitMutation.isPending ? <Loader2 className="animate-spin" /> : <Save />}
-          {existing ? "Update evaluation" : "Submit evaluation"}
+          {existing ? t("review.updateEvaluation") : t("review.submitEvaluation")}
         </Button>
       </div>
     </div>

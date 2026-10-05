@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import i18n from "@/i18n";
 import { cycleService } from "@/services/api/cycle.service";
 import { queryKeys } from "@/services/queryKeys";
 import type { ApiError } from "@/types/common";
-import type { CyclePayload } from "@/types/cycle";
+import type { CyclePayload, ExtendDeadlinePayload } from "@/types/cycle";
 
 export function useCyclesQuery() {
   return useQuery({
@@ -56,6 +57,22 @@ export function useOpenCycleMutation() {
   });
 }
 
+/**
+ * Xoá đợt tạo nhầm. BE chỉ cho xoá khi đợt CHƯA có đề tài / vòng chấm / danh mục đặt hàng /
+ * lịch sử gia hạn — đợt đã dùng thật thì đóng lại chứ không xoá khỏi lịch sử.
+ */
+export function useDeleteCycleMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => cycleService.remove(id),
+    onSuccess: () => {
+      toast.success(i18n.t("toast.cycleDeleted"));
+      queryClient.invalidateQueries({ queryKey: queryKeys.cycles.all() });
+    },
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.cycleDeleteFailed")),
+  });
+}
+
 export function useCloseCycleMutation() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -65,5 +82,25 @@ export function useCloseCycleMutation() {
       queryClient.invalidateQueries({ queryKey: queryKeys.cycles.all() });
     },
     onError: (error: ApiError) => toast.error(error.message || "Unable to close cycle."),
+  });
+}
+
+export function useDeadlineExtensionsQuery(cycleId: number | null) {
+  return useQuery({
+    queryKey: [...queryKeys.cycles.detail(String(cycleId ?? "")), "deadline-extensions"],
+    queryFn: () => cycleService.listDeadlineExtensions(cycleId as number),
+    enabled: Boolean(cycleId),
+  });
+}
+
+export function useExtendDeadlineMutation(cycleId: number) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: ExtendDeadlinePayload) => cycleService.extendDeadline(cycleId, payload),
+    onSuccess: () => {
+      toast.success(i18n.t("toast.deadlineExtended"));
+      queryClient.invalidateQueries({ queryKey: queryKeys.cycles.detail(String(cycleId)) });
+    },
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.extendFailed")),
   });
 }

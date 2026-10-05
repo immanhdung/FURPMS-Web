@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import i18n from "@/i18n";
 import { trackService } from "@/services/api/track.service";
 import { queryKeys } from "@/services/queryKeys";
 import type { ApiError } from "@/types/common";
@@ -9,6 +10,15 @@ export function useTracksQuery() {
   return useQuery({
     queryKey: queryKeys.tracks.list(),
     queryFn: trackService.list,
+  });
+}
+
+/** Fields attached to a specific cycle. Disabled until a cycle is chosen. */
+export function useTracksByCycleQuery(cycleId: number | undefined) {
+  return useQuery({
+    queryKey: queryKeys.tracks.byCycle(cycleId ?? 0),
+    queryFn: () => trackService.listByCycle(cycleId as number),
+    enabled: Boolean(cycleId),
   });
 }
 
@@ -45,6 +55,30 @@ export function useAssignTrackOwnerMutation() {
       queryClient.invalidateQueries({ queryKey: queryKeys.tracks.all() });
     },
     onError: (error: ApiError) => toast.error(error.message || "Unable to assign owner."),
+  });
+}
+
+export function useAttachTrackToCycleMutation(cycleId: number) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (trackId: number) => trackService.attachToCycle(cycleId, trackId),
+    onSuccess: () => {
+      toast.success(i18n.t("toast.trackAttached"));
+      queryClient.invalidateQueries({ queryKey: queryKeys.tracks.byCycle(cycleId) });
+    },
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.trackAttachFailed")),
+  });
+}
+
+export function useDetachTrackFromCycleMutation(cycleId: number) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (trackId: number) => trackService.detachFromCycle(cycleId, trackId),
+    onSuccess: () => {
+      toast.success(i18n.t("toast.trackDetached"));
+      queryClient.invalidateQueries({ queryKey: queryKeys.tracks.byCycle(cycleId) });
+    },
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("toast.trackDetachFailed")),
   });
 }
 

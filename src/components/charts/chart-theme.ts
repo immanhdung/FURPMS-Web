@@ -1,19 +1,20 @@
 export const CHART_COLORS = {
-  primary: "#2563EB",
-  secondary: "#0F172A",
-  accent: "#14B8A6",
-  success: "#22C55E",
-  warning: "#F59E0B",
-  danger: "#EF4444",
+  primary: "var(--primary)",
+  secondary: "var(--brand-secondary)",
+  accent: "var(--brand-accent)",
+  accent2: "var(--brand-accent-2)",
+  success: "var(--success)",
+  warning: "var(--warning)",
+  danger: "var(--danger)",
 };
 
 export const CHART_PALETTE = [
   CHART_COLORS.primary,
+  CHART_COLORS.secondary,
+  CHART_COLORS.accent2,
   CHART_COLORS.accent,
   CHART_COLORS.warning,
-  CHART_COLORS.success,
   CHART_COLORS.danger,
-  "#8B5CF6",
 ];
 
 export const CHART_TOOLTIP_STYLE = {

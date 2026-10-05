@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { ClipboardList } from "lucide-react";
 import { KpiCard, KpiCardSkeleton } from "@/components/shared/KpiCard";
 import { ChartCard, ChartCardSkeleton } from "@/components/charts/ChartCard";
@@ -7,6 +8,7 @@ import { ErrorState } from "@/components/shared/ErrorState";
 import { useAnalyticsOverviewQuery } from "@/hooks/useAnalyticsReports";
 
 export function ReviewAnalyticsTab() {
+  const { t } = useTranslation();
   const { data, isLoading, isError, refetch, isRefetching } = useAnalyticsOverviewQuery();
 
   if (isError) return <ErrorState onRetry={() => refetch()} isRetrying={isRefetching} />;
@@ -17,25 +19,25 @@ export function ReviewAnalyticsTab() {
         {isLoading ? (
           <KpiCardSkeleton />
         ) : (
-          <KpiCard datum={{ id: "pending-reviews", label: "Pending Reviews", value: data?.pendingReviews ?? 0 }} icon={ClipboardList} />
+          <KpiCard datum={{ id: "pending-reviews", label: t("analytics.kpiPendingReviews"), value: data?.pendingReviews ?? 0 }} icon={ClipboardList} />
         )}
       </div>
 
       {isLoading ? (
         <ChartCardSkeleton />
       ) : data?.reviewProgress && data.reviewProgress.length > 0 ? (
-        <ChartCard title="Review Progress" description="Completed vs. pending reviews over time">
+        <ChartCard title={t("analytics.reviewProgress")} description={t("analytics.reviewProgressDesc")}>
           <LineChartCardBody
             data={data.reviewProgress}
             xKey="label"
             series={[
-              { key: "completed", label: "Completed", color: "#22C55E" },
-              { key: "pending", label: "Pending", color: "#F59E0B" },
+              { key: "completed", label: t("analytics.completed"), color: "#22C55E" },
+              { key: "pending", label: t("analytics.pending"), color: "#F59E0B" },
             ]}
           />
         </ChartCard>
       ) : (
-        <EmptyState title="No review progress data available" description="Review completion trends will appear here." />
+        <EmptyState title={t("analytics.noReviewProgress")} description={t("analytics.noReviewProgressDesc")} />
       )}
     </div>
   );

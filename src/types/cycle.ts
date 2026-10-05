@@ -6,9 +6,26 @@ export interface Cycle {
   academicYear: string;
   researchTypeId: number;
   submissionStartDate: string;
-  submissionDeadline: string;
+  submissionDeadline: string;      // hạn HIỆU LỰC (sau gia hạn nếu có)
+  originalDeadline?: string | null; // hạn gốc — chỉ có khi đã gia hạn
+  extensionCount?: number;          // số lần gia hạn (0/undefined = chưa gia hạn)
   description?: string | null;
   status: CycleStatus;
+}
+
+/** 1 lần gia hạn deadline đợt (rule tuần 10) — ngày gốc giữ nguyên, hiệu lực = bản mới nhất. */
+export interface DeadlineExtension {
+  id: string;
+  oldDeadline: string;
+  newDeadline: string;
+  reason?: string | null;
+  createdByName?: string | null;
+  createdAt: string;
+}
+
+export interface ExtendDeadlinePayload {
+  newDeadline: string;
+  reason?: string;
 }
 
 export interface CyclePayload {

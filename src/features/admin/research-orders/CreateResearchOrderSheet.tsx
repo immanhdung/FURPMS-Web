@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { FormSheet } from "@/components/shared/FormSheet";
@@ -18,6 +19,7 @@ interface CreateResearchOrderSheetProps {
 }
 
 export function CreateResearchOrderSheet({ open, onOpenChange }: CreateResearchOrderSheetProps) {
+  const { t } = useTranslation();
   const { data: cycles } = useCyclesQuery();
   const { data: units } = useOrganizationalUnitsQuery();
   const createMutation = useCreateResearchOrderMutation();
@@ -46,22 +48,22 @@ export function CreateResearchOrderSheet({ open, onOpenChange }: CreateResearchO
     <FormSheet
       open={open}
       onOpenChange={onOpenChange}
-      title="Create Research Order"
-      description="Submit an applied research topic order from an external unit."
+      title={t("researchOrders.createTitle")}
+      description={t("researchOrders.formDesc")}
       formId="research-order-form"
       onSubmit={handleSubmit(onSubmit)}
       isSubmitting={createMutation.isPending}
-      submitLabel="Create order"
+      submitLabel={t("researchOrders.createBtn")}
     >
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Research cycle</label>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("researchOrders.researchCycle")}</label>
         <Controller
           control={control}
           name="cycleId"
           render={({ field }) => (
             <Select value={field.value ? field.value.toString() : undefined} onValueChange={(value) => field.onChange(Number(value))}>
               <SelectTrigger aria-invalid={Boolean(errors.cycleId)}>
-                <SelectValue placeholder="Select cycle" />
+                <SelectValue placeholder={t("researchOrders.selectCycle")} />
               </SelectTrigger>
               <SelectContent>
                 {cycles?.map((cycle) => (
@@ -77,14 +79,14 @@ export function CreateResearchOrderSheet({ open, onOpenChange }: CreateResearchO
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-foreground">Ordering unit</label>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">{t("researchOrders.orderingUnit")}</label>
         <Controller
           control={control}
           name="orderingUnitId"
           render={({ field }) => (
             <Select value={field.value ? field.value.toString() : undefined} onValueChange={(value) => field.onChange(Number(value))}>
               <SelectTrigger aria-invalid={Boolean(errors.orderingUnitId)}>
-                <SelectValue placeholder="Select unit" />
+                <SelectValue placeholder={t("researchOrders.selectUnit")} />
               </SelectTrigger>
               <SelectContent>
                 {units?.map((unit) => (
@@ -101,7 +103,7 @@ export function CreateResearchOrderSheet({ open, onOpenChange }: CreateResearchO
 
       <div>
         <label htmlFor="ro-area" className="mb-1.5 block text-sm font-medium text-foreground">
-          Research area
+          {t("researchOrders.researchArea")}
         </label>
         <Input id="ro-area" aria-invalid={Boolean(errors.researchArea)} {...register("researchArea")} />
         {errors.researchArea && <p className="mt-1 text-xs text-destructive">{errors.researchArea.message}</p>}
@@ -109,7 +111,7 @@ export function CreateResearchOrderSheet({ open, onOpenChange }: CreateResearchO
 
       <div>
         <label htmlFor="ro-problem" className="mb-1.5 block text-sm font-medium text-foreground">
-          Problem description
+          {t("researchOrders.problemDescription")}
         </label>
         <Textarea id="ro-problem" rows={4} aria-invalid={Boolean(errors.problemDescription)} {...register("problemDescription")} />
         {errors.problemDescription && (
@@ -119,7 +121,7 @@ export function CreateResearchOrderSheet({ open, onOpenChange }: CreateResearchO
 
       <div>
         <label htmlFor="ro-products" className="mb-1.5 block text-sm font-medium text-foreground">
-          Expected products
+          {t("researchOrders.expectedProducts")}
         </label>
         <Textarea id="ro-products" rows={3} aria-invalid={Boolean(errors.expectedProducts)} {...register("expectedProducts")} />
         {errors.expectedProducts && <p className="mt-1 text-xs text-destructive">{errors.expectedProducts.message}</p>}

@@ -1,6 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { motion } from "motion/react";
 import { KeyRound, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,6 +16,7 @@ import { ROUTES } from "@/constants/routes";
 
 export function ChangePasswordPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const changePasswordMutation = useChangePasswordMutation();
 
   const {
@@ -35,10 +38,10 @@ export function ChangePasswordPage() {
 
   return (
     <div className="mx-auto max-w-lg space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Change Password</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Update the password used to sign in to FURPMS.</p>
-      </div>
+      <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("auth.changePassword")}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t("auth.changePasswordSubtitle")}</p>
+      </motion.div>
 
       <Card>
         <CardHeader>
@@ -47,8 +50,8 @@ export function ChangePasswordPage() {
               <KeyRound className="size-4.5" />
             </div>
             <div>
-              <CardTitle>Security</CardTitle>
-              <CardDescription>Choose a strong password you don't use elsewhere.</CardDescription>
+              <CardTitle>{t("auth.security")}</CardTitle>
+              <CardDescription>{t("auth.securityDesc")}</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -57,7 +60,7 @@ export function ChangePasswordPage() {
           <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
             <div>
               <label htmlFor="currentPassword" className="mb-1.5 block text-sm font-medium text-foreground">
-                Current password
+                {t("auth.currentPassword")}
               </label>
               <Input
                 id="currentPassword"
@@ -74,7 +77,7 @@ export function ChangePasswordPage() {
 
             <div>
               <label htmlFor="newPassword" className="mb-1.5 block text-sm font-medium text-foreground">
-                New password
+                {t("auth.newPassword")}
               </label>
               <Input
                 id="newPassword"
@@ -89,7 +92,7 @@ export function ChangePasswordPage() {
 
             <div>
               <label htmlFor="confirmPassword" className="mb-1.5 block text-sm font-medium text-foreground">
-                Confirm new password
+                {t("auth.confirmPassword")}
               </label>
               <Input
                 id="confirmPassword"
@@ -106,11 +109,11 @@ export function ChangePasswordPage() {
 
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="outline" onClick={() => navigate(ROUTES.PROFILE)}>
-                Cancel
+                {t("common.cancel")}
               </Button>
               <Button type="submit" disabled={changePasswordMutation.isPending}>
                 {changePasswordMutation.isPending && <Loader2 className="animate-spin" />}
-                Update password
+                {t("auth.updatePassword")}
               </Button>
             </div>
           </form>

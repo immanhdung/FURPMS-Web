@@ -1,4 +1,5 @@
 import { useRef, useState, type DragEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { FileText, Upload, X } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
@@ -31,9 +32,10 @@ export function FileDropzone({
   accept = DEFAULT_ACCEPT,
   maxSizeMb = DEFAULT_MAX_SIZE_MB,
   disabled = false,
-  label = "Upload PDF or DOCX",
-  hint = "Drag & drop your file here, or click to browse",
+  label,
+  hint,
 }: FileDropzoneProps) {
+  const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,11 +44,11 @@ export function FileDropzone({
     const allowedExtensions = accept.split(",").map((ext) => ext.trim().toLowerCase());
     const extension = `.${candidate.name.split(".").pop()?.toLowerCase()}`;
     if (!allowedExtensions.includes(extension)) {
-      setError(`Unsupported file type. Allowed: ${accept}`);
+      setError(t("common.unsupportedType", { accept }));
       return;
     }
     if (candidate.size > maxSizeMb * 1024 * 1024) {
-      setError(`File is too large. Max size is ${maxSizeMb}MB.`);
+      setError(t("common.fileTooLarge", { max: maxSizeMb }));
       return;
     }
     setError(null);
@@ -67,7 +69,7 @@ export function FileDropzone({
         initial={{ opacity: 0, y: 4 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.15 }}
-        className="flex items-center gap-3 rounded-xl border border-border bg-card p-3.5"
+        className="flex items-center gap-3 rounded-xl border border-border bg-card p-3.5 shadow-soft-xs"
       >
         <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
           <FileText className="size-5" />
@@ -77,7 +79,7 @@ export function FileDropzone({
           <p className="text-xs text-muted-foreground">{formatBytes(file.size)}</p>
         </div>
         {!disabled && (
-          <Button type="button" variant="ghost" size="icon-sm" aria-label="Remove file" onClick={onRemove}>
+          <Button type="button" variant="ghost" size="icon-sm" aria-label={t("common.removeFile")} onClick={onRemove}>
             <X />
           </Button>
         )}
@@ -99,16 +101,16 @@ export function FileDropzone({
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
         className={cn(
-          "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-6 py-10 text-center transition-colors",
-          isDragging ? "border-primary bg-primary/4" : "border-border hover:border-primary/40",
+          "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-6 py-10 text-center transition-all",
+          isDragging ? "border-primary bg-primary/4 shadow-soft-sm" : "border-border hover:border-primary/40 hover:shadow-soft-xs",
           disabled && "cursor-not-allowed opacity-50"
         )}
       >
         <div className="flex size-10 items-center justify-center rounded-full bg-muted">
           <Upload className="size-4.5 text-muted-foreground" />
         </div>
-        <p className="text-sm font-medium text-foreground">{label}</p>
-        <p className="text-xs text-muted-foreground">{hint}</p>
+        <p className="text-sm font-medium text-foreground">{label ?? t("common.dropzoneLabel")}</p>
+        <p className="text-xs text-muted-foreground">{hint ?? t("common.dropzoneHint")}</p>
         <input
           ref={inputRef}
           type="file"

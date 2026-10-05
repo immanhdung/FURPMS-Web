@@ -1,0 +1,27 @@
+import { axiosClient } from "@/services/api/axiosClient";
+import type { ApiResponse } from "@/types/common";
+import type { CouncilPolicy, SystemSetting, UploadPolicy } from "@/types/system-setting";
+
+export const systemSettingService = {
+  /** Admin only. */
+  list: () => axiosClient.get<ApiResponse<SystemSetting[]>>("/system-settings").then((res) => res.data.data),
+
+  /** Mọi user đăng nhập — dùng để chặn file quá cỡ ngay trên trình duyệt. */
+  uploadPolicy: () =>
+    axiosClient.get<ApiResponse<UploadPolicy>>("/system-settings/upload-policy").then((res) => res.data.data),
+
+  /** Bước nhảy điểm — mọi user đăng nhập đọc được (danh sách setting đầy đủ chỉ Admin). */
+  scoringPolicy: () =>
+    axiosClient
+      .get<ApiResponse<{ scoreDecimalPlaces: number }>>("/system-settings/scoring-policy")
+      .then((res) => res.data.data),
+
+  /** Staff đọc để ẩn thao tác trả lời thay khi Admin đã tắt chính sách này. */
+  councilPolicy: () =>
+    axiosClient
+      .get<ApiResponse<CouncilPolicy>>("/system-settings/council-policy")
+      .then((res) => res.data.data),
+
+  update: (key: string, value: string) =>
+    axiosClient.put<ApiResponse<SystemSetting>>(`/system-settings/${key}`, { value }).then((res) => res.data.data),
+};

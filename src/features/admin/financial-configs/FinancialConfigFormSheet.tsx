@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import dayjs from "dayjs";
@@ -20,6 +21,7 @@ interface FinancialConfigFormSheetProps {
 }
 
 export function FinancialConfigFormSheet({ open, onOpenChange, config }: FinancialConfigFormSheetProps) {
+  const { t } = useTranslation();
   const isEdit = Boolean(config);
   const createMutation = useCreateFinancialConfigMutation();
   const updateMutation = useUpdateFinancialConfigMutation();
@@ -65,16 +67,16 @@ export function FinancialConfigFormSheet({ open, onOpenChange, config }: Financi
     <FormSheet
       open={open}
       onOpenChange={onOpenChange}
-      title={isEdit ? "Edit Financial Configuration" : "Create Financial Configuration"}
-      description="System-wide financial parameters such as coefficients and caps."
+      title={isEdit ? t("financialConfigs.editTitle") : t("financialConfigs.createTitle")}
+      description={t("financialConfigs.formDesc")}
       formId="financial-config-form"
       onSubmit={handleSubmit(onSubmit)}
       isSubmitting={isSubmitting}
-      submitLabel={isEdit ? "Save changes" : "Create"}
+      submitLabel={isEdit ? t("common.saveChanges") : t("common.create")}
     >
       <div>
         <label htmlFor="fc-code" className="mb-1.5 block text-sm font-medium text-foreground">
-          Code
+          {t("common.code")}
         </label>
         <Input id="fc-code" aria-invalid={Boolean(errors.code)} {...register("code")} />
         {errors.code && <p className="mt-1 text-xs text-destructive">{errors.code.message}</p>}
@@ -82,7 +84,7 @@ export function FinancialConfigFormSheet({ open, onOpenChange, config }: Financi
 
       <div>
         <label htmlFor="fc-value" className="mb-1.5 block text-sm font-medium text-foreground">
-          Value
+          {t("financialConfigs.value")}
         </label>
         <Input id="fc-value" type="number" step="any" aria-invalid={Boolean(errors.value)} {...register("value", { valueAsNumber: true })} />
         {errors.value && <p className="mt-1 text-xs text-destructive">{errors.value.message}</p>}
@@ -90,7 +92,7 @@ export function FinancialConfigFormSheet({ open, onOpenChange, config }: Financi
 
       <div>
         <label htmlFor="fc-effective" className="mb-1.5 block text-sm font-medium text-foreground">
-          Effective date
+          {t("financialConfigs.effectiveDate")}
         </label>
         <Input id="fc-effective" type="date" aria-invalid={Boolean(errors.effectiveDate)} {...register("effectiveDate")} />
         {errors.effectiveDate && <p className="mt-1 text-xs text-destructive">{errors.effectiveDate.message}</p>}
@@ -98,7 +100,7 @@ export function FinancialConfigFormSheet({ open, onOpenChange, config }: Financi
 
       <div>
         <label htmlFor="fc-description" className="mb-1.5 block text-sm font-medium text-foreground">
-          Description
+          {t("common.description")}
         </label>
         <Textarea id="fc-description" rows={3} {...register("description")} />
       </div>
@@ -109,7 +111,7 @@ export function FinancialConfigFormSheet({ open, onOpenChange, config }: Financi
         render={({ field }) => (
           <label className="flex items-center gap-2 text-sm text-foreground">
             <Checkbox checked={field.value} onCheckedChange={(checked) => field.onChange(Boolean(checked))} />
-            Active
+            {t("common.active")}
           </label>
         )}
       />

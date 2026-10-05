@@ -40,6 +40,14 @@ export const REVIEW_ROUND_TYPE = {
 } as const;
 export type ReviewRoundType = (typeof REVIEW_ROUND_TYPE)[keyof typeof REVIEW_ROUND_TYPE];
 
+/** Confirmed live (seen in ReviewRound.status responses): PENDING before staff opens the round, OPEN once opened, CLOSED after closing. */
+export const ROUND_STATUS = {
+  PENDING: "PENDING",
+  OPEN: "OPEN",
+  CLOSED: "CLOSED",
+} as const;
+export type RoundStatus = (typeof ROUND_STATUS)[keyof typeof ROUND_STATUS];
+
 export const ROUND_TYPE_LABELS: Record<ReviewRoundType, string> = {
   [REVIEW_ROUND_TYPE.REVIEW]: "Review",
   [REVIEW_ROUND_TYPE.ACCEPTANCE]: "Final",
@@ -95,6 +103,42 @@ export const REVIEW_DECISION = {
   REVISION_REQUIRED: "REVISION_REQUIRED",
 } as const;
 export type ReviewDecision = (typeof REVIEW_DECISION)[keyof typeof REVIEW_DECISION];
+
+/** Exact strings expected by AddCouncilMemberRequest.memberRole (confirmed via the working create-member flow). */
+export const COUNCIL_MEMBER_ROLE = {
+  CHAIRMAN: "Chairman",
+  SECRETARY: "Secretary",
+  MEMBER: "Member",
+} as const;
+export type CouncilMemberRole = (typeof COUNCIL_MEMBER_ROLE)[keyof typeof COUNCIL_MEMBER_ROLE];
+
+/**
+ * The backend doesn't document response schemas for Disbursement/Settlement/FinalReport (the
+ * swagger spec has request DTOs only, no response DTOs — same weak-typing pattern seen elsewhere
+ * in this API). Status field names/values below are unconfirmed guesses following the naming
+ * convention of confirmed enums elsewhere (e.g. REVIEW_DECISION); verify against a live response
+ * and adjust once seen.
+ */
+export const DISBURSEMENT_STATUS = {
+  PENDING: "PENDING",
+  CONFIRMED: "CONFIRMED",
+} as const;
+
+export const SETTLEMENT_STATUS = {
+  DRAFT: "DRAFT",
+  SIGNED: "SIGNED",
+  ACCOUNTING_CLEARED: "ACCOUNTING_CLEARED",
+  ASSETS_CLEARED: "ASSETS_CLEARED",
+  COMPLETED: "COMPLETED",
+} as const;
+
+export const FINAL_REPORT_STATUS = {
+  DRAFT: "DRAFT",
+  SUBMITTED: "SUBMITTED",
+  REVISION_REQUESTED: "REVISION_REQUESTED",
+  ACCEPTED: "ACCEPTED",
+  ARCHIVED: "ARCHIVED",
+} as const;
 
 export const RESEARCH_TYPE = {
   BASIC: "BASIC",

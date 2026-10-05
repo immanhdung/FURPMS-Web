@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Gavel } from "lucide-react";
 import { KpiCard, KpiCardSkeleton } from "@/components/shared/KpiCard";
 import { ChartCard, ChartCardSkeleton } from "@/components/charts/ChartCard";
@@ -7,6 +8,7 @@ import { ErrorState } from "@/components/shared/ErrorState";
 import { useAnalyticsOverviewQuery } from "@/hooks/useAnalyticsReports";
 
 export function CouncilAnalyticsTab() {
+  const { t } = useTranslation();
   const { data, isLoading, isError, refetch, isRefetching } = useAnalyticsOverviewQuery();
 
   if (isError) return <ErrorState onRetry={() => refetch()} isRetrying={isRefetching} />;
@@ -17,18 +19,18 @@ export function CouncilAnalyticsTab() {
         {isLoading ? (
           <KpiCardSkeleton />
         ) : (
-          <KpiCard datum={{ id: "councils", label: "Total Councils", value: data?.totalCouncils ?? 0 }} icon={Gavel} />
+          <KpiCard datum={{ id: "councils", label: t("analytics.kpiCouncils"), value: data?.totalCouncils ?? 0 }} icon={Gavel} />
         )}
       </div>
 
       {isLoading ? (
         <ChartCardSkeleton />
       ) : data?.councilPerformance && data.councilPerformance.length > 0 ? (
-        <ChartCard title="Council Performance" description="Average score by council">
+        <ChartCard title={t("analytics.councilPerformance")} description={t("analytics.councilPerformanceDesc")}>
           <BarChartCardBody data={data.councilPerformance} categoryKey="council" valueKey="score" layout="vertical" colorful />
         </ChartCard>
       ) : (
-        <EmptyState title="No council performance data available" description="Council performance comparisons will appear here." />
+        <EmptyState title={t("analytics.noCouncilPerf")} description={t("analytics.noCouncilPerfDesc")} />
       )}
     </div>
   );

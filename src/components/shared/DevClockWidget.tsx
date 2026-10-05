@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
 import { FastForward, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useAuthStore } from "@/store/auth.store";
-import { ROLES } from "@/constants/roles";
+import { useIsAdmin } from "@/hooks/useActiveRole";
 import { cn } from "@/lib/utils";
 import {
   useAdjustSystemClockMutation,
@@ -14,8 +14,12 @@ import {
 
 const FORMAT = "DD MMM YYYY, HH:mm:ss";
 
+/** Bước tua (ngày). Cộng dồn vào offset hiện tại — bấm +90 ba lần là gần một năm. */
+const STEPS = [1, 7, 30, 90] as const;
+
 export function DevClockWidget() {
-  const isAdmin = useAuthStore((state) => state.user?.roles.includes(ROLES.ADMIN) ?? false);
+  const { t } = useTranslation();
+  const isAdmin = useIsAdmin();
   const { data: clock } = useSystemClockQuery();
   const adjustClock = useAdjustSystemClockMutation();
   const resetClock = useResetSystemClockMutation();
@@ -40,7 +44,7 @@ export function DevClockWidget() {
           <Button
             variant="outline"
             size="icon-lg"
-            aria-label="Demo time travel"
+            aria-label={t("devClock.timeTravel")}
             className={cn(
               "relative rounded-full bg-background shadow-lg",
               isOffset && "border-brand-accent text-brand-accent"
@@ -57,42 +61,40 @@ export function DevClockWidget() {
 
         <PopoverContent side="top" align="start" className="w-72 space-y-3">
           <div>
-            <p className="text-xs font-medium text-muted-foreground">Demo time travel</p>
-            <p className="text-[11px] text-muted-foreground/80">Fast-forward the system clock for demos.</p>
+            <p className="text-xs font-medium text-muted-foreground">{t("devClock.timeTravel")}</p>
+            <p className="text-[11px] text-muted-foreground/80">{t("devClock.timeTravelDesc")}</p>
           </div>
 
           <div className="space-y-2 rounded-lg border border-border bg-muted/40 p-2.5">
             <div>
-              <p className="text-[11px] text-muted-foreground">Real time</p>
+              <p className="text-[11px] text-muted-foreground">{t("devClock.realTime")}</p>
               <p className="font-mono text-sm text-foreground">{now.format(FORMAT)}</p>
             </div>
             <div>
-              <p className="text-[11px] text-muted-foreground">System time {isOffset && `(+${offsetDays}d)`}</p>
+              <p className="text-[11px] text-muted-foreground">{t("devClock.systemTime")} {isOffset && `(+${offsetDays}d)`}</p>
               <p className={cn("font-mono text-sm", isOffset ? "font-semibold text-brand-accent" : "text-foreground")}>
                 {simulatedNow.format(FORMAT)}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              className="flex-1"
-              disabled={isBusy}
-              onClick={() => adjustClock.mutate(1)}
-            >
-              +1 day
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              className="flex-1"
-              disabled={isBusy}
-              onClick={() => adjustClock.mutate(7)}
-            >
-              +7 days
-            </Button>
+          {/*
+            Mốc nghiệp vụ dài nhất tính bằng THÁNG chứ không phải ngày: hợp đồng 12–24 tháng, hạn
+            nghiệm thu, nhắc hạn 30 ngày. Trước đây chỉ có +1 và +7 nên muốn tới ngày nghiệm thu
+            phải bấm +7 vài chục lần. Máy chủ vốn nhận tới 3650 ngày — cái chặn nằm ở đây.
+          */}
+          <div className="grid grid-cols-4 gap-2">
+            {STEPS.map((d) => (
+              <Button
+                key={d}
+                size="sm"
+                variant="outline"
+                disabled={isBusy}
+                onClick={() => adjustClock.mutate(d)}
+              >
+                {t("devClock.plusDays", { n: d })}
+              </Button>
+            ))}
           </div>
 
           {isOffset && (
@@ -104,7 +106,7 @@ export function DevClockWidget() {
               onClick={() => resetClock.mutate()}
             >
               <RotateCcw className="size-3.5" />
-              Reset to real time
+              {t("devClock.resetReal")}
             </Button>
           )}
         </PopoverContent>

@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import i18n from "@/i18n";
 import { userService } from "@/services/api/user.service";
 import { queryKeys } from "@/services/queryKeys";
 import type { ApiError } from "@/types/common";
@@ -47,5 +48,33 @@ export function useUpdateUserMutation() {
     onError: (error: ApiError) => {
       toast.error(error.message || "Unable to update user.");
     },
+  });
+}
+
+export function useDeleteUserMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => userService.remove(id),
+    onSuccess: () => {
+      toast.success(i18n.t("users.deleted"));
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.all() });
+    },
+    // BE trả lý do CỤ THỂ khi chặn ("đang là chủ nhiệm đề tài…", "đang là ủy viên hội đồng…") kèm
+    // hướng xử lý. Nuốt nó rồi in câu chung chung là Admin không biết phải làm gì tiếp.
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("users.deleteFailed")),
+  });
+}
+
+export function useToggleUserActiveMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => userService.toggleActive(id),
+    onSuccess: (user) => {
+      toast.success(user?.isActive === false ? i18n.t("users.locked_toast") : i18n.t("users.unlocked_toast"));
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.all() });
+    },
+    onError: (error: ApiError) => toast.error(error.message || i18n.t("users.toggleFailed")),
   });
 }

@@ -1,3 +1,4 @@
+import { ChartEmpty } from "@/components/charts/ChartEmpty";
 import { memo } from "react";
 import {
   Area,
@@ -24,6 +25,9 @@ interface AreaChartCardProps<T> {
 }
 
 function AreaChartCardBodyImpl<T extends object>({ data, xKey, series }: AreaChartCardProps<T>) {
+  // Không có gì để vẽ thì nói ra, đừng để lại một khung trắng trơn (xem ChartEmpty).
+  if (!data || data.length === 0) return <ChartEmpty />;
+
   return (
     <ResponsiveContainer width="100%" height="100%">
       <AreaChart data={data} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>

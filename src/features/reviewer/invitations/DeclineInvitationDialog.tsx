@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 import {
   Dialog,
@@ -19,6 +20,7 @@ interface DeclineInvitationDialogProps {
 }
 
 export function DeclineInvitationDialog({ open, onOpenChange, memberId }: DeclineInvitationDialogProps) {
+  const { t } = useTranslation();
   const [reason, setReason] = useState("");
   const respondMutation = useRespondToInvitationMutation();
 
@@ -26,12 +28,12 @@ export function DeclineInvitationDialog({ open, onOpenChange, memberId }: Declin
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Decline invitation</DialogTitle>
-          <DialogDescription>Let the staff know why you can't join this council (optional).</DialogDescription>
+          <DialogTitle>{t("reviewer.declineTitle")}</DialogTitle>
+          <DialogDescription>{t("reviewer.declineDesc")}</DialogDescription>
         </DialogHeader>
 
         <Textarea
-          placeholder="Reason for declining..."
+          placeholder={t("reviewer.declineReasonPlaceholder")}
           rows={3}
           value={reason}
           onChange={(e) => setReason(e.target.value)}
@@ -39,7 +41,7 @@ export function DeclineInvitationDialog({ open, onOpenChange, memberId }: Declin
 
         <DialogFooter>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={respondMutation.isPending}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button
             type="button"
@@ -59,7 +61,7 @@ export function DeclineInvitationDialog({ open, onOpenChange, memberId }: Declin
             }
           >
             {respondMutation.isPending && <Loader2 className="animate-spin" />}
-            Decline invitation
+            {t("reviewer.declineBtn")}
           </Button>
         </DialogFooter>
       </DialogContent>
